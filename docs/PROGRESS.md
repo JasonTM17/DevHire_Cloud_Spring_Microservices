@@ -60,3 +60,20 @@ Committed as `chore: add local infrastructure with docker compose`.
 Verification:
 
 - `mvn -T1 clean verify` passed on 2026-05-02 with 5 auth tests.
+
+Committed as `feat(auth): implement jwt authentication and refresh token flow`.
+
+## Phase 4 - User service
+
+- Implemented candidate/employer profile APIs:
+  - `GET /users/me`
+  - `PUT /users/me`
+  - `GET /users/{id}`
+- Added gateway identity header handling through shared `X-User-Id`, `X-User-Email`, and `X-User-Role` constants.
+- Added profile entity, repository, service layer, mapper, request/response DTOs, validation, optimistic locking, and Flyway migrations.
+- Seeded demo employer profile, demo candidate profile, and four additional candidate profiles.
+- Added tests for profile update, validation failure, candidate skill normalization, and admin profile update rejection.
+
+Verification:
+
+- `mvn -T1 clean verify` passed on 2026-05-02 with 9 total tests.
