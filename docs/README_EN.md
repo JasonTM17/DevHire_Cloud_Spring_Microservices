@@ -83,5 +83,17 @@ See [api.http](api.http) for a runnable flow.
 - Kafka domain events.
 - Standard error response with trace id.
 - Docker Compose full local stack.
-- CI, Docker image build workflow and dependency review.
+- CI, Docker image build workflow, dependency review and release image publishing.
 - Tests include Testcontainers and event contract checks.
+
+## Deployment
+
+- `deploy/docker-compose.prod.yml`: production Compose sample for externally managed PostgreSQL, Redis, Kafka and tagged images.
+- `deploy/k8s`: Kubernetes baseline with namespace, config map, secret template, deployments, services, ingress and HPA examples.
+- `docs/deployment.md`: runbook for release, deploy, health checks and rollback.
+
+Preview Kubernetes manifests:
+
+```bash
+kubectl kustomize ./deploy/k8s
+```

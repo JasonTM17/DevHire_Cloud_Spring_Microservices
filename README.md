@@ -261,6 +261,27 @@ GitHub Actions:
 - `ci.yml`: Java 21, Maven cache, `mvn -B -T1 clean verify`, upload test reports nếu fail.
 - `docker.yml`: Docker matrix build cho từng service, tag theo commit SHA.
 - `security.yml`: Dependency Review cho PR và Maven dependency tree sanity check.
+- `release.yml`: Publish Docker images lên GHCR khi push tag dạng `v1.0.0` hoặc chạy thủ công.
+
+## Deployment/Kubernetes
+
+Tài sản triển khai nằm trong `deploy/`:
+
+- `deploy/docker-compose.prod.yml`: compose mẫu cho production với external PostgreSQL/Redis/Kafka và image tag rõ ràng.
+- `deploy/k8s`: Kubernetes baseline gồm namespace, config map, secret template, deployments, services, ingress và HPA.
+- `docs/deployment.md`: runbook vận hành cho render manifest, deploy, health check và rollback.
+
+Xem manifest:
+
+```powershell
+kubectl kustomize .\deploy\k8s
+```
+
+Apply sau khi thay secret và image tag thật:
+
+```powershell
+kubectl apply -k .\deploy\k8s
+```
 
 ## Cấu Trúc Thư Mục
 
@@ -306,7 +327,7 @@ GitHub Actions:
 - Elasticsearch/OpenSearch adapter cho job search.
 - Outbox pattern cho event publishing.
 - Email provider thật cho notification-service.
-- Kubernetes manifests đầy đủ hơn và Helm chart.
+- Helm chart và GitOps overlays cho từng môi trường.
 - Frontend Candidate/Employer/Admin bằng React hoặc Next.js.
 
 Tài liệu bổ sung:
@@ -315,3 +336,4 @@ Tài liệu bổ sung:
 - Japanese: [docs/README_JA.md](docs/README_JA.md)
 - API quick test: [docs/api.http](docs/api.http)
 - Architecture notes: [docs/architecture.md](docs/architecture.md)
+- Deployment runbook: [docs/deployment.md](docs/deployment.md)

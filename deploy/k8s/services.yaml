@@ -1,0 +1,678 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+  labels:
+    app.kubernetes.io/name: api-gateway
+    app.kubernetes.io/part-of: devhire-cloud
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: api-gateway
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: api-gateway
+        app.kubernetes.io/part-of: devhire-cloud
+    spec:
+      securityContext:
+        runAsNonRoot: true
+      containers:
+        - name: api-gateway
+          image: devhire/api-gateway:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: devhire-config
+            - secretRef:
+                name: devhire-secrets
+          resources:
+            requests:
+              cpu: 150m
+              memory: 384Mi
+            limits:
+              cpu: "1"
+              memory: 768Mi
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 20
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-gateway
+  labels:
+    app.kubernetes.io/name: api-gateway
+    app.kubernetes.io/part-of: devhire-cloud
+spec:
+  selector:
+    app.kubernetes.io/name: api-gateway
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-service
+  labels:
+    app.kubernetes.io/name: auth-service
+    app.kubernetes.io/part-of: devhire-cloud
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: auth-service
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: auth-service
+        app.kubernetes.io/part-of: devhire-cloud
+    spec:
+      securityContext:
+        runAsNonRoot: true
+      containers:
+        - name: auth-service
+          image: devhire/auth-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8081
+          envFrom:
+            - configMapRef:
+                name: devhire-config
+          env:
+            - name: SPRING_DATASOURCE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: devhire-secrets
+                  key: AUTH_DATABASE_URL
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: devhire-secrets
+                  key: AUTH_DATABASE_USERNAME
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: devhire-secrets
+                  key: AUTH_DATABASE_PASSWORD
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: devhire-secrets
+                  key: JWT_SECRET
+          resources:
+            requests:
+              cpu: 150m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: http
+            initialDelaySeconds: 25
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: http
+            initialDelaySeconds: 70
+            periodSeconds: 20
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-service
+  labels:
+    app.kubernetes.io/name: auth-service
+    app.kubernetes.io/part-of: devhire-cloud
+spec:
+  selector:
+    app.kubernetes.io/name: auth-service
+  ports:
+    - name: http
+      port: 8081
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-service
+  labels:
+    app.kubernetes.io/name: user-service
+    app.kubernetes.io/part-of: devhire-cloud
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: user-service
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: user-service
+        app.kubernetes.io/part-of: devhire-cloud
+    spec:
+      securityContext:
+        runAsNonRoot: true
+      containers:
+        - name: user-service
+          image: devhire/user-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8082
+          envFrom:
+            - configMapRef:
+                name: devhire-config
+          env:
+            - name: SPRING_DATASOURCE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: devhire-secrets
+                  key: USER_DATABASE_URL
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: devhire-secrets
+                  key: USER_DATABASE_USERNAME
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: devhire-secrets
+                  key: USER_DATABASE_PASSWORD
+          resources:
+            requests:
+              cpu: 100m
+              memory: 384Mi
+            limits:
+              cpu: 750m
+              memory: 768Mi
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: http
+            initialDelaySeconds: 25
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: http
+            initialDelaySeconds: 70
+            periodSeconds: 20
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-service
+  labels:
+    app.kubernetes.io/name: user-service
+    app.kubernetes.io/part-of: devhire-cloud
+spec:
+  selector:
+    app.kubernetes.io/name: user-service
+  ports:
+    - name: http
+      port: 8082
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: company-service
+  labels:
+    app.kubernetes.io/name: company-service
+    app.kubernetes.io/part-of: devhire-cloud
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: company-service
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: company-service
+        app.kubernetes.io/part-of: devhire-cloud
+    spec:
+      securityContext:
+        runAsNonRoot: true
+      containers:
+        - name: company-service
+          image: devhire/company-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8083
+          envFrom:
+            - configMapRef:
+                name: devhire-config
+          env:
+            - name: SPRING_DATASOURCE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: devhire-secrets
+                  key: COMPANY_DATABASE_URL
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: devhire-secrets
+                  key: COMPANY_DATABASE_USERNAME
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: devhire-secrets
+                  key: COMPANY_DATABASE_PASSWORD
+          resources:
+            requests:
+              cpu: 100m
+              memory: 384Mi
+            limits:
+              cpu: 750m
+              memory: 768Mi
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: http
+            initialDelaySeconds: 25
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: http
+            initialDelaySeconds: 70
+            periodSeconds: 20
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: company-service
+  labels:
+    app.kubernetes.io/name: company-service
+    app.kubernetes.io/part-of: devhire-cloud
+spec:
+  selector:
+    app.kubernetes.io/name: company-service
+  ports:
+    - name: http
+      port: 8083
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: job-service
+  labels:
+    app.kubernetes.io/name: job-service
+    app.kubernetes.io/part-of: devhire-cloud
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: job-service
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: job-service
+        app.kubernetes.io/part-of: devhire-cloud
+    spec:
+      securityContext:
+        runAsNonRoot: true
+      containers:
+        - name: job-service
+          image: devhire/job-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8084
+          envFrom:
+            - configMapRef:
+                name: devhire-config
+          env:
+            - name: SPRING_DATASOURCE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: devhire-secrets
+                  key: JOB_DATABASE_URL
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: devhire-secrets
+                  key: JOB_DATABASE_USERNAME
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: devhire-secrets
+                  key: JOB_DATABASE_PASSWORD
+          resources:
+            requests:
+              cpu: 150m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: http
+            initialDelaySeconds: 25
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: http
+            initialDelaySeconds: 70
+            periodSeconds: 20
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: job-service
+  labels:
+    app.kubernetes.io/name: job-service
+    app.kubernetes.io/part-of: devhire-cloud
+spec:
+  selector:
+    app.kubernetes.io/name: job-service
+  ports:
+    - name: http
+      port: 8084
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: application-service
+  labels:
+    app.kubernetes.io/name: application-service
+    app.kubernetes.io/part-of: devhire-cloud
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: application-service
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: application-service
+        app.kubernetes.io/part-of: devhire-cloud
+    spec:
+      securityContext:
+        runAsNonRoot: true
+      containers:
+        - name: application-service
+          image: devhire/application-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8085
+          envFrom:
+            - configMapRef:
+                name: devhire-config
+          env:
+            - name: SPRING_DATASOURCE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: devhire-secrets
+                  key: APPLICATION_DATABASE_URL
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: devhire-secrets
+                  key: APPLICATION_DATABASE_USERNAME
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: devhire-secrets
+                  key: APPLICATION_DATABASE_PASSWORD
+          resources:
+            requests:
+              cpu: 150m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: http
+            initialDelaySeconds: 25
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: http
+            initialDelaySeconds: 70
+            periodSeconds: 20
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: application-service
+  labels:
+    app.kubernetes.io/name: application-service
+    app.kubernetes.io/part-of: devhire-cloud
+spec:
+  selector:
+    app.kubernetes.io/name: application-service
+  ports:
+    - name: http
+      port: 8085
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification-service
+  labels:
+    app.kubernetes.io/name: notification-service
+    app.kubernetes.io/part-of: devhire-cloud
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: notification-service
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: notification-service
+        app.kubernetes.io/part-of: devhire-cloud
+    spec:
+      securityContext:
+        runAsNonRoot: true
+      containers:
+        - name: notification-service
+          image: devhire/notification-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8086
+          envFrom:
+            - configMapRef:
+                name: devhire-config
+          env:
+            - name: SPRING_DATASOURCE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: devhire-secrets
+                  key: NOTIFICATION_DATABASE_URL
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: devhire-secrets
+                  key: NOTIFICATION_DATABASE_USERNAME
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: devhire-secrets
+                  key: NOTIFICATION_DATABASE_PASSWORD
+          resources:
+            requests:
+              cpu: 100m
+              memory: 384Mi
+            limits:
+              cpu: 750m
+              memory: 768Mi
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: http
+            initialDelaySeconds: 25
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: http
+            initialDelaySeconds: 70
+            periodSeconds: 20
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: notification-service
+  labels:
+    app.kubernetes.io/name: notification-service
+    app.kubernetes.io/part-of: devhire-cloud
+spec:
+  selector:
+    app.kubernetes.io/name: notification-service
+  ports:
+    - name: http
+      port: 8086
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: audit-service
+  labels:
+    app.kubernetes.io/name: audit-service
+    app.kubernetes.io/part-of: devhire-cloud
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: audit-service
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: audit-service
+        app.kubernetes.io/part-of: devhire-cloud
+    spec:
+      securityContext:
+        runAsNonRoot: true
+      containers:
+        - name: audit-service
+          image: devhire/audit-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8087
+          envFrom:
+            - configMapRef:
+                name: devhire-config
+          env:
+            - name: SPRING_DATASOURCE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: devhire-secrets
+                  key: AUDIT_DATABASE_URL
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: devhire-secrets
+                  key: AUDIT_DATABASE_USERNAME
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: devhire-secrets
+                  key: AUDIT_DATABASE_PASSWORD
+          resources:
+            requests:
+              cpu: 100m
+              memory: 384Mi
+            limits:
+              cpu: 750m
+              memory: 768Mi
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: http
+            initialDelaySeconds: 25
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: http
+            initialDelaySeconds: 70
+            periodSeconds: 20
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: audit-service
+  labels:
+    app.kubernetes.io/name: audit-service
+    app.kubernetes.io/part-of: devhire-cloud
+spec:
+  selector:
+    app.kubernetes.io/name: audit-service
+  ports:
+    - name: http
+      port: 8087
+      targetPort: http

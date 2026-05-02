@@ -314,3 +314,23 @@ Verification:
 - Secret/TODO scan found only local placeholder variables in `.env.example` and this progress note; no real secret was found in source files.
 
 Committed as `chore: polish configuration validation and developer experience`.
+
+## Phase 16 - Kubernetes deployment and release hardening
+
+- Added `deploy/k8s` Kubernetes baseline:
+  - namespace,
+  - shared config map,
+  - placeholder-only secret template,
+  - deployments and services for gateway and all backend services,
+  - ingress sample,
+  - HPA samples for gateway, auth, and job services.
+- Added `docs/deployment.md` as an operational runbook for Kubernetes rendering, deployment, image updates, health checks, and rollback.
+- Added `.github/workflows/release.yml` to publish versioned service images to GHCR on semantic version tags or manual dispatch.
+- Updated Vietnamese, English, and Japanese documentation to mention Kubernetes and release operations.
+
+Verification:
+
+- `kubectl kustomize .\deploy\k8s` passed on 2026-05-02.
+- `docker compose config --quiet` passed on 2026-05-02.
+- `mvn -T1 clean verify` passed on 2026-05-02 with 42 total tests.
+- `kubectl apply --dry-run=client --validate=false -k .\deploy\k8s` could not complete because no local Kubernetes API server is running at the current kubeconfig endpoint. This was not counted as passed; Kustomize rendering is the verified local check for this environment.

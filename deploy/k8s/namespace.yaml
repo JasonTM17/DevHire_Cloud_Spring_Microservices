@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: devhire
+  labels:
+    app.kubernetes.io/name: devhire-cloud
+    app.kubernetes.io/part-of: devhire-cloud

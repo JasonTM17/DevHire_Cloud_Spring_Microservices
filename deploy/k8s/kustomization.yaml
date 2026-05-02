@@ -1,0 +1,35 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: devhire
+resources:
+  - namespace.yaml
+  - configmap.yaml
+  - secret.example.yaml
+  - services.yaml
+  - ingress.yaml
+  - hpa.yaml
+images:
+  - name: devhire/api-gateway
+    newName: ghcr.io/jasontm17/devhire/api-gateway
+    newTag: latest
+  - name: devhire/auth-service
+    newName: ghcr.io/jasontm17/devhire/auth-service
+    newTag: latest
+  - name: devhire/user-service
+    newName: ghcr.io/jasontm17/devhire/user-service
+    newTag: latest
+  - name: devhire/company-service
+    newName: ghcr.io/jasontm17/devhire/company-service
+    newTag: latest
+  - name: devhire/job-service
+    newName: ghcr.io/jasontm17/devhire/job-service
+    newTag: latest
+  - name: devhire/application-service
+    newName: ghcr.io/jasontm17/devhire/application-service
+    newTag: latest
+  - name: devhire/notification-service
+    newName: ghcr.io/jasontm17/devhire/notification-service
+    newTag: latest
+  - name: devhire/audit-service
+    newName: ghcr.io/jasontm17/devhire/audit-service
+    newTag: latest

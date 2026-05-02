@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: devhire-config
+  labels:
+    app.kubernetes.io/name: devhire-cloud
+    app.kubernetes.io/part-of: devhire-cloud
+data:
+  SPRING_PROFILES_ACTIVE: prod
+  SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka.devhire-platform.svc.cluster.local:9092
+  SPRING_DATA_REDIS_HOST: redis.devhire-platform.svc.cluster.local
+  SPRING_DATA_REDIS_PORT: "6379"
+  OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector.devhire-observability.svc.cluster.local:4318
+  MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "0.1"
+  CORS_ALLOWED_ORIGINS: https://devhire.example.com
+  AUTH_SERVICE_URL: http://auth-service:8081
+  USER_SERVICE_URL: http://user-service:8082
+  COMPANY_SERVICE_URL: http://company-service:8083
+  JOB_SERVICE_URL: http://job-service:8084
+  APPLICATION_SERVICE_URL: http://application-service:8085
+  NOTIFICATION_SERVICE_URL: http://notification-service:8086
+  AUDIT_SERVICE_URL: http://audit-service:8087
