@@ -12,6 +12,7 @@ import com.devhire.job.event.JobEventPublisher;
 import com.devhire.job.mapper.JobMapper;
 import com.devhire.job.repository.JobRepository;
 import com.devhire.job.search.JobSearchAdapter;
+import com.devhire.job.search.JobSearchIndex;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -31,8 +32,9 @@ class JobServiceTest {
     private final JobRepository repository = mock(JobRepository.class);
     private final CompanyClient companyClient = mock(CompanyClient.class);
     private final JobSearchAdapter searchAdapter = mock(JobSearchAdapter.class);
+    private final JobSearchIndex searchIndex = mock(JobSearchIndex.class);
     private final JobEventPublisher eventPublisher = mock(JobEventPublisher.class);
-    private final JobService service = new JobService(repository, new JobMapper(), companyClient, searchAdapter, eventPublisher);
+    private final JobService service = new JobService(repository, new JobMapper(), companyClient, searchAdapter, searchIndex, eventPublisher);
 
     @Test
     void employerCreatesDraftForApprovedOwnedCompany() {
@@ -89,4 +91,3 @@ class JobServiceTest {
                 List.of("Java", "Kafka"));
     }
 }
-

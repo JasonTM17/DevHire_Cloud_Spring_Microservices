@@ -66,6 +66,40 @@ services:
     networks:
       - devhire
 
+  opensearch:
+    image: opensearchproject/opensearch:2.18.0
+    container_name: devhire-opensearch
+    environment:
+      discovery.type: single-node
+      plugins.security.disabled: "true"
+      OPENSEARCH_JAVA_OPTS: "-Xms512m -Xmx512m"
+    ports:
+      - "${OPENSEARCH_HOST_PORT:-9200}:9200"
+      - "${OPENSEARCH_TRANSPORT_HOST_PORT:-9600}:9600"
+    volumes:
+      - opensearch-data:/usr/share/opensearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:9200/_cluster/health >/dev/null || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 20
+    networks:
+      - devhire
+
+  opensearch-dashboards:
+    image: opensearchproject/opensearch-dashboards:2.18.0
+    container_name: devhire-opensearch-dashboards
+    environment:
+      OPENSEARCH_HOSTS: '["http://opensearch:9200"]'
+      DISABLE_SECURITY_DASHBOARDS_PLUGIN: "true"
+    ports:
+      - "${OPENSEARCH_DASHBOARDS_HOST_PORT:-5601}:5601"
+    depends_on:
+      opensearch:
+        condition: service_healthy
+    networks:
+      - devhire
+
   prometheus:
     image: prom/prometheus:v3.0.1
     container_name: devhire-prometheus
@@ -259,9 +293,22 @@ services:
       <<: *service-env
       SERVICE_DATABASE: devhire_job
       COMPANY_SERVICE_URL: http://company-service:8083
+      DEVHIRE_SEARCH_PROVIDER: ${DEVHIRE_SEARCH_PROVIDER:-opensearch}
+      DEVHIRE_SEARCH_OPENSEARCH_URL: http://opensearch:9200
+      DEVHIRE_SEARCH_OPENSEARCH_INDEX: ${DEVHIRE_SEARCH_OPENSEARCH_INDEX:-devhire_jobs}
+      DEVHIRE_SEARCH_OPENSEARCH_AUTO_CREATE_INDEX: "true"
+      DEVHIRE_SEARCH_OPENSEARCH_FALLBACK_TO_POSTGRES: "true"
     ports:
       - "${JOB_HOST_PORT:-8084}:8084"
-    depends_on: *service-depends
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      opensearch:
+        condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:8084/actuator/health/readiness | grep UP"]
       interval: 15s
@@ -338,6 +385,7 @@ volumes:
   postgres-data:
   redis-data:
   kafka-data:
+  opensearch-data:
   prometheus-data:
   grafana-data:
   tempo-data:

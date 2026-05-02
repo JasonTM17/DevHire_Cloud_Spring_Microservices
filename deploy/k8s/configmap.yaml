@@ -20,3 +20,8 @@ data:
   APPLICATION_SERVICE_URL: http://application-service:8085
   NOTIFICATION_SERVICE_URL: http://notification-service:8086
   AUDIT_SERVICE_URL: http://audit-service:8087
+  DEVHIRE_SEARCH_PROVIDER: opensearch
+  DEVHIRE_SEARCH_OPENSEARCH_URL: http://opensearch.devhire-platform.svc.cluster.local:9200
+  DEVHIRE_SEARCH_OPENSEARCH_INDEX: devhire_jobs
+  DEVHIRE_SEARCH_OPENSEARCH_AUTO_CREATE_INDEX: "false"
+  DEVHIRE_SEARCH_OPENSEARCH_FALLBACK_TO_POSTGRES: "true"

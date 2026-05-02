@@ -334,3 +334,23 @@ Verification:
 - `docker compose config --quiet` passed on 2026-05-02.
 - `mvn -T1 clean verify` passed on 2026-05-02 with 42 total tests.
 - `kubectl apply --dry-run=client --validate=false -k .\deploy\k8s` could not complete because no local Kubernetes API server is running at the current kubeconfig endpoint. This was not counted as passed; Kustomize rendering is the verified local check for this environment.
+
+## Phase 17 - OpenSearch job search
+
+- Added OpenSearch search adapter for `job-service` behind the existing `JobSearchAdapter` interface.
+- Added OpenSearch indexing abstraction:
+  - `JobSearchIndex`,
+  - OpenSearch index writer,
+  - no-op fallback implementation,
+  - index bootstrap runner.
+- Kept PostgreSQL search as fallback/degraded mode instead of deleting it.
+- Wired job lifecycle actions to sync/remove OpenSearch documents when jobs become published or leave the public search surface.
+- Added OpenSearch and OpenSearch Dashboards to Docker Compose.
+- Added production/Kubernetes configuration variables for OpenSearch.
+- Added unit coverage for OpenSearch search ordering, fallback behavior, and index publishing.
+- Updated Vietnamese, English, Japanese, and architecture docs.
+
+Verification:
+
+- `mvn -pl job-service -am test` passed on 2026-05-02 with 10 tests across `common-lib` and `job-service`.
+- `docker compose config --quiet` passed on 2026-05-02.

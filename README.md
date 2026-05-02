@@ -2,7 +2,7 @@
 
 DevHire Cloud là nền tảng tuyển dụng dạng mini ITviec/LinkedIn Jobs, được xây dựng như một dự án portfolio backend production-ready bằng Java 21, Spring Boot 3.5.13 và Spring Cloud 2025.0.2.
 
-Dự án tập trung vào kiến trúc microservices, bảo mật JWT, workflow tuyển dụng, event-driven communication, PostgreSQL riêng cho từng service, Docker Compose full stack, observability, CI/CD và test thật.
+Dự án tập trung vào kiến trúc microservices, bảo mật JWT, workflow tuyển dụng, event-driven communication, PostgreSQL riêng cho từng service, OpenSearch job search, Docker Compose full stack, observability, CI/CD và test thật.
 
 ## Kiến Trúc Tổng Quan
 
@@ -21,6 +21,7 @@ flowchart LR
     User --> UserDb[("devhire_user")]
     Company --> CompanyDb[("devhire_company")]
     Job --> JobDb[("devhire_job")]
+    Job --> OpenSearch[("OpenSearch devhire_jobs")]
     Application --> AppDb[("devhire_application")]
     Notification --> NotiDb[("devhire_notification")]
     Audit --> AuditDb[("devhire_audit")]
@@ -49,6 +50,7 @@ flowchart LR
 - PostgreSQL 17, Flyway, JPA/Hibernate
 - Redis cho rate limit và access-token blacklist
 - Kafka cho domain events
+- OpenSearch cho job search, PostgreSQL fallback adapter
 - OpenFeign cho service-to-service query
 - Springdoc OpenAPI/Swagger
 - Actuator, Micrometer, Prometheus, Grafana, OpenTelemetry, Tempo, Loki
@@ -63,7 +65,7 @@ flowchart LR
 | auth-service | 8081 | Register, login, refresh token rotation, logout, `/auth/me` |
 | user-service | 8082 | Candidate/employer profile |
 | company-service | 8083 | Company onboarding, admin approval/rejection |
-| job-service | 8084 | Job workflow, search/filter/page/sort |
+| job-service | 8084 | Job workflow, OpenSearch search/filter/page/sort |
 | application-service | 8085 | Candidate apply, employer status tracking, history |
 | notification-service | 8086 | Internal notification từ application events |
 | audit-service | 8087 | Audit log ingestion và admin query |
@@ -103,6 +105,8 @@ Các URL chính:
 - Grafana: `http://localhost:3000` với `admin/admin`
 - Tempo: `http://localhost:3200`
 - Kafka external bootstrap: `localhost:29092`
+- OpenSearch: `http://localhost:9200`
+- OpenSearch Dashboards: `http://localhost:5601`
 - PostgreSQL: `localhost:5432`
 - Redis: `localhost:6380` (container nội bộ vẫn dùng `6379`)
 
@@ -132,7 +136,7 @@ Ví dụ chạy auth-service:
 mvn -pl auth-service -am spring-boot:run
 ```
 
-Khi chạy local không Docker, cần có PostgreSQL, Redis và Kafka tương ứng hoặc override config bằng environment variables.
+Khi chạy local không Docker, cần có PostgreSQL, Redis và Kafka tương ứng hoặc override config bằng environment variables. `job-service` mặc định dùng PostgreSQL fallback; Docker Compose bật OpenSearch bằng `DEVHIRE_SEARCH_PROVIDER=opensearch`.
 
 ## Swagger / OpenAPI
 
@@ -311,6 +315,7 @@ kubectl apply -k .\deploy\k8s
 
 - Multi-module Maven build, Java 21 release target.
 - Database per service, Flyway migrations, indexes, constraints, seed data.
+- OpenSearch adapter cho published job search, có PostgreSQL fallback khi search cluster chưa sẵn sàng.
 - JWT access token, refresh token rotation, BCrypt, Redis blacklist.
 - Gateway validation, rate limiting, CORS, correlation id, centralized gateway errors.
 - Không share JPA entity giữa services.
@@ -324,7 +329,7 @@ kubectl apply -k .\deploy\k8s
 ## Roadmap
 
 - Aggregate OpenAPI tại gateway.
-- Elasticsearch/OpenSearch adapter cho job search.
+- Relevance tuning và synonym dictionary cho OpenSearch job search.
 - Outbox pattern cho event publishing.
 - Email provider thật cho notification-service.
 - Helm chart và GitOps overlays cho từng môi trường.

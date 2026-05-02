@@ -8,6 +8,7 @@ DevHire Cloud is a production-style Java Spring Boot microservices recruitment p
 - Spring Boot 3.5.13, Spring Cloud 2025.0.2
 - Spring Cloud Gateway, Spring Security, JWT, BCrypt
 - PostgreSQL, Flyway, JPA/Hibernate
+- OpenSearch job search with PostgreSQL fallback
 - Redis, Kafka, OpenFeign
 - Actuator, Micrometer, Prometheus, Grafana, OpenTelemetry, Tempo, Loki
 - JUnit 5, Mockito, MockMvc, Testcontainers PostgreSQL, JaCoCo
@@ -21,7 +22,7 @@ DevHire Cloud is a production-style Java Spring Boot microservices recruitment p
 | auth-service | 8081 | Register, login, refresh rotation, logout, current user |
 | user-service | 8082 | Candidate and employer profiles |
 | company-service | 8083 | Company onboarding and admin review |
-| job-service | 8084 | Job workflow and PostgreSQL search |
+| job-service | 8084 | Job workflow and OpenSearch search |
 | application-service | 8085 | Candidate applications, status changes, history |
 | notification-service | 8086 | Event-driven internal notifications |
 | audit-service | 8087 | Audit ingestion and admin log search |
@@ -71,12 +72,14 @@ See [api.http](api.http) for a runnable flow.
 - Prometheus: `http://localhost:9090`
 - Grafana: `http://localhost:3000` with `admin/admin`
 - Tempo: `http://localhost:3200`
+- OpenSearch: `http://localhost:9200`
 - Metrics endpoint per service: `/actuator/prometheus`
 - Health endpoint per service: `/actuator/health`
 
 ## Production-Ready Highlights
 
 - Service-owned databases with Flyway migrations.
+- OpenSearch adapter for published job search with PostgreSQL fallback.
 - Real constraints and indexes.
 - JWT and refresh token rotation.
 - Gateway-side JWT validation and rate limiting.

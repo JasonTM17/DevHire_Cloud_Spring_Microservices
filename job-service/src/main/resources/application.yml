@@ -25,6 +25,15 @@ spring:
 
 company-service:
   url: ${COMPANY_SERVICE_URL:http://localhost:8083}
+
+devhire:
+  search:
+    provider: ${DEVHIRE_SEARCH_PROVIDER:postgres}
+    opensearch:
+      url: ${DEVHIRE_SEARCH_OPENSEARCH_URL:http://localhost:9200}
+      index: ${DEVHIRE_SEARCH_OPENSEARCH_INDEX:devhire_jobs}
+      auto-create-index: ${DEVHIRE_SEARCH_OPENSEARCH_AUTO_CREATE_INDEX:true}
+      fallback-to-postgres: ${DEVHIRE_SEARCH_OPENSEARCH_FALLBACK_TO_POSTGRES:true}
 management:
   endpoints:
     web:

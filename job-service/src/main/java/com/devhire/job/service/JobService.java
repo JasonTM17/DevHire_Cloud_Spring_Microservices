@@ -18,6 +18,7 @@ import com.devhire.job.event.JobEventPublisher;
 import com.devhire.job.mapper.JobMapper;
 import com.devhire.job.repository.JobRepository;
 import com.devhire.job.search.JobSearchAdapter;
+import com.devhire.job.search.JobSearchIndex;
 import feign.FeignException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,14 +36,16 @@ public class JobService {
     private final JobMapper mapper;
     private final CompanyClient companyClient;
     private final JobSearchAdapter searchAdapter;
+    private final JobSearchIndex searchIndex;
     private final JobEventPublisher eventPublisher;
 
     public JobService(JobRepository repository, JobMapper mapper, CompanyClient companyClient,
-                      JobSearchAdapter searchAdapter, JobEventPublisher eventPublisher) {
+                      JobSearchAdapter searchAdapter, JobSearchIndex searchIndex, JobEventPublisher eventPublisher) {
         this.repository = repository;
         this.mapper = mapper;
         this.companyClient = companyClient;
         this.searchAdapter = searchAdapter;
+        this.searchIndex = searchIndex;
         this.eventPublisher = eventPublisher;
     }
 
@@ -88,6 +91,7 @@ public class JobService {
         requireOwner(user, job);
         approvedCompanyForEmployer(request.companyId(), user.id());
         applyContent(job, request);
+        searchIndex.sync(job);
         return mapper.toResponse(job);
     }
 
@@ -97,6 +101,7 @@ public class JobService {
         Job job = find(id);
         requireOwner(user, job);
         job.submitReview();
+        searchIndex.remove(job);
         return mapper.toResponse(job);
     }
 
@@ -108,6 +113,7 @@ public class JobService {
             throw new DevHireException(ErrorCode.BAD_REQUEST, "Only pending jobs can be approved");
         }
         job.approve();
+        searchIndex.sync(job);
         eventPublisher.publishAudit(AuditEvent.now(admin.id(), admin.email(), admin.role().name(),
                 "approve job", "job", job.getId().toString(), Map.of()));
         eventPublisher.publishJobApproved(new JobApprovedEvent(
@@ -120,6 +126,7 @@ public class JobService {
         requireRole(admin, UserRole.ADMIN);
         Job job = find(id);
         job.reject(reason);
+        searchIndex.remove(job);
         eventPublisher.publishAudit(AuditEvent.now(admin.id(), admin.email(), admin.role().name(),
                 "reject job", "job", job.getId().toString(), Map.of("reason", reason == null ? "" : reason)));
         return mapper.toResponse(job);
@@ -131,6 +138,7 @@ public class JobService {
         Job job = find(id);
         requireOwner(user, job);
         job.close();
+        searchIndex.remove(job);
         return mapper.toResponse(job);
     }
 
