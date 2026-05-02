@@ -106,3 +106,24 @@ Committed as `feat(company): implement company onboarding and approval workflow`
 Verification:
 
 - `mvn -T1 clean verify` passed on 2026-05-02 with 19 total tests.
+
+Committed as `feat(job): implement job posting and search APIs`.
+
+## Phase 7 - Application service
+
+- Implemented candidate application workflow:
+  - `POST /jobs/{jobId}/applications`
+  - `GET /applications/me`
+  - `GET /employer/jobs/{jobId}/applications`
+  - `PATCH /applications/{id}/status`
+  - `PATCH /applications/{id}/withdraw`
+- Added transactional duplicate-prevention through a real unique constraint on `(candidate_id, job_id)`.
+- Added application status history for every submit, employer status change, and withdrawal.
+- Added OpenFeign job lookup through job-service internal API, so application-service validates published jobs and employer ownership without reading another service database.
+- Published application-submitted, application-status-changed, and audit events to Kafka topics with failure-tolerant logging.
+- Added Flyway migrations with application/history tables, indexes, and demo application data.
+- Added application service unit/controller tests for successful submit, duplicate rejection, unpublished job rejection, employer status update, and candidate withdrawal.
+
+Verification:
+
+- `mvn -T1 clean verify` passed on 2026-05-02 with 24 total tests.

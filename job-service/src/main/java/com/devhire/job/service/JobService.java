@@ -10,6 +10,7 @@ import com.devhire.job.client.CompanyClient;
 import com.devhire.job.client.dto.CompanyInternalResponse;
 import com.devhire.job.dto.request.JobCreateRequest;
 import com.devhire.job.dto.request.JobSearchCriteria;
+import com.devhire.job.dto.response.JobInternalResponse;
 import com.devhire.job.dto.response.JobResponse;
 import com.devhire.job.entity.Job;
 import com.devhire.job.entity.JobStatus;
@@ -65,6 +66,19 @@ public class JobService {
     @Transactional(readOnly = true)
     public JobResponse get(UUID id) {
         return mapper.toResponse(find(id));
+    }
+
+    @Transactional(readOnly = true)
+    public JobInternalResponse getInternal(UUID id) {
+        Job job = find(id);
+        return new JobInternalResponse(
+                job.getId(),
+                job.getCompanyId(),
+                job.getEmployerId(),
+                job.getTitle(),
+                job.getStatus(),
+                job.getStatus() == JobStatus.PUBLISHED
+        );
     }
 
     @Transactional
@@ -175,4 +189,3 @@ public class JobService {
         }
     }
 }
-
