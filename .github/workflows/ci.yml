@@ -31,6 +31,10 @@ jobs:
       - name: Verify
         run: mvn -B -T1 clean verify
 
+      - name: Coverage gate
+        shell: pwsh
+        run: ./scripts/check-coverage.ps1
+
       - name: Upload test reports on failure
         if: failure()
         uses: actions/upload-artifact@v4
@@ -39,4 +43,5 @@ jobs:
           path: |
             **/target/surefire-reports/**
             **/target/failsafe-reports/**
+            **/target/site/jacoco/**
           if-no-files-found: ignore

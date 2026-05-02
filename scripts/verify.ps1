@@ -13,4 +13,5 @@ $env:Path = "$env:JAVA_HOME\bin;$env:Path"
 $env:MAVEN_OPTS = $MavenOpts
 
 mvn -T1 clean verify
+& "$PSScriptRoot\check-coverage.ps1" -Root (Resolve-Path "$PSScriptRoot\..").Path
 exit $LASTEXITCODE

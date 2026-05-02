@@ -128,6 +128,8 @@ Hoặc trên Windows:
 .\scripts\verify.ps1
 ```
 
+`verify.ps1` chạy `mvn clean verify` và coverage gate theo từng module.
+
 ## Chạy Một Service Không Docker
 
 Ví dụ chạy auth-service:
@@ -331,6 +333,7 @@ kubectl apply -k .\deploy\k8s
 - Dockerfile multi-stage, non-root runtime user.
 - Observability stack có metrics, health probes, tracing và dashboard.
 - Test thật với unit, controller, contract-like tests và Testcontainers.
+- Coverage gate cứng bằng JaCoCo + `scripts/check-coverage.ps1` trong CI.
 - Git history chia theo phase, commit message rõ ràng.
 
 ## Roadmap

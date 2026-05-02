@@ -382,3 +382,27 @@ Verification:
 - `mvn -pl notification-service -am test` passed on 2026-05-02 with 11 tests across `common-lib` and `notification-service`.
 - `docker compose config --quiet` passed on 2026-05-02.
 - `kubectl kustomize .\deploy\k8s` passed on 2026-05-02.
+
+Committed as `feat(notification): add smtp email delivery`.
+
+## Phase 19 - Coverage gate
+
+- Added JaCoCo `check` goal to Maven `verify` with a hard baseline instruction coverage threshold.
+- Added `scripts/check-coverage.ps1` with per-module coverage gates based on the current tested baseline.
+- Updated CI to run the coverage gate after `mvn clean verify`.
+- Updated `scripts/verify.ps1` so local verification runs the same gate.
+- CI now uploads JaCoCo reports on failure for easier debugging.
+
+Verification:
+
+- `mvn -T1 clean verify` passed on 2026-05-02 with Maven JaCoCo check enabled.
+- `powershell -ExecutionPolicy Bypass -File .\scripts\check-coverage.ps1` passed on 2026-05-02:
+  - api-gateway: 37.6% / 35.0%
+  - application-service: 62.5% / 60.0%
+  - audit-service: 56.5% / 55.0%
+  - auth-service: 29.4% / 28.0%
+  - common-lib: 10.9% / 10.0%
+  - company-service: 58.6% / 55.0%
+  - job-service: 49.8% / 45.0%
+  - notification-service: 60.3% / 45.0%
+  - user-service: 76.0% / 70.0%

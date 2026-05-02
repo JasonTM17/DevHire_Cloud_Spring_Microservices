@@ -43,6 +43,8 @@ mvn clean verify
 
 Unit test、controller test、event contract test、Testcontainers PostgreSQL integration test を実行します。
 
+CI では Maven verify の後に `scripts/check-coverage.ps1` を実行し、module ごとの coverage gate を強制します。
+
 ## デモアカウント
 
 | Role | Email | Password |
@@ -89,6 +91,7 @@ API フローは [api.http](api.http) を参照してください。
 - Docker Compose full local stack。
 - GitHub Actions CI/CD と GHCR release workflow。
 - Testcontainers と event contract tests。
+- CI の JaCoCo coverage gate。
 
 ## デプロイ
 

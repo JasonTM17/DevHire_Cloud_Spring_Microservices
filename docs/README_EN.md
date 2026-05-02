@@ -43,6 +43,8 @@ mvn clean verify
 
 The build runs unit tests, controller tests, event contract tests and Testcontainers PostgreSQL integration tests.
 
+CI also runs `scripts/check-coverage.ps1` as a hard per-module coverage gate after Maven verification.
+
 ## Demo Accounts
 
 | Role | Email | Password |
@@ -89,6 +91,7 @@ See [api.http](api.http) for a runnable flow.
 - Docker Compose full local stack.
 - CI, Docker image build workflow, dependency review and release image publishing.
 - Tests include Testcontainers and event contract checks.
+- Hard JaCoCo coverage gate in CI.
 
 ## Deployment
 
