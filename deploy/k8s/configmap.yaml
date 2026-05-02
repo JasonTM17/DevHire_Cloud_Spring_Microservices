@@ -34,3 +34,4 @@ data:
   SPRING_MAIL_USERNAME: devhire-smtp-user
   SPRING_MAIL_SMTP_AUTH: "true"
   SPRING_MAIL_SMTP_STARTTLS_ENABLE: "true"
+  NEXT_PUBLIC_API_BASE_URL: https://devhire.example.com

@@ -28,6 +28,7 @@ jobs:
           - application-service
           - notification-service
           - audit-service
+          - frontend
 
     steps:
       - name: Checkout

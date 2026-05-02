@@ -3,12 +3,14 @@
 DevHire Cloud là nền tảng tuyển dụng dạng mini ITviec/LinkedIn Jobs, được xây dựng như một dự án portfolio backend production-ready bằng Java 21, Spring Boot 3.5.13 và Spring Cloud 2025.0.2.
 
 Dự án tập trung vào kiến trúc microservices, bảo mật JWT, workflow tuyển dụng, event-driven communication, PostgreSQL riêng cho từng service, OpenSearch job search, Docker Compose full stack, observability, CI/CD và test thật.
+Frontend Next.js tối giản đã được thêm để demo các workflow Candidate, Employer và Admin trên API Gateway thật.
 
 ## Kiến Trúc Tổng Quan
 
 ```mermaid
 flowchart LR
     Client["Client / REST API"] --> Gateway["api-gateway :8080"]
+    Frontend["frontend :3001"] --> Gateway
     Gateway --> Auth["auth-service :8081"]
     Gateway --> User["user-service :8082"]
     Gateway --> Company["company-service :8083"]
@@ -56,6 +58,7 @@ flowchart LR
 - Actuator, Micrometer, Prometheus, Grafana, OpenTelemetry, Tempo, Loki
 - JUnit 5, Mockito, MockMvc, Testcontainers PostgreSQL, JaCoCo
 - Docker Compose, GitHub Actions
+- Next.js 16, React 19, TypeScript cho frontend portfolio
 
 ## Service
 
@@ -70,6 +73,7 @@ flowchart LR
 | notification-service | 8086 | Internal notification từ application events, optional SMTP email delivery |
 | audit-service | 8087 | Audit log ingestion và admin query |
 | common-lib | - | Error model, security constants, event DTO contracts |
+| frontend | 3001 | Next.js UI cho jobs, candidate, employer và admin workflows |
 
 ## Luồng Nghiệp Vụ Chính
 
@@ -101,6 +105,7 @@ Hoặc trên Windows:
 Các URL chính:
 
 - Gateway: `http://localhost:8080`
+- Frontend: `http://localhost:3001`
 - Prometheus: `http://localhost:9090`
 - Grafana: `http://localhost:3000` với `admin/admin`
 - Tempo: `http://localhost:3200`
@@ -129,6 +134,16 @@ Hoặc trên Windows:
 ```
 
 `verify.ps1` chạy `mvn clean verify` và coverage gate theo từng module.
+
+Frontend:
+
+```powershell
+cd frontend
+npm ci
+npm run typecheck
+npm run build
+npm run dev
+```
 
 ## Chạy Một Service Không Docker
 
@@ -271,7 +286,8 @@ Error response chuẩn:
 GitHub Actions:
 
 - `ci.yml`: Java 21, Maven cache, `mvn -B -T1 clean verify`, upload test reports nếu fail.
-- `docker.yml`: Docker matrix build cho từng service, tag theo commit SHA.
+- `ci.yml`: thêm Node 24, `npm ci`, `npm run typecheck`, `npm run build` cho frontend.
+- `docker.yml`: Docker matrix build cho từng service và frontend, tag theo commit SHA.
 - `security.yml`: Dependency Review cho PR và Maven dependency tree sanity check.
 - `release.yml`: Publish Docker images lên GHCR khi push tag dạng `v1.0.0` hoặc chạy thủ công.
 
@@ -309,6 +325,7 @@ kubectl apply -k .\deploy\k8s
 ├── notification-service
 ├── audit-service
 ├── common-lib
+├── frontend
 ├── infra
 │   ├── grafana
 │   ├── otel

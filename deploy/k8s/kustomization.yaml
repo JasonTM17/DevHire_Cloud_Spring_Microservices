@@ -37,3 +37,6 @@ images:
   - name: devhire/audit-service
     newName: ghcr.io/jasontm17/devhire/audit-service
     newTag: latest
+  - name: devhire/frontend
+    newName: ghcr.io/jasontm17/devhire/frontend
+    newTag: latest

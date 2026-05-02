@@ -10,6 +10,7 @@ This runbook describes the production-style deployment assets included in the po
 - `deploy/k8s-overlays/local`: smaller local cluster overlay with one replica and `devhire.local` ingress host.
 - `deploy/k8s-overlays/prod`: production overlay with higher replicas and TLS ingress sample.
 - `.github/workflows/release.yml`: GHCR publishing workflow for version tags.
+- `frontend`: Next.js standalone Docker image served separately from the API Gateway.
 
 ## Kubernetes Prerequisites
 
@@ -81,6 +82,7 @@ Health endpoints:
 
 - Gateway: `/actuator/health/readiness`
 - Services: `/actuator/health/readiness`
+- Frontend readiness: `/jobs`
 - Prometheus metrics: `/actuator/prometheus`
 
 ## Email Delivery

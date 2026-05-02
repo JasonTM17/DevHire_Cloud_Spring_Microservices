@@ -8,6 +8,14 @@ x-common-env: &common-env
   MANAGEMENT_TRACING_SAMPLING_PROBABILITY: ${MANAGEMENT_TRACING_SAMPLING_PROBABILITY:-0.1}
 
 services:
+  frontend:
+    image: ${REGISTRY:-ghcr.io/example}/devhire/frontend:${IMAGE_TAG:?set IMAGE_TAG}
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:?set NEXT_PUBLIC_API_BASE_URL}
+    ports:
+      - "3000:3000"
+
   api-gateway:
     image: ${REGISTRY:-ghcr.io/example}/devhire/api-gateway:${IMAGE_TAG:?set IMAGE_TAG}
     restart: unless-stopped

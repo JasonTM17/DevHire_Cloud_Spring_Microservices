@@ -1,6 +1,7 @@
 # DevHire Cloud
 
 DevHire Cloud is a production-style Java Spring Boot microservices recruitment platform for portfolio use. It models a small ITviec/LinkedIn Jobs experience with authentication, employer company onboarding, job posting, candidate applications, internal notifications, audit logs, search, observability, Docker and CI/CD.
+It also includes a small Next.js frontend for the main Candidate, Employer and Admin workflows.
 
 ## Stack
 
@@ -13,6 +14,7 @@ DevHire Cloud is a production-style Java Spring Boot microservices recruitment p
 - Actuator, Micrometer, Prometheus, Grafana, OpenTelemetry, Tempo, Loki
 - JUnit 5, Mockito, MockMvc, Testcontainers PostgreSQL, JaCoCo
 - Docker Compose and GitHub Actions
+- Next.js 16, React 19 and TypeScript frontend
 
 ## Services
 
@@ -26,6 +28,7 @@ DevHire Cloud is a production-style Java Spring Boot microservices recruitment p
 | application-service | 8085 | Candidate applications, status changes, history |
 | notification-service | 8086 | Event-driven internal notifications and optional SMTP email delivery |
 | audit-service | 8087 | Audit ingestion and admin log search |
+| frontend | 3001 | Next.js UI for jobs and role dashboards |
 
 ## Run
 
@@ -34,6 +37,7 @@ docker compose up --build
 ```
 
 Gateway is available at `http://localhost:8080`.
+Frontend is available at `http://localhost:3001` when running Docker Compose.
 
 ## Test
 
@@ -44,6 +48,7 @@ mvn clean verify
 The build runs unit tests, controller tests, event contract tests and Testcontainers PostgreSQL integration tests.
 
 CI also runs `scripts/check-coverage.ps1` as a hard per-module coverage gate after Maven verification.
+Frontend verification uses `npm ci`, `npm run typecheck` and `npm run build`.
 
 ## Demo Accounts
 
@@ -92,6 +97,7 @@ See [api.http](api.http) for a runnable flow.
 - CI, Docker image build workflow, dependency review and release image publishing.
 - Tests include Testcontainers and event contract checks.
 - Hard JaCoCo coverage gate in CI.
+- Next.js frontend wired to the API Gateway.
 
 ## Deployment
 

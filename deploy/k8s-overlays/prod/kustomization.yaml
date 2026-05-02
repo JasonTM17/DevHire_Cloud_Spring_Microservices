@@ -6,6 +6,13 @@ resources:
 patches:
   - target:
       kind: Deployment
+      name: frontend
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 3
+  - target:
+      kind: Deployment
       name: api-gateway
     patch: |-
       - op: replace

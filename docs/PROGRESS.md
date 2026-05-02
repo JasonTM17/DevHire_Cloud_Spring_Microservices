@@ -426,3 +426,40 @@ Verification:
 - `kubectl kustomize .\deploy\k8s-overlays\local` passed on 2026-05-02.
 - `kubectl kustomize .\deploy\k8s-overlays\prod` passed on 2026-05-02.
 - `docker compose config --quiet` passed on 2026-05-02.
+
+Committed as `chore(k8s): harden deployment manifests`.
+
+## Phase 21 - Next.js frontend
+
+- Added `frontend/` Next.js 16, React 19, TypeScript application.
+- Implemented pages:
+  - `/login`,
+  - `/register`,
+  - `/jobs`,
+  - `/jobs/[id]`,
+  - `/candidate`,
+  - `/employer`,
+  - `/admin`.
+- Added frontend API client wired to API Gateway via `NEXT_PUBLIC_API_BASE_URL`.
+- Added local token session handling for access token and current user role.
+- Added operational UI for:
+  - job search and application submission,
+  - candidate applications and notifications,
+  - employer company/job workflow and applicant status update,
+  - admin company approval, job approval by ID, and audit log view.
+- Added frontend Dockerfile with Next standalone output and non-root runtime user.
+- Added frontend service to Docker Compose and production Compose.
+- Added frontend deployment/service/HPA/PDB/Ingress route to Kubernetes manifests.
+- Updated CI and Docker/release workflows to build the frontend.
+- Added frontend docs to Vietnamese, English, Japanese, and deployment runbook.
+
+Verification:
+
+- `npm install` initially found a missing `@types/react-dom@19.2.7`; fixed to the current published `19.2.3`.
+- `npm audit --omit=dev` initially found a transitive PostCSS advisory from Next.js; added a `postcss@8.5.10` override and reran audit successfully.
+- `npm run typecheck` passed on 2026-05-02.
+- `npm run build` passed on 2026-05-02.
+- `npm audit --omit=dev` passed on 2026-05-02 with 0 vulnerabilities.
+- `docker build -f frontend/Dockerfile -t devhire/frontend:test .` passed on 2026-05-02.
+- `docker compose config --quiet` passed on 2026-05-02.
+- `kubectl kustomize .\deploy\k8s`, `.\deploy\k8s-overlays\local`, and `.\deploy\k8s-overlays\prod` passed on 2026-05-02.
