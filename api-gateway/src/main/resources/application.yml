@@ -4,6 +4,28 @@ server:
 spring:
   application:
     name: api-gateway
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:localhost}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
+
+devhire:
+  jwt:
+    secret: ${JWT_SECRET:local-dev-only-change-this-secret-with-at-least-32-characters}
+  gateway:
+    services:
+      auth: ${AUTH_SERVICE_URL:http://localhost:8081}
+      user: ${USER_SERVICE_URL:http://localhost:8082}
+      company: ${COMPANY_SERVICE_URL:http://localhost:8083}
+      job: ${JOB_SERVICE_URL:http://localhost:8084}
+      application: ${APPLICATION_SERVICE_URL:http://localhost:8085}
+      notification: ${NOTIFICATION_SERVICE_URL:http://localhost:8086}
+      audit: ${AUDIT_SERVICE_URL:http://localhost:8087}
+    cors:
+      allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:5173,http://localhost:8080}
+    rate-limit:
+      replenish-rate: ${GATEWAY_RATE_LIMIT_REPLENISH:20}
+      burst-capacity: ${GATEWAY_RATE_LIMIT_BURST:40}
 
 management:
   endpoints:
@@ -14,4 +36,3 @@ management:
     health:
       probes:
         enabled: true
-

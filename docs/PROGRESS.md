@@ -166,3 +166,24 @@ Verification:
 - `mvn -T1 clean verify` initially failed because the standalone controller test lacked Spring Data's `Pageable` argument resolver.
 - Added `PageableHandlerMethodArgumentResolver` to the audit controller test and reran verification.
 - `mvn -T1 clean verify` passed on 2026-05-02 with 35 total tests.
+
+Committed as `feat(audit): record and expose administrative audit logs`.
+
+## Phase 10 - Gateway integration
+
+- Implemented Spring Cloud Gateway programmatic routes for all external `/api/...` endpoint groups.
+- Added `/api` path rewrite so downstream services keep clean internal paths.
+- Added JWT validation at the gateway using the same signing secret as auth-service.
+- Added Redis-backed access-token blacklist checks for logout/revoked tokens.
+- Injected trusted identity headers for downstream services:
+  - `X-User-Id`
+  - `X-User-Email`
+  - `X-User-Role`
+- Stripped spoofed identity headers from public auth routes.
+- Added Redis rate limiting, CORS config, correlation-id propagation, and JSON gateway error responses.
+- Added gateway tests for valid JWT header injection, missing-token rejection, and spoofed header stripping.
+
+Verification:
+
+- `mvn -T1 clean verify` passed on 2026-05-02 with 38 total tests.
+- `docker compose config --quiet` passed on 2026-05-02.
