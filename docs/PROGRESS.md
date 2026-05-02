@@ -147,3 +147,22 @@ Committed as `feat(application): implement candidate application workflow`.
 Verification:
 
 - `mvn -T1 clean verify` passed on 2026-05-02 with 30 total tests.
+
+Committed as `feat(notification): add event-driven notifications`.
+
+## Phase 9 - Audit service
+
+- Implemented audit-service Kafka ingestion from `audit.events` with idempotency through unique `event_id`.
+- Added audit log persistence with actor, role, action, resource, occurred time, created time, and JSONB metadata.
+- Added admin-only audit log API:
+  - `GET /admin/audit-logs`
+- Added filters by `actorId`, `action`, `from`, and `to`, with pagination and sorting support from Spring Data.
+- Added Flyway migrations with indexes for actor/action/date and a GIN index for metadata.
+- Seeded representative audit logs for register, create company, approve job, and submit application.
+- Added service/controller tests for event recording, duplicate event skip, RBAC rejection, and admin filtering.
+
+Verification:
+
+- `mvn -T1 clean verify` initially failed because the standalone controller test lacked Spring Data's `Pageable` argument resolver.
+- Added `PageableHandlerMethodArgumentResolver` to the audit controller test and reran verification.
+- `mvn -T1 clean verify` passed on 2026-05-02 with 35 total tests.
