@@ -67,7 +67,7 @@ flowchart LR
 | company-service | 8083 | Company onboarding, admin approval/rejection |
 | job-service | 8084 | Job workflow, OpenSearch search/filter/page/sort |
 | application-service | 8085 | Candidate apply, employer status tracking, history |
-| notification-service | 8086 | Internal notification từ application events |
+| notification-service | 8086 | Internal notification từ application events, optional SMTP email delivery |
 | audit-service | 8087 | Audit log ingestion và admin query |
 | common-lib | - | Error model, security constants, event DTO contracts |
 
@@ -211,6 +211,12 @@ Notification:
 - `PATCH /api/notifications/{id}/read`
 - `PATCH /api/notifications/read-all`
 
+Email delivery:
+
+- Local mặc định tắt bằng `DEVHIRE_NOTIFICATION_EMAIL_ENABLED=false`.
+- Khi bật SMTP, `notification-service` resolve email qua `user-service`, gửi bằng `spring-boot-starter-mail`, và lưu trạng thái `SENT`, `FAILED`, `DISABLED` hoặc `SKIPPED_NO_EMAIL`.
+- Cấu hình chính: `SPRING_MAIL_HOST`, `SPRING_MAIL_PORT`, `SPRING_MAIL_USERNAME`, `SPRING_MAIL_PASSWORD`, `SPRING_MAIL_SMTP_AUTH`, `SPRING_MAIL_SMTP_STARTTLS_ENABLE`.
+
 Audit:
 
 - `GET /api/admin/audit-logs`
@@ -320,6 +326,7 @@ kubectl apply -k .\deploy\k8s
 - Gateway validation, rate limiting, CORS, correlation id, centralized gateway errors.
 - Không share JPA entity giữa services.
 - Feign cho service-to-service query, Kafka cho domain events.
+- SMTP email provider abstraction cho notification-service, có trạng thái delivery trong DB.
 - Không hardcode production secret, có `.env.example`.
 - Dockerfile multi-stage, non-root runtime user.
 - Observability stack có metrics, health probes, tracing và dashboard.

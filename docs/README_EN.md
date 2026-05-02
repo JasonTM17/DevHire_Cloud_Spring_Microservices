@@ -24,7 +24,7 @@ DevHire Cloud is a production-style Java Spring Boot microservices recruitment p
 | company-service | 8083 | Company onboarding and admin review |
 | job-service | 8084 | Job workflow and OpenSearch search |
 | application-service | 8085 | Candidate applications, status changes, history |
-| notification-service | 8086 | Event-driven internal notifications |
+| notification-service | 8086 | Event-driven internal notifications and optional SMTP email delivery |
 | audit-service | 8087 | Audit ingestion and admin log search |
 
 ## Run
@@ -84,6 +84,7 @@ See [api.http](api.http) for a runnable flow.
 - JWT and refresh token rotation.
 - Gateway-side JWT validation and rate limiting.
 - Kafka domain events.
+- SMTP email delivery provider with persisted delivery status.
 - Standard error response with trace id.
 - Docker Compose full local stack.
 - CI, Docker image build workflow, dependency review and release image publishing.

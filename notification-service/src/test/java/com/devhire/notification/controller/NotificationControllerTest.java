@@ -4,6 +4,7 @@ import com.devhire.common.constants.AppHeaders;
 import com.devhire.common.security.UserRole;
 import com.devhire.common.web.GlobalExceptionHandler;
 import com.devhire.notification.dto.response.NotificationResponse;
+import com.devhire.notification.entity.EmailStatus;
 import com.devhire.notification.service.NotificationService;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.web.servlet.MockMvc;
@@ -37,6 +38,9 @@ class NotificationControllerTest {
                 "Application status updated",
                 "Your application status changed from SUBMITTED to INTERVIEW",
                 true,
+                Instant.parse("2026-05-02T00:00:00Z"),
+                EmailStatus.SENT,
+                "candidate@example.com",
                 Instant.parse("2026-05-02T00:00:00Z"),
                 Instant.parse("2026-05-02T00:00:00Z")
         ));

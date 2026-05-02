@@ -354,3 +354,31 @@ Verification:
 
 - `mvn -pl job-service -am test` passed on 2026-05-02 with 10 tests across `common-lib` and `job-service`.
 - `docker compose config --quiet` passed on 2026-05-02.
+
+Committed as `feat(job): add opensearch search adapter`.
+
+## Phase 18 - SMTP email notification delivery
+
+- Added SMTP-capable email delivery for `notification-service` using Spring Mail.
+- Added an email provider abstraction:
+  - `EmailDeliveryService`,
+  - `SmtpEmailDeliveryService`,
+  - `NoopEmailDeliveryService`,
+  - `EmailNotificationDispatcher`.
+- Added `UserClient` Feign integration so notification-service can resolve recipient email addresses from user-service without reading another service database.
+- Added persisted email delivery status fields:
+  - `email_status`,
+  - `email_recipient`,
+  - `email_provider_message_id`,
+  - `email_failure_reason`,
+  - `email_sent_at`.
+- Added Flyway migration `V3__email_delivery.sql`.
+- Added Docker Compose, production Compose, and Kubernetes configuration for SMTP settings and secrets.
+- Updated Vietnamese, English, Japanese, architecture, and deployment docs.
+- Added unit coverage for disabled delivery, successful SMTP handoff, and provider failure handling.
+
+Verification:
+
+- `mvn -pl notification-service -am test` passed on 2026-05-02 with 11 tests across `common-lib` and `notification-service`.
+- `docker compose config --quiet` passed on 2026-05-02.
+- `kubectl kustomize .\deploy\k8s` passed on 2026-05-02.

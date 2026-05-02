@@ -2,6 +2,8 @@ package com.devhire.notification.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
@@ -33,6 +35,22 @@ public class Notification {
 
     @Column(name = "read_at")
     private Instant readAt;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "email_status", nullable = false, length = 32)
+    private EmailStatus emailStatus = EmailStatus.PENDING;
+
+    @Column(name = "email_recipient", length = 320)
+    private String emailRecipient;
+
+    @Column(name = "email_provider_message_id", length = 200)
+    private String emailProviderMessageId;
+
+    @Column(name = "email_failure_reason", length = 1000)
+    private String emailFailureReason;
+
+    @Column(name = "email_sent_at")
+    private Instant emailSentAt;
 
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
@@ -89,6 +107,26 @@ public class Notification {
         return readAt;
     }
 
+    public EmailStatus getEmailStatus() {
+        return emailStatus;
+    }
+
+    public String getEmailRecipient() {
+        return emailRecipient;
+    }
+
+    public String getEmailProviderMessageId() {
+        return emailProviderMessageId;
+    }
+
+    public String getEmailFailureReason() {
+        return emailFailureReason;
+    }
+
+    public Instant getEmailSentAt() {
+        return emailSentAt;
+    }
+
     public Instant getCreatedAt() {
         return createdAt;
     }
@@ -105,5 +143,29 @@ public class Notification {
         if (readAt == null) {
             readAt = Instant.now();
         }
+    }
+
+    public void markEmailDisabled() {
+        emailStatus = EmailStatus.DISABLED;
+        emailFailureReason = null;
+    }
+
+    public void markEmailSkippedNoAddress() {
+        emailStatus = EmailStatus.SKIPPED_NO_EMAIL;
+        emailFailureReason = "Recipient email was not available";
+    }
+
+    public void markEmailSent(String recipient, String providerMessageId) {
+        emailStatus = EmailStatus.SENT;
+        emailRecipient = recipient;
+        emailProviderMessageId = providerMessageId;
+        emailFailureReason = null;
+        emailSentAt = Instant.now();
+    }
+
+    public void markEmailFailed(String recipient, String reason) {
+        emailStatus = EmailStatus.FAILED;
+        emailRecipient = recipient;
+        emailFailureReason = reason == null ? "Unknown email delivery failure" : reason;
     }
 }

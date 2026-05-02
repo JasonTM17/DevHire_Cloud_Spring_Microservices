@@ -8,6 +8,7 @@ import com.devhire.common.exception.DevHireException;
 import com.devhire.common.security.AuthenticatedUser;
 import com.devhire.notification.dto.response.NotificationResponse;
 import com.devhire.notification.entity.Notification;
+import com.devhire.notification.email.EmailNotificationDispatcher;
 import com.devhire.notification.event.NotificationEventPublisher;
 import com.devhire.notification.mapper.NotificationMapper;
 import com.devhire.notification.repository.NotificationRepository;
@@ -28,13 +29,16 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final NotificationMapper mapper;
     private final NotificationEventPublisher eventPublisher;
+    private final EmailNotificationDispatcher emailDispatcher;
 
     public NotificationService(NotificationRepository notificationRepository,
                                NotificationMapper mapper,
-                               NotificationEventPublisher eventPublisher) {
+                               NotificationEventPublisher eventPublisher,
+                               EmailNotificationDispatcher emailDispatcher) {
         this.notificationRepository = notificationRepository;
         this.mapper = mapper;
         this.eventPublisher = eventPublisher;
+        this.emailDispatcher = emailDispatcher;
     }
 
     @Transactional
@@ -45,6 +49,7 @@ public class NotificationService {
                 "New application received",
                 "A candidate applied to " + event.jobTitle()
         ));
+        emailDispatcher.dispatch(notification);
         publishCreated(notification);
         return mapper.toResponse(notification);
     }
@@ -57,6 +62,7 @@ public class NotificationService {
                 "Application status updated",
                 "Your application status changed from " + event.oldStatus() + " to " + event.newStatus()
         ));
+        emailDispatcher.dispatch(notification);
         publishCreated(notification);
         return mapper.toResponse(notification);
     }

@@ -10,7 +10,7 @@ DevHire Cloud is a Java Spring Boot microservices recruitment platform for portf
 - `company-service`: employer company onboarding and admin approval/rejection.
 - `job-service`: job posting workflow, OpenSearch-backed published job search, and PostgreSQL fallback search.
 - `application-service`: candidate applications, duplicate prevention, status workflow, and status history.
-- `notification-service`: internal notification persistence from application events.
+- `notification-service`: internal notification persistence from application events and optional SMTP email delivery after resolving recipient email from `user-service`.
 - `audit-service`: audit event ingestion and admin audit log search.
 - `common-lib`: shared API response, error model, constants, security headers, pagination, and event DTO contracts.
 

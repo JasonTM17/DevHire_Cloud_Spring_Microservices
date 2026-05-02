@@ -15,6 +15,7 @@ This runbook describes the production-style deployment assets included in the po
 - Redis reachable from the cluster.
 - Kafka reachable from the cluster.
 - OpenTelemetry Collector or compatible OTLP endpoint.
+- SMTP provider credentials when email delivery is enabled.
 - Ingress controller such as NGINX Ingress.
 - Metrics Server when HPA is enabled.
 
@@ -72,6 +73,22 @@ Health endpoints:
 - Gateway: `/actuator/health/readiness`
 - Services: `/actuator/health/readiness`
 - Prometheus metrics: `/actuator/prometheus`
+
+## Email Delivery
+
+`notification-service` supports SMTP email delivery through Spring Mail. In production, keep SMTP credentials in the secret manager and expose only non-sensitive mail settings through ConfigMaps or environment variables.
+
+Required production variables:
+
+- `DEVHIRE_NOTIFICATION_EMAIL_ENABLED=true`
+- `DEVHIRE_NOTIFICATION_EMAIL_FROM`
+- `DEVHIRE_NOTIFICATION_EMAIL_DASHBOARD_BASE_URL`
+- `SPRING_MAIL_HOST`
+- `SPRING_MAIL_PORT`
+- `SPRING_MAIL_USERNAME`
+- `SPRING_MAIL_PASSWORD`
+- `SPRING_MAIL_SMTP_AUTH=true`
+- `SPRING_MAIL_SMTP_STARTTLS_ENABLE=true`
 
 ## Rollback
 

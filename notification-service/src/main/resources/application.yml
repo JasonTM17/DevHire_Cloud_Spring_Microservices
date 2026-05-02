@@ -29,6 +29,26 @@ spring:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+  mail:
+    host: ${SPRING_MAIL_HOST:localhost}
+    port: ${SPRING_MAIL_PORT:1025}
+    username: ${SPRING_MAIL_USERNAME:}
+    password: ${SPRING_MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: ${SPRING_MAIL_SMTP_AUTH:false}
+          starttls:
+            enable: ${SPRING_MAIL_SMTP_STARTTLS_ENABLE:false}
+user-service:
+  url: ${USER_SERVICE_URL:http://localhost:8082}
+devhire:
+  notification:
+    email:
+      enabled: ${DEVHIRE_NOTIFICATION_EMAIL_ENABLED:false}
+      from: ${DEVHIRE_NOTIFICATION_EMAIL_FROM:no-reply@devhire.local}
+      reply-to: ${DEVHIRE_NOTIFICATION_EMAIL_REPLY_TO:}
+      dashboard-base-url: ${DEVHIRE_NOTIFICATION_EMAIL_DASHBOARD_BASE_URL:http://localhost:8080}
 management:
   endpoints:
     web:
