@@ -127,3 +127,23 @@ Committed as `feat(job): implement job posting and search APIs`.
 Verification:
 
 - `mvn -T1 clean verify` passed on 2026-05-02 with 24 total tests.
+
+Committed as `feat(application): implement candidate application workflow`.
+
+## Phase 8 - Notification service + events
+
+- Implemented internal notification storage and APIs:
+  - `GET /notifications`
+  - `PATCH /notifications/{id}/read`
+  - `PATCH /notifications/read-all`
+- Added notification entity, repository, mapper, service layer, optimistic locking, recipient unread index, and Flyway migrations.
+- Added Kafka listener for application events:
+  - `ApplicationSubmittedEvent` creates employer notifications.
+  - `ApplicationStatusChangedEvent` creates candidate notifications.
+- Added notification-created event publishing for downstream audit/analytics usage.
+- Seeded demo notifications for employer and candidate demo users.
+- Added service/controller tests for event-created notifications and read/unread flows.
+
+Verification:
+
+- `mvn -T1 clean verify` passed on 2026-05-02 with 30 total tests.
