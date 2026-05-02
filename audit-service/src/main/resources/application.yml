@@ -1,0 +1,11 @@
+server:
+  port: ${SERVER_PORT:8087}
+spring:
+  application:
+    name: audit-service
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+

@@ -1,0 +1,11 @@
+server:
+  port: ${SERVER_PORT:8083}
+spring:
+  application:
+    name: company-service
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+

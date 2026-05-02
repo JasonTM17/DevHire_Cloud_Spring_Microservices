@@ -1,0 +1,11 @@
+server:
+  port: ${SERVER_PORT:8082}
+spring:
+  application:
+    name: user-service
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+
