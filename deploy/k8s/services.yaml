@@ -16,8 +16,11 @@ spec:
         app.kubernetes.io/name: api-gateway
         app.kubernetes.io/part-of: devhire-cloud
     spec:
+      serviceAccountName: devhire-service
       securityContext:
         runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: api-gateway
           image: devhire/api-gateway:latest
@@ -88,8 +91,11 @@ spec:
         app.kubernetes.io/name: auth-service
         app.kubernetes.io/part-of: devhire-cloud
     spec:
+      serviceAccountName: devhire-service
       securityContext:
         runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: auth-service
           image: devhire/auth-service:latest
@@ -179,8 +185,11 @@ spec:
         app.kubernetes.io/name: user-service
         app.kubernetes.io/part-of: devhire-cloud
     spec:
+      serviceAccountName: devhire-service
       securityContext:
         runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: user-service
           image: devhire/user-service:latest
@@ -265,8 +274,11 @@ spec:
         app.kubernetes.io/name: company-service
         app.kubernetes.io/part-of: devhire-cloud
     spec:
+      serviceAccountName: devhire-service
       securityContext:
         runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: company-service
           image: devhire/company-service:latest
@@ -351,8 +363,11 @@ spec:
         app.kubernetes.io/name: job-service
         app.kubernetes.io/part-of: devhire-cloud
     spec:
+      serviceAccountName: devhire-service
       securityContext:
         runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: job-service
           image: devhire/job-service:latest
@@ -437,8 +452,11 @@ spec:
         app.kubernetes.io/name: application-service
         app.kubernetes.io/part-of: devhire-cloud
     spec:
+      serviceAccountName: devhire-service
       securityContext:
         runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: application-service
           image: devhire/application-service:latest
@@ -523,8 +541,11 @@ spec:
         app.kubernetes.io/name: notification-service
         app.kubernetes.io/part-of: devhire-cloud
     spec:
+      serviceAccountName: devhire-service
       securityContext:
         runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: notification-service
           image: devhire/notification-service:latest
@@ -614,8 +635,11 @@ spec:
         app.kubernetes.io/name: audit-service
         app.kubernetes.io/part-of: devhire-cloud
     spec:
+      serviceAccountName: devhire-service
       securityContext:
         runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: audit-service
           image: devhire/audit-service:latest

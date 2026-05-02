@@ -280,13 +280,14 @@ GitHub Actions:
 Tài sản triển khai nằm trong `deploy/`:
 
 - `deploy/docker-compose.prod.yml`: compose mẫu cho production với external PostgreSQL/Redis/Kafka và image tag rõ ràng.
-- `deploy/k8s`: Kubernetes baseline gồm namespace, config map, secret template, deployments, services, ingress và HPA.
+- `deploy/k8s`: Kubernetes baseline gồm namespace, service account, config map, secret template, deployments, services, ingress, HPA, PDB, network policy, quota và local/prod overlays.
 - `docs/deployment.md`: runbook vận hành cho render manifest, deploy, health check và rollback.
 
 Xem manifest:
 
 ```powershell
 kubectl kustomize .\deploy\k8s
+kubectl kustomize .\deploy\k8s-overlays\prod
 ```
 
 Apply sau khi thay secret và image tag thật:
@@ -315,6 +316,8 @@ kubectl apply -k .\deploy\k8s
 │   ├── prometheus
 │   └── tempo
 ├── deploy
+│   ├── k8s
+│   └── k8s-overlays
 ├── docs
 └── .github/workflows
 ```

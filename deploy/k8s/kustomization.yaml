@@ -3,11 +3,15 @@ kind: Kustomization
 namespace: devhire
 resources:
   - namespace.yaml
+  - serviceaccount.yaml
   - configmap.yaml
   - secret.example.yaml
   - services.yaml
   - ingress.yaml
   - hpa.yaml
+  - pdb.yaml
+  - networkpolicy.yaml
+  - quota.yaml
 images:
   - name: devhire/api-gateway
     newName: ghcr.io/jasontm17/devhire/api-gateway

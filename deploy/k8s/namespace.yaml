@@ -5,3 +5,6 @@ metadata:
   labels:
     app.kubernetes.io/name: devhire-cloud
     app.kubernetes.io/part-of: devhire-cloud
+    pod-security.kubernetes.io/audit: baseline
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/warn: restricted

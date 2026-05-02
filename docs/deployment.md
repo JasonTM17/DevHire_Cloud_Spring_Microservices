@@ -7,6 +7,8 @@ This runbook describes the production-style deployment assets included in the po
 - `docker-compose.yml`: full local developer stack with PostgreSQL, Redis, Kafka, observability, and all services.
 - `deploy/docker-compose.prod.yml`: production Compose sample that expects external databases, Redis, Kafka, and image tags.
 - `deploy/k8s`: Kubernetes baseline with namespace, config, secret template, deployments, services, ingress, and autoscaling examples.
+- `deploy/k8s-overlays/local`: smaller local cluster overlay with one replica and `devhire.local` ingress host.
+- `deploy/k8s-overlays/prod`: production overlay with higher replicas and TLS ingress sample.
 - `.github/workflows/release.yml`: GHCR publishing workflow for version tags.
 
 ## Kubernetes Prerequisites
@@ -35,12 +37,19 @@ Preview generated manifests:
 
 ```powershell
 kubectl kustomize .\deploy\k8s
+kubectl kustomize .\deploy\k8s-overlays\prod
 ```
 
 Deploy after replacing image tags and secrets:
 
 ```powershell
 kubectl apply -k .\deploy\k8s
+```
+
+Production overlay:
+
+```powershell
+kubectl apply -k .\deploy\k8s-overlays\prod
 ```
 
 Patch an image tag after a release:

@@ -406,3 +406,23 @@ Verification:
   - job-service: 49.8% / 45.0%
   - notification-service: 60.3% / 45.0%
   - user-service: 76.0% / 70.0%
+
+Committed as `ci: enforce coverage gates`.
+
+## Phase 20 - Kubernetes hardening
+
+- Added Kubernetes service account with token automount disabled.
+- Added namespace Pod Security labels.
+- Added pod-level `seccompProfile: RuntimeDefault` and service account binding for all service deployments.
+- Added PodDisruptionBudgets for gateway and all backend services.
+- Added namespace network policy with same-namespace ingress and ingress-controller access to gateway.
+- Added resource quota and limit range.
+- Added `deploy/k8s-overlays/local` and `deploy/k8s-overlays/prod` Kustomize overlays.
+- Updated Vietnamese deployment docs and runbook.
+
+Verification:
+
+- `kubectl kustomize .\deploy\k8s` passed on 2026-05-02.
+- `kubectl kustomize .\deploy\k8s-overlays\local` passed on 2026-05-02.
+- `kubectl kustomize .\deploy\k8s-overlays\prod` passed on 2026-05-02.
+- `docker compose config --quiet` passed on 2026-05-02.
