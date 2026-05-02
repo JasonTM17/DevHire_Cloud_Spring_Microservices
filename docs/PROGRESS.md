@@ -27,3 +27,18 @@ Verification:
 - `mvn clean verify` initially failed because the previous JVM crash left corrupted Maven artifacts in `C:\Users\Admin\.m2\repository`.
 - Removed only the corrupted artifact directories and reran with JDK 26 compiling to Java 21 bytecode.
 - `mvn -T1 clean verify` passed on 2026-05-02.
+
+Committed as `chore: configure parent build and shared conventions`.
+
+## Phase 2 - Docker Compose infrastructure
+
+- Added Docker Compose for PostgreSQL, Redis, Kafka, Prometheus, Grafana, Loki, Tempo, OpenTelemetry Collector, and all backend services.
+- Added one PostgreSQL container with separate databases per service through `infra/postgres/init/01-create-databases.sql`.
+- Added multi-stage Dockerfiles for every service using Java 21 runtime and a non-root `devhire` user.
+- Added Prometheus scrape config, Grafana datasource/dashboard provisioning, Tempo config, OTel Collector config, `.dockerignore`, `.env.example`, and a production compose sample.
+- Added healthchecks for infrastructure containers and backend services.
+
+Verification:
+
+- `docker compose config --quiet` passed on 2026-05-02.
+- `mvn -T1 clean verify` passed on 2026-05-02.

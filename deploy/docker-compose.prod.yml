@@ -1,0 +1,20 @@
+name: devhire-cloud-prod-sample
+
+services:
+  api-gateway:
+    image: ${REGISTRY:-ghcr.io/example}/devhire/api-gateway:${IMAGE_TAG:?set IMAGE_TAG}
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET}
+    ports:
+      - "8080:8080"
+
+  auth-service:
+    image: ${REGISTRY:-ghcr.io/example}/devhire/auth-service:${IMAGE_TAG:?set IMAGE_TAG}
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET}
+      SPRING_DATASOURCE_URL: ${AUTH_DATABASE_URL:?set AUTH_DATABASE_URL}
+      SPRING_DATASOURCE_USERNAME: ${AUTH_DATABASE_USERNAME:?set AUTH_DATABASE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${AUTH_DATABASE_PASSWORD:?set AUTH_DATABASE_PASSWORD}
+

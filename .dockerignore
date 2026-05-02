@@ -1,0 +1,13 @@
+.git
+.idea
+.vscode
+**/target
+**/*.iml
+.env
+data
+logs
+tmp
+*.log
+hs_err_pid*
+replay_pid*
+
