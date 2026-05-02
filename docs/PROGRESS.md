@@ -42,3 +42,21 @@ Verification:
 
 - `docker compose config --quiet` passed on 2026-05-02.
 - `mvn -T1 clean verify` passed on 2026-05-02.
+
+Committed as `chore: add local infrastructure with docker compose`.
+
+## Phase 3 - Auth service
+
+- Implemented register, login, refresh token rotation, logout/revoke, access-token blacklist, and `/auth/me`.
+- Added BCrypt password hashing, JWT access tokens, secure random refresh tokens stored as SHA-256 hashes, and role rules that prevent public admin self-registration.
+- Added `user_accounts` and `refresh_tokens` Flyway migrations with demo accounts:
+  - `admin@devhire.local` / `Admin@123456`
+  - `employer@devhire.local` / `Employer@123456`
+  - `candidate@devhire.local` / `Candidate@123456`
+- Added shared global exception handling and servlet correlation id filter in `common-lib`.
+- Added auth service unit/controller tests for successful registration, validation failure, admin self-registration rejection, and invalid login handling.
+- Upgraded JaCoCo from 0.8.12 to 0.8.14 because local verification runs on JDK 26 while compiling Java 21 bytecode.
+
+Verification:
+
+- `mvn -T1 clean verify` passed on 2026-05-02 with 5 auth tests.
