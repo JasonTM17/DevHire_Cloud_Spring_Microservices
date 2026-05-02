@@ -207,6 +207,26 @@ Verification:
 - Added the missing test dependencies and reran verification.
 - `mvn -T1 clean verify` passed on 2026-05-02 with 42 total tests, including 2 Testcontainers PostgreSQL integration tests.
 
+Committed as `test: add unit integration and controller coverage`.
+
+## Phase 13 - CI/CD
+
+- Added `.github/workflows/ci.yml`:
+  - Runs on push and pull request.
+  - Sets up Java 21 with Maven cache.
+  - Runs `mvn -B -T1 clean verify`.
+  - Uploads Surefire/Failsafe reports on failure.
+- Added `.github/workflows/docker.yml`:
+  - Builds Docker images for each runtime service with a matrix.
+  - Tags images by commit SHA.
+- Added `.github/workflows/security.yml`:
+  - Runs GitHub dependency review on pull requests.
+  - Runs Maven dependency tree resolution as a lightweight dependency sanity check.
+
+Verification:
+
+- `mvn -T1 clean verify` passed on 2026-05-02 with 42 total tests.
+
 Committed as `feat(gateway): wire service routing and security filters`.
 
 ## Phase 11 - Observability
