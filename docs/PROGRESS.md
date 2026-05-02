@@ -188,6 +188,25 @@ Verification:
 - `mvn -T1 clean verify` passed on 2026-05-02 with 38 total tests.
 - `docker compose config --quiet` passed on 2026-05-02.
 
+Committed as `feat(gateway): wire service routing and security filters`.
+
+## Phase 11 - Observability
+
+- Added Micrometer OpenTelemetry tracing bridge and OTLP exporter dependencies to all runtime services.
+- Configured Prometheus application tags, trace sampling, OTLP trace export endpoint, and trace/span ids in log patterns for all services.
+- Kept health/readiness probes and Prometheus actuator exposure enabled consistently across services.
+- Upgraded Grafana provisioning dashboard with:
+  - HTTP requests per second by service.
+  - HTTP p95 latency by service.
+  - 5xx error ratio by service.
+  - JVM heap usage by service.
+- Verified OTel Collector, Tempo, Prometheus, and Grafana compose configuration remains valid.
+
+Verification:
+
+- `mvn -T1 clean verify` passed on 2026-05-02 with 38 total tests.
+- `docker compose config --quiet` passed on 2026-05-02.
+
 Committed as `feat(observability): add metrics tracing health checks and dashboards`.
 
 ## Phase 12 - Testing hardening
@@ -242,21 +261,56 @@ Verification:
 
 - `mvn -T1 clean verify` passed on 2026-05-02 with 42 total tests.
 
-Committed as `feat(gateway): wire service routing and security filters`.
+Committed as `docs: add production portfolio documentation`.
 
-## Phase 11 - Observability
+## Phase 15 - Final hardening
 
-- Added Micrometer OpenTelemetry tracing bridge and OTLP exporter dependencies to all runtime services.
-- Configured Prometheus application tags, trace sampling, OTLP trace export endpoint, and trace/span ids in log patterns for all services.
-- Kept health/readiness probes and Prometheus actuator exposure enabled consistently across services.
-- Upgraded Grafana provisioning dashboard with:
-  - HTTP requests per second by service.
-  - HTTP p95 latency by service.
-  - 5xx error ratio by service.
-  - JVM heap usage by service.
-- Verified OTel Collector, Tempo, Prometheus, and Grafana compose configuration remains valid.
+- Added `.gitattributes` for consistent text normalization and shell script handling.
+- Expanded `.env.example` with Redis, Kafka, service URL, CORS, rate-limit, and tracing variables.
+- Reworked `deploy/docker-compose.prod.yml` into a production-style sample for all backend services.
+- Added Windows helper scripts:
+  - `scripts/verify.ps1`
+  - `scripts/dev-up.ps1`
+  - `scripts/compose-config.ps1`
+- Updated the Vietnamese README with the helper script workflow.
+- Replaced the unavailable `bitnami/kafka:3.9` image with `apache/kafka:3.9.0` and updated KRaft environment variables.
+- Hardened all service Dockerfiles so Maven sees every reactor module `pom.xml` during Docker builds.
+- Made all Docker host ports configurable through `*_HOST_PORT` variables; Redis defaults to host port `6380` to avoid the common local Redis collision.
+- Fixed Docker service datasource wiring by setting `POSTGRES_HOST=postgres` and `POSTGRES_PORT=5432` inside the service network.
+- Added the missing auth-service actuator dependency so `/actuator/health/readiness` is available.
+- Wired gateway Docker environment to internal service URLs (`http://auth-service:8081`, etc.) instead of localhost defaults.
+- Added unexpected-exception logging in the shared global exception handler to make production diagnostics less opaque.
+- Reconfirmed Git remote `origin` points to `https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices.git`.
 
 Verification:
 
-- `mvn -T1 clean verify` passed on 2026-05-02 with 38 total tests.
-- `docker compose config --quiet` passed on 2026-05-02.
+- `docker compose config --quiet` passed with default ports and with the alternate host-port set used on this machine.
+- Initial `docker compose up --build -d` found real local hardening issues:
+  - unavailable Kafka image tag,
+  - incomplete Dockerfile Maven reactor context,
+  - local host port collisions with other running projects,
+  - service datasource fallback to `localhost:5432`,
+  - missing auth actuator dependency,
+  - gateway service URL fallback to localhost.
+- Fixed those issues and reran Docker verification successfully using alternate host ports because this machine already had other stacks on `8080`, `3000`, `3100`, `4318`, `6379`, and `9090`.
+- `docker compose up --build -d --force-recreate` passed on 2026-05-02 with the alternate host-port set:
+  - Gateway: `http://localhost:18080`
+  - Services: `18081-18087`
+  - Prometheus: `19090`
+  - Grafana: `13000`
+- Readiness probes returned `UP` for gateway, auth, user, company, job, application, notification, and audit services.
+- End-to-end API smoke flow through gateway passed:
+  - demo admin/employer/candidate login,
+  - candidate `/api/auth/me`,
+  - employer created company,
+  - admin approved company,
+  - employer created/submitted job,
+  - admin approved job,
+  - candidate searched jobs and applied,
+  - employer moved application to `INTERVIEW`,
+  - candidate notification list returned data,
+  - admin audit log list returned data.
+- `mvn -T1 clean verify` passed on 2026-05-02 at 22:19 +07 with 42 total tests, including Testcontainers PostgreSQL integration tests.
+- Secret/TODO scan found only local placeholder variables in `.env.example` and this progress note; no real secret was found in source files.
+
+Committed as `chore: polish configuration validation and developer experience`.

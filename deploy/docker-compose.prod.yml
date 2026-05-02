@@ -1,20 +1,94 @@
 name: devhire-cloud-prod-sample
 
+x-common-env: &common-env
+  SPRING_PROFILES_ACTIVE: prod
+  JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET}
+  SPRING_KAFKA_BOOTSTRAP_SERVERS: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:?set SPRING_KAFKA_BOOTSTRAP_SERVERS}
+  OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://otel-collector:4318}
+  MANAGEMENT_TRACING_SAMPLING_PROBABILITY: ${MANAGEMENT_TRACING_SAMPLING_PROBABILITY:-0.1}
+
 services:
   api-gateway:
     image: ${REGISTRY:-ghcr.io/example}/devhire/api-gateway:${IMAGE_TAG:?set IMAGE_TAG}
+    restart: unless-stopped
     environment:
-      SPRING_PROFILES_ACTIVE: prod
-      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET}
+      <<: *common-env
+      SPRING_DATA_REDIS_HOST: ${REDIS_HOST:?set REDIS_HOST}
+      SPRING_DATA_REDIS_PORT: ${REDIS_PORT:-6379}
+      AUTH_SERVICE_URL: http://auth-service:8081
+      USER_SERVICE_URL: http://user-service:8082
+      COMPANY_SERVICE_URL: http://company-service:8083
+      JOB_SERVICE_URL: http://job-service:8084
+      APPLICATION_SERVICE_URL: http://application-service:8085
+      NOTIFICATION_SERVICE_URL: http://notification-service:8086
+      AUDIT_SERVICE_URL: http://audit-service:8087
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:?set CORS_ALLOWED_ORIGINS}
     ports:
       - "8080:8080"
 
   auth-service:
     image: ${REGISTRY:-ghcr.io/example}/devhire/auth-service:${IMAGE_TAG:?set IMAGE_TAG}
+    restart: unless-stopped
     environment:
-      SPRING_PROFILES_ACTIVE: prod
-      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET}
+      <<: *common-env
       SPRING_DATASOURCE_URL: ${AUTH_DATABASE_URL:?set AUTH_DATABASE_URL}
       SPRING_DATASOURCE_USERNAME: ${AUTH_DATABASE_USERNAME:?set AUTH_DATABASE_USERNAME}
       SPRING_DATASOURCE_PASSWORD: ${AUTH_DATABASE_PASSWORD:?set AUTH_DATABASE_PASSWORD}
+      SPRING_DATA_REDIS_HOST: ${REDIS_HOST:?set REDIS_HOST}
+      SPRING_DATA_REDIS_PORT: ${REDIS_PORT:-6379}
 
+  user-service:
+    image: ${REGISTRY:-ghcr.io/example}/devhire/user-service:${IMAGE_TAG:?set IMAGE_TAG}
+    restart: unless-stopped
+    environment:
+      <<: *common-env
+      SPRING_DATASOURCE_URL: ${USER_DATABASE_URL:?set USER_DATABASE_URL}
+      SPRING_DATASOURCE_USERNAME: ${USER_DATABASE_USERNAME:?set USER_DATABASE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${USER_DATABASE_PASSWORD:?set USER_DATABASE_PASSWORD}
+
+  company-service:
+    image: ${REGISTRY:-ghcr.io/example}/devhire/company-service:${IMAGE_TAG:?set IMAGE_TAG}
+    restart: unless-stopped
+    environment:
+      <<: *common-env
+      SPRING_DATASOURCE_URL: ${COMPANY_DATABASE_URL:?set COMPANY_DATABASE_URL}
+      SPRING_DATASOURCE_USERNAME: ${COMPANY_DATABASE_USERNAME:?set COMPANY_DATABASE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${COMPANY_DATABASE_PASSWORD:?set COMPANY_DATABASE_PASSWORD}
+
+  job-service:
+    image: ${REGISTRY:-ghcr.io/example}/devhire/job-service:${IMAGE_TAG:?set IMAGE_TAG}
+    restart: unless-stopped
+    environment:
+      <<: *common-env
+      SPRING_DATASOURCE_URL: ${JOB_DATABASE_URL:?set JOB_DATABASE_URL}
+      SPRING_DATASOURCE_USERNAME: ${JOB_DATABASE_USERNAME:?set JOB_DATABASE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${JOB_DATABASE_PASSWORD:?set JOB_DATABASE_PASSWORD}
+      COMPANY_SERVICE_URL: http://company-service:8083
+
+  application-service:
+    image: ${REGISTRY:-ghcr.io/example}/devhire/application-service:${IMAGE_TAG:?set IMAGE_TAG}
+    restart: unless-stopped
+    environment:
+      <<: *common-env
+      SPRING_DATASOURCE_URL: ${APPLICATION_DATABASE_URL:?set APPLICATION_DATABASE_URL}
+      SPRING_DATASOURCE_USERNAME: ${APPLICATION_DATABASE_USERNAME:?set APPLICATION_DATABASE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${APPLICATION_DATABASE_PASSWORD:?set APPLICATION_DATABASE_PASSWORD}
+      JOB_SERVICE_URL: http://job-service:8084
+
+  notification-service:
+    image: ${REGISTRY:-ghcr.io/example}/devhire/notification-service:${IMAGE_TAG:?set IMAGE_TAG}
+    restart: unless-stopped
+    environment:
+      <<: *common-env
+      SPRING_DATASOURCE_URL: ${NOTIFICATION_DATABASE_URL:?set NOTIFICATION_DATABASE_URL}
+      SPRING_DATASOURCE_USERNAME: ${NOTIFICATION_DATABASE_USERNAME:?set NOTIFICATION_DATABASE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${NOTIFICATION_DATABASE_PASSWORD:?set NOTIFICATION_DATABASE_PASSWORD}
+
+  audit-service:
+    image: ${REGISTRY:-ghcr.io/example}/devhire/audit-service:${IMAGE_TAG:?set IMAGE_TAG}
+    restart: unless-stopped
+    environment:
+      <<: *common-env
+      SPRING_DATASOURCE_URL: ${AUDIT_DATABASE_URL:?set AUDIT_DATABASE_URL}
+      SPRING_DATASOURCE_USERNAME: ${AUDIT_DATABASE_USERNAME:?set AUDIT_DATABASE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${AUDIT_DATABASE_PASSWORD:?set AUDIT_DATABASE_PASSWORD}

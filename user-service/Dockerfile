@@ -3,7 +3,14 @@ WORKDIR /workspace
 ARG SERVICE_NAME=user-service
 COPY pom.xml .
 COPY common-lib/pom.xml common-lib/pom.xml
-COPY ${SERVICE_NAME}/pom.xml ${SERVICE_NAME}/pom.xml
+COPY api-gateway/pom.xml api-gateway/pom.xml
+COPY auth-service/pom.xml auth-service/pom.xml
+COPY user-service/pom.xml user-service/pom.xml
+COPY company-service/pom.xml company-service/pom.xml
+COPY job-service/pom.xml job-service/pom.xml
+COPY application-service/pom.xml application-service/pom.xml
+COPY notification-service/pom.xml notification-service/pom.xml
+COPY audit-service/pom.xml audit-service/pom.xml
 RUN mvn -B -T1 -pl ${SERVICE_NAME} -am dependency:go-offline
 COPY common-lib/src common-lib/src
 COPY ${SERVICE_NAME}/src ${SERVICE_NAME}/src
@@ -18,4 +25,3 @@ COPY --from=build /workspace/${SERVICE_NAME}/target/${SERVICE_NAME}-*.jar app.ja
 USER devhire
 EXPOSE 8082
 ENTRYPOINT ["java", "-XX:MaxRAMPercentage=75", "-jar", "app.jar"]
-

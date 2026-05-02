@@ -5,6 +5,8 @@ import com.devhire.common.error.ErrorResponse;
 import com.devhire.common.error.FieldViolation;
 import com.devhire.common.exception.DevHireException;
 import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -18,6 +20,8 @@ import java.util.List;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
     @ExceptionHandler(DevHireException.class)
     ResponseEntity<ErrorResponse> handleDevHireException(DevHireException exception, HttpServletRequest request) {
         ErrorCode code = exception.errorCode();
@@ -54,6 +58,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     ResponseEntity<ErrorResponse> handleUnexpected(Exception exception, HttpServletRequest request) {
+        log.error("unexpected_request_failure path={} traceId={}", request.getRequestURI(), traceId(), exception);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ErrorResponse.of(HttpStatus.INTERNAL_SERVER_ERROR.value(), ErrorCode.INTERNAL_ERROR.name(),
                         "Unexpected server error", request.getRequestURI(), traceId()));
@@ -63,4 +68,3 @@ public class GlobalExceptionHandler {
         return MDC.get(CorrelationIdFilter.MDC_KEY);
     }
 }
-

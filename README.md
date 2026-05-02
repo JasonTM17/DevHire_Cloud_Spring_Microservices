@@ -90,6 +90,12 @@ Yêu cầu: Docker Desktop.
 docker compose up --build
 ```
 
+Hoặc trên Windows:
+
+```powershell
+.\scripts\dev-up.ps1 -Build
+```
+
 Các URL chính:
 
 - Gateway: `http://localhost:8080`
@@ -98,7 +104,9 @@ Các URL chính:
 - Tempo: `http://localhost:3200`
 - Kafka external bootstrap: `localhost:29092`
 - PostgreSQL: `localhost:5432`
-- Redis: `localhost:6379`
+- Redis: `localhost:6380` (container nội bộ vẫn dùng `6379`)
+
+Nếu máy đang có stack khác chiếm port chuẩn, chỉnh các biến `*_HOST_PORT` trong `.env` rồi chạy lại Compose.
 
 ## Build Và Test
 
@@ -109,6 +117,12 @@ mvn clean verify
 ```
 
 Lệnh này chạy unit test, controller test, contract-like event tests và Testcontainers PostgreSQL integration test.
+
+Hoặc trên Windows:
+
+```powershell
+.\scripts\verify.ps1
+```
 
 ## Chạy Một Service Không Docker
 
