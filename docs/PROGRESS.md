@@ -188,6 +188,25 @@ Verification:
 - `mvn -T1 clean verify` passed on 2026-05-02 with 38 total tests.
 - `docker compose config --quiet` passed on 2026-05-02.
 
+Committed as `feat(observability): add metrics tracing health checks and dashboards`.
+
+## Phase 12 - Testing hardening
+
+- Enabled Maven Failsafe in the parent build so `*IT` integration tests run as part of `mvn verify`.
+- Added common event contract tests to protect JSON compatibility for shared event DTOs.
+- Added direct Jackson test dependencies to `common-lib` so event contract tests are explicit and module-local.
+- Added `JobRepositoryIT` with Testcontainers PostgreSQL:
+  - Verifies Flyway migrations and seed data run against real PostgreSQL.
+  - Verifies job workflow state is persisted by JPA.
+  - Verifies the database salary-range check constraint rejects invalid data.
+- Kept existing unit/controller coverage across auth, user, company, job, application, notification, audit, and gateway.
+
+Verification:
+
+- `mvn -T1 clean verify` initially failed because `common-lib` contract tests needed explicit Jackson databind/jsr310 test dependencies.
+- Added the missing test dependencies and reran verification.
+- `mvn -T1 clean verify` passed on 2026-05-02 with 42 total tests, including 2 Testcontainers PostgreSQL integration tests.
+
 Committed as `feat(gateway): wire service routing and security filters`.
 
 ## Phase 11 - Observability
