@@ -187,3 +187,22 @@ Verification:
 
 - `mvn -T1 clean verify` passed on 2026-05-02 with 38 total tests.
 - `docker compose config --quiet` passed on 2026-05-02.
+
+Committed as `feat(gateway): wire service routing and security filters`.
+
+## Phase 11 - Observability
+
+- Added Micrometer OpenTelemetry tracing bridge and OTLP exporter dependencies to all runtime services.
+- Configured Prometheus application tags, trace sampling, OTLP trace export endpoint, and trace/span ids in log patterns for all services.
+- Kept health/readiness probes and Prometheus actuator exposure enabled consistently across services.
+- Upgraded Grafana provisioning dashboard with:
+  - HTTP requests per second by service.
+  - HTTP p95 latency by service.
+  - 5xx error ratio by service.
+  - JVM heap usage by service.
+- Verified OTel Collector, Tempo, Prometheus, and Grafana compose configuration remains valid.
+
+Verification:
+
+- `mvn -T1 clean verify` passed on 2026-05-02 with 38 total tests.
+- `docker compose config --quiet` passed on 2026-05-02.
