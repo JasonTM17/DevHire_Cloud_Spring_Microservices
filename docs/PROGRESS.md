@@ -91,3 +91,18 @@ Committed as `feat(user): implement profile management APIs`.
 Verification:
 
 - `mvn -T1 clean verify` passed on 2026-05-02 with 14 total tests.
+
+Committed as `feat(company): implement company onboarding and approval workflow`.
+
+## Phase 6 - Job service
+
+- Implemented job posting APIs for employer create/update/submit-review/close, admin approve/reject, public job detail, and public search.
+- Added approved-company ownership checks through OpenFeign against company-service internal API.
+- Added `PostgresJobSearchAdapter` with pageable filtering by keyword, skill, location, salary range, and level; schema includes a PostgreSQL full-text GIN index for future search optimization.
+- Added job entity, workflow status enum, DTOs, mapper, repository/specification search, event publisher, and Flyway migrations.
+- Seeded 10 jobs across approved companies, including 8 published jobs plus draft/review examples.
+- Added service/controller tests for create, validation, unapproved company rejection, and admin approval.
+
+Verification:
+
+- `mvn -T1 clean verify` passed on 2026-05-02 with 19 total tests.
