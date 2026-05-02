@@ -77,3 +77,17 @@ Committed as `feat(auth): implement jwt authentication and refresh token flow`.
 Verification:
 
 - `mvn -T1 clean verify` passed on 2026-05-02 with 9 total tests.
+
+Committed as `feat(user): implement profile management APIs`.
+
+## Phase 5 - Company service
+
+- Implemented employer company creation, company list/detail, admin approve/reject workflow, and internal company lookup for later job-service checks.
+- Added company entity, status enum, DTOs, mapper, repository, service layer, event publisher, validation, unique slug handling, and role checks from gateway identity headers.
+- Added Flyway migrations with slug uniqueness, status indexes, employer index, and 3 seeded companies.
+- Published audit and company-reviewed events to Kafka topics with failure-tolerant logging.
+- Added service/controller tests for create, validation, role rejection, and admin approval.
+
+Verification:
+
+- `mvn -T1 clean verify` passed on 2026-05-02 with 14 total tests.

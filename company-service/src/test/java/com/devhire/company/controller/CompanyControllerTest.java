@@ -1,0 +1,76 @@
+package com.devhire.company.controller;
+
+import com.devhire.common.constants.AppHeaders;
+import com.devhire.common.security.UserRole;
+import com.devhire.common.web.GlobalExceptionHandler;
+import com.devhire.company.dto.request.CompanyCreateRequest;
+import com.devhire.company.dto.response.CompanyResponse;
+import com.devhire.company.entity.CompanyStatus;
+import com.devhire.company.service.CompanyService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.junit.jupiter.api.Test;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+
+import java.time.Instant;
+import java.util.UUID;
+
+import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
+
+class CompanyControllerTest {
+    private final CompanyService companyService = mock(CompanyService.class);
+    private final MockMvc mockMvc = standaloneSetup(new CompanyController(companyService))
+            .setControllerAdvice(new GlobalExceptionHandler())
+            .build();
+    private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+
+    @Test
+    void createCompanyReturnsPendingCompany() throws Exception {
+        UUID companyId = UUID.randomUUID();
+        UUID employerId = UUID.randomUUID();
+        when(companyService.create(any(), any())).thenReturn(new CompanyResponse(
+                companyId, employerId, "DevHire Labs", "devhire-labs", null,
+                "https://devhire.local", "51-200", "HR Tech", "Hiring platform",
+                CompanyStatus.PENDING, null, Instant.parse("2026-05-02T00:00:00Z"),
+                Instant.parse("2026-05-02T00:00:00Z")
+        ));
+
+        mockMvc.perform(post("/companies")
+                        .header(AppHeaders.USER_ID, employerId)
+                        .header(AppHeaders.USER_EMAIL, "employer@example.com")
+                        .header(AppHeaders.USER_ROLE, UserRole.EMPLOYER.name())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new CompanyCreateRequest(
+                                "DevHire Labs", null, "https://devhire.local", "51-200", "HR Tech", "Hiring platform"
+                        ))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.id", is(companyId.toString())))
+                .andExpect(jsonPath("$.data.status", is("PENDING")));
+    }
+
+    @Test
+    void createCompanyRejectsBlankName() throws Exception {
+        UUID employerId = UUID.randomUUID();
+        mockMvc.perform(post("/companies")
+                        .header(AppHeaders.USER_ID, employerId)
+                        .header(AppHeaders.USER_EMAIL, "employer@example.com")
+                        .header(AppHeaders.USER_ROLE, UserRole.EMPLOYER.name())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "name": ""
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error", is("VALIDATION_ERROR")));
+    }
+}
+
