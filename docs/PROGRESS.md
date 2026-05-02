@@ -227,6 +227,21 @@ Verification:
 
 - `mvn -T1 clean verify` passed on 2026-05-02 with 42 total tests.
 
+Committed as `ci: add build test docker and security workflows`.
+
+## Phase 14 - Documentation
+
+- Added root Vietnamese `README.md` with architecture, tech stack, service map, workflow, local/Docker/test instructions, Swagger links, demo accounts, endpoints, sample responses, observability, CI/CD, directory structure, production-ready highlights, and roadmap.
+- Added English documentation in `docs/README_EN.md`.
+- Added Japanese documentation in `docs/README_JA.md`.
+- Expanded `docs/architecture.md` with service boundaries, data ownership, communication, security, and observability notes.
+- Added `docs/api.http` covering the main end-to-end API flow through gateway.
+- Configured Git remote `origin` to `https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices.git`.
+
+Verification:
+
+- `mvn -T1 clean verify` passed on 2026-05-02 with 42 total tests.
+
 Committed as `feat(gateway): wire service routing and security filters`.
 
 ## Phase 11 - Observability
