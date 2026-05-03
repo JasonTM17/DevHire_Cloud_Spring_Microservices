@@ -127,6 +127,7 @@ Operations smoke gates:
 - [Claude Haiku provider](claude-haiku.md)
 - [AI evaluation gate](ai-evaluation.md)
 - [AWS Terraform blueprint](aws-terraform.md)
+- [Unified verification runner](verification.md)
 - [External Secrets and GitOps](external-secrets.md)
 - [Email sandbox](email-sandbox.md)
 - [Backup and restore runbook](runbooks/backup-restore.md)

@@ -1472,6 +1472,22 @@ Verification:
   - `.\scripts\docs-quality.ps1`
   - `docker compose config --quiet`
   - `git diff --check`
+
+## Phase 63 - Unified portfolio verification runner
+
+- Rebuilt `scripts/verify.ps1` as a scoped verification runner with:
+  - `-Backend`, `-Frontend`, `-Docker`, `-Smoke`, `-Infra`, `-Security`, `-Docs`, and `-All`,
+  - optional `-StartStack`,
+  - smoke tuning with `-PerfVus`, `-PerfDuration`, `-SkipPerf`, and `-SkipChaos`,
+  - generated JSON and Markdown summaries under `reports/verification/`.
+- Added `docs/verification.md` to document quick checks, full release checks, scope flags, and generated reports.
+- Linked the verification runner from Vietnamese, English, and Japanese README files.
+
+Verification:
+
+- Passed:
+  - `.\scripts\verify.ps1 -Docs -Docker`
+  - `git diff --check`
   - `mvn -T1 clean verify`
 
 ## Final verification polish - Local email sandbox isolation
