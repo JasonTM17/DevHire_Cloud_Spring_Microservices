@@ -1,6 +1,7 @@
 package com.devhire.common.outbox;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.Test;
 import org.springframework.kafka.core.KafkaTemplate;
 
@@ -16,11 +17,13 @@ import static org.mockito.Mockito.when;
 class OutboxEventPublisherTest {
     private final OutboxEventRepository repository = mock(OutboxEventRepository.class);
     private final KafkaTemplate<String, Object> kafkaTemplate = mock(KafkaTemplate.class);
+    private final SimpleMeterRegistry meterRegistry = new SimpleMeterRegistry();
     private final OutboxEventPublisher publisher = new OutboxEventPublisher(
             repository,
             kafkaTemplate,
             new ObjectMapper(),
-            new OutboxProperties(true, 10, 3, 1000, 1000, 1, 60)
+            new OutboxProperties(true, 10, 3, 1000, 1000, 1, 60),
+            meterRegistry
     );
 
     @Test
@@ -45,6 +48,11 @@ class OutboxEventPublisherTest {
         publisher.publishPending();
 
         verify(repository).markPublished(11L);
+        org.assertj.core.api.Assertions.assertThat(meterRegistry.counter(
+                "devhire.outbox.publish.success",
+                "topic", "audit.events",
+                "dead_letter", "false"
+        ).count()).isEqualTo(1.0);
         verify(repository, never()).markFailed(org.mockito.ArgumentMatchers.anyLong(),
                 org.mockito.ArgumentMatchers.anyInt(),
                 org.mockito.ArgumentMatchers.anyString(),
@@ -78,5 +86,10 @@ class OutboxEventPublisherTest {
                 org.mockito.ArgumentMatchers.eq(OutboxStatus.FAILED.name()),
                 org.mockito.ArgumentMatchers.any(),
                 org.mockito.ArgumentMatchers.contains("broker unavailable"));
+        org.assertj.core.api.Assertions.assertThat(meterRegistry.counter(
+                "devhire.outbox.publish.failure",
+                "topic", "audit.events",
+                "dead_letter", "false"
+        ).count()).isEqualTo(1.0);
     }
 }

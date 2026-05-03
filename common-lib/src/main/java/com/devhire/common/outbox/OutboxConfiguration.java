@@ -1,6 +1,7 @@
 package com.devhire.common.outbox;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -38,7 +39,8 @@ public class OutboxConfiguration {
     OutboxEventPublisher outboxEventPublisher(OutboxEventRepository repository,
                                               KafkaTemplate<String, Object> kafkaTemplate,
                                               ObjectMapper objectMapper,
-                                              OutboxProperties properties) {
-        return new OutboxEventPublisher(repository, kafkaTemplate, objectMapper, properties);
+                                              OutboxProperties properties,
+                                              MeterRegistry meterRegistry) {
+        return new OutboxEventPublisher(repository, kafkaTemplate, objectMapper, properties, meterRegistry);
     }
 }

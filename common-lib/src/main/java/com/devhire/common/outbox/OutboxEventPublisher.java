@@ -2,6 +2,8 @@ package com.devhire.common.outbox;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -20,15 +22,18 @@ public class OutboxEventPublisher {
     private final KafkaTemplate<String, Object> kafkaTemplate;
     private final ObjectMapper objectMapper;
     private final OutboxProperties properties;
+    private final MeterRegistry meterRegistry;
 
     public OutboxEventPublisher(OutboxEventRepository repository,
                                 KafkaTemplate<String, Object> kafkaTemplate,
                                 ObjectMapper objectMapper,
-                                OutboxProperties properties) {
+                                OutboxProperties properties,
+                                MeterRegistry meterRegistry) {
         this.repository = repository;
         this.kafkaTemplate = kafkaTemplate;
         this.objectMapper = objectMapper;
         this.properties = properties;
+        this.meterRegistry = meterRegistry;
     }
 
     @Scheduled(fixedDelayString = "${devhire.outbox.publisher.fixed-delay-ms:5000}")
@@ -46,13 +51,24 @@ public class OutboxEventPublisher {
             kafkaTemplate.send(record.topic(), record.eventId().toString(), payload)
                     .get(properties.sendTimeoutMs(), TimeUnit.MILLISECONDS);
             repository.markPublished(record.id());
+            increment("devhire.outbox.publish.success", record.topic(), false);
         } catch (Exception ex) {
             int attempts = record.attempts() + 1;
             boolean deadLetter = attempts >= properties.maxAttempts();
             repository.markFailed(record.id(), attempts, statusFor(deadLetter), nextAttemptAt(attempts), message(ex));
+            increment("devhire.outbox.publish.failure", record.topic(), deadLetter);
             log.warn("outbox_publish_failed eventId={} topic={} attempts={} deadLetter={}",
                     record.eventId(), record.topic(), attempts, deadLetter);
         }
+    }
+
+    private void increment(String name, String topic, boolean deadLetter) {
+        Counter.builder(name)
+                .description("DevHire transactional outbox publish result")
+                .tag("topic", topic)
+                .tag("dead_letter", Boolean.toString(deadLetter))
+                .register(meterRegistry)
+                .increment();
     }
 
     private String statusFor(boolean deadLetter) {

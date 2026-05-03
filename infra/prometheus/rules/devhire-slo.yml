@@ -1,0 +1,83 @@
+groups:
+  - name: devhire-slo
+    rules:
+      - alert: DevHireGatewayHigh5xxRate
+        expr: |
+          (
+            sum(rate(http_server_requests_seconds_count{application="api-gateway",status=~"5.."}[5m]))
+            /
+            clamp_min(sum(rate(http_server_requests_seconds_count{application="api-gateway"}[5m])), 0.001)
+          ) > 0.02
+        for: 10m
+        labels:
+          severity: page
+          service: api-gateway
+          slo: availability
+        annotations:
+          summary: DevHire Gateway 5xx rate is above 2%
+          description: The Gateway is burning availability budget. Check recent deployments, downstream service health, and traces.
+
+      - alert: DevHireGatewayP95LatencyHigh
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (le) (rate(http_server_requests_seconds_bucket{application="api-gateway"}[5m]))
+          ) > 1
+        for: 10m
+        labels:
+          severity: warning
+          service: api-gateway
+          slo: latency
+        annotations:
+          summary: DevHire Gateway p95 latency is above 1s
+          description: Gateway p95 latency is over the SLO threshold for 10 minutes.
+
+      - alert: DevHireServiceDown
+        expr: up{job="devhire-services"} == 0
+        for: 2m
+        labels:
+          severity: page
+          slo: availability
+        annotations:
+          summary: DevHire service target is down
+          description: 'Prometheus cannot scrape {{ $labels.instance }}. Check container health, readiness, and network connectivity.'
+
+      - alert: DevHireJvmHeapPressureHigh
+        expr: |
+          (
+            sum by (application) (jvm_memory_used_bytes{area="heap"})
+            /
+            clamp_min(sum by (application) (jvm_memory_max_bytes{area="heap"}), 1)
+          ) > 0.85
+        for: 10m
+        labels:
+          severity: warning
+          slo: capacity
+        annotations:
+          summary: DevHire JVM heap pressure is above 85%
+          description: '{{ $labels.application }} heap usage is high. Review GC, memory limits, and request load.'
+
+      - alert: DevHireJobSearchP95LatencyHigh
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (le) (rate(http_server_requests_seconds_bucket{application="job-service",uri="/jobs"}[5m]))
+          ) > 0.75
+        for: 10m
+        labels:
+          severity: warning
+          service: job-service
+          slo: search-latency
+        annotations:
+          summary: DevHire job search p95 latency is above 750ms
+          description: Job search is slower than target. Check PostgreSQL/OpenSearch health and query filters.
+
+      - alert: DevHireOutboxPublishFailures
+        expr: increase(devhire_outbox_publish_failure_total[10m]) > 0
+        for: 5m
+        labels:
+          severity: warning
+          slo: event-reliability
+        annotations:
+          summary: DevHire outbox publishing failures detected
+          description: 'Outbox publish failures were observed for topic {{ $labels.topic }}. Check Kafka, retry backlog, and dead-letter status.'
