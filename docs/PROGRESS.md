@@ -836,3 +836,30 @@ Verification:
 
 - `docker run --rm -v "${PWD}:/repo" -w /repo rhysd/actionlint:latest -color` passed on 2026-05-03.
 - `mvn -T1 clean verify` passed on 2026-05-03.
+
+## Phase 33 - AWS Terraform blueprint
+
+- Added a safe AWS Terraform blueprint under `deploy/terraform/aws`.
+- Created reusable modules for:
+  - VPC networking, public/private subnets, route tables, NAT toggle, and service/data security groups,
+  - EKS cluster, managed node group, and OIDC/IRSA foundation,
+  - RDS PostgreSQL, ElastiCache Redis, MSK Serverless Kafka, and OpenSearch with explicit enable toggles,
+  - ECR repositories for backend services and frontend,
+  - AWS Secrets Manager secret-name/ARN placeholders without secret values.
+- Added `dev`, `staging`, and `prod` environment folders with local-safe backend defaults and `terraform.tfvars.example` files.
+- Added `backend.s3.example.hcl` for optional S3 + DynamoDB remote state, intentionally not enabled by default.
+- Updated `.gitignore` to exclude Terraform state, plan files, local plugin caches, and lock files from the portfolio repository.
+- Fixed the Maven test runner to use Mockito as a Java agent so local verification works on newer JDKs while still compiling with `--release 21`.
+
+Verification:
+
+- `docker run --rm -v "${PWD}:/workspace" -w /workspace hashicorp/terraform:1.10.5 fmt -check -recursive deploy/terraform/aws` passed on 2026-05-03.
+- `docker run --rm -v "${PWD}:/workspace" -w /workspace/deploy/terraform/aws/environments/dev hashicorp/terraform:1.10.5 validate` passed on 2026-05-03.
+- `docker run --rm -v "${PWD}:/workspace" -w /workspace/deploy/terraform/aws/environments/staging hashicorp/terraform:1.10.5 validate` passed on 2026-05-03.
+- `docker run --rm -v "${PWD}:/workspace" -w /workspace/deploy/terraform/aws/environments/prod hashicorp/terraform:1.10.5 validate` passed on 2026-05-03.
+- `docker compose config --quiet` passed on 2026-05-03.
+- `mvn -T1 clean verify` passed on 2026-05-03.
+- Secret scan over changed Terraform/build files found no Gmail app password, SMTP account, AWS key id, or AWS secret key.
+
+Committed as `test: configure mockito javaagent for modern jdks`.
+Committed as `chore(terraform): add aws infrastructure blueprint`.

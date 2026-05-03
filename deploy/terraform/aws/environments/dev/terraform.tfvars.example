@@ -1,0 +1,13 @@
+aws_region         = "ap-southeast-1"
+environment        = "dev"
+name_prefix        = "devhire-dev"
+vpc_cidr           = "10.40.0.0/16"
+availability_zones = ["ap-southeast-1a", "ap-southeast-1b", "ap-southeast-1c"]
+
+# Cost guardrails: keep expensive resources disabled until you intentionally deploy.
+enable_nat_gateway = false
+enable_eks         = false
+enable_rds         = false
+enable_redis       = false
+enable_msk         = false
+enable_opensearch  = false
