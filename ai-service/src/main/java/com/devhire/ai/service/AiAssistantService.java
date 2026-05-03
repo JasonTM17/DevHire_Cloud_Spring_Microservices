@@ -78,6 +78,7 @@ public class AiAssistantService {
         JobSearchTool.ToolResult jobs = jobSearchTool.search(request.message());
         PlatformHealthTool.ToolResult health = platformHealthTool.snapshot();
         List<AiToolTrace> toolTraces = new ArrayList<>(List.of(jobs.trace(), health.trace()));
+        toolTraces.forEach(trace -> recordToolExecution(user, conversationId, trace));
 
         String systemPrompt = systemPrompt();
         String userPrompt = userPrompt(request.message(), chunks, jobs.summary(), health.summary());
@@ -103,6 +104,8 @@ public class AiAssistantService {
                 userPrompt.length(), answer.length(), latencyMs);
         meterRegistry.counter("devhire.ai.chat.requests", "fallback", String.valueOf(fallback)).increment();
         meterRegistry.timer("devhire.ai.chat.latency").record(Duration.ofMillis(latencyMs));
+        meterRegistry.summary("devhire.ai.token.estimate", "direction", "prompt").record(estimateTokens(userPrompt));
+        meterRegistry.summary("devhire.ai.token.estimate", "direction", "answer").record(estimateTokens(answer));
         audit(user, fallback ? "AI_FALLBACK_USED" : "AI_CHAT_REQUESTED", conversationId,
                 Map.of("model", model, "toolCount", toolTraces.size(), "fallback", fallback));
         return new AiChatResponse(conversationId, answer, citations, toolTraces, model, fallback, Instant.now());
@@ -136,6 +139,16 @@ public class AiAssistantService {
     private void audit(AuthenticatedUser user, String action, UUID resourceId, Map<String, Object> metadata) {
         auditEventPublisher.publish(AuditEvent.now(user.id(), user.email(), user.role().name(), action,
                 "AI", resourceId.toString(), metadata));
+    }
+
+    private void recordToolExecution(AuthenticatedUser user, UUID conversationId, AiToolTrace trace) {
+        meterRegistry.counter("devhire.ai.tool.calls", "tool", trace.name(), "status", trace.status()).increment();
+        audit(user, "AI_TOOL_EXECUTED", conversationId,
+                Map.of("tool", trace.name(), "status", trace.status(), "summary", trace.summary()));
+    }
+
+    private static int estimateTokens(String value) {
+        return Math.max(1, (int) Math.ceil(value.length() / 4.0));
     }
 
     private String systemPrompt() {

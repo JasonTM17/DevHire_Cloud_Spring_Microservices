@@ -38,8 +38,9 @@ class AiAssistantServiceTest {
     private final PlatformHealthTool platformHealthTool = mock(PlatformHealthTool.class);
     private final AiConversationRepository repository = mock(AiConversationRepository.class);
     private final AiAuditEventPublisher auditEventPublisher = mock(AiAuditEventPublisher.class);
+    private final SimpleMeterRegistry meterRegistry = new SimpleMeterRegistry();
     private final AiAssistantService service = new AiAssistantService(properties, claudeChatClient, knowledgeService,
-            jobSearchTool, platformHealthTool, repository, auditEventPublisher, new SimpleMeterRegistry());
+            jobSearchTool, platformHealthTool, repository, auditEventPublisher, meterRegistry);
 
     @Test
     void usesClaudeWhenConfigured() {
@@ -56,6 +57,10 @@ class AiAssistantServiceTest {
         assertThat(response.fallback()).isFalse();
         assertThat(response.answer()).contains("Claude answer");
         assertThat(response.citations()).hasSize(1);
+        assertThat(meterRegistry.get("devhire.ai.chat.requests").tag("fallback", "false").counter().count()).isEqualTo(1);
+        assertThat(meterRegistry.get("devhire.ai.tool.calls").tag("tool", "search_jobs").tag("status", "OK").counter().count())
+                .isEqualTo(1);
+        assertThat(meterRegistry.get("devhire.ai.token.estimate").tag("direction", "prompt").summary().count()).isEqualTo(1);
         verify(repository).recordUsage(eq(conversationId), any(), anyString(), eq(false), anyInt(), anyInt(), anyInt(), anyLong());
         verify(knowledgeService, never()).reindex();
     }

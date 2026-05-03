@@ -81,3 +81,45 @@ groups:
         annotations:
           summary: DevHire outbox publishing failures detected
           description: 'Outbox publish failures were observed for topic {{ $labels.topic }}. Check Kafka, retry backlog, and dead-letter status.'
+
+      - alert: DevHireAiP95LatencyHigh
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (le) (rate(devhire_ai_chat_latency_seconds_bucket[5m]))
+          ) > 5
+        for: 10m
+        labels:
+          severity: warning
+          service: ai-service
+          slo: ai-latency
+        annotations:
+          summary: DevHire AI assistant p95 latency is above 5s
+          description: Claude/RAG response latency is above the reviewer-demo target. Check Anthropic API latency, job-service calls, and fallback status.
+
+      - alert: DevHireAiFallbackSpike
+        expr: increase(devhire_ai_fallback_total[15m]) > 5
+        for: 5m
+        labels:
+          severity: warning
+          service: ai-service
+          slo: ai-provider
+        annotations:
+          summary: DevHire AI assistant fallback mode is being used frequently
+          description: Claude API calls are falling back to deterministic demo mode. Check ANTHROPIC_API_KEY, Anthropic availability, and outbound network policy.
+
+      - alert: DevHireAiHigh5xxRate
+        expr: |
+          (
+            sum(rate(http_server_requests_seconds_count{application="ai-service",status=~"5.."}[5m]))
+            /
+            clamp_min(sum(rate(http_server_requests_seconds_count{application="ai-service"}[5m])), 0.001)
+          ) > 0.05
+        for: 10m
+        labels:
+          severity: warning
+          service: ai-service
+          slo: ai-availability
+        annotations:
+          summary: DevHire AI assistant 5xx rate is above 5%
+          description: AI API errors are burning the assistant demo reliability budget. Check ai-service logs, database health, and Claude client configuration.

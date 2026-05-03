@@ -272,6 +272,110 @@
       ],
       "title": "Outbox Publish Failures",
       "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "drawStyle": "line", "fillOpacity": 10, "lineWidth": 2, "showPoints": "never" },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green" }] },
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 7, "w": 8, "x": 0, "y": 23 },
+      "id": 9,
+      "options": {
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "tooltip": { "mode": "multi", "sort": "none" }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
+          "editorMode": "code",
+          "expr": "sum by (fallback) (rate(devhire_ai_chat_requests_total[5m]))",
+          "legendFormat": "fallback={{fallback}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "AI Assistant Request Rate",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "green" }, { "color": "orange", "value": 3 }, { "color": "red", "value": 5 }]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 7, "w": 8, "x": 8, "y": 23 },
+      "id": 10,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(devhire_ai_chat_latency_seconds_bucket[5m])))",
+          "legendFormat": "ai p95",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "AI Assistant p95 Latency",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "drawStyle": "line", "fillOpacity": 10, "lineWidth": 2, "showPoints": "never" },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green" }, { "color": "orange", "value": 1 }, { "color": "red", "value": 5 }] },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 7, "w": 8, "x": 16, "y": 23 },
+      "id": 11,
+      "options": {
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "tooltip": { "mode": "multi", "sort": "none" }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
+          "editorMode": "code",
+          "expr": "sum by (tool, status) (increase(devhire_ai_tool_calls_total[10m]))",
+          "legendFormat": "{{tool}} {{status}}",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
+          "editorMode": "code",
+          "expr": "increase(devhire_ai_fallback_total[10m])",
+          "legendFormat": "fallback",
+          "range": true,
+          "refId": "B"
+        }
+      ],
+      "title": "AI Tool Calls And Fallbacks",
+      "type": "timeseries"
     }
   ],
   "refresh": "30s",

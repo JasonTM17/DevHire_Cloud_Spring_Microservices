@@ -9,6 +9,8 @@ DevHire Cloud uses Prometheus, Grafana, Micrometer, OpenTelemetry, Loki, and Tem
 | Gateway availability | 99.5% successful requests over 30 days | `1 - 5xx / all gateway requests` |
 | Gateway latency | p95 below 1 second over 5 minutes | `http_server_requests_seconds_bucket` for `api-gateway` |
 | Job search latency | p95 below 750 ms over 5 minutes | `http_server_requests_seconds_bucket` for `job-service` URI `/jobs` |
+| AI assistant latency | p95 below 5 seconds over 5 minutes | `devhire_ai_chat_latency_seconds_bucket` |
+| AI assistant provider fallback | Fewer than 5 fallback answers over 15 minutes in non-demo environments | `devhire_ai_fallback_total` |
 | Service health | All service scrape targets available | Prometheus `up{job="devhire-services"}` |
 | Event reliability | Zero outbox publish failures for 10 minutes | `devhire_outbox_publish_failure_total` |
 | JVM capacity | Heap pressure below 85% for normal traffic | `jvm_memory_used_bytes / jvm_memory_max_bytes` |
@@ -36,6 +38,9 @@ Current alerts:
 - `DevHireJvmHeapPressureHigh`
 - `DevHireJobSearchP95LatencyHigh`
 - `DevHireOutboxPublishFailures`
+- `DevHireAiP95LatencyHigh`
+- `DevHireAiFallbackSpike`
+- `DevHireAiHigh5xxRate`
 
 Validate the rules locally:
 
@@ -65,6 +70,24 @@ The SLO dashboard includes:
 - Service scrape health.
 - JVM heap pressure.
 - Outbox publish failures.
+- AI assistant request rate.
+- AI assistant p95 latency.
+- AI tool calls and Claude fallback count.
+
+AI assistant metrics are emitted by `ai-service`:
+
+- `devhire_ai_chat_requests_total`
+- `devhire_ai_chat_latency_seconds_bucket`
+- `devhire_ai_fallback_total`
+- `devhire_ai_tool_calls_total`
+- `devhire_ai_token_estimate`
+
+Every chat request also emits audit/outbox activity:
+
+- `AI_CHAT_REQUESTED`
+- `AI_TOOL_EXECUTED`
+- `AI_FALLBACK_USED`
+- `AI_KNOWLEDGE_REINDEXED`
 
 ## Incident Triage
 

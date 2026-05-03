@@ -1136,3 +1136,28 @@ Verification:
 
 - `npm run typecheck` passed on 2026-05-03.
 - `npm run build` passed on 2026-05-03.
+
+## Phase 46 - AI assistant observability and audit
+
+- Added AI assistant operational metrics in `ai-service`:
+  - chat request counter,
+  - latency timer,
+  - fallback counter,
+  - tool-call counter by tool/status,
+  - prompt/answer token estimate summaries.
+- Added `AI_TOOL_EXECUTED` audit events alongside existing AI chat/fallback/reindex events.
+- Added `ai-service:8088` to the Prometheus service scrape target list.
+- Added Prometheus alert rules for:
+  - AI p95 latency,
+  - frequent fallback mode,
+  - AI service 5xx rate.
+- Extended the Grafana SLO dashboard with AI request rate, p95 latency, tool call, and fallback panels.
+- Updated `docs/slo.md` with AI assistant SLOs, metrics, dashboard panels, and audit event names.
+
+Verification:
+
+- Grafana SLO dashboard JSON parsed successfully on 2026-05-03.
+- `mvn -T1 -pl common-lib,ai-service test` passed on 2026-05-03.
+- `docker compose config --quiet` passed on 2026-05-03.
+- `docker run --rm --entrypoint promtool -v "${PWD}/infra/prometheus:/etc/prometheus" prom/prometheus:v3.0.1 check config /etc/prometheus/prometheus.yml` passed on 2026-05-03 with 9 rules found.
+- `mvn -T1 clean verify` passed on 2026-05-03.
