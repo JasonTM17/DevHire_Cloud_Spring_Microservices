@@ -1317,3 +1317,19 @@ Verification:
 - `docker run --rm -v "${PWD}:/repo" -w /repo rhysd/actionlint:latest` passed on 2026-05-03.
 - `docker run --rm -v "${PWD}:/repo" -w /repo zricethezav/gitleaks:latest detect --source /repo --no-git --redact --verbose` passed on 2026-05-03 with no leaks found.
 - `git diff --check` passed on 2026-05-03.
+
+## Phase 54 - Release governance and review evidence
+
+- Added `.github/CODEOWNERS` for portfolio monorepo ownership.
+- Added an incident report issue template for operations-style production evidence.
+- Expanded the pull request template with API/browser/OpenAPI/performance/chaos smoke evidence, rollback notes, observability impact, and secret hygiene checks.
+- Added `docs/release-checklist-v0.2.md` as the release gate checklist for the operations-grade portfolio hardening release.
+- Updated `docs/github-profile.md` with README badges, branch protection, required checks, CODEOWNERS, and manual release guidance.
+- Started `CHANGELOG.md` section `0.2.0`.
+
+Verification:
+
+- `.\scripts\docs-quality.ps1` passed on 2026-05-03.
+- `docker run --rm -v "${PWD}:/repo" -w /repo rhysd/actionlint:latest` passed on 2026-05-03.
+- `git diff --check` passed on 2026-05-03.
+- `mvn -T1 clean verify` passed on 2026-05-03.

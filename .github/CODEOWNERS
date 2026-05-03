@@ -1,0 +1,21 @@
+# DevHire Cloud review ownership.
+# Keep broad ownership because this is a portfolio monorepo; service owners can be split later.
+
+* @JasonTM17
+
+/auth-service/ @JasonTM17
+/user-service/ @JasonTM17
+/company-service/ @JasonTM17
+/job-service/ @JasonTM17
+/application-service/ @JasonTM17
+/notification-service/ @JasonTM17
+/audit-service/ @JasonTM17
+/ai-service/ @JasonTM17
+/api-gateway/ @JasonTM17
+/common-lib/ @JasonTM17
+/frontend/ @JasonTM17
+/deploy/ @JasonTM17
+/infra/ @JasonTM17
+/.github/ @JasonTM17
+/docs/ @JasonTM17
+/scripts/ @JasonTM17

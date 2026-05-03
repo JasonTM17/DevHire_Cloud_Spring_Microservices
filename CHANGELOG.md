@@ -4,6 +4,12 @@ All notable changes to DevHire Cloud are documented here.
 
 The project follows Conventional Commits and keeps release notes under `docs/release-notes/`.
 
+## 0.2.0 - Unreleased
+
+### Added
+
+- Operations-grade release governance with CODEOWNERS, incident template, PR evidence checklist, and v0.2 release checklist.
+
 ## 0.1.0 - Unreleased
 
 ### Added
