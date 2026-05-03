@@ -1038,3 +1038,22 @@ Verification:
 - `mvn -T1 clean verify` passed on 2026-05-03.
 - `git diff --cached --check` passed on 2026-05-03.
 - `docker run --rm -v "${PWD}:/repo" -w /repo zricethezav/gitleaks:latest protect --staged --source /repo --redact --verbose` passed on 2026-05-03 with no leaks found.
+
+## Phase 40 - Repository governance and release metadata
+
+- Added root governance files:
+  - `SECURITY.md`,
+  - `CONTRIBUTING.md`,
+  - `CODE_OF_CONDUCT.md`,
+  - `CHANGELOG.md`.
+- Added GitHub pull request and issue templates.
+- Added `docs/github-profile.md` with repository About description, topics, branch protection guidance, and status check recommendations.
+- Added initial `docs/release-notes/v0.1.0.md`.
+- Kept the pasted Anthropic API key out of every file; all future Claude configuration uses environment placeholders only.
+
+Verification:
+
+- `git diff --check` passed on 2026-05-03.
+- `docker run --rm -v "${PWD}:/repo" -w /repo zricethezav/gitleaks:latest detect --source /repo --no-git --redact --verbose` passed on 2026-05-03 with no leaks found.
+- Initial `mvn -T1 clean verify` hit a local JVM native memory allocation failure while the full Docker stack was running; Docker was stopped, ignored JVM crash logs were removed, and the command was rerun with conservative `MAVEN_OPTS`.
+- `mvn -T1 clean verify` passed on 2026-05-03.
