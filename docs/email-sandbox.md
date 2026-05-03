@@ -35,7 +35,15 @@ The script creates generated smoke data, submits an application, updates the app
 
 ## Gmail And Real SMTP
 
-Gmail remains an optional secret-backed profile for manual testing. Use `scripts/configure-gmail-smtp.ps1` to write local `.env` values, then rotate any app password that was pasted into chat, screenshots, logs, or issue comments.
+Gmail remains an optional secret-backed profile for manual testing. The default `docker-compose.yml` is pinned to Mailpit so host-level `SPRING_MAIL_*` values cannot accidentally send portfolio smoke emails to the internet.
+
+Use `scripts/configure-gmail-smtp.ps1` to write local `GMAIL_SMTP_*` values, then start the override explicitly:
+
+```powershell
+docker compose -f docker-compose.yml -f docker-compose.smtp-gmail.example.yml up -d notification-service
+```
+
+Rotate any app password that was pasted into chat, screenshots, logs, or issue comments.
 
 Never commit:
 

@@ -1473,3 +1473,23 @@ Verification:
   - `docker compose config --quiet`
   - `git diff --check`
   - `mvn -T1 clean verify`
+
+## Final verification polish - Local email sandbox isolation
+
+- During final runtime verification, `.\scripts\email-smoke.ps1 -GatewayUrl http://localhost:8080 -MailpitUrl http://localhost:8025` initially failed because local `.env` SMTP settings were overriding the Mailpit sandbox and sending through a real SMTP profile.
+- Pinned the default Docker Compose notification service SMTP settings to Mailpit:
+  - `SPRING_MAIL_HOST=mailpit`
+  - `SPRING_MAIL_PORT=1025`
+  - SMTP auth and STARTTLS disabled for local sandbox.
+- Added `docker-compose.smtp-gmail.example.yml` as an explicit opt-in override for Gmail/manual SMTP testing.
+- Updated `scripts/configure-gmail-smtp.ps1` to write `GMAIL_SMTP_*` variables instead of generic `SPRING_MAIL_*` variables.
+- Updated `.env.example` and `docs/email-sandbox.md` with the new override workflow.
+
+Verification:
+
+- Passed:
+  - `docker compose config --quiet`
+  - `.\scripts\docs-quality.ps1`
+  - `git diff --check`
+  - `docker compose up -d --build --force-recreate notification-service`
+  - `.\scripts\email-smoke.ps1 -GatewayUrl http://localhost:8080 -MailpitUrl http://localhost:8025`

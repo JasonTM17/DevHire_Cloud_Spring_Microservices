@@ -93,29 +93,19 @@ foreach ($line in [IO.File]::ReadAllLines($envFile)) {
     $script:EnvLines.Add($line)
 }
 
-Set-EnvLine -Key "DEVHIRE_NOTIFICATION_EMAIL_ENABLED" -Value "true"
-Set-EnvLine -Key "DEVHIRE_NOTIFICATION_EMAIL_FROM" -Value $Username
-Set-EnvLine -Key "DEVHIRE_NOTIFICATION_EMAIL_REPLY_TO" -Value $Username
+Set-EnvLine -Key "GMAIL_SMTP_FROM" -Value $Username
+Set-EnvLine -Key "GMAIL_SMTP_REPLY_TO" -Value $Username
+Set-EnvLine -Key "GMAIL_SMTP_USERNAME" -Value $Username
+Set-EnvLine -Key "GMAIL_SMTP_APP_PASSWORD" -Value $normalizedPassword
 Set-EnvLine -Key "DEVHIRE_NOTIFICATION_EMAIL_DASHBOARD_BASE_URL" -Value $DashboardBaseUrl
 Set-EnvLine -Key "DEVHIRE_NOTIFICATION_EMAIL_BATCH_SIZE" -Value "25"
 Set-EnvLine -Key "DEVHIRE_NOTIFICATION_EMAIL_MAX_ATTEMPTS" -Value "5"
 Set-EnvLine -Key "DEVHIRE_NOTIFICATION_EMAIL_RETRY_INITIAL_DELAY_SECONDS" -Value "30"
 Set-EnvLine -Key "DEVHIRE_NOTIFICATION_EMAIL_RETRY_MAX_DELAY_SECONDS" -Value "900"
 Set-EnvLine -Key "DEVHIRE_NOTIFICATION_EMAIL_RATE_LIMIT_PER_MINUTE" -Value "30"
-Set-EnvLine -Key "SPRING_MAIL_HOST" -Value "smtp.gmail.com"
-Set-EnvLine -Key "SPRING_MAIL_PORT" -Value "587"
-Set-EnvLine -Key "SPRING_MAIL_USERNAME" -Value $Username
-Set-EnvLine -Key "SPRING_MAIL_PASSWORD" -Value $normalizedPassword
-Set-EnvLine -Key "SPRING_MAIL_SMTP_AUTH" -Value "true"
-Set-EnvLine -Key "SPRING_MAIL_SMTP_STARTTLS_ENABLE" -Value "true"
-Set-EnvLine -Key "SPRING_MAIL_SMTP_STARTTLS_REQUIRED" -Value "true"
-Set-EnvLine -Key "SPRING_MAIL_SMTP_SSL_TRUST" -Value "smtp.gmail.com"
-Set-EnvLine -Key "SPRING_MAIL_SMTP_CONNECTION_TIMEOUT" -Value "5000"
-Set-EnvLine -Key "SPRING_MAIL_SMTP_TIMEOUT" -Value "5000"
-Set-EnvLine -Key "SPRING_MAIL_SMTP_WRITE_TIMEOUT" -Value "5000"
-Set-EnvLine -Key "MANAGEMENT_HEALTH_MAIL_ENABLED" -Value "true"
 
 [IO.File]::WriteAllLines($envFile, $script:EnvLines, [Text.UTF8Encoding]::new($false))
 
 Write-Host "Gmail SMTP configuration written to $envFile for $Username."
 Write-Host "The app password was normalized and stored only in the local gitignored .env file."
+Write-Host "Run with: docker compose -f docker-compose.yml -f docker-compose.smtp-gmail.example.yml up -d notification-service"
