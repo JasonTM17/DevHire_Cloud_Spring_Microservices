@@ -12,6 +12,7 @@ import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
 import org.springframework.data.redis.core.ReactiveStringRedisTemplate;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
@@ -48,7 +49,8 @@ public class JwtAuthenticationGatewayFilter implements GlobalFilter, Ordered {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         String path = exchange.getRequest().getPath().value();
-        if (isPublic(path)) {
+        HttpMethod method = exchange.getRequest().getMethod();
+        if (isPublic(method, path)) {
             return chain.filter(stripIdentityHeaders(exchange));
         }
         String token = bearerToken(exchange);
@@ -98,11 +100,23 @@ public class JwtAuthenticationGatewayFilter implements GlobalFilter, Ordered {
                 .getPayload();
     }
 
-    private static boolean isPublic(String path) {
+    private static boolean isPublic(HttpMethod method, String path) {
+        if (method == HttpMethod.OPTIONS) {
+            return true;
+        }
         return PUBLIC_AUTH_PATHS.contains(path)
                 || path.startsWith("/actuator")
                 || path.startsWith("/swagger-ui")
-                || path.startsWith("/v3/api-docs");
+                || path.startsWith("/v3/api-docs")
+                || isPublicJobRead(method, path);
+    }
+
+    private static boolean isPublicJobRead(HttpMethod method, String path) {
+        if (method != HttpMethod.GET) {
+            return false;
+        }
+        return path.equals("/api/jobs")
+                || path.matches("^/api/jobs/[^/]+$");
     }
 
     private static String bearerToken(ServerWebExchange exchange) {

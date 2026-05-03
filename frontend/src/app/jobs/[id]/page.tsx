@@ -33,7 +33,7 @@ export default function JobDetailPage() {
   }
 
   return (
-    <section className="detail-layout">
+    <section className="detail-layout" data-testid="job-detail-page">
       <article className="panel job-detail">
         <div className="job-card-top">
           <div className="company-mark large">{job.title.slice(0, 1)}</div>

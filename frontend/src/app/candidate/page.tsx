@@ -31,7 +31,7 @@ export default function CandidatePage() {
   const unread = notifications?.content.filter((item) => !item.read).length ?? 0;
 
   return (
-    <section className="page-stack">
+    <section className="page-stack" data-testid="candidate-dashboard">
       <div className="toolbar">
         <div>
           <p className="eyebrow">Candidate workspace</p>

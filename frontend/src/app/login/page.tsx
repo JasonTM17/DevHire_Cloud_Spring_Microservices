@@ -35,13 +35,13 @@ export default function LoginPage() {
   }
 
   return (
-    <section className="auth-grid">
+    <section className="auth-grid" data-testid="login-page">
       <div className="panel auth-panel">
         <div className="section-title">
           <LockKeyhole size={20} />
           <h1>Sign in</h1>
         </div>
-        <form className="form" onSubmit={submit}>
+        <form className="form" data-testid="login-form" onSubmit={submit}>
           <label>
             Email
             <input value={email} onChange={(event) => setEmail(event.target.value)} type="email" required />

@@ -40,7 +40,7 @@ export default function AdminPage() {
   }
 
   return (
-    <section className="page-stack">
+    <section className="page-stack" data-testid="admin-dashboard">
       <div>
         <p className="eyebrow">Admin workspace</p>
         <h1>Review console</h1>

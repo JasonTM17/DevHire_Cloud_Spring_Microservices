@@ -67,6 +67,7 @@ jobs:
           file: ${{ matrix.service }}/Dockerfile
           build-args: |
             SERVICE_NAME=${{ matrix.service }}
+            NEXT_PUBLIC_API_BASE_URL=${{ vars.NEXT_PUBLIC_API_BASE_URL || 'https://devhire.example.com' }}
           tags: |
             ${{ env.IMAGE_NAME }}:${{ env.VERSION_TAG }}
             ${{ env.IMAGE_NAME }}:${{ github.sha }}

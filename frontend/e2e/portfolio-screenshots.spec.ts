@@ -1,0 +1,67 @@
+import { expect, test, type Page } from "@playwright/test";
+import path from "node:path";
+
+const screenshotsDir = path.resolve(__dirname, "..", "..", "docs", "screenshots");
+
+const accounts = {
+  admin: {
+    email: "admin@devhire.local",
+    password: "Admin@123456",
+    dashboard: "/admin",
+    testId: "admin-dashboard"
+  },
+  employer: {
+    email: "employer@devhire.local",
+    password: "Employer@123456",
+    dashboard: "/employer",
+    testId: "employer-dashboard"
+  },
+  candidate: {
+    email: "candidate@devhire.local",
+    password: "Candidate@123456",
+    dashboard: "/candidate",
+    testId: "candidate-dashboard"
+  }
+} as const;
+
+async function capture(page: Page, name: string) {
+  await page.screenshot({
+    path: path.join(screenshotsDir, `${name}.png`),
+    fullPage: true
+  });
+}
+
+async function login(page: Page, account: keyof typeof accounts) {
+  const user = accounts[account];
+  await page.goto("/login");
+  await expect(page.getByTestId("login-page")).toBeVisible();
+  await page.getByLabel("Email").fill(user.email);
+  await page.getByLabel("Password").fill(user.password);
+  await page.getByRole("button", { name: "Sign in" }).click();
+  await expect(page).toHaveURL(new RegExp(`${user.dashboard}$`));
+  await expect(page.getByTestId(user.testId)).toBeVisible();
+}
+
+test.describe("portfolio screenshots", () => {
+  test("capture public and role dashboards", async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 1100 });
+
+    await page.goto("/jobs");
+    await expect(page.getByTestId("jobs-page")).toBeVisible();
+    await expect(page.getByTestId("job-card").first()).toBeVisible();
+    await capture(page, "jobs-page");
+
+    await page.getByTestId("job-card").first().click();
+    await expect(page.getByTestId("job-detail-page")).toBeVisible();
+    await capture(page, "job-detail");
+
+    await login(page, "candidate");
+    await capture(page, "candidate-dashboard");
+
+    await login(page, "employer");
+    await capture(page, "employer-dashboard");
+
+    await login(page, "admin");
+    await capture(page, "admin-dashboard");
+  });
+});

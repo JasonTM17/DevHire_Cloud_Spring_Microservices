@@ -81,7 +81,7 @@ export default function EmployerPage() {
   }
 
   return (
-    <section className="page-stack">
+    <section className="page-stack" data-testid="employer-dashboard">
       <div>
         <p className="eyebrow">Employer workspace</p>
         <h1>Company and pipeline</h1>

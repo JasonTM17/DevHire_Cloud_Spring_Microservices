@@ -28,7 +28,7 @@ export default function JobsPage() {
   }, [params]);
 
   return (
-    <section className="page-stack">
+    <section className="page-stack" data-testid="jobs-page">
       <div className="toolbar">
         <div>
           <p className="eyebrow">Published opportunities</p>
@@ -59,9 +59,9 @@ export default function JobsPage() {
       </div>
 
       {error ? <p className="error">{error}</p> : null}
-      <div className="job-grid">
+      <div className="job-grid" data-testid="job-grid">
         {jobs?.content.map((job) => (
-          <Link className="job-card" href={`/jobs/${job.id}`} key={job.id}>
+          <Link className="job-card" data-testid="job-card" href={`/jobs/${job.id}`} key={job.id}>
             <div className="job-card-top">
               <div className="company-mark">{job.title.slice(0, 1)}</div>
               <StatusPill value={job.status} />

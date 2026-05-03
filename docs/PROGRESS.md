@@ -535,3 +535,37 @@ Verification:
 - `powershell -ExecutionPolicy Bypass -File .\scripts\check-coverage.ps1` passed on 2026-05-03; `notification-service` coverage increased to 67.5% against the 45.0% gate.
 
 Committed as `chore(notification): configure gmail smtp sender`.
+
+## Phase 24 - Browser E2E and portfolio screenshots
+
+- Added Playwright E2E smoke coverage for the production happy path through the real frontend and API Gateway:
+  - public job search and job detail,
+  - candidate dashboard login,
+  - employer dashboard login,
+  - admin dashboard login.
+- Added `scripts/e2e-smoke.ps1` to run/wait the Docker stack, verify Gateway readiness, execute E2E tests, and regenerate portfolio screenshots.
+- Added a manual/scheduled GitHub Actions E2E workflow so heavy browser QA does not slow every pull request.
+- Added stable `data-testid` hooks to frontend pages used by E2E tests and portfolio screenshot capture.
+- Fixed Gateway public-read security for `GET /api/jobs` and `GET /api/jobs/{id}` while preserving JWT requirements for write/admin routes.
+- Propagated `CORS_ALLOWED_ORIGINS` into the Gateway Docker Compose environment and fixed frontend build-time API base URL injection.
+- Generated real portfolio screenshots in `docs/screenshots/`:
+  - `jobs-page.png`,
+  - `job-detail.png`,
+  - `candidate-dashboard.png`,
+  - `employer-dashboard.png`,
+  - `admin-dashboard.png`.
+- Browser plugin was used to verify the local UI route; screenshot capture through the in-app browser CDP surface timed out, so reproducible Playwright screenshot capture was added as the stable portfolio artifact path.
+
+Verification:
+
+- `npm run typecheck` passed on 2026-05-03.
+- `npm run build` passed on 2026-05-03.
+- `docker compose config --quiet` passed on 2026-05-03.
+- `.\scripts\e2e-smoke.ps1 -Build -KeepRunning` passed on 2026-05-03 after fixing Gateway CORS/public job read behavior:
+  - Playwright E2E: 4/4 passed.
+- `.\scripts\e2e-smoke.ps1 -SkipCompose -KeepRunning` passed on 2026-05-03:
+  - Playwright E2E: 4/4 passed.
+  - Screenshot capture: 1/1 passed.
+- `mvn -T1 clean verify` passed on 2026-05-03.
+
+Committed as `test(e2e): add browser driven smoke coverage`.
