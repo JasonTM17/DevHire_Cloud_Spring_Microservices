@@ -20,6 +20,7 @@ The service is designed as a safe portfolio feature:
 | `GET` | `/api/ai/conversations/{id}` | Read conversation messages |
 | `DELETE` | `/api/ai/conversations/{id}` | Delete current user's conversation |
 | `POST` | `/api/admin/ai/knowledge/reindex` | Rebuild local knowledge chunks |
+| `GET` | `/api/admin/ai/provider/status` | Return safe Anthropic provider diagnostics for admins |
 
 ## RAG Sources
 
@@ -72,6 +73,22 @@ npm run e2e
 ```powershell
 ./scripts/portfolio-demo.ps1 -Build -ResetBefore
 ```
+
+## Evaluation Gate
+
+The assistant has a small regression pack in `docs/ai/eval-prompts.json` and a runner at `scripts/ai-eval.ps1`.
+
+```powershell
+./scripts/ai-eval.ps1 -GatewayUrl http://localhost:8080
+```
+
+The gate checks authenticated Gateway access, provider diagnostics, answer content, citations, and tool traces. It works in Claude API mode and deterministic fallback mode, so CI does not need a real Anthropic key.
+
+See [AI Assistant Evaluation Gate](ai-evaluation.md) for the full runbook.
+
+## Provider Diagnostics
+
+Admins can call `GET /api/admin/ai/provider/status` to verify model, Anthropic API host, API version, max tokens, fallback setting, and runtime mode without exposing the API key.
 
 ## Security Notes
 

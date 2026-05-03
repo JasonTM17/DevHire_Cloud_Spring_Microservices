@@ -1253,3 +1253,29 @@ Verification:
 - `./scripts/api-smoke.ps1 -GatewayUrl http://localhost:8080` passed on 2026-05-03 with `aiAssistantCheck: ok`.
 - `npm run e2e` passed on 2026-05-03.
 - `npm run screenshots` passed on 2026-05-03.
+
+## Phase 52 - AI provider diagnostics and evaluation gate
+
+- Added admin-only AI provider diagnostics at `GET /api/admin/ai/provider/status`.
+- The diagnostics response reports provider, model, Anthropic host, API version, max tokens, fallback setting, and runtime mode without exposing API keys.
+- Added unit and controller coverage for safe provider status behavior.
+- Added `docs/ai/eval-prompts.json` as the assistant evaluation prompt pack.
+- Added `scripts/ai-eval.ps1` to run authenticated assistant evaluations through API Gateway.
+- Added `.github/workflows/ai-eval.yml` as a weekly/manual AI evaluation gate with report and failure log artifacts.
+- Extended `scripts/api-smoke.ps1` and `docs/api.http` with the provider diagnostics check.
+- Added `docs/ai-evaluation.md` and updated trilingual README pointers for the AI eval gate.
+
+Verification:
+
+- `mvn -T1 -pl common-lib,ai-service test` passed on 2026-05-03.
+- PowerShell syntax parse passed for `scripts/ai-eval.ps1`, `scripts/api-smoke.ps1`, and `scripts/docs-quality.ps1` on 2026-05-03.
+- `./scripts/docs-quality.ps1` passed on 2026-05-03.
+- `docker compose config --quiet` passed on 2026-05-03.
+- `docker compose build ai-service` passed on 2026-05-03.
+- `docker compose up -d --no-deps ai-service` passed on 2026-05-03.
+- `./scripts/ai-eval.ps1 -GatewayUrl http://localhost:8080` passed on 2026-05-03 with 4 prompt evaluations, citations, and tool traces.
+- `./scripts/api-smoke.ps1 -GatewayUrl http://localhost:8080` passed on 2026-05-03 with `aiProviderMode: DEMO_FALLBACK` and `aiAssistantCheck: ok`.
+- `mvn -T1 clean verify` passed on 2026-05-03.
+- `docker run --rm -v "${PWD}:/repo" -w /repo rhysd/actionlint:latest` passed on 2026-05-03.
+- `docker run --rm -v "${PWD}:/repo" -w /repo zricethezav/gitleaks:latest detect --source /repo --no-git --redact --verbose` passed on 2026-05-03 with no leaks found.
+- `git diff --check` passed on 2026-05-03.

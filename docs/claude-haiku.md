@@ -22,6 +22,14 @@ DEVHIRE_AI_DEMO_FALLBACK_ENABLED=true
 4. If the key is missing or the provider fails and fallback is enabled, it returns a deterministic portfolio answer.
 5. It persists messages, usage, metrics, and audit/outbox events.
 
+Admins can verify safe runtime state with:
+
+```http
+GET /api/admin/ai/provider/status
+```
+
+The endpoint reports provider, model, base URL host, API version, max token cap, fallback setting, and mode. It never returns the raw key.
+
 ## Cost Guardrails
 
 - Default model is Haiku.
@@ -29,6 +37,7 @@ DEVHIRE_AI_DEMO_FALLBACK_ENABLED=true
 - CI uses mock/fallback behavior.
 - Manual provider smoke should be opt-in only.
 - Token estimates are exposed through Micrometer summaries for reviewer visibility.
+- `scripts/ai-eval.ps1` runs the assistant through Gateway in fallback mode by default, so CI can catch regressions without paid provider calls.
 
 ## Production Upgrade Path
 

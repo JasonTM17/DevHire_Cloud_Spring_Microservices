@@ -32,7 +32,7 @@ Claude AI assistant:
 - Event-driven communication dùng Kafka, transactional outbox và idempotent consumers.
 - Job search dùng OpenSearch, có PostgreSQL fallback adapter.
 - Observability gồm Actuator, Prometheus, Grafana, OpenTelemetry, Tempo và Loki.
-- CI/CD có Maven verify, frontend build, Docker image build, security scan, SBOM, Terraform validate, API smoke, k6 smoke và Playwright E2E.
+- CI/CD có Maven verify, frontend build, Docker image build, security scan, SBOM, Terraform validate, API smoke, AI eval, k6 smoke và Playwright E2E.
 - Infrastructure có Docker Compose, Kubernetes manifests, Helm chart, Argo CD sample và AWS Terraform blueprint.
 
 ## Kiến Trúc
@@ -169,6 +169,12 @@ API smoke qua Gateway:
 .\scripts\api-smoke.ps1 -GatewayUrl http://localhost:8080
 ```
 
+AI assistant evaluation:
+
+```powershell
+.\scripts\ai-eval.ps1 -GatewayUrl http://localhost:8080
+```
+
 Performance smoke:
 
 ```powershell
@@ -204,6 +210,7 @@ Performance smoke:
 - `POST /api/ai/chat`
 - `POST /api/ai/chat/stream`
 - `POST /api/admin/ai/knowledge/reindex`
+- `GET /api/admin/ai/provider/status`
 
 Xem flow chạy được tại [docs/api.http](docs/api.http).
 
@@ -222,7 +229,7 @@ Xem flow chạy được tại [docs/api.http](docs/api.http).
 - Docker multi-stage images chạy non-root.
 - Kubernetes raw manifests, Helm chart, Argo CD sample.
 - AWS Terraform blueprint có cost guardrails.
-- GitHub Actions CI/CD, Trivy, Gitleaks, SBOM, Dependabot.
+- GitHub Actions CI/CD, Trivy, Gitleaks, SBOM, Dependabot, AI eval gate.
 - Unit, controller, contract, integration, E2E và performance smoke tests.
 
 ## Tài Liệu Quan Trọng
@@ -236,6 +243,7 @@ Xem flow chạy được tại [docs/api.http](docs/api.http).
 - [Gmail SMTP runbook](docs/gmail-smtp.md)
 - [Claude AI assistant](docs/ai-assistant.md)
 - [Claude Haiku provider](docs/claude-haiku.md)
+- [AI evaluation gate](docs/ai-evaluation.md)
 - [AWS Terraform blueprint](docs/aws-terraform.md)
 - [10-minute demo script](docs/demo-script.md)
 - [GitHub profile checklist](docs/github-profile.md)

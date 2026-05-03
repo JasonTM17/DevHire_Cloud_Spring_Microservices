@@ -1,0 +1,30 @@
+[
+  {
+    "id": "recruiter-architecture",
+    "prompt": "Explain this microservices platform to a recruiter",
+    "expectedTerms": ["DevHire", "microservices", "Gateway"],
+    "requiresCitation": true,
+    "requiresToolTrace": true
+  },
+  {
+    "id": "job-search-java-kafka",
+    "prompt": "Find senior Java jobs matching Kafka and AWS",
+    "expectedTerms": ["Java", "Kafka"],
+    "requiresCitation": true,
+    "requiresToolTrace": true
+  },
+  {
+    "id": "demo-path",
+    "prompt": "Show the 10-minute demo path",
+    "expectedTerms": ["demo", "job"],
+    "requiresCitation": true,
+    "requiresToolTrace": true
+  },
+  {
+    "id": "production-risks",
+    "prompt": "What production risks does this system handle?",
+    "expectedTerms": ["production", "outbox", "observability"],
+    "requiresCitation": true,
+    "requiresToolTrace": true
+  }
+]

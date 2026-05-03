@@ -77,6 +77,10 @@ npm run build
 ./scripts/api-smoke.ps1 -GatewayUrl http://localhost:8080
 ```
 
+```powershell
+./scripts/ai-eval.ps1 -GatewayUrl http://localhost:8080
+```
+
 ## Demo Accounts
 
 | Role | Email | Password |
@@ -96,7 +100,7 @@ npm run build
 - SMTP notification delivery queue with retry/backoff and persisted delivery status.
 - Standard error response with trace ID.
 - Docker Compose full stack, Helm, Argo CD, Kubernetes, and AWS Terraform blueprint.
-- GitHub Actions CI/CD, Trivy, Gitleaks, SBOM, Dependabot, k6 smoke, and Playwright E2E.
+- GitHub Actions CI/CD, Trivy, Gitleaks, SBOM, Dependabot, AI eval, k6 smoke, and Playwright E2E.
 
 ## Key Docs
 
@@ -108,6 +112,7 @@ npm run build
 - [SLO operations](slo.md)
 - [Claude AI assistant](ai-assistant.md)
 - [Claude Haiku provider](claude-haiku.md)
+- [AI evaluation gate](ai-evaluation.md)
 - [AWS Terraform blueprint](aws-terraform.md)
 - [10-minute demo script](demo-script.md)
 - [GitHub profile checklist](github-profile.md)
