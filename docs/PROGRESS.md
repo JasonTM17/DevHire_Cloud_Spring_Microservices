@@ -998,3 +998,43 @@ Verification:
 - Playwright local visual smoke opened `http://localhost:3000/jobs` and captured 3 job cards.
 - Playwright local visual smoke opened `http://localhost:3000/jobs/preview-java-platform` and captured the job detail page.
 - Browser in-app automation was attempted twice, but the Browser plugin could not attach to the tab in this environment. Playwright local was used as the visual QA fallback.
+
+## Phase 39 - Docker runtime cleanup and portfolio stack polish
+
+- Cleaned old local Docker containers from completed projects before running DevHire Cloud:
+  - `jobhunter`,
+  - `wavestream`,
+  - `01-java-spring-laptopshop-starter-master`.
+- Kept DevHire source files, images, and volumes intact; only stale containers were removed.
+- Recovered Docker Desktop after a parallel BuildKit EOF error by restarting Docker Desktop and WSL, then rebuilt the DevHire stack with `COMPOSE_PARALLEL_LIMIT=1`.
+- Rebuilt and ran the full Docker stack:
+  - PostgreSQL,
+  - Redis,
+  - Kafka,
+  - OpenSearch and OpenSearch Dashboards,
+  - Prometheus,
+  - Grafana,
+  - Loki,
+  - Tempo,
+  - OpenTelemetry Collector,
+  - all backend services,
+  - frontend.
+- Fixed local Docker CORS for the frontend host port `3001` so `http://localhost:3001` can call the API Gateway on `http://localhost:8080`.
+- Added local company logo assets under `frontend/public/company-logos` and wired the frontend demo company catalog to use those stable assets before falling back to remote favicons.
+- Cleaned local runtime smoke-test jobs from PostgreSQL/OpenSearch after verification so portfolio screenshots show curated seed data instead of generated smoke titles.
+- Added the Docker runtime screenshot `docs/screenshots/docker-runtime-jobs.png`.
+
+Verification:
+
+- `docker compose build api-gateway frontend` passed on 2026-05-03.
+- `docker compose up -d --force-recreate --no-deps api-gateway frontend` passed on 2026-05-03.
+- `docker compose ps` showed all DevHire backend services healthy on 2026-05-03.
+- `docker compose config --quiet` passed on 2026-05-03.
+- CORS verification for `Origin: http://localhost:3001` against `/api/jobs` returned HTTP 200 with `Access-Control-Allow-Origin: http://localhost:3001`.
+- `./scripts/api-smoke.ps1 -GatewayUrl http://localhost:8080` passed on 2026-05-03.
+- Playwright Docker visual smoke opened `http://localhost:3001/jobs`, captured 8 live job cards, found 0 offline API warnings, and verified 8 local company logo images.
+- `npm run typecheck` passed on 2026-05-03.
+- `npm run build` passed on 2026-05-03.
+- `mvn -T1 clean verify` passed on 2026-05-03.
+- `git diff --cached --check` passed on 2026-05-03.
+- `docker run --rm -v "${PWD}:/repo" -w /repo zricethezav/gitleaks:latest protect --staged --source /repo --redact --verbose` passed on 2026-05-03 with no leaks found.

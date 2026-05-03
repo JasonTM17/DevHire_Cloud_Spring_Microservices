@@ -2,30 +2,47 @@ import type { Company, Job } from "@/types/domain";
 
 export type DemoCompanyBrand = {
   name: string;
+  slug: string;
   domain: string;
   logoUrl: string;
   industry: string;
   signal: string;
 };
 
+const localLogoSlugs: Record<string, string> = {
+  "google.com": "google",
+  "microsoft.com": "microsoft",
+  "amazon.com": "amazon",
+  "atlassian.com": "atlassian",
+  "shopify.com": "shopify",
+  "netflix.com": "netflix",
+  "datadoghq.com": "datadog",
+  "gitlab.com": "gitlab",
+  "stripe.com": "stripe",
+  "canva.com": "canva",
+  "figma.com": "figma",
+  "slack.com": "slack"
+};
+
 const demoBrands: DemoCompanyBrand[] = [
-  brand("Google", "google.com", "Search infrastructure", "Global scale"),
-  brand("Microsoft", "microsoft.com", "Cloud platform", "Enterprise"),
-  brand("Amazon", "amazon.com", "Commerce cloud", "High traffic"),
-  brand("Atlassian", "atlassian.com", "Developer tools", "Collaboration"),
-  brand("Shopify", "shopify.com", "Commerce platform", "Remote-ready"),
-  brand("Netflix", "netflix.com", "Streaming platform", "Distributed systems"),
-  brand("Datadog", "datadoghq.com", "Observability", "SRE-heavy"),
-  brand("GitLab", "gitlab.com", "DevSecOps", "Async team"),
-  brand("Stripe", "stripe.com", "Fintech APIs", "Reliability"),
-  brand("Canva", "canva.com", "Creative platform", "Product-led"),
-  brand("Figma", "figma.com", "Design systems", "Collaboration"),
-  brand("Slack", "slack.com", "Work communication", "Workflow automation")
+  brand("Google", "google", "google.com", "Search infrastructure", "Global scale"),
+  brand("Microsoft", "microsoft", "microsoft.com", "Cloud platform", "Enterprise"),
+  brand("Amazon", "amazon", "amazon.com", "Commerce cloud", "High traffic"),
+  brand("Atlassian", "atlassian", "atlassian.com", "Developer tools", "Collaboration"),
+  brand("Shopify", "shopify", "shopify.com", "Commerce platform", "Remote-ready"),
+  brand("Netflix", "netflix", "netflix.com", "Streaming platform", "Distributed systems"),
+  brand("Datadog", "datadog", "datadoghq.com", "Observability", "SRE-heavy"),
+  brand("GitLab", "gitlab", "gitlab.com", "DevSecOps", "Async team"),
+  brand("Stripe", "stripe", "stripe.com", "Fintech APIs", "Reliability"),
+  brand("Canva", "canva", "canva.com", "Creative platform", "Product-led"),
+  brand("Figma", "figma", "figma.com", "Design systems", "Collaboration"),
+  brand("Slack", "slack", "slack.com", "Work communication", "Workflow automation")
 ];
 
-function brand(name: string, domain: string, industry: string, signal: string): DemoCompanyBrand {
+function brand(name: string, slug: string, domain: string, industry: string, signal: string): DemoCompanyBrand {
   return {
     name,
+    slug,
     domain,
     industry,
     signal,
@@ -42,6 +59,7 @@ export function brandForCompany(company: Pick<Company, "name" | "website" | "log
   if (domain) {
     return {
       name: company.name,
+      slug: domain.replace(/\./g, "-"),
       domain,
       industry: "Hiring team",
       signal: "Employer workspace",
@@ -75,5 +93,9 @@ function domainFromWebsite(value?: string) {
 }
 
 function logoUrlForDomain(domain: string) {
+  const localSlug = localLogoSlugs[domain];
+  if (localSlug) {
+    return `/company-logos/${localSlug}.png`;
+  }
   return `https://www.google.com/s2/favicons?sz=128&domain=${domain}`;
 }

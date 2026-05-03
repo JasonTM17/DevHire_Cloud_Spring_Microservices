@@ -13,6 +13,10 @@ Anh chup duoc tao tu Playwright E2E tren frontend that:
 |---|---|
 | ![Jobs page](docs/screenshots/frontend-redesign-jobs.png) | ![Job detail](docs/screenshots/frontend-redesign-job-detail.png) |
 
+Docker runtime qua API Gateway that:
+
+![Docker runtime jobs](docs/screenshots/docker-runtime-jobs.png)
+
 | Candidate | Employer | Admin |
 |---|---|---|
 | ![Candidate dashboard](docs/screenshots/candidate-dashboard.png) | ![Employer dashboard](docs/screenshots/employer-dashboard.png) | ![Admin dashboard](docs/screenshots/admin-dashboard.png) |

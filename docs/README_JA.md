@@ -11,6 +11,10 @@ Screenshots are generated from the real frontend through Playwright E2E.
 |---|---|
 | ![Jobs page](screenshots/frontend-redesign-jobs.png) | ![Job detail](screenshots/frontend-redesign-job-detail.png) |
 
+Docker runtime through the real API Gateway:
+
+![Docker runtime jobs](screenshots/docker-runtime-jobs.png)
+
 | Candidate | Employer | Admin |
 |---|---|---|
 | ![Candidate dashboard](screenshots/candidate-dashboard.png) | ![Employer dashboard](screenshots/employer-dashboard.png) | ![Admin dashboard](screenshots/admin-dashboard.png) |
