@@ -17,13 +17,19 @@ public class EmailNotificationDispatcher {
     private final EmailProperties properties;
     private final UserClient userClient;
     private final EmailDeliveryService emailDeliveryService;
+    private final EmailRetryPolicy retryPolicy;
+    private final EmailTemplateRenderer templateRenderer;
 
     public EmailNotificationDispatcher(EmailProperties properties,
                                        UserClient userClient,
-                                       EmailDeliveryService emailDeliveryService) {
+                                       EmailDeliveryService emailDeliveryService,
+                                       EmailRetryPolicy retryPolicy,
+                                       EmailTemplateRenderer templateRenderer) {
         this.properties = properties;
         this.userClient = userClient;
         this.emailDeliveryService = emailDeliveryService;
+        this.retryPolicy = retryPolicy;
+        this.templateRenderer = templateRenderer;
     }
 
     public void dispatch(Notification notification) {
@@ -31,56 +37,59 @@ public class EmailNotificationDispatcher {
             notification.markEmailDisabled();
             return;
         }
-        String recipient = resolveEmail(notification);
+        notification.markEmailSending(notification.getEmailRecipient());
+        ResolvedEmail resolvedEmail = resolveEmail(notification);
+        if (resolvedEmail.retryableFailure()) {
+            markFailure(notification, null, resolvedEmail.failureReason(), true);
+            return;
+        }
+        String recipient = resolvedEmail.email();
         if (recipient == null || recipient.isBlank()) {
             notification.markEmailSkippedNoAddress();
             return;
         }
-        EmailDeliveryResult result = emailDeliveryService.send(message(notification, recipient));
+        EmailDeliveryResult result = emailDeliveryService.send(templateRenderer.render(notification, recipient));
         if (result.sent()) {
             notification.markEmailSent(recipient, result.providerMessageId());
             return;
         }
-        notification.markEmailFailed(recipient, result.failureReason());
+        markFailure(notification, recipient, result.failureReason(), result.retryable());
     }
 
-    private String resolveEmail(Notification notification) {
+    private ResolvedEmail resolveEmail(Notification notification) {
         try {
             ApiResponse<ProfileResponse> response = userClient.getProfile(notification.getRecipientId());
-            return response == null || response.data() == null ? null : response.data().email();
+            return ResolvedEmail.resolved(response == null || response.data() == null ? null : response.data().email());
         } catch (FeignException.NotFound ex) {
             log.warn("notification_email_recipient_missing recipientId={}", notification.getRecipientId());
-            return null;
+            return ResolvedEmail.permanent("Recipient email was not available");
         } catch (RuntimeException ex) {
             log.warn("notification_email_recipient_lookup_failed recipientId={} message={}",
                     notification.getRecipientId(), ex.getMessage());
-            return null;
+            return ResolvedEmail.retryable(ex.getMessage() == null ? "Recipient lookup failed" : ex.getMessage());
         }
     }
 
-    private EmailMessage message(Notification notification, String recipient) {
-        String ctaUrl = properties.dashboardBaseUrl() + "/api/notifications";
-        String html = """
-                <html>
-                  <body style="font-family:Arial,sans-serif;color:#17202a">
-                    <h2>%s</h2>
-                    <p>%s</p>
-                    <p><a href="%s">Open DevHire Cloud notifications</a></p>
-                  </body>
-                </html>
-                """.formatted(escape(notification.getTitle()), escape(notification.getMessage()), ctaUrl);
-        String text = notification.getTitle() + System.lineSeparator()
-                + notification.getMessage() + System.lineSeparator()
-                + ctaUrl;
-        return new EmailMessage(recipient, "[DevHire Cloud] " + notification.getTitle(), html, text);
+    private void markFailure(Notification notification, String recipient, String reason, boolean retryable) {
+        if (retryable && retryPolicy.canRetry(notification.getEmailAttempts())) {
+            notification.markEmailRetryableFailure(recipient, reason,
+                    retryPolicy.nextAttemptAt(notification.getEmailAttempts(), java.time.Instant.now()));
+            return;
+        }
+        notification.markEmailPermanentFailure(recipient, reason);
     }
 
-    private static String escape(String value) {
-        if (value == null) {
-            return "";
+    private record ResolvedEmail(String email, String failureReason, boolean retryableFailure) {
+        static ResolvedEmail resolved(String email) {
+            return new ResolvedEmail(email, null, false);
         }
-        return value.replace("&", "&amp;")
-                .replace("<", "&lt;")
-                .replace(">", "&gt;");
+
+        static ResolvedEmail retryable(String reason) {
+            return new ResolvedEmail(null, reason, true);
+        }
+
+        static ResolvedEmail permanent(String reason) {
+            return new ResolvedEmail(null, reason, false);
+        }
     }
 }

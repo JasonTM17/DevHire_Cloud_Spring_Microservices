@@ -25,7 +25,8 @@ class SmtpEmailDeliveryServiceTest {
         MimeMessage mimeMessage = new MimeMessage(Session.getInstance(new Properties()));
         when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
         var service = new SmtpEmailDeliveryService(mailSender,
-                new EmailProperties(true, "devhire.sender@gmail.com", "reply@gmail.com", "http://localhost:8080"));
+                new EmailProperties(true, "devhire.sender@gmail.com", "reply@gmail.com", "http://localhost:8080",
+                        25, 5, 30, 900, 60));
 
         EmailDeliveryResult result = service.send(new EmailMessage(
                 "candidate@example.com",
@@ -49,7 +50,8 @@ class SmtpEmailDeliveryServiceTest {
         when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
         doThrow(new MailSendException("authentication failed")).when(mailSender).send(mimeMessage);
         var service = new SmtpEmailDeliveryService(mailSender,
-                new EmailProperties(true, "devhire.sender@gmail.com", null, "http://localhost:8080"));
+                new EmailProperties(true, "devhire.sender@gmail.com", null, "http://localhost:8080",
+                        25, 5, 30, 900, 60));
 
         EmailDeliveryResult result = service.send(new EmailMessage(
                 "candidate@example.com",
@@ -59,5 +61,6 @@ class SmtpEmailDeliveryServiceTest {
 
         assertThat(result.sent()).isFalse();
         assertThat(result.failureReason()).contains("authentication failed");
+        assertThat(result.retryable()).isTrue();
     }
 }

@@ -60,6 +60,11 @@ devhire:
       from: ${DEVHIRE_NOTIFICATION_EMAIL_FROM:no-reply@devhire.local}
       reply-to: ${DEVHIRE_NOTIFICATION_EMAIL_REPLY_TO:}
       dashboard-base-url: ${DEVHIRE_NOTIFICATION_EMAIL_DASHBOARD_BASE_URL:http://localhost:8080}
+      batch-size: ${DEVHIRE_NOTIFICATION_EMAIL_BATCH_SIZE:25}
+      max-attempts: ${DEVHIRE_NOTIFICATION_EMAIL_MAX_ATTEMPTS:5}
+      retry-initial-delay-seconds: ${DEVHIRE_NOTIFICATION_EMAIL_RETRY_INITIAL_DELAY_SECONDS:30}
+      retry-max-delay-seconds: ${DEVHIRE_NOTIFICATION_EMAIL_RETRY_MAX_DELAY_SECONDS:900}
+      rate-limit-per-minute: ${DEVHIRE_NOTIFICATION_EMAIL_RATE_LIMIT_PER_MINUTE:60}
 management:
   health:
     mail:

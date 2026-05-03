@@ -8,6 +8,6 @@ import org.springframework.stereotype.Component;
 public class NoopEmailDeliveryService implements EmailDeliveryService {
     @Override
     public EmailDeliveryResult send(EmailMessage message) {
-        return EmailDeliveryResult.failed("Email delivery is disabled");
+        return EmailDeliveryResult.failedPermanent("Email delivery is disabled");
     }
 }

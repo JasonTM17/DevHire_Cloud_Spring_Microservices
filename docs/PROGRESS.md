@@ -601,3 +601,48 @@ Verification:
   - `devhire_audit.audit_logs` contained the new `login` entry for `candidate@devhire.local`.
 
 Committed as `feat(events): add transactional outbox publishing`.
+
+## Phase 26 - Notification delivery hardening
+
+- Moved SMTP delivery out of the notification creation transaction and into a database-backed delivery queue.
+- Added email lifecycle states:
+  - `PENDING`,
+  - `SENDING`,
+  - `SENT`,
+  - `FAILED_RETRYABLE`,
+  - `FAILED_PERMANENT`,
+  - `DISABLED`.
+- Added Flyway `V6__email_delivery_retry.sql` with retry columns:
+  - `email_attempts`,
+  - `email_next_attempt_at`,
+  - `email_last_attempt_at`.
+- Added scheduled `EmailDeliveryWorker` with `FOR UPDATE SKIP LOCKED` queue polling.
+- Added exponential backoff and max-attempt retry policy.
+- Added local in-memory rate limiting for SMTP send throughput.
+- Added production-style HTML email templates with plain-text fallback.
+- Kept internal notification persistence as the fallback source of truth when SMTP is disabled or fails.
+- Extended environment, Docker Compose, production Compose, and Kubernetes ConfigMap templates with email retry/rate-limit settings.
+- Updated Gmail/deployment docs without committing any real SMTP credential.
+- Added focused tests for:
+  - retry policy,
+  - queue worker rate-limit behavior,
+  - dispatcher success/retryable failure behavior,
+  - HTML template escaping,
+  - SMTP retryable failure classification.
+
+Verification:
+
+- `mvn -T1 -pl notification-service -am test` passed on 2026-05-03.
+- Docker smoke found and fixed two runtime-only Spring binding issues:
+  - `EmailProperties` record constructor binding,
+  - `EmailRateLimiter` constructor selection.
+- `docker compose up -d --build notification-service` passed on 2026-05-03 with `DEVHIRE_NOTIFICATION_EMAIL_ENABLED=false` to avoid sending real email during automated smoke.
+- Runtime DB smoke passed on 2026-05-03:
+  - Flyway applied notification migration v6.
+  - `notifications` table contained `email_attempts`, `email_next_attempt_at`, and `email_last_attempt_at`.
+  - email worker moved pending seed notifications to `DISABLED` while preserving internal notifications.
+- `mvn -T1 clean verify` passed on 2026-05-03.
+- `docker compose config --quiet` passed on 2026-05-03.
+- `kubectl kustomize .\deploy\k8s`, `.\deploy\k8s-overlays\local`, and `.\deploy\k8s-overlays\prod` passed on 2026-05-03.
+
+Committed as `feat(notification): harden email retry delivery`.

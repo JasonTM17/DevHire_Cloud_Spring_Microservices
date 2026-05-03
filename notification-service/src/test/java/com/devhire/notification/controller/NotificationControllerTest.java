@@ -41,6 +41,8 @@ class NotificationControllerTest {
                 Instant.parse("2026-05-02T00:00:00Z"),
                 EmailStatus.SENT,
                 "candidate@example.com",
+                1,
+                null,
                 Instant.parse("2026-05-02T00:00:00Z"),
                 Instant.parse("2026-05-02T00:00:00Z")
         ));

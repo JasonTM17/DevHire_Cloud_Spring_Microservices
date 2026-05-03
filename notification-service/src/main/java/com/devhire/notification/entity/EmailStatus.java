@@ -2,8 +2,10 @@ package com.devhire.notification.entity;
 
 public enum EmailStatus {
     PENDING,
-    DISABLED,
-    SKIPPED_NO_EMAIL,
+    SENDING,
     SENT,
-    FAILED
+    FAILED_RETRYABLE,
+    FAILED_PERMANENT,
+    DISABLED,
+    SKIPPED_NO_EMAIL
 }

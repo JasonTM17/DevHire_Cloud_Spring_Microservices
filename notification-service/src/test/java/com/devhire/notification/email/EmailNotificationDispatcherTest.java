@@ -23,10 +23,8 @@ class EmailNotificationDispatcherTest {
 
     @Test
     void disabledEmailMarksNotificationWithoutCallingProvider() {
-        var dispatcher = new EmailNotificationDispatcher(
-                new EmailProperties(false, "no-reply@devhire.local", null, "http://localhost:8080"),
-                userClient,
-                emailDeliveryService);
+        EmailProperties properties = properties(false);
+        var dispatcher = dispatcher(properties);
         Notification notification = new Notification(UUID.randomUUID(), "APPLICATION_SUBMITTED", "Title", "Message");
 
         dispatcher.dispatch(notification);
@@ -37,10 +35,8 @@ class EmailNotificationDispatcherTest {
     @Test
     void enabledEmailResolvesRecipientAndSendsSmtpMessage() {
         UUID userId = UUID.randomUUID();
-        var dispatcher = new EmailNotificationDispatcher(
-                new EmailProperties(true, "no-reply@devhire.local", null, "http://localhost:8080"),
-                userClient,
-                emailDeliveryService);
+        EmailProperties properties = properties(true);
+        var dispatcher = dispatcher(properties);
         when(userClient.getProfile(userId)).thenReturn(ApiResponse.ok(
                 new ProfileResponse(userId, "candidate@example.com", UserRole.CANDIDATE, "Candidate")));
         when(emailDeliveryService.send(argThat(message -> message.recipient().equals("candidate@example.com"))))
@@ -57,21 +53,31 @@ class EmailNotificationDispatcherTest {
     }
 
     @Test
-    void failedProviderMarksFailureWithoutBreakingNotificationCreation() {
+    void retryableProviderFailureSchedulesAnotherAttempt() {
         UUID userId = UUID.randomUUID();
-        var dispatcher = new EmailNotificationDispatcher(
-                new EmailProperties(true, "no-reply@devhire.local", null, "http://localhost:8080"),
-                userClient,
-                emailDeliveryService);
+        EmailProperties properties = properties(true);
+        var dispatcher = dispatcher(properties);
         when(userClient.getProfile(userId)).thenReturn(ApiResponse.ok(
                 new ProfileResponse(userId, "candidate@example.com", UserRole.CANDIDATE, "Candidate")));
         when(emailDeliveryService.send(argThat(message -> message.recipient().equals("candidate@example.com"))))
-                .thenReturn(EmailDeliveryResult.failed("smtp unavailable"));
+                .thenReturn(EmailDeliveryResult.failedRetryable("smtp unavailable"));
         Notification notification = new Notification(userId, "APPLICATION_STATUS_CHANGED", "Status", "Updated");
 
         dispatcher.dispatch(notification);
 
-        assertThat(notification.getEmailStatus()).isEqualTo(EmailStatus.FAILED);
+        assertThat(notification.getEmailStatus()).isEqualTo(EmailStatus.FAILED_RETRYABLE);
         assertThat(notification.getEmailFailureReason()).contains("smtp unavailable");
+        assertThat(notification.getEmailAttempts()).isEqualTo(1);
+        assertThat(notification.getEmailNextAttemptAt()).isNotNull();
+    }
+
+    private EmailNotificationDispatcher dispatcher(EmailProperties properties) {
+        return new EmailNotificationDispatcher(properties, userClient, emailDeliveryService,
+                new EmailRetryPolicy(properties), new EmailTemplateRenderer(properties));
+    }
+
+    private static EmailProperties properties(boolean enabled) {
+        return new EmailProperties(enabled, "no-reply@devhire.local", null, "http://localhost:8080",
+                25, 5, 30, 900, 60);
     }
 }

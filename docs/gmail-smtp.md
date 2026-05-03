@@ -63,7 +63,7 @@ Nếu chạy full stack:
 docker compose up --build -d
 ```
 
-Khi `application-service` phát event, `notification-service` sẽ resolve email qua `user-service`, gửi SMTP và lưu trạng thái trong bảng `notifications`: `SENT`, `FAILED`, `DISABLED` hoặc `SKIPPED_NO_EMAIL`.
+Khi `application-service` phát event, `notification-service` sẽ lưu internal notification trước, sau đó email worker xử lý queue trong bảng `notifications` với trạng thái `PENDING`, `SENDING`, `SENT`, `FAILED_RETRYABLE`, `FAILED_PERMANENT` hoặc `DISABLED`. SMTP lỗi tạm thời sẽ được retry với exponential backoff; notification nội bộ vẫn tồn tại để người dùng không mất thông báo.
 
 ## English
 

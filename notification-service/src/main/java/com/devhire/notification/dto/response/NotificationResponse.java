@@ -15,6 +15,8 @@ public record NotificationResponse(
         Instant readAt,
         EmailStatus emailStatus,
         String emailRecipient,
+        int emailAttempts,
+        Instant emailNextAttemptAt,
         Instant emailSentAt,
         Instant createdAt
 ) {

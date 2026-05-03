@@ -17,6 +17,8 @@ public class NotificationMapper {
                 notification.getReadAt(),
                 notification.getEmailStatus(),
                 notification.getEmailRecipient(),
+                notification.getEmailAttempts(),
+                notification.getEmailNextAttemptAt(),
                 notification.getEmailSentAt(),
                 notification.getCreatedAt()
         );

@@ -49,6 +49,15 @@ public class Notification {
     @Column(name = "email_failure_reason", length = 1000)
     private String emailFailureReason;
 
+    @Column(name = "email_attempts", nullable = false)
+    private int emailAttempts;
+
+    @Column(name = "email_next_attempt_at")
+    private Instant emailNextAttemptAt;
+
+    @Column(name = "email_last_attempt_at")
+    private Instant emailLastAttemptAt;
+
     @Column(name = "email_sent_at")
     private Instant emailSentAt;
 
@@ -127,6 +136,18 @@ public class Notification {
         return emailSentAt;
     }
 
+    public int getEmailAttempts() {
+        return emailAttempts;
+    }
+
+    public Instant getEmailNextAttemptAt() {
+        return emailNextAttemptAt;
+    }
+
+    public Instant getEmailLastAttemptAt() {
+        return emailLastAttemptAt;
+    }
+
     public Instant getCreatedAt() {
         return createdAt;
     }
@@ -148,11 +169,21 @@ public class Notification {
     public void markEmailDisabled() {
         emailStatus = EmailStatus.DISABLED;
         emailFailureReason = null;
+        emailNextAttemptAt = null;
     }
 
     public void markEmailSkippedNoAddress() {
-        emailStatus = EmailStatus.SKIPPED_NO_EMAIL;
+        emailStatus = EmailStatus.FAILED_PERMANENT;
         emailFailureReason = "Recipient email was not available";
+        emailNextAttemptAt = null;
+    }
+
+    public void markEmailSending(String recipient) {
+        emailStatus = EmailStatus.SENDING;
+        emailRecipient = recipient;
+        emailAttempts++;
+        emailLastAttemptAt = Instant.now();
+        emailFailureReason = null;
     }
 
     public void markEmailSent(String recipient, String providerMessageId) {
@@ -160,12 +191,21 @@ public class Notification {
         emailRecipient = recipient;
         emailProviderMessageId = providerMessageId;
         emailFailureReason = null;
+        emailNextAttemptAt = null;
         emailSentAt = Instant.now();
     }
 
-    public void markEmailFailed(String recipient, String reason) {
-        emailStatus = EmailStatus.FAILED;
+    public void markEmailRetryableFailure(String recipient, String reason, Instant nextAttemptAt) {
+        emailStatus = EmailStatus.FAILED_RETRYABLE;
         emailRecipient = recipient;
-        emailFailureReason = reason == null ? "Unknown email delivery failure" : reason;
+        emailFailureReason = reason == null ? "Retryable email delivery failure" : reason;
+        emailNextAttemptAt = nextAttemptAt;
+    }
+
+    public void markEmailPermanentFailure(String recipient, String reason) {
+        emailStatus = EmailStatus.FAILED_PERMANENT;
+        emailRecipient = recipient;
+        emailFailureReason = reason == null ? "Permanent email delivery failure" : reason;
+        emailNextAttemptAt = null;
     }
 }

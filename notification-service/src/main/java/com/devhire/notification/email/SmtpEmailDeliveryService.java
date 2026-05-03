@@ -1,6 +1,7 @@
 package com.devhire.notification.email;
 
 import com.devhire.notification.config.EmailProperties;
+import jakarta.mail.AuthenticationFailedException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -35,7 +36,25 @@ public class SmtpEmailDeliveryService implements EmailDeliveryService {
             mailSender.send(mimeMessage);
             return EmailDeliveryResult.sent(mimeMessage.getMessageID());
         } catch (Exception ex) {
-            return EmailDeliveryResult.failed(ex.getMessage());
+            if (hasCause(ex, AuthenticationFailedException.class)) {
+                return EmailDeliveryResult.failedPermanent(safeMessage(ex));
+            }
+            return EmailDeliveryResult.failedRetryable(safeMessage(ex));
         }
+    }
+
+    private static boolean hasCause(Throwable throwable, Class<? extends Throwable> type) {
+        Throwable current = throwable;
+        while (current != null) {
+            if (type.isInstance(current)) {
+                return true;
+            }
+            current = current.getCause();
+        }
+        return false;
+    }
+
+    private static String safeMessage(Exception ex) {
+        return ex.getMessage() == null ? ex.getClass().getSimpleName() : ex.getMessage();
     }
 }

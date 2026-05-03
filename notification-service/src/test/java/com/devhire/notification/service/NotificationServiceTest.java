@@ -6,7 +6,6 @@ import com.devhire.common.exception.DevHireException;
 import com.devhire.common.security.AuthenticatedUser;
 import com.devhire.common.security.UserRole;
 import com.devhire.notification.entity.Notification;
-import com.devhire.notification.email.EmailNotificationDispatcher;
 import com.devhire.notification.event.NotificationEventPublisher;
 import com.devhire.notification.mapper.NotificationMapper;
 import com.devhire.notification.repository.NotificationRepository;
@@ -27,9 +26,8 @@ import static org.mockito.Mockito.when;
 class NotificationServiceTest {
     private final NotificationRepository notificationRepository = mock(NotificationRepository.class);
     private final NotificationEventPublisher eventPublisher = mock(NotificationEventPublisher.class);
-    private final EmailNotificationDispatcher emailDispatcher = mock(EmailNotificationDispatcher.class);
     private final NotificationService service = new NotificationService(
-            notificationRepository, new NotificationMapper(), eventPublisher, emailDispatcher);
+            notificationRepository, new NotificationMapper(), eventPublisher);
 
     @Test
     void createsEmployerNotificationWhenApplicationSubmitted() {
