@@ -24,6 +24,16 @@ Claude AI assistant:
 
 ![Claude AI assistant](docs/screenshots/assistant-page.png)
 
+Operations evidence từ stack local:
+
+| AI Provider Ops | Mailpit SMTP Sandbox |
+|---|---|
+| ![AI provider operations](docs/screenshots/ops-ai-provider.png) | ![Mailpit sandbox](docs/screenshots/ops-mailpit.png) |
+
+| OpenAPI Job Service | Prometheus Rules | Grafana SLO |
+|---|---|---|
+| ![OpenAPI job service](docs/screenshots/ops-openapi-job-service.png) | ![Prometheus rules](docs/screenshots/ops-prometheus-rules.png) | ![Grafana SLO dashboard](docs/screenshots/ops-grafana-slo.png) |
+
 ## Vì Sao Dự Án Này Đáng Xem
 
 - Thiết kế microservices có ranh giới rõ: mỗi service có database riêng, migration riêng, API riêng, không share entity JPA.

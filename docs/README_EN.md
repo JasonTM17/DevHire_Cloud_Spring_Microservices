@@ -22,6 +22,16 @@ Claude AI assistant:
 
 ![Claude AI assistant](screenshots/assistant-page.png)
 
+Operations evidence from the local stack:
+
+| AI Provider Ops | Mailpit SMTP Sandbox |
+|---|---|
+| ![AI provider operations](screenshots/ops-ai-provider.png) | ![Mailpit sandbox](screenshots/ops-mailpit.png) |
+
+| OpenAPI Job Service | Prometheus Rules | Grafana SLO |
+|---|---|---|
+| ![OpenAPI job service](screenshots/ops-openapi-job-service.png) | ![Prometheus rules](screenshots/ops-prometheus-rules.png) | ![Grafana SLO dashboard](screenshots/ops-grafana-slo.png) |
+
 ## Architecture Snapshot
 
 - `api-gateway` is the public ingress for JWT validation, routing, CORS, and Redis rate limiting.

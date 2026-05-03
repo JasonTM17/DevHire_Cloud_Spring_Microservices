@@ -1543,3 +1543,23 @@ Verification:
   - `.\scripts\docs-quality.ps1`
   - `docker compose config --quiet`
   - `git diff --check`
+
+## Phase 64 - Operations screenshot evidence
+
+- Added a Playwright operations screenshot spec for recruiter-facing evidence:
+  - Admin AI provider operations panel.
+  - Mailpit SMTP sandbox.
+  - Job service OpenAPI page.
+  - Prometheus alert rules.
+  - Grafana SLO dashboard.
+- Added `npm run screenshots:ops` and expanded `npm run screenshots` to include the operations evidence suite.
+- Captured and committed generated screenshots under `docs/screenshots/`.
+- Updated Vietnamese, English, and Japanese README files with the operations evidence gallery.
+
+Verification:
+
+- Passed:
+  - `npm run screenshots:ops`
+  - `npm run typecheck`
+  - `.\scripts\verify.ps1 -Docs -Docker`
+  - `git diff --check`
