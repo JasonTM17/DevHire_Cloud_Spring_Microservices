@@ -19,4 +19,14 @@ terraform -chdir=deploy/terraform/aws/environments/dev init -backend=false
 terraform -chdir=deploy/terraform/aws/environments/dev validate
 ```
 
+Or run the same Docker-based validation used by CI:
+
+```powershell
+scripts/terraform-validate.ps1
+```
+
 Remote state is disabled by default. Use `backend.s3.example.hcl` only after creating a real S3 bucket and DynamoDB lock table.
+
+## Cost Guardrails
+
+The environment examples keep `enable_nat_gateway`, `enable_eks`, `enable_rds`, `enable_redis`, `enable_msk`, and `enable_opensearch` disabled by default. See `docs/cost-estimate.md` before running `terraform apply`.

@@ -863,3 +863,27 @@ Verification:
 
 Committed as `test: configure mockito javaagent for modern jdks`.
 Committed as `chore(terraform): add aws infrastructure blueprint`.
+
+## Phase 34 - Terraform CI, security, and cost guardrails
+
+- Added `scripts/terraform-validate.ps1` so local and CI validation share the same Docker-based logic:
+  - Terraform `fmt -check`,
+  - `init -backend=false` and `validate` for `dev`, `staging`, and `prod`,
+  - TFLint recursive scan,
+  - Trivy Terraform config scan with critical findings failing the run.
+- Added `.github/workflows/terraform.yml` as a manual and pull-request workflow for the AWS blueprint.
+- Extended Dependabot maintenance to track Terraform provider updates in each AWS environment.
+- Added `docs/cost-estimate.md` with explicit guardrails for NAT Gateway, EKS, RDS, Redis, MSK, and OpenSearch toggles.
+- Added provider/version metadata to Terraform modules so TFLint runs without noisy module warnings.
+- Tightened default AWS security group egress from `0.0.0.0/0` to the VPC CIDR so Trivy critical config scan passes.
+- Hardened Maven test forks with bounded heap/metaspace/code cache after JDK 24 native memory crashes were observed while the Docker stack was running.
+
+Verification:
+
+- `scripts/terraform-validate.ps1` passed on 2026-05-03.
+- `docker compose config --quiet` passed on 2026-05-03.
+- `docker run --rm -v "${PWD}:/repo" -w /repo rhysd/actionlint:latest -color` passed on 2026-05-03.
+- `mvn -T1 clean verify` passed on 2026-05-03 after stopping the local Docker stack to free memory.
+- Secret scan over changed Terraform/CI/docs/script files found no Gmail app password, SMTP account, AWS key id, or AWS secret key.
+
+Committed as `ci(terraform): add validation security and dependency maintenance`.

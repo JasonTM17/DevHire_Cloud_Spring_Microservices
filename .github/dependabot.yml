@@ -54,21 +54,47 @@ updates:
         patterns:
           - "*"
 
-  - package-ecosystem: docker
-    directory: /api-gateway
+  - package-ecosystem: terraform
+    directory: /deploy/terraform/aws/environments/dev
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:50"
+      timezone: Asia/Bangkok
+    open-pull-requests-limit: 5
+    groups:
+      terraform-aws-providers:
+        patterns:
+          - "hashicorp/aws"
+
+  - package-ecosystem: terraform
+    directory: /deploy/terraform/aws/environments/staging
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:55"
+      timezone: Asia/Bangkok
+    open-pull-requests-limit: 5
+    groups:
+      terraform-aws-providers:
+        patterns:
+          - "hashicorp/aws"
+
+  - package-ecosystem: terraform
+    directory: /deploy/terraform/aws/environments/prod
     schedule:
       interval: weekly
       day: monday
       time: "07:00"
       timezone: Asia/Bangkok
+    open-pull-requests-limit: 5
     groups:
-      backend-base-images:
+      terraform-aws-providers:
         patterns:
-          - "maven"
-          - "eclipse-temurin"
+          - "hashicorp/aws"
 
   - package-ecosystem: docker
-    directory: /auth-service
+    directory: /api-gateway
     schedule:
       interval: weekly
       day: monday
@@ -81,7 +107,7 @@ updates:
           - "eclipse-temurin"
 
   - package-ecosystem: docker
-    directory: /user-service
+    directory: /auth-service
     schedule:
       interval: weekly
       day: monday
@@ -94,7 +120,7 @@ updates:
           - "eclipse-temurin"
 
   - package-ecosystem: docker
-    directory: /company-service
+    directory: /user-service
     schedule:
       interval: weekly
       day: monday
@@ -107,7 +133,7 @@ updates:
           - "eclipse-temurin"
 
   - package-ecosystem: docker
-    directory: /job-service
+    directory: /company-service
     schedule:
       interval: weekly
       day: monday
@@ -120,7 +146,7 @@ updates:
           - "eclipse-temurin"
 
   - package-ecosystem: docker
-    directory: /application-service
+    directory: /job-service
     schedule:
       interval: weekly
       day: monday
@@ -133,7 +159,7 @@ updates:
           - "eclipse-temurin"
 
   - package-ecosystem: docker
-    directory: /notification-service
+    directory: /application-service
     schedule:
       interval: weekly
       day: monday
@@ -146,7 +172,7 @@ updates:
           - "eclipse-temurin"
 
   - package-ecosystem: docker
-    directory: /audit-service
+    directory: /notification-service
     schedule:
       interval: weekly
       day: monday
@@ -159,11 +185,24 @@ updates:
           - "eclipse-temurin"
 
   - package-ecosystem: docker
-    directory: /frontend
+    directory: /audit-service
     schedule:
       interval: weekly
       day: monday
       time: "07:40"
+      timezone: Asia/Bangkok
+    groups:
+      backend-base-images:
+        patterns:
+          - "maven"
+          - "eclipse-temurin"
+
+  - package-ecosystem: docker
+    directory: /frontend
+    schedule:
+      interval: weekly
+      day: monday
+      time: "07:45"
       timezone: Asia/Bangkok
     groups:
       frontend-base-images:
