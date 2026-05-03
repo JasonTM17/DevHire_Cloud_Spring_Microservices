@@ -6,6 +6,8 @@ import com.devhire.job.entity.Job;
 import com.devhire.job.entity.JobStatus;
 import com.devhire.job.repository.JobRepository;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.springframework.boot.DefaultApplicationArguments;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -71,6 +73,24 @@ class OpenSearchJobSearchAdapterTest {
 
         index.sync(job);
 
+        ArgumentCaptor<Map<String, Object>> document = ArgumentCaptor.forClass(Map.class);
+        verify(client).index(eq("devhire_jobs"), eq(job.getId().toString()), document.capture());
+        assertThat(document.getValue())
+                .containsEntry("publishedAt", job.getPublishedAt().toString())
+                .containsEntry("createdAt", "2026-05-02T00:00:00Z")
+                .containsEntry("updatedAt", "2026-05-02T00:00:00Z");
+    }
+
+    @Test
+    void initializerReindexesPublishedJobsAfterEnsuringIndex() {
+        OpenSearchJobSearchIndex index = new OpenSearchJobSearchIndex(client, properties);
+        OpenSearchIndexInitializer initializer = new OpenSearchIndexInitializer(client, properties, repository, index);
+        Job job = publishedJob(UUID.randomUUID(), "Staff Java Engineer");
+        when(repository.findByStatus(JobStatus.PUBLISHED)).thenReturn(List.of(job));
+
+        initializer.run(new DefaultApplicationArguments());
+
+        verify(client).ensureJobIndex("devhire_jobs");
         verify(client).index(eq("devhire_jobs"), eq(job.getId().toString()), any(Map.class));
     }
 

@@ -463,3 +463,45 @@ Verification:
 - `docker build -f frontend/Dockerfile -t devhire/frontend:test .` passed on 2026-05-02.
 - `docker compose config --quiet` passed on 2026-05-02.
 - `kubectl kustomize .\deploy\k8s`, `.\deploy\k8s-overlays\local`, and `.\deploy\k8s-overlays\prod` passed on 2026-05-02.
+
+Committed as `feat(frontend): add nextjs recruitment console`.
+
+## Phase 22 - Runtime hardening after upgrade verification
+
+- Fixed OpenSearch 2.18 local startup by disabling the security plugin for local Compose and documenting `OPENSEARCH_INITIAL_ADMIN_PASSWORD` in `.env.example`.
+- Added cold-start OpenSearch reindexing for all `PUBLISHED` jobs so seeded and existing public jobs are searchable after service restart.
+- Serialized OpenSearch date fields as ISO-8601 strings to match the index date mapping.
+- Fixed notification email delivery bean selection so noop mode is available when SMTP delivery is disabled.
+- Disabled the mail health indicator automatically when email delivery is disabled, while keeping it available for real SMTP mode.
+- Fixed Tempo local volume permissions in Docker Compose.
+
+Verification:
+
+- `mvn -pl job-service -am test` passed on 2026-05-03.
+- `mvn -pl notification-service -am test` passed on 2026-05-03.
+- `mvn -T1 clean verify` passed on 2026-05-03 after stopping the local Compose stack to avoid Docker resource contention.
+- `powershell -ExecutionPolicy Bypass -File .\scripts\check-coverage.ps1` passed on 2026-05-03:
+  - api-gateway: 37.6% / 35.0%
+  - application-service: 62.5% / 60.0%
+  - audit-service: 56.5% / 55.0%
+  - auth-service: 29.4% / 28.0%
+  - common-lib: 10.9% / 10.0%
+  - company-service: 58.6% / 55.0%
+  - job-service: 51.8% / 45.0%
+  - notification-service: 60.3% / 45.0%
+  - user-service: 76.0% / 70.0%
+- `docker compose config --quiet` passed on 2026-05-03.
+- `docker compose up --build -d` passed on 2026-05-03 using alternate host ports for this workstation:
+  - gateway `18080`,
+  - frontend `13001`,
+  - OpenSearch `19200`,
+  - OpenSearch Dashboards `15601`,
+  - Grafana `13000`.
+- `docker compose ps` showed all backend services healthy and all infrastructure containers running on 2026-05-03.
+- Gateway smoke test passed:
+  - `POST /api/auth/login` with `candidate@devhire.local`,
+  - `GET /api/jobs?size=5&sort=createdAt,desc` with JWT returned `total=9`.
+- OpenSearch smoke test passed: `GET /devhire_jobs/_count` returned `count=9`.
+- Frontend smoke test passed: `GET /jobs` returned HTTP 200.
+
+Committed as `chore: harden opensearch and notification runtime`.

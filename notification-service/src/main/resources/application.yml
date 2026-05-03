@@ -50,6 +50,9 @@ devhire:
       reply-to: ${DEVHIRE_NOTIFICATION_EMAIL_REPLY_TO:}
       dashboard-base-url: ${DEVHIRE_NOTIFICATION_EMAIL_DASHBOARD_BASE_URL:http://localhost:8080}
 management:
+  health:
+    mail:
+      enabled: ${MANAGEMENT_HEALTH_MAIL_ENABLED:${DEVHIRE_NOTIFICATION_EMAIL_ENABLED:false}}
   endpoints:
     web:
       exposure:

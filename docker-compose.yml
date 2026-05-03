@@ -71,7 +71,9 @@ services:
     container_name: devhire-opensearch
     environment:
       discovery.type: single-node
-      plugins.security.disabled: "true"
+      DISABLE_SECURITY_PLUGIN: "true"
+      DISABLE_INSTALL_DEMO_CONFIG: "true"
+      OPENSEARCH_INITIAL_ADMIN_PASSWORD: ${OPENSEARCH_INITIAL_ADMIN_PASSWORD:-DevHireOpenSearch@123456}
       OPENSEARCH_JAVA_OPTS: "-Xms512m -Xmx512m"
     ports:
       - "${OPENSEARCH_HOST_PORT:-9200}:9200"
@@ -148,6 +150,7 @@ services:
   tempo:
     image: grafana/tempo:2.6.1
     container_name: devhire-tempo
+    user: "0:0"
     command: ["-config.file=/etc/tempo.yml"]
     ports:
       - "${TEMPO_HOST_PORT:-3200}:3200"

@@ -1,10 +1,10 @@
 package com.devhire.notification.email;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 @Component
-@ConditionalOnMissingBean(EmailDeliveryService.class)
+@ConditionalOnProperty(prefix = "devhire.notification.email", name = "enabled", havingValue = "false", matchIfMissing = true)
 public class NoopEmailDeliveryService implements EmailDeliveryService {
     @Override
     public EmailDeliveryResult send(EmailMessage message) {

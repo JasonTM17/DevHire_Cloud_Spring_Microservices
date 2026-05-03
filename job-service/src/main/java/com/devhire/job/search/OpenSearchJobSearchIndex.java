@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -76,10 +77,14 @@ public class OpenSearchJobSearchIndex implements JobSearchIndex {
         document.put("type", job.getType());
         document.put("skills", skills(job.getSkillsCsv()));
         document.put("status", job.getStatus().name());
-        document.put("publishedAt", job.getPublishedAt());
-        document.put("createdAt", job.getCreatedAt());
-        document.put("updatedAt", job.getUpdatedAt());
+        document.put("publishedAt", instant(job.getPublishedAt()));
+        document.put("createdAt", instant(job.getCreatedAt()));
+        document.put("updatedAt", instant(job.getUpdatedAt()));
         return document;
+    }
+
+    private static String instant(Instant value) {
+        return value == null ? null : value.toString();
     }
 
     private static List<String> skills(String skillsCsv) {
