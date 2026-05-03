@@ -505,3 +505,33 @@ Verification:
 - Frontend smoke test passed: `GET /jobs` returned HTTP 200.
 
 Committed as `chore: harden opensearch and notification runtime`.
+
+## Phase 23 - Gmail SMTP sender hardening
+
+- Added a Gmail SMTP profile template in `.env.gmail.example` without real credentials.
+- Added local-only scripts:
+  - `scripts/configure-gmail-smtp.ps1` to write Gmail SMTP settings into the gitignored `.env` file.
+  - `scripts/smoke-gmail-smtp.ps1` to send an independent SMTP smoke email without printing the app password.
+- Added Spring Mail Gmail hardening variables:
+  - `SPRING_MAIL_SMTP_STARTTLS_REQUIRED`
+  - `SPRING_MAIL_SMTP_SSL_TRUST`
+  - `SPRING_MAIL_SMTP_CONNECTION_TIMEOUT`
+  - `SPRING_MAIL_SMTP_TIMEOUT`
+  - `SPRING_MAIL_SMTP_WRITE_TIMEOUT`
+  - `MANAGEMENT_HEALTH_MAIL_ENABLED`
+- Propagated the new SMTP settings into Docker Compose, production Compose, and Kubernetes ConfigMap templates.
+- Added unit coverage for `SmtpEmailDeliveryService` success and provider failure cases.
+- Added `docs/gmail-smtp.md` with Vietnamese, English, and Japanese instructions.
+
+Verification:
+
+- `mvn -pl notification-service -am test` passed on 2026-05-03.
+- `docker compose config --quiet` passed on 2026-05-03.
+- `kubectl kustomize .\deploy\k8s`, `.\deploy\k8s-overlays\local`, and `.\deploy\k8s-overlays\prod` passed on 2026-05-03.
+- `scripts/configure-gmail-smtp.ps1` created a local gitignored `.env` with Gmail SMTP enabled.
+- `scripts/smoke-gmail-smtp.ps1` sent a real smoke email through Gmail SMTP on 2026-05-03.
+- `docker compose up --build -d notification-service` rebuilt and started `notification-service` with Gmail SMTP env; readiness was `UP`.
+- `mvn -T1 clean verify` passed on 2026-05-03.
+- `powershell -ExecutionPolicy Bypass -File .\scripts\check-coverage.ps1` passed on 2026-05-03; `notification-service` coverage increased to 67.5% against the 45.0% gate.
+
+Committed as `chore(notification): configure gmail smtp sender`.

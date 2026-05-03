@@ -100,6 +100,13 @@ Required production variables:
 - `SPRING_MAIL_PASSWORD`
 - `SPRING_MAIL_SMTP_AUTH=true`
 - `SPRING_MAIL_SMTP_STARTTLS_ENABLE=true`
+- `SPRING_MAIL_SMTP_STARTTLS_REQUIRED=true`
+- `SPRING_MAIL_SMTP_SSL_TRUST=smtp.gmail.com` for Gmail
+- `SPRING_MAIL_SMTP_CONNECTION_TIMEOUT=5000`
+- `SPRING_MAIL_SMTP_TIMEOUT=5000`
+- `SPRING_MAIL_SMTP_WRITE_TIMEOUT=5000`
+
+For Gmail-specific local setup and smoke testing, see `docs/gmail-smtp.md`.
 
 ## Rollback
 

@@ -645,6 +645,11 @@ spec:
                 secretKeyRef:
                   name: devhire-secrets
                   key: NOTIFICATION_DATABASE_PASSWORD
+            - name: SPRING_MAIL_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: devhire-secrets
+                  key: SPRING_MAIL_USERNAME
             - name: SPRING_MAIL_PASSWORD
               valueFrom:
                 secretKeyRef:

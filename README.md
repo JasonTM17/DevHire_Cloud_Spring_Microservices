@@ -361,7 +361,7 @@ kubectl apply -k .\deploy\k8s
 - Aggregate OpenAPI tại gateway.
 - Relevance tuning và synonym dictionary cho OpenSearch job search.
 - Outbox pattern cho event publishing.
-- Email provider thật cho notification-service.
+- Email template, retry queue và provider failover cho notification-service.
 - Helm chart và GitOps overlays cho từng môi trường.
 - Frontend Candidate/Employer/Admin bằng React hoặc Next.js.
 
@@ -372,3 +372,4 @@ Tài liệu bổ sung:
 - API quick test: [docs/api.http](docs/api.http)
 - Architecture notes: [docs/architecture.md](docs/architecture.md)
 - Deployment runbook: [docs/deployment.md](docs/deployment.md)
+- Gmail SMTP runbook: [docs/gmail-smtp.md](docs/gmail-smtp.md)

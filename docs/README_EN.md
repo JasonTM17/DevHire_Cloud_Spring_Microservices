@@ -92,6 +92,7 @@ See [api.http](api.http) for a runnable flow.
 - Gateway-side JWT validation and rate limiting.
 - Kafka domain events.
 - SMTP email delivery provider with persisted delivery status.
+- Gmail SMTP setup and smoke-test scripts: [gmail-smtp.md](gmail-smtp.md).
 - Standard error response with trace id.
 - Docker Compose full local stack.
 - CI, Docker image build workflow, dependency review and release image publishing.

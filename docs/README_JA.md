@@ -92,6 +92,7 @@ API フローは [api.http](api.http) を参照してください。
 - Gateway での JWT 検証、rate limit、CORS。
 - Kafka domain events。
 - SMTP email delivery provider と delivery status の永続化。
+- Gmail SMTP setup and smoke-test scripts: [gmail-smtp.md](gmail-smtp.md).
 - Trace id を含む標準エラーレスポンス。
 - Docker Compose full local stack。
 - GitHub Actions CI/CD と GHCR release workflow。
@@ -104,6 +105,7 @@ API フローは [api.http](api.http) を参照してください。
 - `deploy/docker-compose.prod.yml`: 本番向け Compose サンプル。
 - `deploy/k8s`: Namespace、ConfigMap、Secret template、Deployment、Service、Ingress、HPA の Kubernetes baseline。
 - `docs/deployment.md`: release、deploy、health check、rollback の runbook。
+- `docs/gmail-smtp.md`: Gmail SMTP setup and smoke-test runbook.
 
 Kubernetes manifest の preview:
 
