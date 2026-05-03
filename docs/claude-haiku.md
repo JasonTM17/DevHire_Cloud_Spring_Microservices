@@ -10,6 +10,8 @@ ANTHROPIC_BASE_URL=https://api.anthropic.com
 ANTHROPIC_MODEL=claude-haiku-4-5-20251001
 ANTHROPIC_MAX_TOKENS=900
 DEVHIRE_AI_DEMO_FALLBACK_ENABLED=true
+DEVHIRE_AI_PROVIDER_FAILURE_THRESHOLD=3
+DEVHIRE_AI_PROVIDER_CIRCUIT_OPEN_SECONDS=120
 ```
 
 `.env.example` documents placeholders only. Real values must stay outside Git.
@@ -30,6 +32,8 @@ GET /api/admin/ai/provider/status
 
 The endpoint reports provider, model, base URL host, API version, max token cap, fallback setting, and mode. It never returns the raw key.
 
+Provider failures are guarded by a lightweight circuit breaker. After `DEVHIRE_AI_PROVIDER_FAILURE_THRESHOLD` consecutive API failures, `ai-service` opens the circuit for `DEVHIRE_AI_PROVIDER_CIRCUIT_OPEN_SECONDS` and serves deterministic fallback responses instead of repeatedly calling the provider.
+
 ## Cost Guardrails
 
 - Default model is Haiku.
@@ -38,6 +42,7 @@ The endpoint reports provider, model, base URL host, API version, max token cap,
 - Manual provider smoke should be opt-in only.
 - Token estimates are exposed through Micrometer summaries for reviewer visibility.
 - `scripts/ai-eval.ps1` runs the assistant through Gateway in fallback mode by default, so CI can catch regressions without paid provider calls.
+- Provider circuit state is visible through admin diagnostics and Prometheus counters.
 
 ## Production Upgrade Path
 

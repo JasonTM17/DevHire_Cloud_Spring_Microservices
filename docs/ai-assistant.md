@@ -48,6 +48,8 @@ Prometheus metrics:
 - `devhire_ai_fallback_total`
 - `devhire_ai_tool_calls_total`
 - `devhire_ai_token_estimate`
+- `devhire_ai_provider_failures_total`
+- `devhire_ai_provider_circuit_opened_total`
 
 Audit events:
 
@@ -89,6 +91,15 @@ See [AI Assistant Evaluation Gate](ai-evaluation.md) for the full runbook.
 ## Provider Diagnostics
 
 Admins can call `GET /api/admin/ai/provider/status` to verify model, Anthropic API host, API version, max tokens, fallback setting, and runtime mode without exposing the API key.
+
+The endpoint also reports provider resilience state:
+
+- `circuitBreakerState`: `CLOSED` or `OPEN`.
+- `consecutiveFailures`: number of consecutive provider call failures.
+- `circuitOpenUntil`: cooldown deadline when the circuit is open.
+- `lastFailureAt` and `lastFailureReason`: safe operational details without prompt or token data.
+
+The admin dashboard surfaces the same state in the AI provider operations panel and provides a knowledge reindex action for demo recovery.
 
 ## Security Notes
 

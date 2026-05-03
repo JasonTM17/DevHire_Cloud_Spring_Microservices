@@ -108,6 +108,17 @@ groups:
           summary: DevHire AI assistant fallback mode is being used frequently
           description: Claude API calls are falling back to deterministic demo mode. Check ANTHROPIC_API_KEY, Anthropic availability, and outbound network policy.
 
+      - alert: DevHireAiProviderCircuitOpen
+        expr: max(devhire_ai_provider_circuit_open) > 0
+        for: 2m
+        labels:
+          severity: warning
+          service: ai-service
+          slo: ai-provider
+        annotations:
+          summary: DevHire AI provider circuit breaker is open
+          description: ai-service has opened the Claude provider circuit after consecutive failures and is serving deterministic fallback responses.
+
       - alert: DevHireAiHigh5xxRate
         expr: |
           (

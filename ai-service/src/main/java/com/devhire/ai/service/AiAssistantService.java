@@ -33,6 +33,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 public class AiAssistantService {
@@ -44,6 +45,11 @@ public class AiAssistantService {
     private final AiConversationRepository repository;
     private final AiAuditEventPublisher auditEventPublisher;
     private final MeterRegistry meterRegistry;
+    private final AtomicInteger consecutiveProviderFailures = new AtomicInteger();
+    private final AtomicInteger providerCircuitOpenGauge = new AtomicInteger();
+    private volatile Instant providerCircuitOpenUntil;
+    private volatile Instant lastProviderFailureAt;
+    private volatile String lastProviderFailureReason;
 
     public AiAssistantService(AiProperties properties,
                               ClaudeChatClient claudeClient,
@@ -61,6 +67,7 @@ public class AiAssistantService {
         this.repository = repository;
         this.auditEventPublisher = auditEventPublisher;
         this.meterRegistry = meterRegistry;
+        this.meterRegistry.gauge("devhire.ai.provider.circuit.open", providerCircuitOpenGauge);
     }
 
     @Transactional
@@ -86,12 +93,21 @@ public class AiAssistantService {
         String userPrompt = userPrompt(request.message(), chunks, jobs.summary(), health.summary());
         boolean fallback = false;
         String answer;
+        boolean providerAttempted = false;
         try {
             if (!claudeClient.enabled()) {
                 throw new IllegalStateException("Claude Haiku API key is not configured");
             }
+            if (providerCircuitOpen()) {
+                throw new IllegalStateException("Claude provider circuit is open until " + providerCircuitOpenUntil);
+            }
+            providerAttempted = true;
             answer = claudeClient.complete(systemPrompt, userPrompt);
+            recordProviderSuccess();
         } catch (RuntimeException ex) {
+            if (providerAttempted) {
+                recordProviderFailure(ex);
+            }
             if (!properties.isDemoFallbackEnabled()) {
                 throw ex;
             }
@@ -130,7 +146,10 @@ public class AiAssistantService {
         }
         var anthropic = properties.getAnthropic();
         boolean keyConfigured = claudeClient.enabled();
-        String mode = keyConfigured ? "CLAUDE_API" : properties.isDemoFallbackEnabled() ? "DEMO_FALLBACK" : "DISABLED";
+        boolean circuitOpen = providerCircuitOpen();
+        String mode = keyConfigured
+                ? circuitOpen ? "CIRCUIT_OPEN_FALLBACK" : "CLAUDE_API"
+                : properties.isDemoFallbackEnabled() ? "DEMO_FALLBACK" : "DISABLED";
         return new AiProviderStatusResponse(
                 "anthropic",
                 anthropic.getModel(),
@@ -140,6 +159,11 @@ public class AiAssistantService {
                 keyConfigured,
                 properties.isDemoFallbackEnabled(),
                 mode,
+                circuitOpen ? "OPEN" : "CLOSED",
+                consecutiveProviderFailures.get(),
+                providerCircuitOpenUntil,
+                lastProviderFailureAt,
+                lastProviderFailureReason,
                 Instant.now()
         );
     }
@@ -172,6 +196,40 @@ public class AiAssistantService {
 
     private static int estimateTokens(String value) {
         return Math.max(1, (int) Math.ceil(value.length() / 4.0));
+    }
+
+    private boolean providerCircuitOpen() {
+        Instant openUntil = providerCircuitOpenUntil;
+        if (openUntil == null) {
+            providerCircuitOpenGauge.set(0);
+            return false;
+        }
+        if (Instant.now().isBefore(openUntil)) {
+            providerCircuitOpenGauge.set(1);
+            return true;
+        }
+        providerCircuitOpenUntil = null;
+        providerCircuitOpenGauge.set(0);
+        return false;
+    }
+
+    private void recordProviderSuccess() {
+        consecutiveProviderFailures.set(0);
+        providerCircuitOpenUntil = null;
+        lastProviderFailureReason = null;
+        providerCircuitOpenGauge.set(0);
+    }
+
+    private void recordProviderFailure(RuntimeException ex) {
+        int failures = consecutiveProviderFailures.incrementAndGet();
+        lastProviderFailureAt = Instant.now();
+        lastProviderFailureReason = ex.getClass().getSimpleName();
+        meterRegistry.counter("devhire.ai.provider.failures").increment();
+        if (failures >= Math.max(1, properties.getProviderFailureThreshold())) {
+            providerCircuitOpenUntil = Instant.now().plusSeconds(Math.max(1, properties.getProviderCircuitOpenSeconds()));
+            providerCircuitOpenGauge.set(1);
+            meterRegistry.counter("devhire.ai.provider.circuit.opened").increment();
+        }
     }
 
     private static String hostOf(String baseUrl) {

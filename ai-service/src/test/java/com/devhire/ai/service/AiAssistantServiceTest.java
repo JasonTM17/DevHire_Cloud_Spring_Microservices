@@ -28,6 +28,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -94,6 +95,8 @@ class AiAssistantServiceTest {
         assertThat(response.baseUrlHost()).isEqualTo("api.anthropic.com");
         assertThat(response.apiKeyConfigured()).isTrue();
         assertThat(response.mode()).isEqualTo("CLAUDE_API");
+        assertThat(response.circuitBreakerState()).isEqualTo("CLOSED");
+        assertThat(response.consecutiveFailures()).isZero();
         assertThat(response.toString()).doesNotContain("secret-value-that-must-not-leak");
     }
 
@@ -101,6 +104,34 @@ class AiAssistantServiceTest {
     void providerStatusRequiresAdminRole() {
         assertThatThrownBy(() -> service.providerStatus(user()))
                 .hasMessageContaining("Required role: ADMIN");
+    }
+
+    @Test
+    void opensProviderCircuitAfterConsecutiveClaudeFailures() {
+        properties.setProviderFailureThreshold(2);
+        properties.setProviderCircuitOpenSeconds(60);
+        UUID conversationId = UUID.randomUUID();
+        when(repository.ensureConversation(any(), any(), anyString(), anyString())).thenReturn(conversationId);
+        when(knowledgeService.retrieve(anyString())).thenReturn(List.of(chunk()));
+        when(jobSearchTool.search(anyString())).thenReturn(new JobSearchTool.ToolResult("search_jobs", "Senior Java", nullTrace("search_jobs")));
+        when(platformHealthTool.snapshot()).thenReturn(new PlatformHealthTool.ToolResult("health", "Compose health", nullTrace("health")));
+        when(claudeChatClient.enabled()).thenReturn(true);
+        when(claudeChatClient.complete(anyString(), anyString())).thenThrow(new IllegalStateException("provider failed"));
+
+        service.chat(user(), new AiChatRequest(null, "Explain risk"));
+        service.chat(user(), new AiChatRequest(null, "Explain risk again"));
+        service.chat(user(), new AiChatRequest(null, "Explain risk once more"));
+
+        var status = service.providerStatus(admin());
+
+        assertThat(status.mode()).isEqualTo("CIRCUIT_OPEN_FALLBACK");
+        assertThat(status.circuitBreakerState()).isEqualTo("OPEN");
+        assertThat(status.consecutiveFailures()).isEqualTo(2);
+        assertThat(status.circuitOpenUntil()).isNotNull();
+        assertThat(meterRegistry.get("devhire.ai.provider.failures").counter().count()).isEqualTo(2);
+        assertThat(meterRegistry.get("devhire.ai.provider.circuit.opened").counter().count()).isEqualTo(1);
+        assertThat(meterRegistry.get("devhire.ai.provider.circuit.open").gauge().value()).isEqualTo(1);
+        verify(claudeChatClient, times(2)).complete(anyString(), anyString());
     }
 
     private static AuthenticatedUser user() {

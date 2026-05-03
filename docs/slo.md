@@ -11,6 +11,7 @@ DevHire Cloud uses Prometheus, Grafana, Micrometer, OpenTelemetry, Loki, and Tem
 | Job search latency | p95 below 750 ms over 5 minutes | `http_server_requests_seconds_bucket` for `job-service` URI `/jobs` |
 | AI assistant latency | p95 below 5 seconds over 5 minutes | `devhire_ai_chat_latency_seconds_bucket` |
 | AI assistant provider fallback | Fewer than 5 fallback answers over 15 minutes in non-demo environments | `devhire_ai_fallback_total` |
+| AI provider circuit health | Circuit breaker should remain closed outside provider incidents | `devhire_ai_provider_circuit_open` |
 | Service health | All service scrape targets available | Prometheus `up{job="devhire-services"}` |
 | Event reliability | Zero outbox publish failures for 10 minutes | `devhire_outbox_publish_failure_total` |
 | JVM capacity | Heap pressure below 85% for normal traffic | `jvm_memory_used_bytes / jvm_memory_max_bytes` |
@@ -40,6 +41,7 @@ Current alerts:
 - `DevHireOutboxPublishFailures`
 - `DevHireAiP95LatencyHigh`
 - `DevHireAiFallbackSpike`
+- `DevHireAiProviderCircuitOpen`
 - `DevHireAiHigh5xxRate`
 
 Validate the rules locally:
@@ -81,6 +83,9 @@ AI assistant metrics are emitted by `ai-service`:
 - `devhire_ai_fallback_total`
 - `devhire_ai_tool_calls_total`
 - `devhire_ai_token_estimate`
+- `devhire_ai_provider_failures_total`
+- `devhire_ai_provider_circuit_open`
+- `devhire_ai_provider_circuit_opened_total`
 
 Every chat request also emits audit/outbox activity:
 
@@ -97,7 +102,8 @@ Every chat request also emits audit/outbox activity:
 4. Use Tempo traces for slow or failing request paths.
 5. Use Loki logs with trace id/correlation id for the impacted service.
 6. If `DevHireOutboxPublishFailures` fires, inspect Kafka availability and the service `outbox_events` table for `FAILED` or `DEAD_LETTER` rows.
-7. Roll back the newest deployment if the failure correlates with a release.
+7. If `DevHireAiProviderCircuitOpen` fires, check admin AI provider diagnostics, Anthropic key/configuration, outbound network policy, and recent provider errors.
+8. Roll back the newest deployment if the failure correlates with a release.
 
 ## Review Commands
 

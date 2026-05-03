@@ -11,6 +11,11 @@ public record AiProviderStatusResponse(
         boolean apiKeyConfigured,
         boolean demoFallbackEnabled,
         String mode,
+        String circuitBreakerState,
+        int consecutiveFailures,
+        Instant circuitOpenUntil,
+        Instant lastFailureAt,
+        String lastFailureReason,
         Instant checkedAt
 ) {
 }

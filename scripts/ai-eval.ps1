@@ -155,6 +155,12 @@ try {
     $candidateToken = Login -Email "candidate@devhire.local" -Password "Candidate@123456"
     $adminToken = Login -Email "admin@devhire.local" -Password "Admin@123456"
     $provider = Invoke-Api -Method GET -Path "/api/admin/ai/provider/status" -Token $adminToken
+    if ($provider.provider -ne "anthropic" -or [string]::IsNullOrWhiteSpace($provider.model)) {
+        throw "AI provider diagnostics did not return the expected Anthropic model metadata"
+    }
+    if ($provider.circuitBreakerState -notin @("OPEN", "CLOSED")) {
+        throw "AI provider diagnostics did not include a valid circuit breaker state"
+    }
     $evals = Get-Content -Raw -Encoding UTF8 $EvalFile | ConvertFrom-Json
 
     $results = foreach ($eval in $evals) {

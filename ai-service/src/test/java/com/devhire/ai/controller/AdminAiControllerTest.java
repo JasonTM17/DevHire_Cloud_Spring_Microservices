@@ -37,6 +37,11 @@ class AdminAiControllerTest {
                 false,
                 true,
                 "DEMO_FALLBACK",
+                "CLOSED",
+                0,
+                null,
+                null,
+                null,
                 Instant.now()
         ));
 
@@ -48,6 +53,8 @@ class AdminAiControllerTest {
                 .andExpect(jsonPath("$.data.provider", is("anthropic")))
                 .andExpect(jsonPath("$.data.model", is("claude-haiku-4-5-20251001")))
                 .andExpect(jsonPath("$.data.apiKeyConfigured", is(false)))
-                .andExpect(jsonPath("$.data.mode", is("DEMO_FALLBACK")));
+                .andExpect(jsonPath("$.data.mode", is("DEMO_FALLBACK")))
+                .andExpect(jsonPath("$.data.circuitBreakerState", is("CLOSED")))
+                .andExpect(jsonPath("$.data.consecutiveFailures", is(0)));
     }
 }

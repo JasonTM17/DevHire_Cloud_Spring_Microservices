@@ -236,6 +236,9 @@ try {
     if ([string]::IsNullOrWhiteSpace($provider.model)) {
         throw "AI provider diagnostics did not return a model"
     }
+    if ($provider.circuitBreakerState -notin @("OPEN", "CLOSED")) {
+        throw "AI provider diagnostics did not return a circuit breaker state"
+    }
 
     $assistant = Invoke-Api -Method POST -Path "/api/ai/chat" -Token $candidateToken -Body @{
         message = "Explain this microservices platform to a recruiter"

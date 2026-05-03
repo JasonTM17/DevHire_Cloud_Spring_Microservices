@@ -7,6 +7,8 @@ public class AiProperties {
     private boolean demoFallbackEnabled = true;
     private int maxContextChunks = 5;
     private String jobServiceUrl = "http://localhost:8084";
+    private int providerFailureThreshold = 3;
+    private int providerCircuitOpenSeconds = 120;
     private Anthropic anthropic = new Anthropic();
 
     public boolean isDemoFallbackEnabled() {
@@ -31,6 +33,22 @@ public class AiProperties {
 
     public void setJobServiceUrl(String jobServiceUrl) {
         this.jobServiceUrl = jobServiceUrl;
+    }
+
+    public int getProviderFailureThreshold() {
+        return providerFailureThreshold;
+    }
+
+    public void setProviderFailureThreshold(int providerFailureThreshold) {
+        this.providerFailureThreshold = providerFailureThreshold;
+    }
+
+    public int getProviderCircuitOpenSeconds() {
+        return providerCircuitOpenSeconds;
+    }
+
+    public void setProviderCircuitOpenSeconds(int providerCircuitOpenSeconds) {
+        this.providerCircuitOpenSeconds = providerCircuitOpenSeconds;
     }
 
     public Anthropic getAnthropic() {

@@ -12,7 +12,8 @@ Each prompt verifies:
 - expected portfolio terms are present;
 - at least one citation is returned;
 - at least one tool trace is returned;
-- the provider diagnostics endpoint is reachable for an admin user.
+- the provider diagnostics endpoint is reachable for an admin user;
+- the diagnostics response includes safe circuit breaker state.
 
 The gate intentionally works without a real Anthropic key. When `ANTHROPIC_API_KEY` is absent, `ai-service` runs in deterministic demo fallback mode and still proves the RAG, citation, tool trace, auth, persistence, and gateway path.
 
@@ -58,7 +59,7 @@ GET /api/admin/ai/provider/status
 Authorization: Bearer <admin-access-token>
 ```
 
-The response includes provider, model, base URL host, Anthropic API version, token cap, fallback flag, and runtime mode. It never returns the API key or raw secret values.
+The response includes provider, model, base URL host, Anthropic API version, token cap, fallback flag, runtime mode, and circuit breaker state. It never returns the API key or raw secret values.
 
 Example:
 
@@ -71,7 +72,9 @@ Example:
   "maxTokens": 900,
   "apiKeyConfigured": false,
   "demoFallbackEnabled": true,
-  "mode": "DEMO_FALLBACK"
+  "mode": "DEMO_FALLBACK",
+  "circuitBreakerState": "CLOSED",
+  "consecutiveFailures": 0
 }
 ```
 
