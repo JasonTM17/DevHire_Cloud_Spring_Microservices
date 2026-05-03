@@ -112,6 +112,28 @@ export type AiChatResponse = {
   createdAt: string;
 };
 
+export type AiProviderStatus = {
+  provider: string;
+  model: string;
+  baseUrlHost: string;
+  anthropicVersion: string;
+  maxTokens: number;
+  apiKeyConfigured: boolean;
+  demoFallbackEnabled: boolean;
+  mode: string;
+  circuitBreakerState: "OPEN" | "CLOSED";
+  consecutiveFailures: number;
+  circuitOpenUntil?: string;
+  lastFailureAt?: string;
+  lastFailureReason?: string;
+  checkedAt: string;
+};
+
+export type AiReindexResponse = {
+  documents: number;
+  chunks: number;
+};
+
 export type PageResponse<T> = {
   content: T[];
   totalElements: number;

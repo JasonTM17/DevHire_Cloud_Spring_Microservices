@@ -2,6 +2,8 @@ import { getSession } from "@/lib/session";
 import type {
   Application,
   AiChatResponse,
+  AiProviderStatus,
+  AiReindexResponse,
   AuditLog,
   AuthResponse,
   Company,
@@ -111,6 +113,9 @@ export const api = {
       body: JSON.stringify({ status })
     }),
   auditLogs: () => request<PageResponse<AuditLog>>("/api/admin/audit-logs"),
+  aiProviderStatus: () => request<AiProviderStatus>("/api/admin/ai/provider/status"),
+  reindexAiKnowledge: () =>
+    request<AiReindexResponse>("/api/admin/ai/knowledge/reindex", { method: "POST" }),
   aiChat: (message: string, conversationId?: string) =>
     request<AiChatResponse>("/api/ai/chat", {
       method: "POST",

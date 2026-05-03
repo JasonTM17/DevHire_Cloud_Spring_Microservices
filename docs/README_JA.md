@@ -96,7 +96,7 @@ npm run build
 - Gateway JWT validation, refresh token rotation, Redis blacklist, CORS, rate limiting.
 - Kafka, transactional outbox, idempotent consumers, audit events.
 - OpenSearch search adapter with PostgreSQL fallback.
-- Claude Haiku AI assistant with citations, streaming UI, metrics, audit events.
+- Claude Haiku AI assistant with citations, streaming UI, provider circuit breaker, metrics, audit events.
 - SMTP notification delivery queue with retry/backoff and persisted status.
 - Trace ID を含む標準エラーレスポンス。
 - Docker Compose full stack, Helm, Argo CD, Kubernetes, AWS Terraform blueprint.

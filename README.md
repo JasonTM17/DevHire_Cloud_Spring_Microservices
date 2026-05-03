@@ -223,6 +223,7 @@ Xem flow chạy được tại [docs/api.http](docs/api.http).
 - Transactional outbox, Kafka events, idempotent consumers.
 - OpenSearch adapter với fallback PostgreSQL.
 - Claude Haiku AI assistant có fallback demo mode, citations, tool traces, metrics và audit events.
+- Admin dashboard hiển thị AI provider diagnostics, circuit breaker state và knowledge reindex.
 - Persisted notification delivery status, SMTP retry/backoff và Gmail runbook.
 - Standard error response có `traceId`.
 - Prometheus alerts, Grafana SLO dashboard, trace/log stack.
