@@ -136,7 +136,11 @@ export default function AssistantPage() {
         <div className="panel chat-panel">
           <div className="chat-transcript" aria-live="polite">
             {messages.map((message, index) => (
-              <article key={`${message.role}-${index}`} className={`chat-message ${message.role}`}>
+              <article
+                key={`${message.role}-${index}`}
+                className={`chat-message ${message.role}`}
+                data-testid={message.role === "assistant" ? "assistant-message" : "user-message"}
+              >
                 <div className="chat-avatar">{message.role === "assistant" ? <Bot size={17} /> : "You"}</div>
                 <div className="chat-bubble">
                   {message.content ? <p>{message.content}</p> : <p className="muted">Streaming answer...</p>}
@@ -144,7 +148,7 @@ export default function AssistantPage() {
                   {message.citations?.length ? (
                     <div className="citation-list">
                       {message.citations.map((citation) => (
-                        <div key={`${citation.sourcePath}-${citation.title}`} className="citation">
+                        <div key={`${citation.sourcePath}-${citation.title}`} className="citation" data-testid="assistant-citation">
                           <FileText size={14} />
                           <span>
                             <strong>{citation.title}</strong>
@@ -188,7 +192,7 @@ export default function AssistantPage() {
               <h2>Tool traces</h2>
             </div>
             {(latestAssistant?.toolTraces ?? []).map((trace) => (
-              <div key={trace.name} className="tool-trace">
+              <div key={trace.name} className="tool-trace" data-testid="assistant-tool-trace">
                 <strong>{trace.name}</strong>
                 <span className={trace.status === "OK" ? "badge live" : "badge warn"}>{trace.status}</span>
                 <p>{trace.summary}</p>

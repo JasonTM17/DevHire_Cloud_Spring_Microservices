@@ -58,6 +58,13 @@ test.describe("portfolio screenshots", () => {
     await login(page, "candidate");
     await capture(page, "candidate-dashboard");
 
+    await page.goto("/assistant");
+    await expect(page.getByTestId("assistant-page")).toBeVisible();
+    await page.getByPlaceholder(/Ask about architecture/i).fill("Explain this microservices platform to a recruiter");
+    await page.getByRole("button", { name: "Ask" }).click();
+    await expect(page.getByTestId("assistant-message").last()).toContainText(/DevHire|microservices/i, { timeout: 25_000 });
+    await capture(page, "assistant-page");
+
     await login(page, "employer");
     await capture(page, "employer-dashboard");
 

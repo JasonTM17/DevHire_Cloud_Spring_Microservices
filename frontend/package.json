@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start --hostname 0.0.0.0 --port 3000",
     "typecheck": "tsc --noEmit",
-    "e2e": "playwright test e2e/devhire-smoke.spec.ts",
+    "e2e": "playwright test e2e/devhire-smoke.spec.ts e2e/assistant-smoke.spec.ts",
     "e2e:report": "playwright show-report",
     "screenshots": "playwright test e2e/portfolio-screenshots.spec.ts"
   },

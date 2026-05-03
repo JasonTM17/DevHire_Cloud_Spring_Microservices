@@ -1182,3 +1182,20 @@ Verification:
 - PowerShell syntax parse passed for `scripts/reset-demo-data.ps1`, `scripts/portfolio-demo.ps1`, `scripts/api-smoke.ps1`, and `scripts/e2e-smoke.ps1` on 2026-05-03.
 - `docker compose config --quiet` passed on 2026-05-03.
 - `./scripts/reset-demo-data.ps1 -DryRun -WhatIf` passed on 2026-05-03.
+
+## Phase 48 - AI assistant browser coverage
+
+- Added Playwright `assistant-smoke.spec.ts` for the protected Claude AI assistant flow:
+  - candidate login,
+  - `/assistant` navigation,
+  - recruiter demo prompt,
+  - cited answer assertion,
+  - tool trace assertion.
+- Added stable assistant test IDs for chat messages, citations, and tool traces.
+- Extended portfolio screenshot capture to include the assistant page after a real prompt.
+- Updated the frontend `e2e` script to include assistant smoke coverage.
+
+Verification:
+
+- `npm run typecheck` passed on 2026-05-03.
+- `npm run build` passed on 2026-05-03.
