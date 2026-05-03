@@ -1057,3 +1057,27 @@ Verification:
 - `docker run --rm -v "${PWD}:/repo" -w /repo zricethezav/gitleaks:latest detect --source /repo --no-git --redact --verbose` passed on 2026-05-03 with no leaks found.
 - Initial `mvn -T1 clean verify` hit a local JVM native memory allocation failure while the full Docker stack was running; Docker was stopped, ignored JVM crash logs were removed, and the command was rerun with conservative `MAVEN_OPTS`.
 - `mvn -T1 clean verify` passed on 2026-05-03.
+
+## Phase 41 - Trilingual portfolio case-study documentation
+
+- Rewrote root `README.md` in Vietnamese as a recruiter-facing production case study with:
+  - screenshots,
+  - architecture diagram,
+  - tech stack,
+  - services,
+  - demo flow,
+  - run/test commands,
+  - production-ready highlights,
+  - roadmap.
+- Rewrote `docs/README_EN.md` and `docs/README_JA.md` with the same portfolio narrative.
+- Added `docs/portfolio-case-study.md`.
+- Added `docs/production-readiness.md`.
+- Added operations runbooks:
+  - `docs/runbooks/incident-response.md`,
+  - `docs/runbooks/backup-restore.md`.
+
+Verification:
+
+- `git diff --check` passed on 2026-05-03.
+- UTF-8 sanity check for `README.md`, `docs/README_EN.md`, and `docs/README_JA.md` passed on 2026-05-03 with no replacement characters or common mojibake byte markers.
+- `mvn -T1 clean verify` passed on 2026-05-03.

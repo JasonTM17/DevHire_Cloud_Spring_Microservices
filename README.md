@@ -1,19 +1,18 @@
-# DevHire Cloud - Microservices Recruitment Platform
+# DevHire Cloud - Production Microservices Recruitment Platform
 
-DevHire Cloud là nền tảng tuyển dụng dạng mini ITviec/LinkedIn Jobs, được xây dựng như một dự án portfolio backend production-ready bằng Java 21, Spring Boot 3.5.13 và Spring Cloud 2025.0.2.
+DevHire Cloud là một dự án portfolio backend/DevOps/Solution Architecture được xây dựng như một nền tảng tuyển dụng mini ITviec/LinkedIn Jobs. Mục tiêu của dự án không phải là demo CRUD đơn giản, mà là chứng minh năng lực thiết kế, triển khai, kiểm thử và vận hành một hệ thống microservices Java Spring Boot production-style.
 
-Dự án tập trung vào kiến trúc microservices, bảo mật JWT, workflow tuyển dụng, event-driven communication, PostgreSQL riêng cho từng service, OpenSearch job search, Docker Compose full stack, observability, CI/CD và test thật.
-Frontend Next.js tối giản đã được thêm để demo các workflow Candidate, Employer và Admin trên API Gateway thật.
+Repository hiện có Java 21, Spring Boot 3.5.13, Spring Cloud 2025.0.2, API Gateway, JWT security, Kafka/outbox, OpenSearch, PostgreSQL service-owned databases, Docker Compose full stack, observability, CI/CD, Kubernetes/Helm/GitOps, AWS Terraform blueprint, Next.js frontend và bộ kiểm thử tự động.
 
 ## Portfolio Screenshots
 
-Anh chup duoc tao tu Playwright E2E tren frontend that:
+Ảnh được tạo từ frontend thật qua Playwright và Docker runtime, không phải mockup tĩnh.
 
 | Jobs | Job Detail |
 |---|---|
 | ![Jobs page](docs/screenshots/frontend-redesign-jobs.png) | ![Job detail](docs/screenshots/frontend-redesign-job-detail.png) |
 
-Docker runtime qua API Gateway that:
+Docker runtime qua API Gateway thật:
 
 ![Docker runtime jobs](docs/screenshots/docker-runtime-jobs.png)
 
@@ -21,22 +20,23 @@ Docker runtime qua API Gateway that:
 |---|---|---|
 | ![Candidate dashboard](docs/screenshots/candidate-dashboard.png) | ![Employer dashboard](docs/screenshots/employer-dashboard.png) | ![Admin dashboard](docs/screenshots/admin-dashboard.png) |
 
-Tai lieu quan trong:
+## Vì Sao Dự Án Này Đáng Xem
 
-- [Architecture](docs/architecture.md)
-- [Security and supply chain](docs/security.md)
-- [Deployment runbook](docs/deployment.md)
-- [Gmail SMTP runbook](docs/gmail-smtp.md)
-- [Production checklist](docs/production-checklist.md)
-- [10-minute demo script](docs/demo-script.md)
-- [Architecture Decision Records](docs/ADR/0001-microservices-and-service-databases.md)
+- Thiết kế microservices có ranh giới rõ: mỗi service có database riêng, migration riêng, API riêng, không share entity JPA.
+- Luồng tuyển dụng có đủ vai trò Candidate, Employer và Admin.
+- Gateway xử lý JWT validation, CORS, rate limit và routing.
+- Event-driven communication dùng Kafka, transactional outbox và idempotent consumers.
+- Job search dùng OpenSearch, có PostgreSQL fallback adapter.
+- Observability gồm Actuator, Prometheus, Grafana, OpenTelemetry, Tempo và Loki.
+- CI/CD có Maven verify, frontend build, Docker image build, security scan, SBOM, Terraform validate, API smoke, k6 smoke và Playwright E2E.
+- Infrastructure có Docker Compose, Kubernetes manifests, Helm chart, Argo CD sample và AWS Terraform blueprint.
 
-## Kiến Trúc Tổng Quan
+## Kiến Trúc
 
 ```mermaid
 flowchart LR
-    Client["Client / REST API"] --> Gateway["api-gateway :8080"]
-    Frontend["frontend :3001"] --> Gateway
+    Frontend["Next.js Frontend :3001"] --> Gateway["api-gateway :8080"]
+    Client["REST Client / api.http"] --> Gateway
     Gateway --> Auth["auth-service :8081"]
     Gateway --> User["user-service :8082"]
     Gateway --> Company["company-service :8083"]
@@ -51,45 +51,43 @@ flowchart LR
     Job --> JobDb[("devhire_job")]
     Job --> OpenSearch[("OpenSearch devhire_jobs")]
     Application --> AppDb[("devhire_application")]
-    Notification --> NotiDb[("devhire_notification")]
+    Notification --> NotificationDb[("devhire_notification")]
     Audit --> AuditDb[("devhire_audit")]
 
-    Job -. Feign .-> Company
-    Application -. Feign .-> Job
-    Auth --> Kafka["Kafka"]
+    Job -. OpenFeign .-> Company
+    Application -. OpenFeign .-> Job
+    Auth --> Kafka["Kafka topics"]
     Company --> Kafka
     Job --> Kafka
     Application --> Kafka
     Kafka --> Notification
     Kafka --> Audit
 
-    Prometheus["Prometheus"] --> Gateway
-    Grafana["Grafana"] --> Prometheus
+    Prometheus --> Gateway
+    Prometheus --> Job
+    Grafana --> Prometheus
     Gateway --> OTel["OpenTelemetry Collector"]
-    OTel --> Tempo["Tempo"]
+    OTel --> Tempo
 ```
 
 ## Tech Stack
 
-- Java 21, Maven multi-module
-- Spring Boot 3.5.13, Spring Cloud 2025.0.2
-- Spring Cloud Gateway WebFlux
-- Spring Security, JWT, BCrypt
-- PostgreSQL 17, Flyway, JPA/Hibernate
-- Redis cho rate limit và access-token blacklist
-- Kafka cho domain events
-- Transactional outbox va idempotent consumers
-- OpenSearch cho job search, PostgreSQL fallback adapter
-- OpenFeign cho service-to-service query
-- Springdoc OpenAPI/Swagger
-- Actuator, Micrometer, Prometheus, Grafana, OpenTelemetry, Tempo, Loki
-- JUnit 5, Mockito, MockMvc, Testcontainers PostgreSQL, JaCoCo
-- Docker Compose, GitHub Actions
-- Kubernetes, Helm, Argo CD GitOps sample
-- Trivy, Gitleaks, SBOM
-- Next.js 16, React 19, TypeScript cho frontend portfolio
+- Java 21, Maven multi-module.
+- Spring Boot 3.5.13, Spring Cloud 2025.0.2, Spring Cloud Gateway.
+- Spring Security, JWT, BCrypt, role-based authorization.
+- PostgreSQL 17, Flyway, JPA/Hibernate.
+- Redis cho rate limit và token blacklist.
+- Kafka, transactional outbox, idempotent consumers.
+- OpenSearch job search, PostgreSQL fallback.
+- OpenFeign cho service-to-service reads.
+- Springdoc OpenAPI, Actuator, Micrometer, OpenTelemetry.
+- Prometheus, Grafana, Loki, Tempo.
+- JUnit 5, Mockito, MockMvc, Testcontainers, JaCoCo.
+- Docker Compose, GitHub Actions, Trivy, Gitleaks, SBOM.
+- Kubernetes, Helm, Argo CD, AWS Terraform blueprint.
+- Next.js 16, React 19, TypeScript.
 
-## Service
+## Services
 
 | Service | Port | Trách nhiệm |
 |---|---:|---|
@@ -98,93 +96,51 @@ flowchart LR
 | user-service | 8082 | Candidate/employer profile |
 | company-service | 8083 | Company onboarding, admin approval/rejection |
 | job-service | 8084 | Job workflow, OpenSearch search/filter/page/sort |
-| application-service | 8085 | Candidate apply, employer status tracking, history |
-| notification-service | 8086 | Internal notification từ application events, optional SMTP email delivery |
+| application-service | 8085 | Candidate apply, employer status tracking, status history |
+| notification-service | 8086 | Internal notification, SMTP email queue/retry |
 | audit-service | 8087 | Audit log ingestion và admin query |
-| common-lib | - | Error model, security constants, event DTO contracts |
-| frontend | 3001 | Next.js UI cho jobs, candidate, employer và admin workflows |
+| common-lib | - | Error model, headers, event DTOs, outbox support |
+| frontend | 3001 | Next.js UI cho jobs, candidate, employer, admin |
 
-## Luồng Nghiệp Vụ Chính
+## Luồng Demo Chính
 
-1. Employer đăng ký hoặc đăng nhập.
+1. Employer đăng nhập.
 2. Employer tạo company.
 3. Admin approve company.
 4. Employer tạo job và submit review.
 5. Admin approve job.
 6. Candidate search job đã publish.
-7. Candidate apply job bằng CV URL.
-8. Employer cập nhật application status.
+7. Candidate apply bằng CV URL.
+8. Employer chuyển application sang `INTERVIEW`.
 9. Candidate nhận notification.
 10. Admin xem audit log.
 
-## Chạy Local Bằng Docker
+## Chạy Bằng Docker
 
-Yêu cầu: Docker Desktop.
-
-```bash
+```powershell
 docker compose up --build
 ```
 
-Hoặc trên Windows:
+URL chính:
 
-```powershell
-.\scripts\dev-up.ps1 -Build
-```
-
-Các URL chính:
-
-- Gateway: `http://localhost:8080`
 - Frontend: `http://localhost:3001`
-- Prometheus: `http://localhost:9090`
+- API Gateway: `http://localhost:8080`
 - Grafana: `http://localhost:3000` với `admin/admin`
-- Tempo: `http://localhost:3200`
-- Kafka external bootstrap: `localhost:29092`
+- Prometheus: `http://localhost:9090`
 - OpenSearch: `http://localhost:9200`
 - OpenSearch Dashboards: `http://localhost:5601`
-- PostgreSQL: `localhost:5432`
-- Redis: `localhost:6380` (container nội bộ vẫn dùng `6379`)
+- Tempo: `http://localhost:3200`
+- Loki: `http://localhost:3100`
 
-Nếu máy đang có stack khác chiếm port chuẩn, chỉnh các biến `*_HOST_PORT` trong `.env` rồi chạy lại Compose.
+Nếu port local bị trùng, chỉnh các biến `*_HOST_PORT` trong `.env`.
 
 ## Build Và Test
 
-Yêu cầu: JDK 21 hoặc mới hơn có hỗ trợ compile `--release 21`, Maven 3.9+.
-
-```bash
-mvn clean verify
-```
-
-Lệnh này chạy unit test, controller test, contract-like event tests và Testcontainers PostgreSQL integration test.
-
-Hoặc trên Windows:
+Backend:
 
 ```powershell
-.\scripts\verify.ps1
+mvn -T1 clean verify
 ```
-
-`verify.ps1` chạy `mvn clean verify` và coverage gate theo từng module.
-
-Gateway API smoke flow:
-
-```powershell
-.\scripts\api-smoke.ps1 -GatewayUrl http://localhost:8080
-```
-
-Neu muon script tu build va khoi dong full Docker stack bang high ports de tranh xung dot local:
-
-```powershell
-.\scripts\api-smoke.ps1 -StartStack -Build
-```
-
-Script nay login 3 demo roles, tao va approve company, tao va approve job, search job, submit application, update application status, doc notification va audit log qua API Gateway.
-
-Gateway performance smoke voi k6:
-
-```powershell
-.\scripts\perf-smoke.ps1 -BaseUrl http://localhost:8080 -Vus 5 -Duration 30s -UseDocker
-```
-
-Bao cao JSON duoc ghi vao `reports/k6/job-search-summary.json` va khong duoc commit.
 
 Frontend:
 
@@ -193,32 +149,19 @@ cd frontend
 npm ci
 npm run typecheck
 npm run build
-npm run dev
 ```
 
-## Chạy Một Service Không Docker
+API smoke qua Gateway:
 
-Ví dụ chạy auth-service:
-
-```bash
-mvn -pl auth-service -am spring-boot:run
+```powershell
+.\scripts\api-smoke.ps1 -GatewayUrl http://localhost:8080
 ```
 
-Khi chạy local không Docker, cần có PostgreSQL, Redis và Kafka tương ứng hoặc override config bằng environment variables. `job-service` mặc định dùng PostgreSQL fallback; Docker Compose bật OpenSearch bằng `DEVHIRE_SEARCH_PROVIDER=opensearch`.
+Performance smoke:
 
-## Swagger / OpenAPI
-
-Swagger hiện được expose theo từng service port:
-
-- `http://localhost:8081/swagger-ui/index.html`
-- `http://localhost:8082/swagger-ui/index.html`
-- `http://localhost:8083/swagger-ui/index.html`
-- `http://localhost:8084/swagger-ui/index.html`
-- `http://localhost:8085/swagger-ui/index.html`
-- `http://localhost:8086/swagger-ui/index.html`
-- `http://localhost:8087/swagger-ui/index.html`
-
-Gateway chưa aggregate OpenAPI trong v1.
+```powershell
+.\scripts\perf-smoke.ps1 -BaseUrl http://localhost:8080 -Vus 5 -Duration 30s -UseDocker
+```
 
 ## Demo Accounts
 
@@ -228,216 +171,60 @@ Gateway chưa aggregate OpenAPI trong v1.
 | EMPLOYER | `employer@devhire.local` | `Employer@123456` |
 | CANDIDATE | `candidate@devhire.local` | `Candidate@123456` |
 
-Seed data gồm 3 companies, 10 jobs, 5 candidate profiles, một số applications, notifications và audit logs.
-
-## Endpoint Chính Qua Gateway
-
-Auth:
+## API Chính Qua Gateway
 
 - `POST /api/auth/register`
 - `POST /api/auth/login`
 - `POST /api/auth/refresh`
 - `POST /api/auth/logout`
 - `GET /api/auth/me`
-
-User:
-
 - `GET /api/users/me`
 - `PUT /api/users/me`
-- `GET /api/users/{id}`
-
-Company:
-
 - `POST /api/companies`
-- `GET /api/companies`
-- `GET /api/companies/{id}`
 - `PATCH /api/admin/companies/{id}/approve`
-- `PATCH /api/admin/companies/{id}/reject`
-
-Job:
-
 - `POST /api/jobs`
 - `GET /api/jobs`
-- `GET /api/jobs/{id}`
-- `PUT /api/jobs/{id}`
-- `PATCH /api/jobs/{id}/submit-review`
 - `PATCH /api/admin/jobs/{id}/approve`
-- `PATCH /api/admin/jobs/{id}/reject`
-- `PATCH /api/jobs/{id}/close`
-
-Application:
-
 - `POST /api/jobs/{jobId}/applications`
-- `GET /api/applications/me`
-- `GET /api/employer/jobs/{jobId}/applications`
 - `PATCH /api/applications/{id}/status`
-- `PATCH /api/applications/{id}/withdraw`
-
-Notification:
-
 - `GET /api/notifications`
-- `PATCH /api/notifications/{id}/read`
-- `PATCH /api/notifications/read-all`
-
-Email delivery:
-
-- Local mặc định tắt bằng `DEVHIRE_NOTIFICATION_EMAIL_ENABLED=false`.
-- Khi bật SMTP, `notification-service` resolve email qua `user-service`, gửi bằng delivery worker, retry/backoff nếu lỗi tạm thời, và lưu trạng thái `PENDING`, `SENDING`, `SENT`, `FAILED_RETRYABLE`, `FAILED_PERMANENT` hoặc `DISABLED`.
-- Cấu hình chính: `SPRING_MAIL_HOST`, `SPRING_MAIL_PORT`, `SPRING_MAIL_USERNAME`, `SPRING_MAIL_PASSWORD`, `SPRING_MAIL_SMTP_AUTH`, `SPRING_MAIL_SMTP_STARTTLS_ENABLE`.
-
-Audit:
-
 - `GET /api/admin/audit-logs`
 
-## Sample API Response
+Xem flow chạy được tại [docs/api.http](docs/api.http).
 
-```json
-{
-  "data": {
-    "userId": "00000000-0000-0000-0000-000000000003",
-    "email": "candidate@devhire.local",
-    "role": "CANDIDATE",
-    "accessToken": "eyJhbGciOiJIUzI1NiJ9...",
-    "refreshToken": "refresh-token-value",
-    "accessTokenExpiresAt": "2026-05-02T14:15:00Z",
-    "refreshTokenExpiresAt": "2026-05-09T14:00:00Z"
-  }
-}
-```
+## Production-Ready Highlights
 
-Error response chuẩn:
+- Service-owned databases và Flyway migrations.
+- Constraints/index thật, optimistic locking ở các aggregate quan trọng.
+- JWT access token ngắn hạn, refresh token rotation, Redis blacklist.
+- Gateway-side JWT validation, CORS, rate limit.
+- Transactional outbox, Kafka events, idempotent consumers.
+- OpenSearch adapter với fallback PostgreSQL.
+- Persisted notification delivery status, SMTP retry/backoff và Gmail runbook.
+- Standard error response có `traceId`.
+- Prometheus alerts, Grafana SLO dashboard, trace/log stack.
+- Docker multi-stage images chạy non-root.
+- Kubernetes raw manifests, Helm chart, Argo CD sample.
+- AWS Terraform blueprint có cost guardrails.
+- GitHub Actions CI/CD, Trivy, Gitleaks, SBOM, Dependabot.
+- Unit, controller, contract, integration, E2E và performance smoke tests.
 
-```json
-{
-  "timestamp": "2026-05-02T14:00:00Z",
-  "status": 400,
-  "error": "VALIDATION_ERROR",
-  "message": "Request validation failed",
-  "path": "/api/jobs",
-  "traceId": "f8a1d2f0-6b92-4b33-92fe-f89d3e0b3f2e",
-  "violations": [
-    {
-      "field": "title",
-      "message": "must not be blank"
-    }
-  ]
-}
-```
+## Tài Liệu Quan Trọng
 
-## Observability
+- [Architecture](docs/architecture.md)
+- [Portfolio case study](docs/portfolio-case-study.md)
+- [Production readiness](docs/production-readiness.md)
+- [Security and supply chain](docs/security.md)
+- [SLO operations](docs/slo.md)
+- [Deployment runbook](docs/deployment.md)
+- [Gmail SMTP runbook](docs/gmail-smtp.md)
+- [AWS Terraform blueprint](docs/aws-terraform.md)
+- [10-minute demo script](docs/demo-script.md)
+- [GitHub profile checklist](docs/github-profile.md)
+- [Architecture Decision Records](docs/ADR/0001-microservices-and-service-databases.md)
 
-- Actuator health: `/actuator/health`
-- Prometheus metrics: `/actuator/prometheus`
-- Grafana dashboard: DevHire Cloud Overview
-- Trace export: OTLP HTTP tới OpenTelemetry Collector, sau đó vào Tempo
-- Log pattern có `application`, `traceId`, `spanId`
+## Roadmap Gần Nhất
 
-## CI/CD
-
-GitHub Actions:
-
-- `ci.yml`: Java 21, Maven cache, `mvn -B -T1 clean verify`, upload test reports nếu fail.
-- `ci.yml`: thêm Node 24, `npm ci`, `npm run typecheck`, `npm run build` cho frontend.
-- `docker.yml`: Docker matrix build cho từng service và frontend, tag theo commit SHA.
-- `security.yml`: Dependency Review cho PR và Maven dependency tree sanity check.
-- `release.yml`: Publish Docker images lên GHCR khi push tag dạng `v1.0.0` hoặc chạy thủ công.
-
-Security supply-chain CI da co them Gitleaks, Trivy filesystem/image scan, SBOM artifact va OCI image labels cho Docker image.
-API smoke CI co workflow `api-smoke.yml` de build stack va chay luong nghiep vu chinh qua API Gateway theo lich/manual.
-Performance smoke CI co workflow `performance.yml` chay k6 job-search smoke voi threshold cho error rate va p95 latency.
-Dependabot duoc cau hinh cho Maven, npm frontend, GitHub Actions va Docker base images cua tung service.
-
-## Deployment/Kubernetes
-
-Tài sản triển khai nằm trong `deploy/`:
-
-- `deploy/docker-compose.prod.yml`: compose mẫu cho production với external PostgreSQL/Redis/Kafka và image tag rõ ràng.
-- `deploy/k8s`: Kubernetes baseline gồm namespace, service account, config map, secret template, deployments, services, ingress, HPA, PDB, network policy, quota và local/prod overlays.
-- `deploy/helm/devhire-cloud`: Helm chart cho local, staging và production values.
-- `deploy/gitops/argocd-application.yaml`: Argo CD GitOps sample.
-- `docs/deployment.md`: runbook vận hành cho render manifest, deploy, health check và rollback.
-
-Xem manifest:
-
-```powershell
-kubectl kustomize .\deploy\k8s
-kubectl kustomize .\deploy\k8s-overlays\prod
-```
-
-Apply sau khi thay secret và image tag thật:
-
-```powershell
-kubectl apply -k .\deploy\k8s
-```
-
-## Cấu Trúc Thư Mục
-
-```text
-.
-├── api-gateway
-├── auth-service
-├── user-service
-├── company-service
-├── job-service
-├── application-service
-├── notification-service
-├── audit-service
-├── common-lib
-├── frontend
-├── infra
-│   ├── grafana
-│   ├── otel
-│   ├── postgres
-│   ├── prometheus
-│   └── tempo
-├── deploy
-│   ├── k8s
-│   ├── k8s-overlays
-│   ├── helm
-│   └── gitops
-├── docs
-└── .github/workflows
-```
-
-## Điểm Production-Ready
-
-- Multi-module Maven build, Java 21 release target.
-- Database per service, Flyway migrations, indexes, constraints, seed data.
-- OpenSearch adapter cho published job search, có PostgreSQL fallback khi search cluster chưa sẵn sàng.
-- JWT access token, refresh token rotation, BCrypt, Redis blacklist.
-- Gateway validation, rate limiting, CORS, correlation id, centralized gateway errors.
-- Không share JPA entity giữa services.
-- Feign cho service-to-service query, Kafka cho domain events, transactional outbox và idempotent consumers.
-- SMTP email queue cho notification-service, có retry/backoff, rate limit, HTML template và delivery status trong DB.
-- Không hardcode production secret, có `.env.example`.
-- Dockerfile multi-stage, non-root runtime user.
-- Observability stack có metrics, health probes, tracing và dashboard.
-- Security supply-chain có Trivy, Gitleaks, SBOM và OCI image labels.
-- Kubernetes raw manifests, Helm chart và Argo CD sample.
-- Test thật với unit, controller, contract-like tests và Testcontainers.
-- Coverage gate cứng bằng JaCoCo + `scripts/check-coverage.ps1` trong CI.
-- Git history chia theo phase, commit message rõ ràng.
-
-## Roadmap
-
-- Aggregate OpenAPI tại gateway.
-- Relevance tuning và synonym dictionary cho OpenSearch job search.
-- Debezium CDC publisher thay cho scheduled outbox publisher nếu cần scale cao hơn.
-- Email provider failover SendGrid/SES/Mailgun.
-- Canary deployment và progressive delivery chi tiết hơn.
-
-Tài liệu bổ sung:
-
-- English: [docs/README_EN.md](docs/README_EN.md)
-- Japanese: [docs/README_JA.md](docs/README_JA.md)
-- API quick test: [docs/api.http](docs/api.http)
-- Architecture notes: [docs/architecture.md](docs/architecture.md)
-- Deployment runbook: [docs/deployment.md](docs/deployment.md)
-- Gmail SMTP runbook: [docs/gmail-smtp.md](docs/gmail-smtp.md)
-- Security: [docs/security.md](docs/security.md)
-- AWS Terraform blueprint: [docs/aws-terraform.md](docs/aws-terraform.md)
-- Cost guardrails: [docs/cost-estimate.md](docs/cost-estimate.md)
-- SLO operations: [docs/slo.md](docs/slo.md)
-- Production checklist: [docs/production-checklist.md](docs/production-checklist.md)
-- Demo script: [docs/demo-script.md](docs/demo-script.md)
-- ADR: [docs/ADR](docs/ADR)
+- Thêm `ai-service` dùng Claude Haiku, RAG trên jobs/docs/platform state, streaming UI và citations.
+- Thêm script reset demo data.
+- Chuẩn bị release `v0.1.0` với final screenshots và release notes.
