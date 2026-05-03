@@ -1,0 +1,40 @@
+global:
+  replicas: 1
+  imageRegistry: devhire
+  imageTag: local
+  imagePullPolicy: IfNotPresent
+  env:
+    SPRING_PROFILES_ACTIVE: local
+    CORS_ALLOWED_ORIGINS: http://localhost:3000,http://localhost:13001
+    DEVHIRE_NOTIFICATION_EMAIL_ENABLED: "false"
+    DEVHIRE_NOTIFICATION_EMAIL_FROM: no-reply@devhire.local
+    DEVHIRE_NOTIFICATION_EMAIL_DASHBOARD_BASE_URL: http://localhost:8080
+    NEXT_PUBLIC_API_BASE_URL: http://localhost:8080
+    DEVHIRE_SEARCH_OPENSEARCH_URL: http://opensearch:9200
+
+secrets:
+  createExample: true
+  stringData:
+    JWT_SECRET: local-dev-only-change-me-change-me-change-me-change-me
+    POSTGRES_USER: devhire
+    POSTGRES_PASSWORD: devhire_local_password
+    SPRING_MAIL_USERNAME: ""
+    SPRING_MAIL_PASSWORD: ""
+
+ingress:
+  enabled: false
+  tls:
+    enabled: false
+
+pdb:
+  enabled: false
+
+services:
+  frontend:
+    replicas: 1
+    autoscaling:
+      enabled: false
+  api-gateway:
+    replicas: 1
+    autoscaling:
+      enabled: false

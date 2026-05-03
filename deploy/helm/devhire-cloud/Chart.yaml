@@ -1,0 +1,15 @@
+apiVersion: v2
+name: devhire-cloud
+description: Production-style Helm chart for DevHire Cloud microservices recruitment platform.
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - java
+  - spring-boot
+  - microservices
+  - recruitment
+  - portfolio
+maintainers:
+  - name: JasonTM17
+    url: https://github.com/JasonTM17

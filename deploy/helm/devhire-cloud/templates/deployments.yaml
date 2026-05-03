@@ -1,0 +1,62 @@
+{{- range $name, $service := .Values.services }}
+{{- if $service.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $name }}
+  namespace: {{ $.Values.global.namespace }}
+  labels:
+{{ include "devhire.labels" $ | nindent 4 }}
+    app.kubernetes.io/name: {{ $name }}
+spec:
+  replicas: {{ $service.replicas | default $.Values.global.replicas }}
+  selector:
+    matchLabels:
+{{ include "devhire.selectorLabels" (dict "name" $name) | nindent 6 }}
+  template:
+    metadata:
+      labels:
+{{ include "devhire.selectorLabels" (dict "name" $name) | nindent 8 }}
+    spec:
+      serviceAccountName: {{ $.Values.global.serviceAccountName }}
+      securityContext:
+{{ toYaml $.Values.global.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ $name }}
+          image: {{ include "devhire.image" (dict "root" $ "name" $name "service" $service) | quote }}
+          imagePullPolicy: {{ $.Values.global.imagePullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ $service.port }}
+{{- if $service.database }}
+          env:
+            - name: SERVICE_DATABASE
+              value: {{ $service.database | quote }}
+{{- end }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "devhire.configName" $ }}
+{{- if $service.secretRef }}
+            - secretRef:
+                name: {{ include "devhire.secretName" $ }}
+                optional: true
+{{- end }}
+          readinessProbe:
+            httpGet:
+              path: {{ $service.readinessPath | default "/actuator/health/readiness" }}
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: {{ $service.livenessPath | default "/actuator/health/liveness" }}
+              port: http
+            initialDelaySeconds: 45
+            periodSeconds: 20
+          resources:
+{{ include "devhire.resources" (dict "root" $ "service" $service) | nindent 12 }}
+          securityContext:
+{{ toYaml $.Values.global.containerSecurityContext | nindent 12 }}
+---
+{{- end }}
+{{- end }}

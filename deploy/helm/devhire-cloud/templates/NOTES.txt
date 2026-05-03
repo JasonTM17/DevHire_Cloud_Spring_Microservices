@@ -1,0 +1,7 @@
+DevHire Cloud has been rendered for namespace {{ .Values.global.namespace }}.
+
+Important:
+- Replace placeholder Secret values before production use.
+- Ensure PostgreSQL, Redis, Kafka, OpenSearch, and observability endpoints match values.yaml.
+- For local render checks:
+  helm template devhire-cloud ./deploy/helm/devhire-cloud -f ./deploy/helm/devhire-cloud/values-local.yaml

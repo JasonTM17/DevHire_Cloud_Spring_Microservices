@@ -679,3 +679,36 @@ Verification:
 - `kubectl kustomize .\deploy\k8s`, `.\deploy\k8s-overlays\local`, and `.\deploy\k8s-overlays\prod` passed on 2026-05-03.
 
 Committed as `ci(security): add trivy gitleaks and sbom workflows`.
+
+## Phase 28 - Helm chart and GitOps deployment
+
+- Added `deploy/helm/devhire-cloud` Helm chart with:
+  - namespace,
+  - service account,
+  - ConfigMap,
+  - example Secret support for non-production,
+  - Deployments and Services for frontend plus all backend services,
+  - readiness/liveness probes,
+  - resource requests/limits,
+  - HPA templates,
+  - PodDisruptionBudget templates,
+  - NetworkPolicy,
+  - ResourceQuota,
+  - Ingress routes for frontend and API Gateway.
+- Added environment values:
+  - `values-local.yaml`,
+  - `values-staging.yaml`,
+  - `values-prod.yaml`.
+- Added Argo CD sample at `deploy/gitops/argocd-application.yaml`.
+- Updated deployment docs with Helm render/install and GitOps instructions.
+- Kept raw Kubernetes manifests as the transparent baseline while Helm becomes the configurable deployment path.
+
+Verification:
+
+- Native `helm` is not installed on this workstation, so Helm validation was executed through `alpine/helm:3.17.0`.
+- `helm lint deploy/helm/devhire-cloud` passed on 2026-05-03.
+- `helm template` passed for local, staging, and production values on 2026-05-03.
+- `kubectl apply --dry-run=client` could not be used because the local kubeconfig points to an inactive API server at `https://127.0.0.1:56085`.
+- Offline manifest validation with `ghcr.io/yannh/kubeconform:latest -strict -ignore-missing-schemas` passed for local, staging, and production Helm renders on 2026-05-03.
+
+Committed as `chore(deploy): add helm and gitops manifests`.

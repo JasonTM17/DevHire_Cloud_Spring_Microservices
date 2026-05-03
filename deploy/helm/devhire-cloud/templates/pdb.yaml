@@ -1,0 +1,20 @@
+{{- if .Values.pdb.enabled }}
+{{- range $name, $service := .Values.services }}
+{{- if and $service.enabled (gt (int ($service.replicas | default $.Values.global.replicas)) 1) }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ $name }}
+  namespace: {{ $.Values.global.namespace }}
+  labels:
+{{ include "devhire.labels" $ | nindent 4 }}
+    app.kubernetes.io/name: {{ $name }}
+spec:
+  minAvailable: {{ $.Values.pdb.minAvailable }}
+  selector:
+    matchLabels:
+{{ include "devhire.selectorLabels" (dict "name" $name) | nindent 6 }}
+---
+{{- end }}
+{{- end }}
+{{- end }}

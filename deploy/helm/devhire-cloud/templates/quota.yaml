@@ -1,0 +1,12 @@
+{{- if .Values.quota.enabled }}
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: devhire-quota
+  namespace: {{ .Values.global.namespace }}
+  labels:
+{{ include "devhire.labels" . | nindent 4 }}
+spec:
+  hard:
+{{ toYaml .Values.quota.hard | nindent 4 }}
+{{- end }}

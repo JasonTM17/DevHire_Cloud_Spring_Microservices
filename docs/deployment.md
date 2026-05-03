@@ -9,6 +9,8 @@ This runbook describes the production-style deployment assets included in the po
 - `deploy/k8s`: Kubernetes baseline with namespace, config, secret template, deployments, services, ingress, and autoscaling examples.
 - `deploy/k8s-overlays/local`: smaller local cluster overlay with one replica and `devhire.local` ingress host.
 - `deploy/k8s-overlays/prod`: production overlay with higher replicas and TLS ingress sample.
+- `deploy/helm/devhire-cloud`: Helm chart for local, staging, and production values.
+- `deploy/gitops/argocd-application.yaml`: Argo CD sample for GitOps delivery.
 - `.github/workflows/release.yml`: GHCR publishing workflow for version tags.
 - `frontend`: Next.js standalone Docker image served separately from the API Gateway.
 
@@ -58,6 +60,32 @@ Patch an image tag after a release:
 ```powershell
 kubectl -n devhire set image deployment/api-gateway api-gateway=ghcr.io/jasontm17/devhire/api-gateway:v1.0.0
 ```
+
+## Helm And GitOps
+
+The Helm chart lives in `deploy/helm/devhire-cloud` and is the preferred path for environment-specific deployments.
+
+Render manifests:
+
+```powershell
+helm template devhire-cloud .\deploy\helm\devhire-cloud -f .\deploy\helm\devhire-cloud\values-local.yaml
+helm template devhire-cloud .\deploy\helm\devhire-cloud -f .\deploy\helm\devhire-cloud\values-staging.yaml
+helm template devhire-cloud .\deploy\helm\devhire-cloud -f .\deploy\helm\devhire-cloud\values-prod.yaml
+```
+
+Install or upgrade:
+
+```powershell
+helm upgrade --install devhire-cloud .\deploy\helm\devhire-cloud -f .\deploy\helm\devhire-cloud\values-prod.yaml --namespace devhire --create-namespace
+```
+
+Argo CD sample:
+
+```powershell
+kubectl apply -f .\deploy\gitops\argocd-application.yaml
+```
+
+For production, create `devhire-secrets` outside the chart through External Secrets, SealedSecrets, your cloud secret manager, or a manual Kubernetes Secret before syncing the chart.
 
 ## Release Flow
 

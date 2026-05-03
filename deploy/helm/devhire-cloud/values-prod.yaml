@@ -1,0 +1,32 @@
+global:
+  namespace: devhire
+  imageRegistry: ghcr.io/jasontm17/devhire
+  imageTag: latest
+  imagePullPolicy: IfNotPresent
+  env:
+    SPRING_PROFILES_ACTIVE: prod
+    CORS_ALLOWED_ORIGINS: https://devhire.example.com
+    DEVHIRE_NOTIFICATION_EMAIL_DASHBOARD_BASE_URL: https://devhire.example.com
+    NEXT_PUBLIC_API_BASE_URL: https://devhire.example.com
+    MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "0.1"
+
+secrets:
+  createExample: false
+  name: devhire-secrets
+
+ingress:
+  enabled: true
+  className: nginx
+  host: devhire.example.com
+  tls:
+    enabled: true
+    secretName: devhire-tls
+
+pdb:
+  enabled: true
+
+networkPolicy:
+  enabled: true
+
+quota:
+  enabled: true

@@ -1,0 +1,193 @@
+global:
+  namespace: devhire
+  replicas: 2
+  imageRegistry: ghcr.io/jasontm17/devhire
+  imageTag: latest
+  imagePullPolicy: IfNotPresent
+  serviceAccountName: devhire-service
+  podSecurityContext:
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+  containerSecurityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+  env:
+    SPRING_PROFILES_ACTIVE: prod
+    SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka.devhire-platform.svc.cluster.local:9092
+    SPRING_DATA_REDIS_HOST: redis.devhire-platform.svc.cluster.local
+    SPRING_DATA_REDIS_PORT: "6379"
+    OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector.devhire-observability.svc.cluster.local:4318
+    MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "0.1"
+    CORS_ALLOWED_ORIGINS: https://devhire.example.com
+    AUTH_SERVICE_URL: http://auth-service:8081
+    USER_SERVICE_URL: http://user-service:8082
+    COMPANY_SERVICE_URL: http://company-service:8083
+    JOB_SERVICE_URL: http://job-service:8084
+    APPLICATION_SERVICE_URL: http://application-service:8085
+    NOTIFICATION_SERVICE_URL: http://notification-service:8086
+    AUDIT_SERVICE_URL: http://audit-service:8087
+    DEVHIRE_SEARCH_PROVIDER: opensearch
+    DEVHIRE_SEARCH_OPENSEARCH_URL: http://opensearch.devhire-platform.svc.cluster.local:9200
+    DEVHIRE_SEARCH_OPENSEARCH_INDEX: devhire_jobs
+    DEVHIRE_SEARCH_OPENSEARCH_AUTO_CREATE_INDEX: "false"
+    DEVHIRE_SEARCH_OPENSEARCH_FALLBACK_TO_POSTGRES: "true"
+    DEVHIRE_NOTIFICATION_EMAIL_ENABLED: "true"
+    DEVHIRE_NOTIFICATION_EMAIL_FROM: no-reply@devhire.example.com
+    DEVHIRE_NOTIFICATION_EMAIL_REPLY_TO: support@devhire.example.com
+    DEVHIRE_NOTIFICATION_EMAIL_DASHBOARD_BASE_URL: https://devhire.example.com
+    DEVHIRE_NOTIFICATION_EMAIL_BATCH_SIZE: "25"
+    DEVHIRE_NOTIFICATION_EMAIL_MAX_ATTEMPTS: "5"
+    DEVHIRE_NOTIFICATION_EMAIL_RETRY_INITIAL_DELAY_SECONDS: "30"
+    DEVHIRE_NOTIFICATION_EMAIL_RETRY_MAX_DELAY_SECONDS: "900"
+    DEVHIRE_NOTIFICATION_EMAIL_RATE_LIMIT_PER_MINUTE: "60"
+    SPRING_MAIL_HOST: smtp.example.com
+    SPRING_MAIL_PORT: "587"
+    SPRING_MAIL_SMTP_AUTH: "true"
+    SPRING_MAIL_SMTP_STARTTLS_ENABLE: "true"
+    SPRING_MAIL_SMTP_STARTTLS_REQUIRED: "true"
+    SPRING_MAIL_SMTP_SSL_TRUST: smtp.gmail.com
+    SPRING_MAIL_SMTP_CONNECTION_TIMEOUT: "5000"
+    SPRING_MAIL_SMTP_TIMEOUT: "5000"
+    SPRING_MAIL_SMTP_WRITE_TIMEOUT: "5000"
+    MANAGEMENT_HEALTH_MAIL_ENABLED: "true"
+    NEXT_PUBLIC_API_BASE_URL: https://devhire.example.com
+
+secrets:
+  name: devhire-secrets
+  createExample: true
+  stringData:
+    JWT_SECRET: replace-with-strong-jwt-secret
+    POSTGRES_USER: devhire
+    POSTGRES_PASSWORD: replace-with-database-password
+    SPRING_MAIL_USERNAME: smtp-user@example.com
+    SPRING_MAIL_PASSWORD: replace-with-smtp-password
+
+resources:
+  default:
+    requests:
+      cpu: 150m
+      memory: 384Mi
+    limits:
+      cpu: "1"
+      memory: 768Mi
+  gateway:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: "1"
+      memory: 768Mi
+  frontend:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 750m
+      memory: 512Mi
+
+services:
+  frontend:
+    enabled: true
+    image: frontend
+    port: 3000
+    replicas: 2
+    secretRef: false
+    readinessPath: /jobs
+    livenessPath: /login
+    resourceProfile: frontend
+    autoscaling:
+      enabled: true
+      minReplicas: 2
+      maxReplicas: 5
+      targetCPUUtilizationPercentage: 70
+  api-gateway:
+    enabled: true
+    image: api-gateway
+    port: 8080
+    replicas: 2
+    secretRef: true
+    readinessPath: /actuator/health/readiness
+    livenessPath: /actuator/health/liveness
+    resourceProfile: gateway
+    autoscaling:
+      enabled: true
+      minReplicas: 2
+      maxReplicas: 6
+      targetCPUUtilizationPercentage: 65
+  auth-service:
+    enabled: true
+    image: auth-service
+    port: 8081
+    secretRef: true
+    database: devhire_auth
+  user-service:
+    enabled: true
+    image: user-service
+    port: 8082
+    secretRef: true
+    database: devhire_user
+  company-service:
+    enabled: true
+    image: company-service
+    port: 8083
+    secretRef: true
+    database: devhire_company
+  job-service:
+    enabled: true
+    image: job-service
+    port: 8084
+    secretRef: true
+    database: devhire_job
+  application-service:
+    enabled: true
+    image: application-service
+    port: 8085
+    secretRef: true
+    database: devhire_application
+  notification-service:
+    enabled: true
+    image: notification-service
+    port: 8086
+    secretRef: true
+    database: devhire_notification
+  audit-service:
+    enabled: true
+    image: audit-service
+    port: 8087
+    secretRef: true
+    database: devhire_audit
+
+ingress:
+  enabled: true
+  className: nginx
+  host: devhire.example.com
+  tls:
+    enabled: true
+    secretName: devhire-tls
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+  paths:
+    - path: /
+      service: frontend
+      port: 3000
+    - path: /api
+      service: api-gateway
+      port: 8080
+
+pdb:
+  enabled: true
+  minAvailable: 1
+
+networkPolicy:
+  enabled: true
+
+quota:
+  enabled: true
+  hard:
+    requests.cpu: "4"
+    requests.memory: 8Gi
+    limits.cpu: "8"
+    limits.memory: 16Gi

@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: devhire-cloud
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: devhire-cloud
+    app.kubernetes.io/part-of: devhire-cloud
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices.git
+    targetRevision: main
+    path: deploy/helm/devhire-cloud
+    helm:
+      valueFiles:
+        - values-prod.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: devhire
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true
