@@ -229,6 +229,14 @@ try {
         throw "Audit logs did not return login activity"
     }
 
+    $provider = Invoke-Api -Method GET -Path "/api/admin/ai/provider/status" -Token $adminToken
+    if ($provider.provider -ne "anthropic") {
+        throw "AI provider diagnostics did not return the expected provider"
+    }
+    if ([string]::IsNullOrWhiteSpace($provider.model)) {
+        throw "AI provider diagnostics did not return a model"
+    }
+
     $assistant = Invoke-Api -Method POST -Path "/api/ai/chat" -Token $candidateToken -Body @{
         message = "Explain this microservices platform to a recruiter"
     }
@@ -249,6 +257,7 @@ try {
         applicationStatus = $updatedApplication.status
         notificationCheck = "ok"
         auditCheck        = "ok"
+        aiProviderMode    = $provider.mode
         aiAssistantCheck  = "ok"
     } | ConvertTo-Json -Depth 5
 } finally {

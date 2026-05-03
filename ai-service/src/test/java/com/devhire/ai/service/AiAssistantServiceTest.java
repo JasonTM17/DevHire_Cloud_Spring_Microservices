@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -81,8 +82,33 @@ class AiAssistantServiceTest {
         verify(repository).saveMessage(eq(conversationId), eq("ASSISTANT"), anyString(), eq(true), anyList(), anyList());
     }
 
+    @Test
+    void providerStatusNeverExposesSecret() {
+        properties.getAnthropic().setApiKey("secret-value-that-must-not-leak");
+        when(claudeChatClient.enabled()).thenReturn(true);
+
+        var response = service.providerStatus(admin());
+
+        assertThat(response.provider()).isEqualTo("anthropic");
+        assertThat(response.model()).isEqualTo("claude-haiku-4-5-20251001");
+        assertThat(response.baseUrlHost()).isEqualTo("api.anthropic.com");
+        assertThat(response.apiKeyConfigured()).isTrue();
+        assertThat(response.mode()).isEqualTo("CLAUDE_API");
+        assertThat(response.toString()).doesNotContain("secret-value-that-must-not-leak");
+    }
+
+    @Test
+    void providerStatusRequiresAdminRole() {
+        assertThatThrownBy(() -> service.providerStatus(user()))
+                .hasMessageContaining("Required role: ADMIN");
+    }
+
     private static AuthenticatedUser user() {
         return new AuthenticatedUser(UUID.randomUUID(), "candidate@devhire.local", UserRole.CANDIDATE);
+    }
+
+    private static AuthenticatedUser admin() {
+        return new AuthenticatedUser(UUID.randomUUID(), "admin@devhire.local", UserRole.ADMIN);
     }
 
     private static KnowledgeChunk chunk() {

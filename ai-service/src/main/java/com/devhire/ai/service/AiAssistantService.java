@@ -7,6 +7,7 @@ import com.devhire.ai.dto.AiChatResponse;
 import com.devhire.ai.dto.AiCitation;
 import com.devhire.ai.dto.AiConversationSummary;
 import com.devhire.ai.dto.AiMessageResponse;
+import com.devhire.ai.dto.AiProviderStatusResponse;
 import com.devhire.ai.dto.AiToolTrace;
 import com.devhire.ai.dto.ReindexResponse;
 import com.devhire.ai.event.AiAuditEventPublisher;
@@ -24,6 +25,7 @@ import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.net.URI;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -121,6 +123,27 @@ public class AiAssistantService {
         return repository.findMessages(conversationId, user.id());
     }
 
+    @Transactional(readOnly = true)
+    public AiProviderStatusResponse providerStatus(AuthenticatedUser admin) {
+        if (admin.role() != UserRole.ADMIN) {
+            throw new DevHireException(ErrorCode.FORBIDDEN, "Required role: ADMIN");
+        }
+        var anthropic = properties.getAnthropic();
+        boolean keyConfigured = claudeClient.enabled();
+        String mode = keyConfigured ? "CLAUDE_API" : properties.isDemoFallbackEnabled() ? "DEMO_FALLBACK" : "DISABLED";
+        return new AiProviderStatusResponse(
+                "anthropic",
+                anthropic.getModel(),
+                hostOf(anthropic.getBaseUrl()),
+                anthropic.getVersion(),
+                anthropic.getMaxTokens(),
+                keyConfigured,
+                properties.isDemoFallbackEnabled(),
+                mode,
+                Instant.now()
+        );
+    }
+
     @Transactional
     public void deleteConversation(AuthenticatedUser user, UUID conversationId) {
         repository.deleteConversation(conversationId, user.id());
@@ -149,6 +172,15 @@ public class AiAssistantService {
 
     private static int estimateTokens(String value) {
         return Math.max(1, (int) Math.ceil(value.length() / 4.0));
+    }
+
+    private static String hostOf(String baseUrl) {
+        try {
+            URI uri = URI.create(baseUrl);
+            return uri.getHost() == null ? "configured" : uri.getHost();
+        } catch (IllegalArgumentException ex) {
+            return "configured";
+        }
     }
 
     private String systemPrompt() {
