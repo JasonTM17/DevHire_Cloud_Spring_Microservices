@@ -10,6 +10,7 @@ Read:
 - `docs/README_EN.md`
 - `docs/portfolio-case-study.md`
 - `docs/release-notes/v0.2.0.md`
+- `docs/release-evidence/v0.2.0.md`
 
 Look for:
 
@@ -68,6 +69,7 @@ Open:
 - `docs/runbooks/backup-restore.md`
 - `docs/runbooks/incident-response.md`
 - `docs/release-checklist-v0.2.md`
+- `docs/release-evidence/v0.2.0.md`
 
 What to look for:
 

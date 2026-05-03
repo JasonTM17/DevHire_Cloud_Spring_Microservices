@@ -141,6 +141,7 @@ Operations smoke gates:
 - [External Secrets and GitOps](external-secrets.md)
 - [Email sandbox](email-sandbox.md)
 - [Backup and restore runbook](runbooks/backup-restore.md)
+- [Release evidence v0.2.0](release-evidence/v0.2.0.md)
 - [Recruiter review guide](recruiter-review-guide.md)
 - [Release notes v0.2.0](release-notes/v0.2.0.md)
 - [10-minute demo script](demo-script.md)

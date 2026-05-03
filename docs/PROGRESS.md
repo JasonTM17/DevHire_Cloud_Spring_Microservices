@@ -1563,3 +1563,21 @@ Verification:
   - `npm run typecheck`
   - `.\scripts\verify.ps1 -Docs -Docker`
   - `git diff --check`
+
+## Phase 65 - v0.2 release evidence
+
+- Added `docs/release-evidence/v0.2.0.md` with:
+  - release scope,
+  - verification evidence matrix,
+  - screenshot evidence inventory,
+  - honest limitations,
+  - manual GitHub release steps.
+- Updated `docs/release-notes/v0.2.0.md` from unreleased draft to release-candidate evidence state.
+- Updated `CHANGELOG.md`, recruiter review guide, and trilingual README links so reviewers can find the release evidence quickly.
+
+Verification:
+
+- Passed:
+  - `.\scripts\docs-quality.ps1`
+  - `.\scripts\verify.ps1 -Docs -Docker`
+  - `git diff --check`

@@ -272,6 +272,7 @@ Xem flow chạy được tại [docs/api.http](docs/api.http).
 - [AI evaluation gate](docs/ai-evaluation.md)
 - [AWS Terraform blueprint](docs/aws-terraform.md)
 - [Unified verification runner](docs/verification.md)
+- [Release evidence v0.2.0](docs/release-evidence/v0.2.0.md)
 - [Recruiter review guide](docs/recruiter-review-guide.md)
 - [Release notes v0.2.0](docs/release-notes/v0.2.0.md)
 - [10-minute demo script](docs/demo-script.md)
