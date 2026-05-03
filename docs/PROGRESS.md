@@ -1430,3 +1430,25 @@ Verification:
 - `.\scripts\docs-quality.ps1` passed on 2026-05-03.
 - `git diff --check` passed on 2026-05-03.
 - `mvn -T1 clean verify` passed on 2026-05-03.
+
+## Phase 60 - OpenAPI conformance checks
+
+- Added `scripts/openapi-verify.ps1` to fetch `/v3/api-docs` from each service port derived from the Gateway URL.
+- The script verifies core public/admin/internal portfolio paths across:
+  - auth,
+  - user,
+  - company,
+  - job,
+  - application,
+  - notification,
+  - audit,
+  - ai.
+- Generated OpenAPI snapshots are written under `reports/openapi`, which is ignored by Git.
+
+Verification:
+
+- PowerShell syntax parse passed for `scripts/openapi-verify.ps1` on 2026-05-03.
+- `docker compose config --quiet` passed on 2026-05-03.
+- `git diff --check` passed on 2026-05-03.
+- `mvn -T1 clean verify` passed on 2026-05-03.
+- Runtime OpenAPI fetching is deferred to final stack verification.
