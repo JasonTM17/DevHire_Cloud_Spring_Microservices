@@ -1375,3 +1375,24 @@ Verification:
 - `git diff --check` passed on 2026-05-03.
 - `mvn -T1 clean verify` passed on 2026-05-03.
 - Runtime chaos scenarios are deferred to final stack verification after Mailpit is added in Phase 57.
+
+## Phase 57 - Mailpit email sandbox delivery profile
+
+- Added a local `mailpit` Docker Compose service with SMTP `1025`, UI/API `8025`, and `/readyz` health check.
+- Changed local Docker notification defaults to enable email delivery against Mailpit:
+  - `DEVHIRE_NOTIFICATION_EMAIL_ENABLED=true`,
+  - `SPRING_MAIL_HOST=mailpit`,
+  - `MANAGEMENT_HEALTH_MAIL_ENABLED=true`.
+- Added `MAILPIT_SMTP_HOST_PORT` and `MAILPIT_UI_HOST_PORT` to `.env.example`.
+- Added `scripts/email-smoke.ps1` to run an application notification flow and verify captured HTML email through the Mailpit API.
+- Added `docs/email-sandbox.md` with Mailpit runtime, smoke test, Gmail optional mode, and secret hygiene guidance.
+
+Verification:
+
+- PowerShell syntax parse passed for `scripts/email-smoke.ps1` on 2026-05-03.
+- `docker compose config --quiet` passed on 2026-05-03.
+- `docker compose up -d --force-recreate mailpit` passed on 2026-05-03.
+- `docker inspect --format='{{.State.Health.Status}}' devhire-mailpit` reported `healthy` on 2026-05-03 after switching the healthcheck command to `/mailpit readyz`.
+- `.\scripts\docs-quality.ps1` passed on 2026-05-03.
+- `git diff --check` passed on 2026-05-03.
+- `mvn -T1 clean verify` passed on 2026-05-03.
