@@ -144,6 +144,7 @@ See [api.http](api.http) for a runnable flow.
 - Standard error response with trace id.
 - Docker Compose full local stack.
 - CI, Docker image build workflow, dependency review, Trivy, Gitleaks, SBOM and release image publishing.
+- Dependabot maintenance for Maven, npm, GitHub Actions and Docker base images.
 - Helm chart and Argo CD GitOps sample.
 - Tests include Testcontainers and event contract checks.
 - Hard JaCoCo coverage gate in CI.

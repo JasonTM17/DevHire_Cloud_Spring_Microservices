@@ -57,6 +57,7 @@ DevHire Cloud handles recruitment data: accounts, roles, candidate profiles, com
 - Trivy image scan runs manually or on schedule.
 - Syft/Anchore generates CycloneDX SBOM artifacts.
 - Docker images include OCI source and revision labels.
+- Dependabot opens scheduled maintenance pull requests for Maven, npm, GitHub Actions, and Docker base images.
 
 ## 日本語
 

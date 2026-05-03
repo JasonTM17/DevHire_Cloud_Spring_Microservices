@@ -818,3 +818,21 @@ Verification:
 
 - `scripts/perf-smoke.ps1 -BaseUrl http://localhost:18080 -Vus 2 -Duration 10s -UseDocker` passed locally against the running Docker stack on 2026-05-03.
 - `docker compose config --quiet` passed on 2026-05-03.
+
+Committed as `test(perf): add k6 gateway performance smoke`.
+
+## Phase 32 - Dependency maintenance automation
+
+- Added `.github/dependabot.yml` for scheduled maintenance pull requests covering:
+  - Maven dependencies,
+  - frontend npm dependencies,
+  - GitHub Actions,
+  - backend Docker base images,
+  - frontend Docker base image.
+- Grouped updates by platform/tooling to keep maintenance PRs reviewable.
+- Updated documentation to mention Dependabot as part of the supply-chain maintenance strategy.
+
+Verification:
+
+- `docker run --rm -v "${PWD}:/repo" -w /repo rhysd/actionlint:latest -color` passed on 2026-05-03.
+- `mvn -T1 clean verify` passed on 2026-05-03.

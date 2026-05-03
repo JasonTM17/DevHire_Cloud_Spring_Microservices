@@ -1,0 +1,171 @@
+version: 2
+
+updates:
+  - package-ecosystem: maven
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Asia/Bangkok
+    open-pull-requests-limit: 8
+    groups:
+      spring-platform:
+        patterns:
+          - "org.springframework*"
+          - "org.springframework.boot*"
+          - "org.springframework.cloud*"
+      test-tooling:
+        patterns:
+          - "org.junit*"
+          - "org.mockito*"
+          - "org.testcontainers*"
+          - "org.jacoco*"
+
+  - package-ecosystem: npm
+    directory: /frontend
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:20"
+      timezone: Asia/Bangkok
+    open-pull-requests-limit: 8
+    groups:
+      frontend-platform:
+        patterns:
+          - "next"
+          - "react"
+          - "react-dom"
+          - "typescript"
+      playwright:
+        patterns:
+          - "@playwright/*"
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:40"
+      timezone: Asia/Bangkok
+    open-pull-requests-limit: 5
+    groups:
+      actions:
+        patterns:
+          - "*"
+
+  - package-ecosystem: docker
+    directory: /api-gateway
+    schedule:
+      interval: weekly
+      day: monday
+      time: "07:00"
+      timezone: Asia/Bangkok
+    groups:
+      backend-base-images:
+        patterns:
+          - "maven"
+          - "eclipse-temurin"
+
+  - package-ecosystem: docker
+    directory: /auth-service
+    schedule:
+      interval: weekly
+      day: monday
+      time: "07:05"
+      timezone: Asia/Bangkok
+    groups:
+      backend-base-images:
+        patterns:
+          - "maven"
+          - "eclipse-temurin"
+
+  - package-ecosystem: docker
+    directory: /user-service
+    schedule:
+      interval: weekly
+      day: monday
+      time: "07:10"
+      timezone: Asia/Bangkok
+    groups:
+      backend-base-images:
+        patterns:
+          - "maven"
+          - "eclipse-temurin"
+
+  - package-ecosystem: docker
+    directory: /company-service
+    schedule:
+      interval: weekly
+      day: monday
+      time: "07:15"
+      timezone: Asia/Bangkok
+    groups:
+      backend-base-images:
+        patterns:
+          - "maven"
+          - "eclipse-temurin"
+
+  - package-ecosystem: docker
+    directory: /job-service
+    schedule:
+      interval: weekly
+      day: monday
+      time: "07:20"
+      timezone: Asia/Bangkok
+    groups:
+      backend-base-images:
+        patterns:
+          - "maven"
+          - "eclipse-temurin"
+
+  - package-ecosystem: docker
+    directory: /application-service
+    schedule:
+      interval: weekly
+      day: monday
+      time: "07:25"
+      timezone: Asia/Bangkok
+    groups:
+      backend-base-images:
+        patterns:
+          - "maven"
+          - "eclipse-temurin"
+
+  - package-ecosystem: docker
+    directory: /notification-service
+    schedule:
+      interval: weekly
+      day: monday
+      time: "07:30"
+      timezone: Asia/Bangkok
+    groups:
+      backend-base-images:
+        patterns:
+          - "maven"
+          - "eclipse-temurin"
+
+  - package-ecosystem: docker
+    directory: /audit-service
+    schedule:
+      interval: weekly
+      day: monday
+      time: "07:35"
+      timezone: Asia/Bangkok
+    groups:
+      backend-base-images:
+        patterns:
+          - "maven"
+          - "eclipse-temurin"
+
+  - package-ecosystem: docker
+    directory: /frontend
+    schedule:
+      interval: weekly
+      day: monday
+      time: "07:40"
+      timezone: Asia/Bangkok
+    groups:
+      frontend-base-images:
+        patterns:
+          - "node"

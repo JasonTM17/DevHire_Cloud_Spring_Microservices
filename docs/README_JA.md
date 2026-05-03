@@ -145,6 +145,7 @@ API フローは [api.http](api.http) を参照してください。
 - Trace id を含む標準エラーレスポンス。
 - Docker Compose full local stack。
 - GitHub Actions CI/CD と GHCR release workflow。
+- Dependabot maintenance for Maven, npm, GitHub Actions and Docker base images.
 - Testcontainers と event contract tests。
 - CI の JaCoCo coverage gate。
 - API Gateway に接続する Next.js frontend。

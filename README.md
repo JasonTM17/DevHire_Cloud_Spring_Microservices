@@ -341,6 +341,7 @@ GitHub Actions:
 Security supply-chain CI da co them Gitleaks, Trivy filesystem/image scan, SBOM artifact va OCI image labels cho Docker image.
 API smoke CI co workflow `api-smoke.yml` de build stack va chay luong nghiep vu chinh qua API Gateway theo lich/manual.
 Performance smoke CI co workflow `performance.yml` chay k6 job-search smoke voi threshold cho error rate va p95 latency.
+Dependabot duoc cau hinh cho Maven, npm frontend, GitHub Actions va Docker base images cua tung service.
 
 ## Deployment/Kubernetes
 
