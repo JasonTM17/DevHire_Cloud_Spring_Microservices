@@ -3,7 +3,9 @@ package com.devhire.notification.event;
 import com.devhire.common.constants.KafkaTopics;
 import com.devhire.common.event.ApplicationStatusChangedEvent;
 import com.devhire.common.event.ApplicationSubmittedEvent;
+import com.devhire.common.outbox.ProcessedEventRepository;
 import com.devhire.notification.service.NotificationService;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -16,21 +18,29 @@ import java.util.UUID;
 @Component
 public class ApplicationNotificationListener {
     private static final Logger log = LoggerFactory.getLogger(ApplicationNotificationListener.class);
+    private static final String CONSUMER_NAME = "notification-service";
 
     private final NotificationService notificationService;
+    private final ProcessedEventRepository processedEventRepository;
 
-    public ApplicationNotificationListener(NotificationService notificationService) {
+    public ApplicationNotificationListener(NotificationService notificationService,
+                                           ProcessedEventRepository processedEventRepository) {
         this.notificationService = notificationService;
+        this.processedEventRepository = processedEventRepository;
     }
 
     @KafkaListener(topics = KafkaTopics.APPLICATION_EVENTS, groupId = "${spring.kafka.consumer.group-id:notification-service}")
     public void onApplicationEvent(Object event) {
+        if (event instanceof ConsumerRecord<?, ?> record) {
+            onApplicationEvent(record.value());
+            return;
+        }
         if (event instanceof ApplicationSubmittedEvent submittedEvent) {
-            notificationService.createForApplicationSubmitted(submittedEvent);
+            handleSubmitted(submittedEvent);
             return;
         }
         if (event instanceof ApplicationStatusChangedEvent statusChangedEvent) {
-            notificationService.createForApplicationStatusChanged(statusChangedEvent);
+            handleStatusChanged(statusChangedEvent);
             return;
         }
         if (event instanceof Map<?, ?> map) {
@@ -42,7 +52,7 @@ public class ApplicationNotificationListener {
 
     private void handleMapPayload(Map<?, ?> payload) {
         if (payload.containsKey("newStatus")) {
-            notificationService.createForApplicationStatusChanged(new ApplicationStatusChangedEvent(
+            handleStatusChanged(new ApplicationStatusChangedEvent(
                     uuid(payload, "eventId"),
                     uuid(payload, "applicationId"),
                     uuid(payload, "jobId"),
@@ -55,7 +65,7 @@ public class ApplicationNotificationListener {
             return;
         }
         if (payload.containsKey("jobTitle")) {
-            notificationService.createForApplicationSubmitted(new ApplicationSubmittedEvent(
+            handleSubmitted(new ApplicationSubmittedEvent(
                     uuid(payload, "eventId"),
                     uuid(payload, "applicationId"),
                     uuid(payload, "jobId"),
@@ -67,6 +77,32 @@ public class ApplicationNotificationListener {
             return;
         }
         log.warn("unsupported_application_event_map keys={}", payload.keySet());
+    }
+
+    private void handleSubmitted(ApplicationSubmittedEvent event) {
+        if (!processedEventRepository.markProcessed(event.eventId(), CONSUMER_NAME)) {
+            log.info("duplicate_application_event_skipped eventId={}", event.eventId());
+            return;
+        }
+        try {
+            notificationService.createForApplicationSubmitted(event);
+        } catch (RuntimeException ex) {
+            processedEventRepository.deleteProcessed(event.eventId(), CONSUMER_NAME);
+            throw ex;
+        }
+    }
+
+    private void handleStatusChanged(ApplicationStatusChangedEvent event) {
+        if (!processedEventRepository.markProcessed(event.eventId(), CONSUMER_NAME)) {
+            log.info("duplicate_application_event_skipped eventId={}", event.eventId());
+            return;
+        }
+        try {
+            notificationService.createForApplicationStatusChanged(event);
+        } catch (RuntimeException ex) {
+            processedEventRepository.deleteProcessed(event.eventId(), CONSUMER_NAME);
+            throw ex;
+        }
     }
 
     private static UUID uuid(Map<?, ?> payload, String key) {

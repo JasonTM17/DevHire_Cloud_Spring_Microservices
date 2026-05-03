@@ -3,35 +3,26 @@ package com.devhire.company.event;
 import com.devhire.common.constants.KafkaTopics;
 import com.devhire.common.event.AuditEvent;
 import com.devhire.common.event.CompanyReviewedEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.kafka.core.KafkaTemplate;
+import com.devhire.common.outbox.OutboxEventWriter;
 import org.springframework.stereotype.Component;
 
 @Component
 public class CompanyEventPublisher {
-    private static final Logger log = LoggerFactory.getLogger(CompanyEventPublisher.class);
+    private static final String COMPANY_AGGREGATE = "COMPANY";
 
-    private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final OutboxEventWriter outboxEventWriter;
 
-    public CompanyEventPublisher(KafkaTemplate<String, Object> kafkaTemplate) {
-        this.kafkaTemplate = kafkaTemplate;
+    public CompanyEventPublisher(OutboxEventWriter outboxEventWriter) {
+        this.outboxEventWriter = outboxEventWriter;
     }
 
     public void publishAudit(AuditEvent event) {
-        try {
-            kafkaTemplate.send(KafkaTopics.AUDIT_EVENTS, event.eventId().toString(), event);
-        } catch (RuntimeException ex) {
-            log.warn("audit_event_publish_failed action={} actorId={}", event.action(), event.actorId());
-        }
+        outboxEventWriter.enqueue(KafkaTopics.AUDIT_EVENTS, event.eventId(), COMPANY_AGGREGATE,
+                event.actorId(), event.action(), event);
     }
 
     public void publishCompanyReviewed(CompanyReviewedEvent event) {
-        try {
-            kafkaTemplate.send(KafkaTopics.COMPANY_EVENTS, event.eventId().toString(), event);
-        } catch (RuntimeException ex) {
-            log.warn("company_event_publish_failed companyId={} status={}", event.companyId(), event.status());
-        }
+        outboxEventWriter.enqueue(KafkaTopics.COMPANY_EVENTS, event.eventId(), COMPANY_AGGREGATE,
+                event.companyId(), "COMPANY_REVIEWED", event);
     }
 }
-

@@ -2,27 +2,21 @@ package com.devhire.notification.event;
 
 import com.devhire.common.constants.KafkaTopics;
 import com.devhire.common.event.NotificationCreatedEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.kafka.core.KafkaTemplate;
+import com.devhire.common.outbox.OutboxEventWriter;
 import org.springframework.stereotype.Component;
 
 @Component
 public class NotificationEventPublisher {
-    private static final Logger log = LoggerFactory.getLogger(NotificationEventPublisher.class);
+    private static final String NOTIFICATION_AGGREGATE = "NOTIFICATION";
 
-    private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final OutboxEventWriter outboxEventWriter;
 
-    public NotificationEventPublisher(KafkaTemplate<String, Object> kafkaTemplate) {
-        this.kafkaTemplate = kafkaTemplate;
+    public NotificationEventPublisher(OutboxEventWriter outboxEventWriter) {
+        this.outboxEventWriter = outboxEventWriter;
     }
 
     public void publishCreated(NotificationCreatedEvent event) {
-        try {
-            kafkaTemplate.send(KafkaTopics.NOTIFICATION_EVENTS, event.notificationId().toString(), event);
-        } catch (RuntimeException ex) {
-            log.warn("notification_created_publish_failed notificationId={} recipientId={}",
-                    event.notificationId(), event.recipientId());
-        }
+        outboxEventWriter.enqueue(KafkaTopics.NOTIFICATION_EVENTS, event.eventId(), NOTIFICATION_AGGREGATE,
+                event.notificationId(), "NOTIFICATION_CREATED", event);
     }
 }

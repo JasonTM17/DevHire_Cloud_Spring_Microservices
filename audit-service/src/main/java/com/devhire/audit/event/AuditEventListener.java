@@ -3,6 +3,8 @@ package com.devhire.audit.event;
 import com.devhire.audit.service.AuditLogService;
 import com.devhire.common.constants.KafkaTopics;
 import com.devhire.common.event.AuditEvent;
+import com.devhire.common.outbox.ProcessedEventRepository;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -15,24 +17,45 @@ import java.util.UUID;
 @Component
 public class AuditEventListener {
     private static final Logger log = LoggerFactory.getLogger(AuditEventListener.class);
+    private static final String CONSUMER_NAME = "audit-service";
 
     private final AuditLogService auditLogService;
+    private final ProcessedEventRepository processedEventRepository;
 
-    public AuditEventListener(AuditLogService auditLogService) {
+    public AuditEventListener(AuditLogService auditLogService,
+                              ProcessedEventRepository processedEventRepository) {
         this.auditLogService = auditLogService;
+        this.processedEventRepository = processedEventRepository;
     }
 
     @KafkaListener(topics = KafkaTopics.AUDIT_EVENTS, groupId = "${spring.kafka.consumer.group-id:audit-service}")
     public void onAuditEvent(Object event) {
+        if (event instanceof ConsumerRecord<?, ?> record) {
+            onAuditEvent(record.value());
+            return;
+        }
         if (event instanceof AuditEvent auditEvent) {
-            auditLogService.record(auditEvent);
+            recordOnce(auditEvent);
             return;
         }
         if (event instanceof Map<?, ?> payload) {
-            auditLogService.record(fromMap(payload));
+            recordOnce(fromMap(payload));
             return;
         }
         log.warn("unsupported_audit_event_payload type={}", event == null ? "null" : event.getClass().getName());
+    }
+
+    private void recordOnce(AuditEvent auditEvent) {
+        if (!processedEventRepository.markProcessed(auditEvent.eventId(), CONSUMER_NAME)) {
+            log.info("duplicate_audit_event_skipped eventId={}", auditEvent.eventId());
+            return;
+        }
+        try {
+            auditLogService.record(auditEvent);
+        } catch (RuntimeException ex) {
+            processedEventRepository.deleteProcessed(auditEvent.eventId(), CONSUMER_NAME);
+            throw ex;
+        }
     }
 
     private static AuditEvent fromMap(Map<?, ?> payload) {

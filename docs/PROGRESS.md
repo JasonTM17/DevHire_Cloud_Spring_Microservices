@@ -569,3 +569,35 @@ Verification:
 - `mvn -T1 clean verify` passed on 2026-05-03.
 
 Committed as `test(e2e): add browser driven smoke coverage`.
+
+## Phase 25 - Event reliability with transactional outbox
+
+- Added reusable transactional outbox infrastructure in `common-lib`:
+  - `outbox_events` writer/repository,
+  - scheduled Kafka publisher with retry/backoff,
+  - terminal `DEAD_LETTER` status after max attempts,
+  - `processed_events` repository for idempotent consumers.
+- Replaced direct Kafka publishing in auth, company, job, application, and notification services with same-transaction outbox writes.
+- Added Flyway migrations for `outbox_events` in producing services and `processed_events` in audit/notification consumers.
+- Added consumer idempotency for notification and audit event listeners using `eventId`.
+- Fixed runtime Kafka payload handling after smoke testing revealed Spring was passing `ConsumerRecord` wrappers to listeners in the current converter setup.
+- Hardened idempotency cleanup so a consumer removes its processed marker when downstream handling fails, allowing Kafka retry instead of dropping the event permanently.
+- Added unit coverage for:
+  - outbox serialization/publishing success,
+  - outbox publish failure and retry marking,
+  - duplicate consumer skips,
+  - `ConsumerRecord` unwrapping,
+  - processed-marker cleanup on consumer failure.
+
+Verification:
+
+- `mvn -T1 clean verify` passed on 2026-05-03.
+- `docker compose config --quiet` passed on 2026-05-03.
+- `docker compose up -d --build audit-service notification-service` rebuilt and started both consumers successfully on 2026-05-03.
+- Runtime outbox smoke passed on 2026-05-03:
+  - `POST /api/auth/login` through Gateway generated a new auth audit event.
+  - `devhire_auth.outbox_events` showed `PUBLISHED = 7`.
+  - `devhire_audit.processed_events` showed `processed_events = 1`.
+  - `devhire_audit.audit_logs` contained the new `login` entry for `candidate@devhire.local`.
+
+Committed as `feat(events): add transactional outbox publishing`.

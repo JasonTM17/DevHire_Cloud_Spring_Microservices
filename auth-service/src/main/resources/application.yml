@@ -29,6 +29,11 @@ spring:
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 
 devhire:
+  outbox:
+    publisher:
+      enabled: ${DEVHIRE_OUTBOX_PUBLISHER_ENABLED:true}
+      batch-size: ${DEVHIRE_OUTBOX_BATCH_SIZE:25}
+      max-attempts: ${DEVHIRE_OUTBOX_MAX_ATTEMPTS:10}
   jwt:
     secret: ${JWT_SECRET:local-dev-only-change-this-secret-with-at-least-32-characters}
     access-token-ttl: ${JWT_ACCESS_TOKEN_TTL:15m}

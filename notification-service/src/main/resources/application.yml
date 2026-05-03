@@ -49,6 +49,11 @@ spring:
 user-service:
   url: ${USER_SERVICE_URL:http://localhost:8082}
 devhire:
+  outbox:
+    publisher:
+      enabled: ${DEVHIRE_OUTBOX_PUBLISHER_ENABLED:true}
+      batch-size: ${DEVHIRE_OUTBOX_BATCH_SIZE:25}
+      max-attempts: ${DEVHIRE_OUTBOX_MAX_ATTEMPTS:10}
   notification:
     email:
       enabled: ${DEVHIRE_NOTIFICATION_EMAIL_ENABLED:false}
