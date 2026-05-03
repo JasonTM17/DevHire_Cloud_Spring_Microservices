@@ -12,7 +12,7 @@ on:
         default: manual
 
 permissions:
-  contents: read
+  contents: write
   packages: write
 
 jobs:
@@ -80,3 +80,29 @@ jobs:
             org.opencontainers.image.version=${{ env.VERSION_TAG }}
             org.opencontainers.image.licenses=MIT
           push: true
+
+  github-release:
+    name: Create GitHub Release
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create release from notes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          notes_file="docs/release-notes/${GITHUB_REF_NAME}.md"
+          if [[ ! -f "${notes_file}" ]]; then
+            notes_file="CHANGELOG.md"
+          fi
+
+          gh release create "${GITHUB_REF_NAME}" \
+            --title "DevHire Cloud ${GITHUB_REF_NAME}" \
+            --notes-file "${notes_file}" \
+            --verify-tag

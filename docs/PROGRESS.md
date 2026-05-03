@@ -1604,3 +1604,23 @@ Verification:
   - `docker run --rm -v "${PWD}:/repo" -w /repo aquasec/trivy:0.70.0 fs --scanners vuln --severity CRITICAL --ignore-unfixed --exit-code 1 --format table .`
   - `docker run --rm -v "${PWD}:/repo" -w /repo rhysd/actionlint:latest`
   - `git diff --check`
+
+Post-push GitHub status for commit `7ed50f1`:
+
+- Passed:
+  - CI #65.
+  - Docker Images #65.
+  - Documentation #24.
+  - Security #65.
+
+## Phase 67 - GitHub release automation
+
+- Extended `.github/workflows/release.yml` so tag pushes still publish GHCR images and then create a GitHub Release.
+- The release job uses the GitHub-hosted `gh` CLI with `GITHUB_TOKEN`, so no extra marketplace release action or personal access token is required.
+- Release notes are loaded from `docs/release-notes/<tag>.md` and fall back to `CHANGELOG.md`.
+
+Verification:
+
+- Passed:
+  - `docker run --rm -v "${PWD}:/repo" -w /repo rhysd/actionlint:latest`
+  - `git diff --check`
