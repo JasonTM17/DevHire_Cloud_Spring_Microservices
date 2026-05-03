@@ -915,3 +915,27 @@ Verification:
 - Secret scan over changed Helm/GitOps/docs files found no Gmail app password, SMTP account, AWS key id, or AWS secret key.
 
 Committed as `chore(deploy): wire helm gitops values for aws`.
+
+## Phase 36 - Contract compatibility gates
+
+- Added provider-side contract tests for:
+  - `company-service` internal endpoint `GET /internal/companies/{id}`,
+  - `job-service` internal endpoint `GET /internal/jobs/{id}`.
+- Added consumer-side DTO compatibility tests for:
+  - `job-service` consuming the company internal company payload,
+  - `application-service` consuming the job internal job payload.
+- Added JSON contract fixtures under each relevant service test resources.
+- Added Spring Cloud Contract Groovy DSL descriptors for the provider contracts so the published contract shape is explicit and reviewable.
+- Expanded common event contract tests for:
+  - `ApplicationStatusChangedEvent`,
+  - `JobApprovedEvent`,
+  - `CompanyReviewedEvent`.
+
+Verification:
+
+- `mvn -T1 -pl common-lib,company-service,job-service,application-service test` passed on 2026-05-03.
+- `mvn -T1 clean verify` passed on 2026-05-03.
+- `docker compose config --quiet` passed on 2026-05-03.
+- Secret scan over changed contract/test/docs files found no Gmail app password, SMTP account, AWS key id, or AWS secret key.
+
+Committed as `test(contract): add service compatibility contract gates`.
