@@ -1333,3 +1333,28 @@ Verification:
 - `docker run --rm -v "${PWD}:/repo" -w /repo rhysd/actionlint:latest` passed on 2026-05-03.
 - `git diff --check` passed on 2026-05-03.
 - `mvn -T1 clean verify` passed on 2026-05-03.
+
+## Phase 55 - Role-based load suite
+
+- Added `perf/k6/role-based-suite.js` covering:
+  - public job search and job detail,
+  - candidate registration and application submit without duplicate candidate/job conflicts,
+  - employer application review and status update,
+  - admin audit log browsing,
+  - AI assistant fallback/citation latency.
+- Added `scripts/perf-suite.ps1` with `-GatewayUrl`, `-Scenario`, `-Vus`, `-Duration`, and `-UseDocker` parameters.
+- Updated `.github/workflows/performance.yml` to run the role-based suite and upload its summary artifact.
+- Default thresholds:
+  - request error rate below 1%,
+  - non-AI gateway p95 below 1 second,
+  - AI assistant p95 below 5 seconds,
+  - checks above 95%.
+
+Verification:
+
+- PowerShell syntax parse passed for `scripts/perf-suite.ps1` on 2026-05-03.
+- `docker compose config --quiet` passed on 2026-05-03.
+- `docker run --rm -v "${PWD}:/repo" -w /repo rhysd/actionlint:latest` passed on 2026-05-03.
+- `docker run --rm -v "${PWD}:/workspace" -w /workspace grafana/k6:0.56.0 inspect /workspace/perf/k6/role-based-suite.js` passed on 2026-05-03.
+- `git diff --check` passed on 2026-05-03.
+- `mvn -T1 clean verify` passed on 2026-05-03.
