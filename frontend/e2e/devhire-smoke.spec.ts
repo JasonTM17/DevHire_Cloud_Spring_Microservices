@@ -53,19 +53,19 @@ test.describe("DevHire Cloud portfolio smoke", () => {
 
   test("candidate can sign in and view the application workspace", async ({ page }) => {
     await login(page, "candidate");
-    await expect(page.getByText("Application tracker")).toBeVisible();
-    await expect(page.getByText("Notifications")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Application tracker" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Notifications" })).toBeVisible();
   });
 
   test("employer can sign in and view company and job workflow", async ({ page }) => {
     await login(page, "employer");
-    await expect(page.getByText("Company onboarding")).toBeVisible();
-    await expect(page.getByText("Job workflow")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Company onboarding" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Job workflow" })).toBeVisible();
   });
 
   test("admin can sign in and view review and audit consoles", async ({ page }) => {
     await login(page, "admin");
-    await expect(page.getByText("Company reviews")).toBeVisible();
-    await expect(page.getByText("Audit log")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Company reviews" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Audit log" })).toBeVisible();
   });
 });

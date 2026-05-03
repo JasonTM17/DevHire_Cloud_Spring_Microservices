@@ -18,6 +18,10 @@ DevHire Cloud は、Java Spring Boot による採用プラットフォームの 
 |---|---|---|
 | ![Candidate dashboard](screenshots/candidate-dashboard.png) | ![Employer dashboard](screenshots/employer-dashboard.png) | ![Admin dashboard](screenshots/admin-dashboard.png) |
 
+Claude AI assistant:
+
+![Claude AI assistant](screenshots/assistant-page.png)
+
 ## Architecture Snapshot
 
 - `api-gateway` が JWT 検証、routing、CORS、Redis rate limit を担当します。

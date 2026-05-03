@@ -1211,7 +1211,7 @@ Verification:
 
 Verification:
 
-- `./scripts/docs-quality.ps1` passed on 2026-05-03 after the release docs update.
+- `./scripts/docs-quality.ps1` passed on 2026-05-03.
 - `docker run --rm -v "${PWD}:/repo" -w /repo rhysd/actionlint:latest` passed on 2026-05-03.
 - `docker compose config --quiet` passed on 2026-05-03.
 
@@ -1226,3 +1226,30 @@ Verification:
 Verification:
 
 - `./scripts/docs-quality.ps1` passed on 2026-05-03.
+
+## Phase 51 - Final production readiness polish
+
+- Added a `postgres-init` one-shot Docker Compose service that creates missing `devhire_*` databases on every stack startup.
+- Fixed the final Docker runtime issue where an existing local PostgreSQL volume did not yet contain `devhire_ai`; this can happen after adding a new service to an already-initialized Compose volume.
+- Updated service dependencies so database-backed services wait for `postgres-init` instead of only waiting for PostgreSQL health.
+- Hardened Playwright selectors to use exact headings after the richer frontend introduced duplicate text matches.
+- Captured the final assistant screenshot at `docs/screenshots/assistant-page.png`.
+- Updated README screenshot sections to include the Claude AI assistant.
+- Cleaned generated smoke/demo rows with `scripts/reset-demo-data.ps1` after runtime verification.
+
+Verification:
+
+- `mvn -T1 clean verify` passed on 2026-05-03.
+- `npm run typecheck` passed on 2026-05-03.
+- `npm run build` passed on 2026-05-03.
+- `docker compose config --quiet` passed on 2026-05-03.
+- `./scripts/docs-quality.ps1` passed on 2026-05-03.
+- `docker run --rm -v "${PWD}:/repo" -w /repo rhysd/actionlint:latest` passed on 2026-05-03.
+- `docker run --rm -v "${PWD}:/repo" -w /repo zricethezav/gitleaks:latest detect --source /repo --no-git --redact --verbose` passed on 2026-05-03 with no leaks found.
+- `docker run --rm --entrypoint promtool -v "${PWD}/infra/prometheus:/etc/prometheus" prom/prometheus:v3.0.1 check config /etc/prometheus/prometheus.yml` passed on 2026-05-03 with 9 rules found.
+- First `docker compose up -d --build` exposed the missing `devhire_ai` database in an existing local volume; the Compose database init service was added and the stack was rebuilt.
+- Final `docker compose up -d --build` passed on 2026-05-03.
+- `docker compose ps` showed all backend services healthy, including `ai-service`, on 2026-05-03.
+- `./scripts/api-smoke.ps1 -GatewayUrl http://localhost:8080` passed on 2026-05-03 with `aiAssistantCheck: ok`.
+- `npm run e2e` passed on 2026-05-03.
+- `npm run screenshots` passed on 2026-05-03.

@@ -15,7 +15,8 @@ test.describe("Claude AI assistant", () => {
     await page.goto("/assistant");
 
     await expect(page.getByTestId("assistant-page")).toBeVisible();
-    await expect(page.getByRole("heading", { name: /Portfolio assistant/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Portfolio assistant for recruiters and engineering reviewers" }))
+      .toBeVisible();
 
     await page.getByPlaceholder(/Ask about architecture/i).fill("Show the 10-minute demo path");
     await page.getByRole("button", { name: "Ask" }).click();

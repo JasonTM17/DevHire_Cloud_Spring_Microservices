@@ -18,6 +18,10 @@ Docker runtime through the real API Gateway:
 |---|---|---|
 | ![Candidate dashboard](screenshots/candidate-dashboard.png) | ![Employer dashboard](screenshots/employer-dashboard.png) | ![Admin dashboard](screenshots/admin-dashboard.png) |
 
+Claude AI assistant:
+
+![Claude AI assistant](screenshots/assistant-page.png)
+
 ## Architecture Snapshot
 
 - `api-gateway` is the public ingress for JWT validation, routing, CORS, and Redis rate limiting.

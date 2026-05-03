@@ -20,6 +20,10 @@ Docker runtime qua API Gateway thật:
 |---|---|---|
 | ![Candidate dashboard](docs/screenshots/candidate-dashboard.png) | ![Employer dashboard](docs/screenshots/employer-dashboard.png) | ![Admin dashboard](docs/screenshots/admin-dashboard.png) |
 
+Claude AI assistant:
+
+![Claude AI assistant](docs/screenshots/assistant-page.png)
+
 ## Vì Sao Dự Án Này Đáng Xem
 
 - Thiết kế microservices có ranh giới rõ: mỗi service có database riêng, migration riêng, API riêng, không share entity JPA.
