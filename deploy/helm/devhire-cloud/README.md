@@ -29,7 +29,8 @@ helm upgrade --install devhire-cloud .\deploy\helm\devhire-cloud -f .\deploy\hel
 Production notes:
 
 - `values-prod.yaml` does not create the example secret. Create `devhire-secrets` with a secret manager, SealedSecrets, External Secrets, or your cluster's native secret flow.
-- `values-aws-staging.yaml` and `values-aws-prod.yaml` expect `devhire-aws-runtime-secrets` to be synced from AWS Secrets Manager before rollout.
+- `values-aws-staging.yaml` and `values-aws-prod.yaml` render External Secrets Operator resources that sync `devhire-aws-runtime-secrets` from AWS Secrets Manager placeholders.
+- Install External Secrets Operator first, or use the Argo CD sample at `deploy/gitops/argocd-aws-staging-externalsecrets.yaml`.
 - The runtime secret should include `ANTHROPIC_API_KEY` when `ai-service` should call Claude instead of deterministic fallback mode.
 - AWS overlay endpoint placeholders should be replaced from Terraform outputs: ECR repository URLs, RDS endpoint, ElastiCache endpoint, MSK bootstrap brokers, OpenSearch endpoint, and IRSA role ARN.
 - Raw Kubernetes manifests under `deploy/k8s` remain as a transparent baseline. Helm is the preferred deployment path for configurable environments.

@@ -1413,3 +1413,20 @@ Verification:
 - `git diff --check` passed on 2026-05-03.
 - `mvn -T1 clean verify` passed on 2026-05-03.
 - Runtime DR verification is deferred to final stack verification.
+
+## Phase 59 - External Secrets and GitOps wiring
+
+- Added Helm `ExternalSecret` and optional `ClusterSecretStore` rendering behind `externalSecrets.enabled`.
+- Added AWS staging/prod Helm values that map runtime placeholders from AWS Secrets Manager paths to the `devhire-aws-runtime-secrets` Kubernetes Secret.
+- Added `deploy/gitops/argocd-aws-staging-externalsecrets.yaml` to install External Secrets Operator before DevHire Cloud workloads through Argo CD sync waves.
+- Added `docs/external-secrets.md` with Helm toggle, secret reference list, GitOps order, and AWS assumptions.
+- Updated the Helm chart README with External Secrets rendering guidance.
+
+Verification:
+
+- `docker run --rm -v "${PWD}:/workspace" -w /workspace alpine/helm:3.16.4 lint deploy/helm/devhire-cloud` passed on 2026-05-03.
+- `helm template` via Docker passed for `values-local.yaml`, `values-staging.yaml`, `values-prod.yaml`, `values-aws-staging.yaml`, and `values-aws-prod.yaml` on 2026-05-03.
+- `docker compose config --quiet` passed on 2026-05-03.
+- `.\scripts\docs-quality.ps1` passed on 2026-05-03.
+- `git diff --check` passed on 2026-05-03.
+- `mvn -T1 clean verify` passed on 2026-05-03.

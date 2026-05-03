@@ -44,6 +44,41 @@ secrets:
   createExample: false
   name: devhire-aws-runtime-secrets
 
+externalSecrets:
+  enabled: true
+  refreshInterval: 15m
+  secretStore:
+    create: true
+    name: devhire-prod-aws-secrets
+    kind: ClusterSecretStore
+  aws:
+    region: ap-southeast-1
+  data:
+    - secretKey: JWT_SECRET
+      remoteKey: /devhire/prod/runtime
+      property: JWT_SECRET
+    - secretKey: POSTGRES_USER
+      remoteKey: /devhire/prod/runtime
+      property: POSTGRES_USER
+    - secretKey: POSTGRES_PASSWORD
+      remoteKey: /devhire/prod/runtime
+      property: POSTGRES_PASSWORD
+    - secretKey: SPRING_MAIL_USERNAME
+      remoteKey: /devhire/prod/runtime
+      property: SPRING_MAIL_USERNAME
+    - secretKey: SPRING_MAIL_PASSWORD
+      remoteKey: /devhire/prod/runtime
+      property: SPRING_MAIL_PASSWORD
+    - secretKey: ANTHROPIC_API_KEY
+      remoteKey: /devhire/prod/runtime
+      property: ANTHROPIC_API_KEY
+    - secretKey: OPENSEARCH_USERNAME
+      remoteKey: /devhire/prod/runtime
+      property: OPENSEARCH_USERNAME
+    - secretKey: OPENSEARCH_PASSWORD
+      remoteKey: /devhire/prod/runtime
+      property: OPENSEARCH_PASSWORD
+
 ingress:
   enabled: true
   className: alb
