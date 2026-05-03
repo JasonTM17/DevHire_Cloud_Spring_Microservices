@@ -1618,6 +1618,10 @@ Post-push GitHub status for commit `7ed50f1`:
 - Extended `.github/workflows/release.yml` so tag pushes still publish GHCR images and then create a GitHub Release.
 - The release job uses the GitHub-hosted `gh` CLI with `GITHUB_TOKEN`, so no extra marketplace release action or personal access token is required.
 - Release notes are loaded from `docs/release-notes/<tag>.md` and fall back to `CHANGELOG.md`.
+- Created and pushed annotated tag `v0.2.0`.
+- Verified GitHub Release workflow #1 completed successfully:
+  - 10 service/frontend GHCR image publish jobs passed.
+  - `Create GitHub Release` passed.
 
 Verification:
 
