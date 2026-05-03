@@ -1,0 +1,23 @@
+# Production Portfolio Checklist
+
+- Java 21 and Spring Boot 3.5.x multi-module build.
+- Spring Cloud Gateway with JWT validation, CORS, route security, and Redis rate limit.
+- Role-based authorization for Admin, Employer, and Candidate.
+- BCrypt password hashing.
+- JWT access tokens, refresh token rotation, logout/revoke, Redis blacklist.
+- Service-owned PostgreSQL databases and Flyway migrations.
+- Unique constraints, indexes, timestamps, and optimistic locking where useful.
+- OpenSearch job search adapter with PostgreSQL fallback.
+- Kafka domain events with transactional outbox and idempotent consumers.
+- Notification delivery queue with retry/backoff, rate limit, HTML email, and Gmail SMTP runbook.
+- Audit log ingestion and admin filters.
+- Standard error response with trace ID.
+- Actuator health checks, Prometheus metrics, OpenTelemetry tracing, Grafana/Loki/Tempo stack.
+- Dockerfiles with multi-stage builds and non-root runtime users.
+- Docker Compose full stack.
+- Kubernetes raw manifests plus Helm chart and Argo CD sample.
+- GitHub Actions for CI, Docker images, E2E, security scans, release images.
+- Trivy, Gitleaks, Dependency Review, and SBOM generation.
+- Unit, controller, contract-like, integration, and Playwright E2E tests.
+- Portfolio screenshots generated from the real frontend.
+- Vietnamese, English, and Japanese documentation.

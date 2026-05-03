@@ -3,6 +3,28 @@
 DevHire Cloud は、Java Spring Boot による採用プラットフォームのマイクロサービス構成プロジェクトです。ポートフォリオ用途を想定し、認証、求人投稿、応募管理、通知、監査ログ、検索、監視、Docker、CI/CD、テストを含みます。
 Candidate、Employer、Admin の主要ワークフローを確認できる Next.js frontend も含みます。
 
+## Portfolio Screenshots
+
+Screenshots are generated from the real frontend through Playwright E2E.
+
+| Jobs | Job Detail |
+|---|---|
+| ![Jobs page](screenshots/jobs-page.png) | ![Job detail](screenshots/job-detail.png) |
+
+| Candidate | Employer | Admin |
+|---|---|---|
+| ![Candidate dashboard](screenshots/candidate-dashboard.png) | ![Employer dashboard](screenshots/employer-dashboard.png) | ![Admin dashboard](screenshots/admin-dashboard.png) |
+
+Important docs:
+
+- [Architecture](architecture.md)
+- [Security and supply chain](security.md)
+- [Deployment runbook](deployment.md)
+- [Gmail SMTP runbook](gmail-smtp.md)
+- [Production checklist](production-checklist.md)
+- [10-minute demo script](demo-script.md)
+- [Architecture Decision Records](ADR/0001-microservices-and-service-databases.md)
+
 ## 技術スタック
 
 - Java 21, Maven multi-module
@@ -10,10 +32,13 @@ Candidate、Employer、Admin の主要ワークフローを確認できる Next.
 - Spring Cloud Gateway, Spring Security, JWT, BCrypt
 - PostgreSQL, Flyway, JPA/Hibernate
 - OpenSearch job search with PostgreSQL fallback
+- Transactional outbox and idempotent Kafka consumers
 - Redis, Kafka, OpenFeign
 - Actuator, Micrometer, Prometheus, Grafana, OpenTelemetry, Tempo, Loki
 - JUnit 5, Mockito, MockMvc, Testcontainers PostgreSQL, JaCoCo
 - Docker Compose, GitHub Actions, Kubernetes sample manifests
+- Helm and Argo CD GitOps sample
+- Trivy, Gitleaks and SBOM generation
 - Next.js 16, React 19, TypeScript frontend
 
 ## サービス
@@ -112,3 +137,13 @@ Kubernetes manifest の preview:
 ```bash
 kubectl kustomize ./deploy/k8s
 ```
+
+## Additional Portfolio Notes
+
+- Transactional outbox and idempotent notification/audit consumers are documented in [ADR/0002-transactional-outbox.md](ADR/0002-transactional-outbox.md).
+- Email delivery uses a queue with retry/backoff, rate limiting and persisted status.
+- Security workflows include Trivy, Gitleaks and SBOM generation. See [security.md](security.md).
+- Helm chart: `deploy/helm/devhire-cloud`.
+- Argo CD sample: `deploy/gitops/argocd-application.yaml`.
+- Demo script: [demo-script.md](demo-script.md).
+- Production checklist: [production-checklist.md](production-checklist.md).

@@ -3,6 +3,28 @@
 DevHire Cloud is a production-style Java Spring Boot microservices recruitment platform for portfolio use. It models a small ITviec/LinkedIn Jobs experience with authentication, employer company onboarding, job posting, candidate applications, internal notifications, audit logs, search, observability, Docker and CI/CD.
 It also includes a small Next.js frontend for the main Candidate, Employer and Admin workflows.
 
+## Portfolio Screenshots
+
+Screenshots are generated from the real frontend through Playwright E2E.
+
+| Jobs | Job Detail |
+|---|---|
+| ![Jobs page](screenshots/jobs-page.png) | ![Job detail](screenshots/job-detail.png) |
+
+| Candidate | Employer | Admin |
+|---|---|---|
+| ![Candidate dashboard](screenshots/candidate-dashboard.png) | ![Employer dashboard](screenshots/employer-dashboard.png) | ![Admin dashboard](screenshots/admin-dashboard.png) |
+
+Important docs:
+
+- [Architecture](architecture.md)
+- [Security and supply chain](security.md)
+- [Deployment runbook](deployment.md)
+- [Gmail SMTP runbook](gmail-smtp.md)
+- [Production checklist](production-checklist.md)
+- [10-minute demo script](demo-script.md)
+- [Architecture Decision Records](ADR/0001-microservices-and-service-databases.md)
+
 ## Stack
 
 - Java 21, Maven multi-module
@@ -10,10 +32,13 @@ It also includes a small Next.js frontend for the main Candidate, Employer and A
 - Spring Cloud Gateway, Spring Security, JWT, BCrypt
 - PostgreSQL, Flyway, JPA/Hibernate
 - OpenSearch job search with PostgreSQL fallback
+- Transactional outbox and idempotent Kafka consumers
 - Redis, Kafka, OpenFeign
 - Actuator, Micrometer, Prometheus, Grafana, OpenTelemetry, Tempo, Loki
 - JUnit 5, Mockito, MockMvc, Testcontainers PostgreSQL, JaCoCo
 - Docker Compose and GitHub Actions
+- Kubernetes, Helm and Argo CD GitOps sample
+- Trivy, Gitleaks and SBOM generation
 - Next.js 16, React 19 and TypeScript frontend
 
 ## Services
@@ -91,11 +116,13 @@ See [api.http](api.http) for a runnable flow.
 - JWT and refresh token rotation.
 - Gateway-side JWT validation and rate limiting.
 - Kafka domain events.
-- SMTP email delivery provider with persisted delivery status.
+- Transactional outbox with idempotent notification/audit consumers.
+- SMTP email delivery queue with retry/backoff, rate limiting and persisted delivery status.
 - Gmail SMTP setup and smoke-test scripts: [gmail-smtp.md](gmail-smtp.md).
 - Standard error response with trace id.
 - Docker Compose full local stack.
-- CI, Docker image build workflow, dependency review and release image publishing.
+- CI, Docker image build workflow, dependency review, Trivy, Gitleaks, SBOM and release image publishing.
+- Helm chart and Argo CD GitOps sample.
 - Tests include Testcontainers and event contract checks.
 - Hard JaCoCo coverage gate in CI.
 - Next.js frontend wired to the API Gateway.
@@ -104,6 +131,8 @@ See [api.http](api.http) for a runnable flow.
 
 - `deploy/docker-compose.prod.yml`: production Compose sample for externally managed PostgreSQL, Redis, Kafka and tagged images.
 - `deploy/k8s`: Kubernetes baseline with namespace, config map, secret template, deployments, services, ingress and HPA examples.
+- `deploy/helm/devhire-cloud`: Helm chart with local, staging and production values.
+- `deploy/gitops/argocd-application.yaml`: Argo CD sample.
 - `docs/deployment.md`: runbook for release, deploy, health checks and rollback.
 
 Preview Kubernetes manifests:

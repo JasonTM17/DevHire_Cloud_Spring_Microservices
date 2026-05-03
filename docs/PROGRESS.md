@@ -712,3 +712,63 @@ Verification:
 - Offline manifest validation with `ghcr.io/yannh/kubeconform:latest -strict -ignore-missing-schemas` passed for local, staging, and production Helm renders on 2026-05-03.
 
 Committed as `chore(deploy): add helm and gitops manifests`.
+
+## Phase 29 - Final portfolio polish
+
+- Added portfolio screenshots to the Vietnamese, English, and Japanese documentation:
+  - jobs page,
+  - job detail,
+  - candidate dashboard,
+  - employer dashboard,
+  - admin dashboard.
+- Added architecture decision records under `docs/ADR` for:
+  - microservices and service-owned databases,
+  - transactional outbox,
+  - OpenSearch job search,
+  - JWT and refresh-token security,
+  - Gmail SMTP notification delivery.
+- Added `docs/demo-script.md` with a 10-minute recruiter-friendly demo flow.
+- Added `docs/production-checklist.md` for portfolio review and operational readiness.
+- Updated `README.md`, `docs/README_EN.md`, and `docs/README_JA.md` with:
+  - screenshot gallery,
+  - production-ready highlights,
+  - security and deployment links,
+  - Helm/GitOps notes,
+  - outbox and email delivery notes.
+- Updated `docs/architecture.md` with event reliability, search, notification delivery, and deployment details.
+
+Verification:
+
+- Screenshot artifacts checked on 2026-05-03: 5 non-empty PNG files exist in `docs/screenshots`.
+- `mvn -T1 clean verify` passed on 2026-05-03.
+- `docker compose config --quiet` passed on 2026-05-03.
+- `kubectl kustomize .\deploy\k8s`, `.\deploy\k8s-overlays\local`, and `.\deploy\k8s-overlays\prod` passed on 2026-05-03.
+- `helm lint deploy/helm/devhire-cloud` passed through `alpine/helm:3.17.0` on 2026-05-03.
+- `helm template` passed for local, staging, and production values through `alpine/helm:3.17.0` on 2026-05-03.
+
+Committed as `docs: add portfolio screenshots adr and demo guide`.
+
+## Final verification - Phase 24 to Phase 29
+
+- `mvn -T1 clean verify` passed on 2026-05-03 after all Phase 24-29 commits.
+- `docker compose config --quiet` passed on 2026-05-03.
+- `kubectl kustomize .\deploy\k8s`, `.\deploy\k8s-overlays\local`, and `.\deploy\k8s-overlays\prod` passed on 2026-05-03.
+- `helm lint deploy/helm/devhire-cloud` passed through `alpine/helm:3.17.0` on 2026-05-03.
+- `helm template` passed for local, staging, and production values through `alpine/helm:3.17.0` on 2026-05-03.
+- `.\scripts\e2e-smoke.ps1 -Build -KeepRunning` passed on 2026-05-03:
+  - built the Docker stack,
+  - waited for Gateway and service readiness endpoints,
+  - verified Gateway job search smoke through CORS,
+  - ran Playwright E2E with 4/4 tests passing,
+  - regenerated portfolio screenshots with 1/1 screenshot test passing.
+- Manual API smoke through Gateway `http://localhost:18080` passed on 2026-05-03:
+  - admin, employer, and candidate login,
+  - employer created a company,
+  - admin approved the company,
+  - employer created and submitted a job,
+  - admin approved the job,
+  - candidate searched the published job,
+  - candidate submitted an application,
+  - employer changed the application status to `INTERVIEW`,
+  - candidate notification lookup returned the application signal,
+  - admin audit log lookup returned login activity.

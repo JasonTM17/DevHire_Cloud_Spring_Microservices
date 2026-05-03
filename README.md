@@ -5,6 +5,28 @@ DevHire Cloud là nền tảng tuyển dụng dạng mini ITviec/LinkedIn Jobs, 
 Dự án tập trung vào kiến trúc microservices, bảo mật JWT, workflow tuyển dụng, event-driven communication, PostgreSQL riêng cho từng service, OpenSearch job search, Docker Compose full stack, observability, CI/CD và test thật.
 Frontend Next.js tối giản đã được thêm để demo các workflow Candidate, Employer và Admin trên API Gateway thật.
 
+## Portfolio Screenshots
+
+Anh chup duoc tao tu Playwright E2E tren frontend that:
+
+| Jobs | Job Detail |
+|---|---|
+| ![Jobs page](docs/screenshots/jobs-page.png) | ![Job detail](docs/screenshots/job-detail.png) |
+
+| Candidate | Employer | Admin |
+|---|---|---|
+| ![Candidate dashboard](docs/screenshots/candidate-dashboard.png) | ![Employer dashboard](docs/screenshots/employer-dashboard.png) | ![Admin dashboard](docs/screenshots/admin-dashboard.png) |
+
+Tai lieu quan trong:
+
+- [Architecture](docs/architecture.md)
+- [Security and supply chain](docs/security.md)
+- [Deployment runbook](docs/deployment.md)
+- [Gmail SMTP runbook](docs/gmail-smtp.md)
+- [Production checklist](docs/production-checklist.md)
+- [10-minute demo script](docs/demo-script.md)
+- [Architecture Decision Records](docs/ADR/0001-microservices-and-service-databases.md)
+
 ## Kiến Trúc Tổng Quan
 
 ```mermaid
@@ -52,12 +74,15 @@ flowchart LR
 - PostgreSQL 17, Flyway, JPA/Hibernate
 - Redis cho rate limit và access-token blacklist
 - Kafka cho domain events
+- Transactional outbox va idempotent consumers
 - OpenSearch cho job search, PostgreSQL fallback adapter
 - OpenFeign cho service-to-service query
 - Springdoc OpenAPI/Swagger
 - Actuator, Micrometer, Prometheus, Grafana, OpenTelemetry, Tempo, Loki
 - JUnit 5, Mockito, MockMvc, Testcontainers PostgreSQL, JaCoCo
 - Docker Compose, GitHub Actions
+- Kubernetes, Helm, Argo CD GitOps sample
+- Trivy, Gitleaks, SBOM
 - Next.js 16, React 19, TypeScript cho frontend portfolio
 
 ## Service
@@ -231,7 +256,7 @@ Notification:
 Email delivery:
 
 - Local mặc định tắt bằng `DEVHIRE_NOTIFICATION_EMAIL_ENABLED=false`.
-- Khi bật SMTP, `notification-service` resolve email qua `user-service`, gửi bằng `spring-boot-starter-mail`, và lưu trạng thái `SENT`, `FAILED`, `DISABLED` hoặc `SKIPPED_NO_EMAIL`.
+- Khi bật SMTP, `notification-service` resolve email qua `user-service`, gửi bằng delivery worker, retry/backoff nếu lỗi tạm thời, và lưu trạng thái `PENDING`, `SENDING`, `SENT`, `FAILED_RETRYABLE`, `FAILED_PERMANENT` hoặc `DISABLED`.
 - Cấu hình chính: `SPRING_MAIL_HOST`, `SPRING_MAIL_PORT`, `SPRING_MAIL_USERNAME`, `SPRING_MAIL_PASSWORD`, `SPRING_MAIL_SMTP_AUTH`, `SPRING_MAIL_SMTP_STARTTLS_ENABLE`.
 
 Audit:
@@ -291,12 +316,16 @@ GitHub Actions:
 - `security.yml`: Dependency Review cho PR và Maven dependency tree sanity check.
 - `release.yml`: Publish Docker images lên GHCR khi push tag dạng `v1.0.0` hoặc chạy thủ công.
 
+Security supply-chain CI da co them Gitleaks, Trivy filesystem/image scan, SBOM artifact va OCI image labels cho Docker image.
+
 ## Deployment/Kubernetes
 
 Tài sản triển khai nằm trong `deploy/`:
 
 - `deploy/docker-compose.prod.yml`: compose mẫu cho production với external PostgreSQL/Redis/Kafka và image tag rõ ràng.
 - `deploy/k8s`: Kubernetes baseline gồm namespace, service account, config map, secret template, deployments, services, ingress, HPA, PDB, network policy, quota và local/prod overlays.
+- `deploy/helm/devhire-cloud`: Helm chart cho local, staging và production values.
+- `deploy/gitops/argocd-application.yaml`: Argo CD GitOps sample.
 - `docs/deployment.md`: runbook vận hành cho render manifest, deploy, health check và rollback.
 
 Xem manifest:
@@ -334,7 +363,9 @@ kubectl apply -k .\deploy\k8s
 │   └── tempo
 ├── deploy
 │   ├── k8s
-│   └── k8s-overlays
+│   ├── k8s-overlays
+│   ├── helm
+│   └── gitops
 ├── docs
 └── .github/workflows
 ```
@@ -347,11 +378,13 @@ kubectl apply -k .\deploy\k8s
 - JWT access token, refresh token rotation, BCrypt, Redis blacklist.
 - Gateway validation, rate limiting, CORS, correlation id, centralized gateway errors.
 - Không share JPA entity giữa services.
-- Feign cho service-to-service query, Kafka cho domain events.
-- SMTP email provider abstraction cho notification-service, có trạng thái delivery trong DB.
+- Feign cho service-to-service query, Kafka cho domain events, transactional outbox và idempotent consumers.
+- SMTP email queue cho notification-service, có retry/backoff, rate limit, HTML template và delivery status trong DB.
 - Không hardcode production secret, có `.env.example`.
 - Dockerfile multi-stage, non-root runtime user.
 - Observability stack có metrics, health probes, tracing và dashboard.
+- Security supply-chain có Trivy, Gitleaks, SBOM và OCI image labels.
+- Kubernetes raw manifests, Helm chart và Argo CD sample.
 - Test thật với unit, controller, contract-like tests và Testcontainers.
 - Coverage gate cứng bằng JaCoCo + `scripts/check-coverage.ps1` trong CI.
 - Git history chia theo phase, commit message rõ ràng.
@@ -360,10 +393,9 @@ kubectl apply -k .\deploy\k8s
 
 - Aggregate OpenAPI tại gateway.
 - Relevance tuning và synonym dictionary cho OpenSearch job search.
-- Outbox pattern cho event publishing.
-- Email template, retry queue và provider failover cho notification-service.
-- Helm chart và GitOps overlays cho từng môi trường.
-- Frontend Candidate/Employer/Admin bằng React hoặc Next.js.
+- Debezium CDC publisher thay cho scheduled outbox publisher nếu cần scale cao hơn.
+- Email provider failover SendGrid/SES/Mailgun.
+- Canary deployment và progressive delivery chi tiết hơn.
 
 Tài liệu bổ sung:
 
@@ -373,3 +405,7 @@ Tài liệu bổ sung:
 - Architecture notes: [docs/architecture.md](docs/architecture.md)
 - Deployment runbook: [docs/deployment.md](docs/deployment.md)
 - Gmail SMTP runbook: [docs/gmail-smtp.md](docs/gmail-smtp.md)
+- Security: [docs/security.md](docs/security.md)
+- Production checklist: [docs/production-checklist.md](docs/production-checklist.md)
+- Demo script: [docs/demo-script.md](docs/demo-script.md)
+- ADR: [docs/ADR](docs/ADR)

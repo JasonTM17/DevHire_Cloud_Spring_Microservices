@@ -41,6 +41,18 @@ Services do not share JPA entities and do not read another service's database.
   - `company.events`
   - `notification.events`
 
+## Event Reliability
+
+Producing services write domain events to `outbox_events` in the same PostgreSQL transaction as the business change. A scheduled publisher sends pending rows to Kafka with retry/backoff and terminal `DEAD_LETTER` status. Notification and audit consumers store `processed_events` keyed by `eventId` and consumer name to avoid duplicate processing.
+
+## Search
+
+`job-service` owns the search abstraction. OpenSearch is used for published job search in Docker/production-style profiles, while PostgreSQL full-text search remains as a fallback adapter. This keeps controller and workflow code independent from the search engine.
+
+## Notification Delivery
+
+Internal notifications are persisted first. Email delivery is handled by a scheduled worker that polls due notification rows, resolves recipient email through `user-service`, sends HTML/plain-text email through SMTP, and records delivery state with retry/backoff and rate limiting.
+
 ## Security
 
 - Auth-service signs JWT access tokens with `JWT_SECRET`.
@@ -48,6 +60,10 @@ Services do not share JPA entities and do not read another service's database.
 - Gateway strips spoofed identity headers and injects trusted downstream headers.
 - Refresh tokens are randomly generated, hashed before persistence, rotated on refresh, and revoked on logout.
 - Access tokens are blacklisted in Redis on logout until their original expiry.
+
+## Deployment
+
+Local development uses Docker Compose. Kubernetes deployment assets include raw Kustomize manifests plus a Helm chart with local, staging, and production values. `deploy/gitops/argocd-application.yaml` shows the GitOps path for Argo CD.
 
 ## Observability
 
