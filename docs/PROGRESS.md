@@ -646,3 +646,36 @@ Verification:
 - `kubectl kustomize .\deploy\k8s`, `.\deploy\k8s-overlays\local`, and `.\deploy\k8s-overlays\prod` passed on 2026-05-03.
 
 Committed as `feat(notification): harden email retry delivery`.
+
+## Phase 27 - Security and supply chain
+
+- Hardened `.github/workflows/security.yml` with:
+  - Gitleaks secret scanning,
+  - Trivy filesystem vulnerability scanning,
+  - CycloneDX SBOM artifact generation through Anchore/Syft,
+  - scheduled/manual Trivy Docker image scanning for every backend service and frontend image,
+  - report artifact upload for filesystem, image scan, and SBOM outputs.
+- Added `.gitleaks.toml` with explicit allowlist entries for documented placeholders and deterministic demo credentials only.
+- Added OCI image labels to Docker build and release workflows:
+  - title,
+  - description,
+  - source,
+  - revision,
+  - version on release,
+  - license.
+- Added trilingual `docs/security.md` covering:
+  - threat model,
+  - secret policy,
+  - token policy,
+  - CI supply-chain gates.
+
+Verification:
+
+- `docker run --rm -v "${PWD}:/repo" -w /repo rhysd/actionlint:latest -color` passed on 2026-05-03.
+- `docker run --rm -v "${PWD}:/repo" -w /repo zricethezav/gitleaks:latest detect --source /repo --config /repo/.gitleaks.toml --redact --no-banner --log-level warn` passed on 2026-05-03.
+- `docker run --rm -v "${PWD}:/repo" aquasec/trivy:0.58.2 fs --scanners vuln,misconfig --severity CRITICAL --ignore-unfixed --exit-code 0 --skip-dirs /repo/.git --skip-dirs /repo/frontend/node_modules /repo` completed on 2026-05-03; Trivy reported upstream Rego policy warnings for misconfig checks, so the CI workflow is scoped to `scanners: vuln` for stable gating.
+- `mvn -B -DskipTests dependency:tree` passed on 2026-05-03.
+- `docker compose config --quiet` passed on 2026-05-03.
+- `kubectl kustomize .\deploy\k8s`, `.\deploy\k8s-overlays\local`, and `.\deploy\k8s-overlays\prod` passed on 2026-05-03.
+
+Committed as `ci(security): add trivy gitleaks and sbom workflows`.

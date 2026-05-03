@@ -46,5 +46,11 @@ jobs:
             SERVICE_NAME=${{ matrix.service }}
             NEXT_PUBLIC_API_BASE_URL=${{ vars.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080' }}
           tags: devhire/${{ matrix.service }}:${{ github.sha }}
+          labels: |
+            org.opencontainers.image.title=devhire-${{ matrix.service }}
+            org.opencontainers.image.description=DevHire Cloud ${{ matrix.service }} image
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.licenses=MIT
           push: false
           load: false

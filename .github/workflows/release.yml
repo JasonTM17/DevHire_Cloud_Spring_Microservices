@@ -71,4 +71,11 @@ jobs:
           tags: |
             ${{ env.IMAGE_NAME }}:${{ env.VERSION_TAG }}
             ${{ env.IMAGE_NAME }}:${{ github.sha }}
+          labels: |
+            org.opencontainers.image.title=devhire-${{ matrix.service }}
+            org.opencontainers.image.description=DevHire Cloud ${{ matrix.service }} image
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.version=${{ env.VERSION_TAG }}
+            org.opencontainers.image.licenses=MIT
           push: true
