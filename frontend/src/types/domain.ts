@@ -89,6 +89,29 @@ export type AuditLog = {
   createdAt: string;
 };
 
+export type AiCitation = {
+  title: string;
+  sourceType: string;
+  sourcePath: string;
+  snippet: string;
+};
+
+export type AiToolTrace = {
+  name: string;
+  status: string;
+  summary: string;
+};
+
+export type AiChatResponse = {
+  conversationId: string;
+  answer: string;
+  citations: AiCitation[];
+  toolTraces: AiToolTrace[];
+  model: string;
+  fallback: boolean;
+  createdAt: string;
+};
+
 export type PageResponse<T> = {
   content: T[];
   totalElements: number;

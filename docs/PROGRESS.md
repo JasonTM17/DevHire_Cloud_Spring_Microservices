@@ -1118,3 +1118,21 @@ Verification:
 - `docker compose config --quiet` passed on 2026-05-03.
 - `git diff --check` passed on 2026-05-03.
 - `mvn -T1 clean verify` passed on 2026-05-03.
+
+## Phase 45 - Claude AI frontend workspace
+
+- Added the `/assistant` workspace to the Next.js frontend.
+- Added sidebar navigation and page metadata for the Claude AI portfolio assistant.
+- Implemented a protected streaming chat experience through the API Gateway:
+  - recruiter-oriented suggested prompts,
+  - Claude model/fallback status badges,
+  - cited answer rendering,
+  - tool trace inspection,
+  - deterministic fallback visibility.
+- Added frontend domain types and API helpers for AI chat responses.
+- Styled the assistant workspace with responsive chat, citation, and tool trace layouts.
+
+Verification:
+
+- `npm run typecheck` passed on 2026-05-03.
+- `npm run build` passed on 2026-05-03.

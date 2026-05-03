@@ -1,6 +1,7 @@
 import { getSession } from "@/lib/session";
 import type {
   Application,
+  AiChatResponse,
   AuditLog,
   AuthResponse,
   Company,
@@ -109,5 +110,10 @@ export const api = {
       method: "PATCH",
       body: JSON.stringify({ status })
     }),
-  auditLogs: () => request<PageResponse<AuditLog>>("/api/admin/audit-logs")
+  auditLogs: () => request<PageResponse<AuditLog>>("/api/admin/audit-logs"),
+  aiChat: (message: string, conversationId?: string) =>
+    request<AiChatResponse>("/api/ai/chat", {
+      method: "POST",
+      body: JSON.stringify({ message, conversationId })
+    })
 };

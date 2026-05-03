@@ -3,6 +3,7 @@
 import {
   Activity,
   Bell,
+  Bot,
   BriefcaseBusiness,
   Building2,
   ClipboardList,
@@ -21,6 +22,7 @@ import { clearSession, getSession } from "@/lib/session";
 
 const navItems = [
   { href: "/jobs", label: "Jobs", icon: BriefcaseBusiness },
+  { href: "/assistant", label: "AI Assistant", icon: Bot },
   { href: "/candidate", label: "Candidate", icon: ClipboardList },
   { href: "/employer", label: "Employer", icon: Building2 },
   { href: "/admin", label: "Admin", icon: ShieldCheck }
@@ -30,6 +32,10 @@ const pageMeta: Record<string, { title: string; subtitle: string }> = {
   "/jobs": {
     title: "Recruitment Operations Workspace",
     subtitle: "Published roles, search signals, and production health in one surface."
+  },
+  "/assistant": {
+    title: "Claude AI Portfolio Assistant",
+    subtitle: "RAG answers, citations, and tool traces over the DevHire Cloud platform."
   },
   "/candidate": {
     title: "Candidate Command Center",
@@ -94,6 +100,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <div className="rail-health-row">
             <span>OpenSearch</span>
             <span>Adapter</span>
+          </div>
+          <div className="rail-health-row">
+            <span>Claude AI</span>
+            <span>Haiku</span>
           </div>
           <div className="rail-health-row">
             <span>CI/CD</span>
