@@ -157,6 +157,8 @@ See [api.http](api.http) for a runnable flow.
 - `deploy/helm/devhire-cloud`: Helm chart with local, staging and production values.
 - `deploy/gitops/argocd-application.yaml`: Argo CD sample.
 - `docs/deployment.md`: runbook for release, deploy, health checks and rollback.
+- `docs/aws-terraform.md`: safe AWS Terraform blueprint with validation and cost guardrails.
+- `docs/slo.md`: SLO, error budget, alert and dashboard runbook.
 
 Preview Kubernetes manifests:
 

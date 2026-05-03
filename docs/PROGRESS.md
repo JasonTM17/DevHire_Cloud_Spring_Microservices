@@ -939,3 +939,34 @@ Verification:
 - Secret scan over changed contract/test/docs files found no Gmail app password, SMTP account, AWS key id, or AWS secret key.
 
 Committed as `test(contract): add service compatibility contract gates`.
+
+## Phase 37 - SLO, error budget, and portfolio operations
+
+- Added Prometheus SLO alert rules for:
+  - Gateway 5xx rate,
+  - Gateway p95 latency,
+  - service scrape availability,
+  - JVM heap pressure,
+  - job search p95 latency,
+  - outbox publish failures.
+- Mounted the Prometheus rules directory in Docker Compose and configured Prometheus `rule_files`.
+- Added Micrometer counters in the shared outbox publisher:
+  - `devhire.outbox.publish.success`,
+  - `devhire.outbox.publish.failure`.
+- Enabled HTTP server request histograms and SLO buckets across the gateway and backend services so p95 panels and alerts can be calculated from Prometheus buckets.
+- Added the provisioned Grafana dashboard `DevHire Cloud SLO Overview`.
+- Added operations and portfolio documentation:
+  - `docs/slo.md`,
+  - `docs/aws-terraform.md`,
+  - `docs/ADR/0006-aws-terraform-blueprint.md`.
+- Linked the AWS Terraform and SLO runbooks from the Vietnamese, English, and Japanese portfolio documentation.
+
+Verification:
+
+- Grafana dashboard JSON parsed successfully on 2026-05-03.
+- `docker compose config --quiet` passed on 2026-05-03.
+- `docker run --rm --entrypoint promtool -v "${PWD}/infra/prometheus:/etc/prometheus" prom/prometheus:v3.0.1 check config /etc/prometheus/prometheus.yml` passed on 2026-05-03.
+- `mvn -T1 clean verify` passed on 2026-05-03.
+- `docker run --rm -v "${PWD}:/repo" -w /repo rhysd/actionlint:latest -color` passed on 2026-05-03.
+- `docker run --rm -v "${PWD}:/repo" -w /repo zricethezav/gitleaks:latest detect --source /repo --no-git --redact --verbose` passed on 2026-05-03 with no leaks found.
+- Full Docker runtime smoke was not rerun after Phase 37 because the local stack had been stopped earlier to free memory for JDK 24 Maven verification. Compose syntax, Prometheus rules, Grafana dashboard JSON, and the full Maven lifecycle were validated.

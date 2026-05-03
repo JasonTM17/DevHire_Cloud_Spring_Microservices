@@ -172,3 +172,5 @@ kubectl kustomize ./deploy/k8s
 - Argo CD sample: `deploy/gitops/argocd-application.yaml`.
 - Demo script: [demo-script.md](demo-script.md).
 - Production checklist: [production-checklist.md](production-checklist.md).
+- AWS Terraform blueprint: [aws-terraform.md](aws-terraform.md).
+- SLO operations runbook: [slo.md](slo.md).
