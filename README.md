@@ -10,6 +10,30 @@ DevHire Cloud là một dự án portfolio backend/DevOps/Solution Architecture 
 
 Repository hiện có Java 21, Spring Boot 3.5.13, Spring Cloud 2025.0.2, API Gateway, JWT security, Kafka/outbox, OpenSearch, PostgreSQL service-owned databases, Claude Haiku AI assistant, Docker Compose full stack, observability, CI/CD, Kubernetes/Helm/GitOps, AWS Terraform blueprint, Next.js frontend và bộ kiểm thử tự động.
 
+## 30-Second Review
+
+DevHire Cloud is a production engineering portfolio, not a single-service CRUD demo. It shows how a recruitment platform can be decomposed into service-owned databases, secured through a gateway, coordinated with Kafka/outbox events, searched through OpenSearch, operated with SLO dashboards, released through CI/CD, and explained through a Claude Haiku assistant.
+
+Best reviewer path:
+
+1. Scan the screenshots and release evidence below.
+2. Open [Professional review map](docs/professional-review-map.md) for the 5/15/30-minute review route.
+3. Run `.\scripts\verify.ps1 -Docs -Docker` for a fast local gate.
+4. Run Docker and smoke tests when you want runtime proof.
+5. Check [v0.2.0 release evidence](docs/release-evidence/v0.2.0.md) and [v0.3.0 roadmap evidence](docs/release-notes/v0.3.0.md).
+
+## Production Proof
+
+| Signal | Evidence |
+|---|---|
+| Microservice boundaries | Dedicated modules, service-owned PostgreSQL databases, Flyway migrations, no shared JPA entities |
+| Security | JWT/refresh rotation, gateway validation, role checks, Gitleaks, Trivy, dependency review, secret policy |
+| Event reliability | Kafka events, transactional outbox, retry/dead-letter states, idempotent consumers |
+| Operations | Prometheus, Grafana SLO dashboard, Loki, Tempo, OpenTelemetry, Mailpit, chaos smoke, DR scripts |
+| Delivery | GitHub Actions, Docker matrix builds, GHCR release images, release notes, release evidence |
+| Cloud readiness | Kubernetes, Helm, Argo CD, AWS Terraform blueprint, External Secrets wiring |
+| AI portfolio layer | Claude Haiku assistant, RAG-style citations, fallback mode, tool traces, AI evaluation script |
+
 ## Portfolio Screenshots
 
 Ảnh được tạo từ frontend thật qua Playwright và Docker runtime, không phải mockup tĩnh.

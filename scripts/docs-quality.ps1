@@ -18,6 +18,8 @@ $requiredPaths = @(
     "docs/ai-evaluation.md",
     "docs/portfolio-case-study.md",
     "docs/production-readiness.md",
+    "docs/professional-review-map.md",
+    "docs/github-owner-actions.md",
     "SECURITY.md",
     "CONTRIBUTING.md",
     "CHANGELOG.md",

@@ -1628,3 +1628,18 @@ Verification:
 - Passed:
   - `docker run --rm -v "${PWD}:/repo" -w /repo rhysd/actionlint:latest`
   - `git diff --check`
+
+## Phase 68 - GitHub portfolio facade
+
+- Added a 30-second review section and production proof table to the root README.
+- Added `docs/professional-review-map.md` with 5, 15, and 30 minute review paths.
+- Added `docs/github-owner-actions.md` for repository About, topics, branch protection, release, and package visibility.
+- Added `scripts/github-repo-polish.ps1` with safe dry-run metadata output and optional token-backed apply mode.
+- Registered the new portfolio docs in `scripts/docs-quality.ps1`.
+
+Verification:
+
+- Passed:
+  - `.\scripts\github-repo-polish.ps1 -DryRun`
+  - `.\scripts\docs-quality.ps1`
+  - `git diff --check`
