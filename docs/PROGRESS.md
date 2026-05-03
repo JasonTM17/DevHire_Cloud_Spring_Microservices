@@ -970,3 +970,31 @@ Verification:
 - `docker run --rm -v "${PWD}:/repo" -w /repo rhysd/actionlint:latest -color` passed on 2026-05-03.
 - `docker run --rm -v "${PWD}:/repo" -w /repo zricethezav/gitleaks:latest detect --source /repo --no-git --redact --verbose` passed on 2026-05-03 with no leaks found.
 - Full Docker runtime smoke was not rerun after Phase 37 because the local stack had been stopped earlier to free memory for JDK 24 Maven verification. Compose syntax, Prometheus rules, Grafana dashboard JSON, and the full Maven lifecycle were validated.
+
+## Phase 38 - Frontend professional redesign
+
+- Used Stitch to create the `DevHire Cloud Operations` design direction:
+  - dark navigation rail,
+  - light recruitment operations workspace,
+  - compact SaaS cards and tables,
+  - 8px radius panels,
+  - production signals for Gateway, OpenSearch, Kafka outbox, and SLOs.
+- Added `.stitch/DESIGN.md` as the frontend visual source of truth.
+- Reworked the Next.js frontend:
+  - redesigned app shell with top command bar and platform signal rail,
+  - redesigned Jobs and Job Detail pages with company logo marks, production badges, insight panels, and polished cards,
+  - improved Candidate, Employer, Admin, Login, and Register screens with richer operational layout,
+  - added real-company favicon logo support through domain-based image URLs with fallback initials,
+  - added preview job data so the frontend still looks reviewable when the Docker backend stack is stopped.
+- Added refreshed portfolio screenshots:
+  - `docs/screenshots/frontend-redesign-jobs.png`,
+  - `docs/screenshots/frontend-redesign-job-detail.png`.
+- Updated README screenshot links in Vietnamese, English, and Japanese docs.
+
+Verification:
+
+- `npm run typecheck` passed on 2026-05-03.
+- `npm run build` passed on 2026-05-03.
+- Playwright local visual smoke opened `http://localhost:3000/jobs` and captured 3 job cards.
+- Playwright local visual smoke opened `http://localhost:3000/jobs/preview-java-platform` and captured the job detail page.
+- Browser in-app automation was attempted twice, but the Browser plugin could not attach to the tab in this environment. Playwright local was used as the visual QA fallback.

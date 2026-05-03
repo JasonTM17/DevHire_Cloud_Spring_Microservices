@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Building2, ClipboardList, Plus, Send } from "lucide-react";
+import { Building2, ClipboardList, GitPullRequestArrow, Plus, Send, UsersRound } from "lucide-react";
+import { CompanyLogo } from "@/components/CompanyLogo";
 import { MetricCard } from "@/components/MetricCard";
 import { StatusPill } from "@/components/StatusPill";
 import { api } from "@/lib/api";
+import { brandForCompany } from "@/lib/demoCompanies";
 import type { Application, Company, PageResponse } from "@/types/domain";
 
 export default function EmployerPage() {
@@ -82,18 +84,32 @@ export default function EmployerPage() {
 
   return (
     <section className="page-stack" data-testid="employer-dashboard">
-      <div>
+      <div className="hero-strip">
+        <div>
         <p className="eyebrow">Employer workspace</p>
         <h1>Company and pipeline</h1>
+          <p>
+            Operate company approval, job submission, and applicant review as one workflow backed by separate services,
+            transactions, and Kafka events.
+          </p>
+        </div>
+        <div className="hero-actions">
+          <span className="badge live">Company approval required</span>
+          <span className="badge">Job review workflow</span>
+        </div>
       </div>
       <div className="metrics-row">
-        <MetricCard icon={Building2} label="Companies" value={companies?.totalElements ?? 0} />
-        <MetricCard icon={ClipboardList} label="Applications" value={applications?.totalElements ?? 0} />
+        <MetricCard icon={Building2} label="Companies" value={companies?.totalElements ?? 0} helper="Owned by employer" />
+        <MetricCard icon={ClipboardList} label="Applications" value={applications?.totalElements ?? 0} helper="For selected job" />
+        <MetricCard icon={UsersRound} label="Pipeline" value="Interview" helper="Status mutation ready" />
       </div>
       {message ? <p className={message.includes("Cannot") || message.includes("No approved") ? "error" : "success"}>{message}</p> : null}
       <div className="split-grid">
         <div className="panel">
-          <h2>Company onboarding</h2>
+          <div className="section-title">
+            <Building2 size={20} />
+            <h2>Company onboarding</h2>
+          </div>
           <div className="form inline-form">
             <input value={companyName} onChange={(event) => setCompanyName(event.target.value)} />
             <button className="button primary" type="button" onClick={createCompany}>
@@ -104,14 +120,23 @@ export default function EmployerPage() {
           <div className="table-list">
             {companies?.content.map((company) => (
               <div className="table-row" key={company.id}>
-                <span>{company.name}</span>
+                <div className="company-line">
+                  <CompanyLogo brand={brandForCompany(company)} size="sm" />
+                  <span>
+                    <strong>{company.name}</strong>
+                    <span>{company.industry ?? "Software"} / {company.size ?? "Team size pending"}</span>
+                  </span>
+                </div>
                 <StatusPill value={company.status} />
               </div>
             ))}
           </div>
         </div>
         <div className="panel">
-          <h2>Job workflow</h2>
+          <div className="section-title">
+            <GitPullRequestArrow size={20} />
+            <h2>Job workflow</h2>
+          </div>
           <div className="form">
             <input value={jobTitle} onChange={(event) => setJobTitle(event.target.value)} />
             <button className="button primary" type="button" onClick={createJob}>
@@ -128,7 +153,10 @@ export default function EmployerPage() {
           <div className="table-list">
             {applications?.content.map((item) => (
               <div className="table-row" key={item.id}>
-                <span>{item.candidateId}</span>
+                <span>
+                  <strong>Candidate {item.candidateId.slice(0, 8)}</strong>
+                  <small>CV metadata captured</small>
+                </span>
                 <button className="button ghost" type="button" onClick={() => moveApplication(item.id)}>
                   <StatusPill value={item.status} />
                 </button>

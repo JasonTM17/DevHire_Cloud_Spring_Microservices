@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Activity, Building2, ShieldCheck } from "lucide-react";
+import { Activity, Building2, ClipboardCheck, ScrollText, ShieldCheck } from "lucide-react";
+import { CompanyLogo } from "@/components/CompanyLogo";
 import { MetricCard } from "@/components/MetricCard";
 import { StatusPill } from "@/components/StatusPill";
 import { api } from "@/lib/api";
+import { brandForCompany } from "@/lib/demoCompanies";
 import type { AuditLog, Company, PageResponse } from "@/types/domain";
 
 export default function AdminPage() {
@@ -41,26 +43,44 @@ export default function AdminPage() {
 
   return (
     <section className="page-stack" data-testid="admin-dashboard">
-      <div>
+      <div className="hero-strip">
+        <div>
         <p className="eyebrow">Admin workspace</p>
         <h1>Review console</h1>
+          <p>
+            A control plane for company approvals, job publishing, and immutable audit visibility across the platform.
+          </p>
+        </div>
+        <div className="hero-actions">
+          <span className="badge live">RBAC enforced</span>
+          <span className="badge">Audit log enabled</span>
+        </div>
       </div>
       <div className="metrics-row">
-        <MetricCard icon={Building2} label="Companies" value={companies?.totalElements ?? 0} />
-        <MetricCard icon={Activity} label="Audit events" value={audit?.totalElements ?? 0} />
-        <MetricCard icon={ShieldCheck} label="Pending" value={companies?.content.filter((item) => item.status === "PENDING").length ?? 0} />
+        <MetricCard icon={Building2} label="Companies" value={companies?.totalElements ?? 0} helper="Review queue" />
+        <MetricCard icon={Activity} label="Audit events" value={audit?.totalElements ?? 0} helper="Kafka ingested" />
+        <MetricCard icon={ShieldCheck} label="Pending" value={companies?.content.filter((item) => item.status === "PENDING").length ?? 0} helper="Needs admin action" />
       </div>
       {message ? <p className={message.includes("approved") ? "success" : "error"}>{message}</p> : null}
       <div className="split-grid">
         <div className="panel">
-          <h2>Company reviews</h2>
+          <div className="section-title">
+            <ClipboardCheck size={20} />
+            <h2>Company reviews</h2>
+          </div>
           <div className="table-list">
             {companies?.content.map((company) => (
               <div className="table-row" key={company.id}>
-                <span>{company.name}</span>
+                <div className="company-line">
+                  <CompanyLogo brand={brandForCompany(company)} size="sm" />
+                  <span>
+                    <strong>{company.name}</strong>
+                    <span>{company.website ?? company.slug}</span>
+                  </span>
+                </div>
                 <StatusPill value={company.status} />
                 {company.status === "PENDING" ? (
-                  <button className="button ghost" type="button" onClick={() => approveCompany(company.id)}>
+                  <button className="button secondary" type="button" onClick={() => approveCompany(company.id)}>
                     Approve
                   </button>
                 ) : null}
@@ -75,12 +95,18 @@ export default function AdminPage() {
           </div>
         </div>
         <div className="panel">
-          <h2>Audit log</h2>
+          <div className="section-title">
+            <ScrollText size={20} />
+            <h2>Audit log</h2>
+          </div>
           <div className="stack">
             {audit?.content.slice(0, 12).map((item) => (
               <div className="audit-item" key={item.id}>
-                <strong>{item.action}</strong>
-                <span>{item.actorEmail}</span>
+                <div className="status-line">
+                  <strong>{item.action}</strong>
+                  <StatusPill value={item.actorRole} />
+                </div>
+                <span className="muted">{item.actorEmail}</span>
                 <small>{new Date(item.createdAt).toLocaleString()}</small>
               </div>
             ))}

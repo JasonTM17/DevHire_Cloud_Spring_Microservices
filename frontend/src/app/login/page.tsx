@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { LockKeyhole, UserRoundCheck } from "lucide-react";
+import { DatabaseZap, LockKeyhole, Route, ShieldCheck, UserRoundCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { saveSession } from "@/lib/session";
@@ -57,8 +57,13 @@ export default function LoginPage() {
           </button>
         </form>
       </div>
-      <div className="panel demo-panel">
+      <div className="auth-brief">
+        <p className="eyebrow">Portfolio access</p>
         <h2>Demo accounts</h2>
+        <p>
+          Pick a role to inspect the real API flow through Gateway, JWT authentication, RBAC, and service-owned
+          dashboards.
+        </p>
         <div className="stack">
           {demos.map(([role, demoEmail, demoPassword]) => (
             <button
@@ -74,6 +79,35 @@ export default function LoginPage() {
               <strong>{demoEmail}</strong>
             </button>
           ))}
+        </div>
+        <div className="timeline">
+          <div className="pipeline-step">
+            <span className="step-index">
+              <ShieldCheck size={14} />
+            </span>
+            <span>
+              <strong>BCrypt + JWT</strong>
+              <small className="muted">Access and refresh token rotation</small>
+            </span>
+          </div>
+          <div className="pipeline-step">
+            <span className="step-index">
+              <Route size={14} />
+            </span>
+            <span>
+              <strong>Gateway routing</strong>
+              <small className="muted">Centralized auth and rate limit</small>
+            </span>
+          </div>
+          <div className="pipeline-step">
+            <span className="step-index">
+              <DatabaseZap size={14} />
+            </span>
+            <span>
+              <strong>Audit event</strong>
+              <small className="muted">Login is published to audit-service</small>
+            </span>
+          </div>
         </div>
       </div>
     </section>

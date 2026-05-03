@@ -9,7 +9,7 @@ Screenshots are generated from the real frontend through Playwright E2E.
 
 | Jobs | Job Detail |
 |---|---|
-| ![Jobs page](screenshots/jobs-page.png) | ![Job detail](screenshots/job-detail.png) |
+| ![Jobs page](screenshots/frontend-redesign-jobs.png) | ![Job detail](screenshots/frontend-redesign-job-detail.png) |
 
 | Candidate | Employer | Admin |
 |---|---|---|

@@ -1,11 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { BriefcaseBusiness, Filter, MapPin, Search } from "lucide-react";
+import { Activity, BriefcaseBusiness, Clock3, Database, Filter, MapPin, Search, ShieldCheck, SlidersHorizontal } from "lucide-react";
 import Link from "next/link";
+import { CompanyLogo } from "@/components/CompanyLogo";
 import { MetricCard } from "@/components/MetricCard";
 import { StatusPill } from "@/components/StatusPill";
 import { api } from "@/lib/api";
+import { brandForJob } from "@/lib/demoCompanies";
+import { previewJobs } from "@/lib/previewData";
 import type { Job, PageResponse } from "@/types/domain";
 
 export default function JobsPage() {
@@ -24,19 +27,43 @@ export default function JobsPage() {
   }, [keyword, skill, location]);
 
   useEffect(() => {
-    api.jobs(params).then(setJobs).catch((ex) => setError(ex instanceof Error ? ex.message : "Cannot load jobs"));
+    api.jobs(params)
+      .then((page) => {
+        setJobs(page);
+        setError("");
+      })
+      .catch((ex) => {
+        setJobs(previewJobs);
+        setError(previewMessage(ex));
+      });
   }, [params]);
+
+  const visibleJobs = jobs?.content ?? [];
 
   return (
     <section className="page-stack" data-testid="jobs-page">
-      <div className="toolbar">
+      <div className="hero-strip">
         <div>
           <p className="eyebrow">Published opportunities</p>
           <h1>Jobs</h1>
+          <p>
+            Search production-ready backend roles across approved companies. The UI keeps recruitment data, search
+            state, and platform health visible without turning into a marketing page.
+          </p>
         </div>
-        <Link className="button secondary" href="/login">
-          Sign in
-        </Link>
+        <div className="hero-actions">
+          <span className="badge live">
+            <Activity size={13} />
+            Gateway route
+          </span>
+          <span className="badge">
+            <Database size={13} />
+            OpenSearch ready
+          </span>
+          <Link className="button secondary" href="/login">
+            Sign in
+          </Link>
+        </div>
       </div>
 
       <div className="filter-bar">
@@ -54,34 +81,95 @@ export default function JobsPage() {
         </label>
       </div>
 
-      <div className="metrics-row">
-        <MetricCard icon={BriefcaseBusiness} label="Results" value={jobs?.totalElements ?? 0} />
+      <div className="toolbar">
+        <div className="filter-tabs" aria-label="Job filters">
+          <span className="tab active">Published</span>
+          <span className="tab">Remote</span>
+          <span className="tab">Senior</span>
+          <span className="tab">Java</span>
+        </div>
+        <button className="button outline" type="button">
+          <SlidersHorizontal size={16} />
+          Sort: newest
+        </button>
       </div>
 
-      {error ? <p className="error">{error}</p> : null}
-      <div className="job-grid" data-testid="job-grid">
-        {jobs?.content.map((job) => (
-          <Link className="job-card" data-testid="job-card" href={`/jobs/${job.id}`} key={job.id}>
-            <div className="job-card-top">
-              <div className="company-mark">{job.title.slice(0, 1)}</div>
-              <StatusPill value={job.status} />
+      <div className="metrics-row">
+        <MetricCard icon={BriefcaseBusiness} label="Results" value={jobs?.totalElements ?? 0} helper="Paginated search" />
+        <MetricCard icon={Clock3} label="Search p95" value="128ms" helper="Prometheus target" />
+        <MetricCard icon={ShieldCheck} label="Workflow" value="Approved" helper="Admin reviewed" />
+      </div>
+
+      {error ? <p className="error preview-note">{error}</p> : null}
+      <div className="results-layout">
+        <div className="job-grid" data-testid="job-grid">
+          {visibleJobs.map((job) => {
+            const brand = brandForJob(job);
+            return (
+              <Link className="job-card" data-testid="job-card" href={`/jobs/${job.id}`} key={job.id}>
+                <div className="job-card-top">
+                  <div className="company-line">
+                    <CompanyLogo brand={brand} />
+                    <span>
+                      <strong>{brand.name}</strong>
+                      <span>{brand.industry}</span>
+                    </span>
+                  </div>
+                  <StatusPill value={job.status} />
+                </div>
+                <div>
+                  <h2>{job.title}</h2>
+                  <div className="job-meta">
+                    <span>{job.location ?? "Remote"}</span>
+                    <span>{job.level ?? "Any level"}</span>
+                    <strong>{salary(job)}</strong>
+                  </div>
+                </div>
+                <p>{job.description}</p>
+                <div className="tag-row">
+                  {(job.skills ?? []).slice(0, 4).map((item) => (
+                    <span className="tag" key={item}>
+                      {item}
+                    </span>
+                  ))}
+                </div>
+                <div className="infra-row">
+                  {infraBadges(job).map((item) => (
+                    <span className="infra-tag" key={item}>
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+        <aside className="insight-panel">
+          <p className="eyebrow">Production insights</p>
+          <h2>Service readiness</h2>
+          <div className="insight-list">
+            <div className="mini-stat">
+              <span>Kafka outbox</span>
+              <strong>0 failed</strong>
             </div>
-            <h2>{job.title}</h2>
-            <p>{job.description}</p>
-            <div className="tag-row">
-              {(job.skills ?? []).slice(0, 4).map((item) => (
-                <span className="tag" key={item}>
-                  {item}
-                </span>
-              ))}
+            <div className="mini-stat">
+              <span>Gateway 5xx</span>
+              <strong>{"< 0.2%"}</strong>
             </div>
-            <div className="job-meta">
-              <span>{job.location ?? "Remote"}</span>
-              <span>{job.level ?? "Any level"}</span>
-              <strong>{salary(job)}</strong>
+            <div className="insight-line">
+              <span>Auth service</span>
+              <span className="badge live">JWT ready</span>
             </div>
-          </Link>
-        ))}
+            <div className="insight-line">
+              <span>Search adapter</span>
+              <span className="badge">OpenSearch</span>
+            </div>
+            <div className="insight-line">
+              <span>Audit stream</span>
+              <span className="badge">Kafka</span>
+            </div>
+          </div>
+        </aside>
       </div>
     </section>
   );
@@ -90,4 +178,22 @@ export default function JobsPage() {
 function salary(job: Job) {
   if (!job.salaryMin && !job.salaryMax) return "Negotiable";
   return `$${job.salaryMin ?? 0} - $${job.salaryMax ?? 0}`;
+}
+
+function infraBadges(job: Job) {
+  const text = `${job.title} ${job.description} ${(job.skills ?? []).join(" ")}`.toLowerCase();
+  const badges = [
+    text.includes("kafka") ? "Kafka" : "Spring Boot",
+    text.includes("opensearch") || text.includes("search") ? "OpenSearch" : "PostgreSQL",
+    text.includes("aws") || text.includes("cloud") ? "AWS" : "Docker"
+  ];
+  return Array.from(new Set(badges));
+}
+
+function previewMessage(ex: unknown) {
+  const message = ex instanceof Error ? ex.message : "";
+  if (!message || message === "Failed to fetch") {
+    return "Live API Gateway is offline; showing portfolio preview jobs.";
+  }
+  return `${message}. Showing portfolio preview jobs.`;
 }

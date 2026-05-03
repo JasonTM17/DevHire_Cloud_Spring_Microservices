@@ -1,10 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { SendHorizonal } from "lucide-react";
+import { BriefcaseBusiness, CheckCircle2, MapPin, SendHorizonal, ServerCog } from "lucide-react";
 import { useParams } from "next/navigation";
+import { CompanyLogo } from "@/components/CompanyLogo";
 import { StatusPill } from "@/components/StatusPill";
 import { api } from "@/lib/api";
+import { brandForJob } from "@/lib/demoCompanies";
+import { previewJobs } from "@/lib/previewData";
 import type { Job } from "@/types/domain";
 
 export default function JobDetailPage() {
@@ -12,10 +15,19 @@ export default function JobDetailPage() {
   const [job, setJob] = useState<Job | null>(null);
   const [cvUrl, setCvUrl] = useState("https://example.com/candidate-cv.pdf");
   const [coverLetter, setCoverLetter] = useState("I am interested in this role and available for interview.");
+  const [loadWarning, setLoadWarning] = useState("");
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    api.job(params.id).then(setJob).catch((ex) => setMessage(ex instanceof Error ? ex.message : "Cannot load job"));
+    api.job(params.id)
+      .then((value) => {
+        setJob(value);
+        setLoadWarning("");
+      })
+      .catch((ex) => {
+        setJob(previewJobs.content.find((item) => item.id === params.id) ?? previewJobs.content[0]);
+        setLoadWarning(previewMessage(ex));
+      });
   }, [params.id]);
 
   async function apply() {
@@ -32,18 +44,43 @@ export default function JobDetailPage() {
     return <section className="panel">Loading job...</section>;
   }
 
+  const brand = brandForJob(job);
+
   return (
     <section className="detail-layout" data-testid="job-detail-page">
       <article className="panel job-detail">
-        <div className="job-card-top">
-          <div className="company-mark large">{job.title.slice(0, 1)}</div>
+        <div className="detail-heading">
+          <CompanyLogo brand={brand} size="lg" />
+          <div>
+            <p className="eyebrow">{brand.name} hiring workflow</p>
+            <h1>{job.title}</h1>
+            <div className="job-meta">
+              <span>
+                <MapPin size={13} /> {job.location ?? "Remote"}
+              </span>
+              <span>{job.level ?? "Any level"}</span>
+              <span>{job.type ?? "Full-time"}</span>
+            </div>
+          </div>
           <StatusPill value={job.status} />
         </div>
-        <h1>{job.title}</h1>
-        <div className="job-meta">
-          <span>{job.location}</span>
-          <span>{job.level}</span>
-          <span>{job.type}</span>
+        {loadWarning ? <p className="error preview-note">{loadWarning}</p> : null}
+        <div className="dashboard-grid">
+          <div className="panel">
+            <p className="eyebrow">Salary band</p>
+            <h2>{salary(job)}</h2>
+            <span className="muted">Visible to candidates after approval</span>
+          </div>
+          <div className="panel">
+            <p className="eyebrow">Company signal</p>
+            <h2>{brand.signal}</h2>
+            <span className="muted">{brand.industry}</span>
+          </div>
+          <div className="panel">
+            <p className="eyebrow">Service path</p>
+            <h2>Gateway to Job</h2>
+            <span className="muted">JWT, RBAC, audit events</span>
+          </div>
         </div>
         <h2>Description</h2>
         <p>{job.description}</p>
@@ -58,9 +95,22 @@ export default function JobDetailPage() {
             </span>
           ))}
         </div>
+        <div className="infra-row">
+          <span className="infra-tag">Spring Boot 3.5</span>
+          <span className="infra-tag">Kafka events</span>
+          <span className="infra-tag">OpenSearch</span>
+          <span className="infra-tag">Prometheus SLO</span>
+        </div>
       </article>
       <aside className="panel apply-panel">
-        <h2>Apply</h2>
+        <div className="section-title">
+          <BriefcaseBusiness size={20} />
+          <h2>Apply</h2>
+        </div>
+        <div className="mini-stat">
+          <span>Duplicate protection</span>
+          <strong>Enabled</strong>
+        </div>
         <label>
           CV URL
           <input value={cvUrl} onChange={(event) => setCvUrl(event.target.value)} />
@@ -74,7 +124,34 @@ export default function JobDetailPage() {
           Submit application
         </button>
         {message ? <p className={message.includes("submitted") ? "success" : "error"}>{message}</p> : null}
+        <div className="insight-list">
+          <div className="insight-line">
+            <span>
+              <CheckCircle2 size={13} /> Transaction
+            </span>
+            <span>Required</span>
+          </div>
+          <div className="insight-line">
+            <span>
+              <ServerCog size={13} /> Events
+            </span>
+            <span>Notification + audit</span>
+          </div>
+        </div>
       </aside>
     </section>
   );
+}
+
+function salary(job: Job) {
+  if (!job.salaryMin && !job.salaryMax) return "Negotiable";
+  return `$${job.salaryMin ?? 0} - $${job.salaryMax ?? 0}`;
+}
+
+function previewMessage(ex: unknown) {
+  const message = ex instanceof Error ? ex.message : "";
+  if (!message || message === "Failed to fetch") {
+    return "Live API Gateway is offline; showing portfolio preview job.";
+  }
+  return `${message}. Showing portfolio preview job.`;
 }

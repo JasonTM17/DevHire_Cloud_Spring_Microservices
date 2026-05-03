@@ -11,7 +11,7 @@ Anh chup duoc tao tu Playwright E2E tren frontend that:
 
 | Jobs | Job Detail |
 |---|---|
-| ![Jobs page](docs/screenshots/jobs-page.png) | ![Job detail](docs/screenshots/job-detail.png) |
+| ![Jobs page](docs/screenshots/frontend-redesign-jobs.png) | ![Job detail](docs/screenshots/frontend-redesign-job-detail.png) |
 
 | Candidate | Employer | Admin |
 |---|---|---|
