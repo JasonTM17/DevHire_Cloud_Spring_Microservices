@@ -139,6 +139,25 @@ function Get-OutboxPendingCount {
     return [int]($output | Select-Object -First 1).Trim()
 }
 
+function Get-RecentNotificationCount {
+    param(
+        [Parameter(Mandatory = $true)][string]$RecipientId,
+        [Parameter(Mandatory = $true)][string]$Type,
+        [Parameter(Mandatory = $true)][string]$MessageLike,
+        [Parameter(Mandatory = $true)][DateTime]$SinceUtc
+    )
+
+    $escapedMessage = $MessageLike.Replace("'", "''")
+    $since = $SinceUtc.ToString("yyyy-MM-dd HH:mm:ss")
+    $sql = "SELECT count(*) FROM notifications WHERE recipient_id = '$RecipientId' AND type = '$Type' AND message LIKE '%$escapedMessage%' AND created_at >= timestamptz '$since+00';"
+    $output = docker exec devhire-postgres psql -U devhire -d devhire_notification -tAc $sql
+    if ($LASTEXITCODE -ne 0) {
+        Write-Warning "Could not query notification evidence; returning -1."
+        return -1
+    }
+    return [int]($output | Select-Object -First 1).Trim()
+}
+
 function Invoke-CompanyCreate {
     param([string]$EmployerToken)
 
@@ -227,8 +246,8 @@ function Invoke-AiScenario {
         message = "What happens when the AI provider is unavailable in this portfolio?"
     }
     Assert-True -Condition (-not [string]::IsNullOrWhiteSpace($chat.answer)) -Message "AI chat did not return an answer"
-    Assert-True -Condition ($chat.fallback -or $status.mode -eq "DEMO_FALLBACK" -or $status.circuitState -eq "OPEN") -Message "AI scenario did not expose fallback/circuit evidence"
-    Write-Host "AI scenario passed: mode=$($status.mode), circuit=$($status.circuitState), fallback=$($chat.fallback)."
+    Assert-True -Condition ($chat.fallback -or $status.mode -eq "DEMO_FALLBACK" -or $status.circuitBreakerState -eq "OPEN") -Message "AI scenario did not expose fallback/circuit evidence"
+    Write-Host "AI scenario passed: mode=$($status.mode), circuit=$($status.circuitBreakerState), fallback=$($chat.fallback)."
 }
 
 function Invoke-MailScenario {
@@ -236,13 +255,29 @@ function Invoke-MailScenario {
     $adminToken = Login -Email "admin@devhire.local" -Password "Admin@123456"
     $employerToken = Login -Email "employer@devhire.local" -Password "Employer@123456"
     $candidateToken = Login -Email "candidate@devhire.local" -Password "Candidate@123456"
+    $startedAt = (Get-Date).ToUniversalTime()
     Stop-ComposeService -Service "mailpit"
     $flow = Invoke-ApplicationFlow -AdminToken $adminToken -EmployerToken $employerToken -CandidateToken $candidateToken
-    Start-Sleep -Seconds 8
-    $notifications = Invoke-Api -Method GET -Path "/api/notifications?page=0&size=20" -Token $candidateToken
-    $json = $notifications | ConvertTo-Json -Depth 12
-    Assert-True -Condition ($json -match [regex]::Escape($flow.jobTitle)) -Message "Candidate internal notification was not persisted while SMTP sandbox was down"
-    Write-Host "Mail scenario passed: internal notification persisted while SMTP sandbox was unavailable."
+    $null = Invoke-Api -Method PATCH -Path "/api/applications/$($flow.applicationId)/status" -Token $employerToken -Body @{
+        status = "INTERVIEW"
+        note   = "Chaos mail resilience status update"
+    }
+
+    $deadline = (Get-Date).AddSeconds([Math]::Min($TimeoutSeconds, 120))
+    do {
+        Start-Sleep -Seconds 5
+        $notificationCount = Get-RecentNotificationCount `
+            -RecipientId "00000000-0000-0000-0000-000000000003" `
+            -Type "APPLICATION_STATUS_CHANGED" `
+            -MessageLike "SUBMITTED to INTERVIEW" `
+            -SinceUtc $startedAt
+        if ($notificationCount -gt 0) {
+            Write-Host "Mail scenario passed: candidate internal notification persisted while SMTP sandbox was unavailable."
+            return
+        }
+    } while ((Get-Date) -lt $deadline)
+
+    throw "Candidate internal notification was not persisted while SMTP sandbox was down"
 }
 
 Push-Location $repoRoot

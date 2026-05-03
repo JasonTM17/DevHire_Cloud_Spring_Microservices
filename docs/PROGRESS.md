@@ -1493,3 +1493,22 @@ Verification:
   - `git diff --check`
   - `docker compose up -d --build --force-recreate notification-service`
   - `.\scripts\email-smoke.ps1 -GatewayUrl http://localhost:8080 -MailpitUrl http://localhost:8025`
+
+## Final verification polish - Chaos smoke contract alignment
+
+- During final chaos verification, `.\scripts\chaos-smoke.ps1 -GatewayUrl http://localhost:8080 -Scenario all -Recover -TimeoutSeconds 240` exposed two script issues:
+  - AI provider status uses `circuitBreakerState`, not `circuitState`.
+  - Candidate status-change notifications do not include job title in the message, so the mail chaos assertion now checks persisted notification evidence for `APPLICATION_STATUS_CHANGED` after the scenario starts.
+- Updated `scripts/chaos-smoke.ps1` to align with the current AI provider contract and notification message contract.
+
+Verification:
+
+- Passed:
+  - `.\scripts\chaos-smoke.ps1 -GatewayUrl http://localhost:8080 -Scenario all -Recover -TimeoutSeconds 240`
+  - `.\scripts\dr-verify.ps1 -GatewayUrl http://localhost:8080`
+  - `.\scripts\terraform-validate.ps1`
+  - `helm lint deploy/helm/devhire-cloud`
+  - `helm template` for local, staging, prod, aws-staging, and aws-prod values
+  - `promtool check config /etc/prometheus/prometheus.yml`
+  - `actionlint`
+  - `gitleaks detect --source /repo --no-git --redact --verbose`
