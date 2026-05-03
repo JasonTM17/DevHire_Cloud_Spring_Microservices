@@ -75,7 +75,23 @@ Unit test、controller test、event contract test、Testcontainers PostgreSQL in
 CI では Maven verify の後に `scripts/check-coverage.ps1` を実行し、module ごとの coverage gate を強制します。
 Frontend は `npm ci`、`npm run typecheck`、`npm run build` で検証します。
 
-## デモアカウント
+## Gateway API Smoke
+
+Gateway API smoke verification:
+
+```powershell
+./scripts/api-smoke.ps1 -GatewayUrl http://localhost:8080
+```
+
+To build and start the full Docker stack on high local ports:
+
+```powershell
+./scripts/api-smoke.ps1 -StartStack -Build
+```
+
+The script validates login, company approval, job approval, job search, application submission, application status change, notification lookup and audit lookup through the API Gateway.
+
+## Demo Accounts
 
 | Role | Email | Password |
 |---|---|---|

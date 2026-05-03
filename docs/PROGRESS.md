@@ -772,3 +772,26 @@ Committed as `docs: add portfolio screenshots adr and demo guide`.
   - employer changed the application status to `INTERVIEW`,
   - candidate notification lookup returned the application signal,
   - admin audit log lookup returned login activity.
+
+## Phase 30 - Gateway API smoke automation
+
+- Added `scripts/api-smoke.ps1` so the end-to-end business API flow can be rerun without copying requests from `docs/api.http`.
+- The script validates through API Gateway:
+  - admin, employer, and candidate login,
+  - employer company creation,
+  - admin company approval,
+  - employer job creation and review submission,
+  - admin job approval,
+  - candidate job search,
+  - candidate application submission,
+  - employer application status update,
+  - candidate notification lookup,
+  - admin audit log lookup.
+- The script can either target an already-running Gateway or start the full Docker stack itself with high local ports.
+- Added `.github/workflows/api-smoke.yml` as a manual/scheduled workflow that builds the Docker stack and runs the same Gateway smoke flow.
+- Updated README files with the API smoke command.
+
+Verification:
+
+- `scripts/api-smoke.ps1 -GatewayUrl http://localhost:18080` passed locally against the running Docker stack on 2026-05-03.
+- `docker compose config --quiet` passed on 2026-05-03.

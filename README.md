@@ -160,6 +160,20 @@ Hoặc trên Windows:
 
 `verify.ps1` chạy `mvn clean verify` và coverage gate theo từng module.
 
+Gateway API smoke flow:
+
+```powershell
+.\scripts\api-smoke.ps1 -GatewayUrl http://localhost:8080
+```
+
+Neu muon script tu build va khoi dong full Docker stack bang high ports de tranh xung dot local:
+
+```powershell
+.\scripts\api-smoke.ps1 -StartStack -Build
+```
+
+Script nay login 3 demo roles, tao va approve company, tao va approve job, search job, submit application, update application status, doc notification va audit log qua API Gateway.
+
 Frontend:
 
 ```powershell
@@ -317,6 +331,7 @@ GitHub Actions:
 - `release.yml`: Publish Docker images lên GHCR khi push tag dạng `v1.0.0` hoặc chạy thủ công.
 
 Security supply-chain CI da co them Gitleaks, Trivy filesystem/image scan, SBOM artifact va OCI image labels cho Docker image.
+API smoke CI co workflow `api-smoke.yml` de build stack va chay luong nghiep vu chinh qua API Gateway theo lich/manual.
 
 ## Deployment/Kubernetes
 

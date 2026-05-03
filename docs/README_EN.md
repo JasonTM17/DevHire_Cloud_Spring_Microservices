@@ -75,6 +75,20 @@ The build runs unit tests, controller tests, event contract tests and Testcontai
 CI also runs `scripts/check-coverage.ps1` as a hard per-module coverage gate after Maven verification.
 Frontend verification uses `npm ci`, `npm run typecheck` and `npm run build`.
 
+Gateway API smoke verification:
+
+```powershell
+./scripts/api-smoke.ps1 -GatewayUrl http://localhost:8080
+```
+
+To let the script build and start the full Docker stack on high local ports:
+
+```powershell
+./scripts/api-smoke.ps1 -StartStack -Build
+```
+
+The smoke script logs in with all demo roles, creates and approves a company, creates and approves a job, searches the published job, submits an application, updates the application status, then checks notifications and audit logs through the API Gateway.
+
 ## Demo Accounts
 
 | Role | Email | Password |
