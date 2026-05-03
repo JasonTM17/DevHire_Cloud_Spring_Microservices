@@ -1161,3 +1161,24 @@ Verification:
 - `docker compose config --quiet` passed on 2026-05-03.
 - `docker run --rm --entrypoint promtool -v "${PWD}/infra/prometheus:/etc/prometheus" prom/prometheus:v3.0.1 check config /etc/prometheus/prometheus.yml` passed on 2026-05-03 with 9 rules found.
 - `mvn -T1 clean verify` passed on 2026-05-03.
+
+## Phase 47 - Portfolio demo automation
+
+- Added `scripts/reset-demo-data.ps1` to clean generated smoke/demo rows from:
+  - company-service database,
+  - job-service database,
+  - application-service database,
+  - notification-service database,
+  - audit-service database,
+  - ai-service database,
+  - OpenSearch job index.
+- Added `scripts/portfolio-demo.ps1` to start the full portfolio stack, wait for Gateway/frontend/AI readiness, optionally reset demo data, run API smoke, and print recruiter-demo URLs and accounts.
+- Extended `scripts/api-smoke.ps1` with an authenticated AI assistant smoke check through `/api/ai/chat`.
+- Extended `scripts/e2e-smoke.ps1` with the `ai-service` high-port default and readiness check.
+- Updated `docs/demo-script.md` with the Claude assistant demo flow and cleanup command.
+
+Verification:
+
+- PowerShell syntax parse passed for `scripts/reset-demo-data.ps1`, `scripts/portfolio-demo.ps1`, `scripts/api-smoke.ps1`, and `scripts/e2e-smoke.ps1` on 2026-05-03.
+- `docker compose config --quiet` passed on 2026-05-03.
+- `./scripts/reset-demo-data.ps1 -DryRun -WhatIf` passed on 2026-05-03.

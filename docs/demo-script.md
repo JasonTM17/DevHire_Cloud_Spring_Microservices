@@ -6,12 +6,19 @@
 docker compose up --build
 ```
 
+Fast guided mode:
+
+```powershell
+scripts/portfolio-demo.ps1 -Build -ResetBefore
+```
+
 Open:
 
 - Frontend: `http://localhost:3001`
 - Gateway: `http://localhost:8080`
 - Grafana: `http://localhost:3000`
 - OpenSearch: `http://localhost:9200`
+- Claude assistant: `http://localhost:3001/assistant`
 
 If default ports are busy, use `scripts/e2e-smoke.ps1 -Build -KeepRunning` to start the stack on high local ports.
 
@@ -52,18 +59,34 @@ Talking points:
 - Admin-only endpoints are protected by role checks.
 - Audit log consumer is idempotent through `processed_events`.
 
-## 4. Observability
+## 4. Claude Haiku AI Assistant
+
+1. Login with `candidate@devhire.local` / `Candidate@123456`.
+2. Open `/assistant`.
+3. Ask: `Explain this microservices platform to a recruiter`.
+4. Show the model badge, fallback badge when no secret is configured, citations, and tool traces.
+5. Mention that real Anthropic calls use `ANTHROPIC_API_KEY` from `.env`, GitHub Secrets, Kubernetes Secret, or AWS Secrets Manager only.
+
+Talking points:
+
+- The assistant runs behind API Gateway JWT validation.
+- RAG sources include platform docs, ADRs, demo guide, jobs, and platform health context.
+- CI tests use mock/fallback behavior and never require a real Claude API key.
+- AI usage emits metrics and audit events: `AI_CHAT_REQUESTED`, `AI_TOOL_EXECUTED`, and `AI_FALLBACK_USED`.
+
+## 5. Observability
 
 1. Open Grafana.
-2. Show service health, JVM/application metrics, and trace/log stack wiring.
+2. Show service health, JVM/application metrics, AI request/fallback panels, and trace/log stack wiring.
 3. Mention Prometheus, Loki, Tempo, OpenTelemetry Collector.
 
 Talking points:
 
 - Actuator readiness/liveness endpoints support Docker/Kubernetes probes.
 - Trace IDs are included in standardized error responses and logs.
+- AI assistant latency and fallback behavior are visible in the SLO dashboard.
 
-## 5. Production Portfolio Close
+## 6. Production Portfolio Close
 
 Show these files:
 
@@ -77,4 +100,10 @@ Show these files:
 
 Final message for recruiter:
 
-DevHire Cloud demonstrates Java 21, Spring Boot 3.5, Spring Cloud Gateway, JWT security, service-owned databases, Flyway, Kafka/outbox, OpenSearch, Gmail SMTP hardening, observability, CI/CD, Docker, Kubernetes/Helm/GitOps, tests, and real frontend E2E smoke coverage.
+DevHire Cloud demonstrates Java 21, Spring Boot 3.5, Spring Cloud Gateway, JWT security, service-owned databases, Flyway, Kafka/outbox, OpenSearch, Claude Haiku RAG assistant, Gmail SMTP hardening, observability, CI/CD, Docker, Kubernetes/Helm/GitOps, tests, and real frontend E2E smoke coverage.
+
+Cleanup after a recruiter demo:
+
+```powershell
+scripts/reset-demo-data.ps1
+```

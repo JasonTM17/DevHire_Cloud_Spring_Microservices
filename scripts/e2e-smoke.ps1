@@ -36,6 +36,7 @@ Set-EnvDefault -Name "JOB_HOST_PORT" -Value "18084"
 Set-EnvDefault -Name "APPLICATION_HOST_PORT" -Value "18085"
 Set-EnvDefault -Name "NOTIFICATION_HOST_PORT" -Value "18086"
 Set-EnvDefault -Name "AUDIT_HOST_PORT" -Value "18087"
+Set-EnvDefault -Name "AI_HOST_PORT" -Value "18088"
 Set-EnvDefault -Name "PROMETHEUS_HOST_PORT" -Value "19090"
 Set-EnvDefault -Name "GRAFANA_HOST_PORT" -Value "13000"
 Set-EnvDefault -Name "LOKI_HOST_PORT" -Value "13100"
@@ -120,6 +121,7 @@ try {
     Wait-HttpOk -Url "http://localhost:$env:APPLICATION_HOST_PORT/actuator/health/readiness"
     Wait-HttpOk -Url "http://localhost:$env:NOTIFICATION_HOST_PORT/actuator/health/readiness"
     Wait-HttpOk -Url "http://localhost:$env:AUDIT_HOST_PORT/actuator/health/readiness"
+    Wait-HttpOk -Url "http://localhost:$env:AI_HOST_PORT/actuator/health/readiness"
     Invoke-GatewaySmoke -Url $GatewayUrl -Origin $FrontendUrl
     Wait-HttpOk -Url "$FrontendUrl/jobs"
 

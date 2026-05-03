@@ -116,6 +116,7 @@ Set-EnvDefault -Name "JOB_HOST_PORT" -Value "18084"
 Set-EnvDefault -Name "APPLICATION_HOST_PORT" -Value "18085"
 Set-EnvDefault -Name "NOTIFICATION_HOST_PORT" -Value "18086"
 Set-EnvDefault -Name "AUDIT_HOST_PORT" -Value "18087"
+Set-EnvDefault -Name "AI_HOST_PORT" -Value "18088"
 Set-EnvDefault -Name "PROMETHEUS_HOST_PORT" -Value "19090"
 Set-EnvDefault -Name "GRAFANA_HOST_PORT" -Value "13000"
 Set-EnvDefault -Name "LOKI_HOST_PORT" -Value "13100"
@@ -228,6 +229,16 @@ try {
         throw "Audit logs did not return login activity"
     }
 
+    $assistant = Invoke-Api -Method POST -Path "/api/ai/chat" -Token $candidateToken -Body @{
+        message = "Explain this microservices platform to a recruiter"
+    }
+    if ([string]::IsNullOrWhiteSpace($assistant.answer)) {
+        throw "AI assistant did not return an answer"
+    }
+    if ($assistant.answer -notmatch "DevHire" -and $assistant.answer -notmatch "microservices") {
+        throw "AI assistant answer did not contain expected portfolio context"
+    }
+
     [pscustomobject]@{
         gateway           = $GatewayUrl
         companyId         = $company.id
@@ -238,6 +249,7 @@ try {
         applicationStatus = $updatedApplication.status
         notificationCheck = "ok"
         auditCheck        = "ok"
+        aiAssistantCheck  = "ok"
     } | ConvertTo-Json -Depth 5
 } finally {
     if ($StartStack -and -not $KeepRunning) {
