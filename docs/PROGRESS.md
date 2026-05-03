@@ -1581,3 +1581,26 @@ Verification:
   - `.\scripts\docs-quality.ps1`
   - `.\scripts\verify.ps1 -Docs -Docker`
   - `git diff --check`
+
+## Phase 66 - GitHub Actions gate recovery
+
+- Investigated the public GitHub Actions status for commit `da3fe29`:
+  - Documentation passed.
+  - Docker Images passed.
+  - CI failed.
+  - Security failed.
+- Fixed the CI coverage gate for Linux runners by normalizing JaCoCo report paths in `scripts/check-coverage.ps1`.
+- Added `ai-service` to the explicit portfolio coverage gate.
+- Updated Security workflow Trivy scans from `aquasecurity/trivy-action@0.28.0` to `aquasecurity/trivy-action@v0.36.0`.
+- Added visible GitHub Actions badges to the root README for CI, Docker, Security, Docs, and Terraform.
+
+Verification:
+
+- Passed:
+  - `mvn -T1 clean verify`
+  - `.\scripts\check-coverage.ps1`
+  - `.\scripts\docs-quality.ps1`
+  - `docker compose config --quiet`
+  - `docker run --rm -v "${PWD}:/repo" -w /repo aquasec/trivy:0.70.0 fs --scanners vuln --severity CRITICAL --ignore-unfixed --exit-code 1 --format table .`
+  - `docker run --rm -v "${PWD}:/repo" -w /repo rhysd/actionlint:latest`
+  - `git diff --check`

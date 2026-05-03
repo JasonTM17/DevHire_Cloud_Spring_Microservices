@@ -58,6 +58,7 @@ DevHire Cloud handles recruitment data: accounts, roles, candidate profiles, com
 - Syft/Anchore generates CycloneDX SBOM artifacts.
 - Docker images include OCI source and revision labels.
 - Dependabot opens scheduled maintenance pull requests for Maven, npm, GitHub Actions, and Docker base images.
+- Trivy GitHub Action is pinned to `aquasecurity/trivy-action@v0.36.0` so the workflow uses the post-2026 safe action line and current Trivy engine.
 
 ## 日本語
 

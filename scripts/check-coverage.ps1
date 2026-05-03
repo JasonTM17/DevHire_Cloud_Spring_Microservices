@@ -5,6 +5,7 @@ param(
 $ErrorActionPreference = "Stop"
 
 $thresholds = @{
+    "ai-service"           = 0.35
     "api-gateway"          = 0.35
     "application-service"  = 0.60
     "audit-service"        = 0.55
@@ -19,14 +20,14 @@ $thresholds = @{
 $rootPath = (Resolve-Path $Root).Path
 $failed = $false
 $reports = Get-ChildItem -Path $rootPath -Recurse -Filter jacoco.xml |
-    Where-Object { $_.FullName -like "*\target\site\jacoco\jacoco.xml" }
+    Where-Object { ($_.FullName -replace "\\", "/") -like "*/target/site/jacoco/jacoco.xml" }
 
 if (-not $reports) {
     throw "No JaCoCo XML reports found. Run mvn clean verify before coverage check."
 }
 
 foreach ($module in $thresholds.Keys | Sort-Object) {
-    $report = $reports | Where-Object { $_.FullName -like "*\$module\target\site\jacoco\jacoco.xml" } | Select-Object -First 1
+    $report = $reports | Where-Object { ($_.FullName -replace "\\", "/") -like "*/$module/target/site/jacoco/jacoco.xml" } | Select-Object -First 1
     if (-not $report) {
         Write-Error "Missing JaCoCo report for $module"
         $failed = $true
