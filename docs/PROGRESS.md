@@ -1396,3 +1396,20 @@ Verification:
 - `.\scripts\docs-quality.ps1` passed on 2026-05-03.
 - `git diff --check` passed on 2026-05-03.
 - `mvn -T1 clean verify` passed on 2026-05-03.
+
+## Phase 58 - Backup, restore, and disaster recovery runbooks
+
+- Added `scripts/backup-postgres.ps1` for service-owned PostgreSQL custom-format backups.
+- Added `scripts/restore-postgres.ps1` with an explicit `-ConfirmRestore` guard and `pg_restore --clean --if-exists --exit-on-error`.
+- Added `scripts/dr-verify.ps1` for nondestructive Gateway readiness, backup artifact, and Flyway metadata verification.
+- Added `backups/` to `.gitignore`.
+- Rewrote `docs/runbooks/backup-restore.md` with service database scope, RPO/RTO targets, backup/restore commands, DR verification, and production notes.
+
+Verification:
+
+- PowerShell syntax parse passed for `scripts/backup-postgres.ps1`, `scripts/restore-postgres.ps1`, and `scripts/dr-verify.ps1` on 2026-05-03.
+- `docker compose config --quiet` passed on 2026-05-03.
+- `.\scripts\docs-quality.ps1` passed on 2026-05-03.
+- `git diff --check` passed on 2026-05-03.
+- `mvn -T1 clean verify` passed on 2026-05-03.
+- Runtime DR verification is deferred to final stack verification.

@@ -29,6 +29,7 @@ Thumbs.db
 *.local
 *.log
 logs/
+backups/
 
 # Docker and generated runtime data
 data/
