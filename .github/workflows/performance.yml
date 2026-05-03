@@ -1,0 +1,63 @@
+name: Performance Smoke
+
+on:
+  workflow_dispatch:
+    inputs:
+      vus:
+        description: Virtual users
+        required: false
+        default: "5"
+      duration:
+        description: k6 duration
+        required: false
+        default: "30s"
+  schedule:
+    - cron: "0 4 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  k6-smoke:
+    name: k6 Gateway smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Start stack and validate business flow
+        shell: pwsh
+        run: ./scripts/api-smoke.ps1 -StartStack -Build -KeepRunning -GatewayUrl http://localhost:18080
+
+      - name: Run k6 smoke
+        shell: pwsh
+        env:
+          K6_BASE_URL: http://localhost:18080
+          K6_VUS: ${{ inputs.vus || '5' }}
+          K6_DURATION: ${{ inputs.duration || '30s' }}
+        run: ./scripts/perf-smoke.ps1 -BaseUrl $env:K6_BASE_URL -Vus ([int]$env:K6_VUS) -Duration $env:K6_DURATION -UseDocker
+
+      - name: Upload k6 summary
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: k6-job-search-summary
+          path: reports/k6/job-search-summary.json
+          if-no-files-found: ignore
+
+      - name: Upload compose logs on failure
+        if: failure()
+        run: docker compose logs --no-color > compose-performance-smoke.log
+
+      - name: Store compose logs
+        if: failure()
+        uses: actions/upload-artifact@v5
+        with:
+          name: compose-performance-smoke-log
+          path: compose-performance-smoke.log
+          if-no-files-found: ignore
+
+      - name: Stop stack
+        if: always()
+        run: docker compose down

@@ -795,3 +795,26 @@ Verification:
 
 - `scripts/api-smoke.ps1 -GatewayUrl http://localhost:18080` passed locally against the running Docker stack on 2026-05-03.
 - `docker compose config --quiet` passed on 2026-05-03.
+
+Committed as `test(api): add gateway smoke flow automation`.
+
+## Phase 31 - Gateway performance smoke
+
+- Added `perf/k6/job-search-smoke.js` with k6 thresholds for:
+  - successful checks,
+  - HTTP failure rate,
+  - p95 request latency.
+- The k6 smoke test exercises public job search and job detail through API Gateway.
+- Added `scripts/perf-smoke.ps1` so the test can run with either a local `k6` binary or the Docker image `grafana/k6:0.56.0`.
+- Added `.github/workflows/performance.yml` as a manual/scheduled workflow that:
+  - starts the Docker stack,
+  - validates the business API flow through `api-smoke.ps1`,
+  - runs the k6 Gateway smoke,
+  - uploads the JSON k6 summary artifact.
+- Added `reports/` to `.gitignore` for local k6 summaries.
+- Updated README files with the performance smoke command.
+
+Verification:
+
+- `scripts/perf-smoke.ps1 -BaseUrl http://localhost:18080 -Vus 2 -Duration 10s -UseDocker` passed locally against the running Docker stack on 2026-05-03.
+- `docker compose config --quiet` passed on 2026-05-03.

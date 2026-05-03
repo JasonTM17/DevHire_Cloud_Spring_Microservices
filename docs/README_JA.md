@@ -91,6 +91,14 @@ To build and start the full Docker stack on high local ports:
 
 The script validates login, company approval, job approval, job search, application submission, application status change, notification lookup and audit lookup through the API Gateway.
 
+Gateway performance smoke with k6:
+
+```powershell
+./scripts/perf-smoke.ps1 -BaseUrl http://localhost:8080 -Vus 5 -Duration 30s -UseDocker
+```
+
+The k6 script checks job search and job detail latency/error thresholds and writes a local JSON summary to `reports/k6/job-search-summary.json`.
+
 ## Demo Accounts
 
 | Role | Email | Password |

@@ -89,6 +89,14 @@ To let the script build and start the full Docker stack on high local ports:
 
 The smoke script logs in with all demo roles, creates and approves a company, creates and approves a job, searches the published job, submits an application, updates the application status, then checks notifications and audit logs through the API Gateway.
 
+Gateway performance smoke with k6:
+
+```powershell
+./scripts/perf-smoke.ps1 -BaseUrl http://localhost:8080 -Vus 5 -Duration 30s -UseDocker
+```
+
+The k6 script checks job search and job detail latency/error thresholds and writes a local JSON summary to `reports/k6/job-search-summary.json`.
+
 ## Demo Accounts
 
 | Role | Email | Password |

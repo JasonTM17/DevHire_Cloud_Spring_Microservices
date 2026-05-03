@@ -174,6 +174,14 @@ Neu muon script tu build va khoi dong full Docker stack bang high ports de tranh
 
 Script nay login 3 demo roles, tao va approve company, tao va approve job, search job, submit application, update application status, doc notification va audit log qua API Gateway.
 
+Gateway performance smoke voi k6:
+
+```powershell
+.\scripts\perf-smoke.ps1 -BaseUrl http://localhost:8080 -Vus 5 -Duration 30s -UseDocker
+```
+
+Bao cao JSON duoc ghi vao `reports/k6/job-search-summary.json` va khong duoc commit.
+
 Frontend:
 
 ```powershell
@@ -332,6 +340,7 @@ GitHub Actions:
 
 Security supply-chain CI da co them Gitleaks, Trivy filesystem/image scan, SBOM artifact va OCI image labels cho Docker image.
 API smoke CI co workflow `api-smoke.yml` de build stack va chay luong nghiep vu chinh qua API Gateway theo lich/manual.
+Performance smoke CI co workflow `performance.yml` chay k6 job-search smoke voi threshold cho error rate va p95 latency.
 
 ## Deployment/Kubernetes
 
