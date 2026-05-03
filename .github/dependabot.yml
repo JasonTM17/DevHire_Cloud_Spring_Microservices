@@ -198,6 +198,19 @@ updates:
           - "eclipse-temurin"
 
   - package-ecosystem: docker
+    directory: /ai-service
+    schedule:
+      interval: weekly
+      day: monday
+      time: "07:42"
+      timezone: Asia/Bangkok
+    groups:
+      backend-base-images:
+        patterns:
+          - "maven"
+          - "eclipse-temurin"
+
+  - package-ecosystem: docker
     directory: /frontend
     schedule:
       interval: weekly

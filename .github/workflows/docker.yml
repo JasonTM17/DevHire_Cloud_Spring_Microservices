@@ -28,6 +28,7 @@ jobs:
           - application-service
           - notification-service
           - audit-service
+          - ai-service
           - frontend
 
     steps:

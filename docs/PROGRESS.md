@@ -1199,3 +1199,18 @@ Verification:
 
 - `npm run typecheck` passed on 2026-05-03.
 - `npm run build` passed on 2026-05-03.
+
+## Phase 49 - AI service CI and documentation gates
+
+- Added `.github/workflows/docs.yml` for portfolio documentation quality checks.
+- Added `scripts/docs-quality.ps1` to verify required docs, UTF-8 safety, unsafe placeholders, and AI demo-script coverage.
+- Added `ai-service` to Docker image build matrix.
+- Added `ai-service` to release image publishing matrix.
+- Added `ai-service` to Trivy image scan matrix.
+- Added Docker Dependabot monitoring for `ai-service`.
+
+Verification:
+
+- `./scripts/docs-quality.ps1` passed on 2026-05-03.
+- `docker run --rm -v "${PWD}:/repo" -w /repo rhysd/actionlint:latest` passed on 2026-05-03.
+- `docker compose config --quiet` passed on 2026-05-03.
