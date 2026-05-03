@@ -1,6 +1,6 @@
 # DevHire Cloud
 
-DevHire Cloud は、Java Spring Boot による採用プラットフォームの production-style microservices ポートフォリオです。認証、企業審査、求人公開、応募管理、通知、監査ログ、検索、監視、CI/CD、Docker、Kubernetes、Terraform、Next.js UI を含みます。
+DevHire Cloud は、Java Spring Boot による採用プラットフォームの production-style microservices ポートフォリオです。認証、企業審査、求人公開、応募管理、通知、監査ログ、検索、Claude Haiku AI assistant、監視、CI/CD、Docker、Kubernetes、Terraform、Next.js UI を含みます。
 
 ## Portfolio Screenshots
 
@@ -25,6 +25,7 @@ DevHire Cloud は、Java Spring Boot による採用プラットフォームの 
 - Kafka domain events は transactional outbox から publish されます。
 - Notification と Audit の consumer は idempotent です。
 - 求人検索は OpenSearch を使い、PostgreSQL fallback もあります。
+- `ai-service` は Claude Haiku、citations、tool traces、metrics、fallback mode を持つ assistant です。
 - Actuator、Prometheus、Grafana、OpenTelemetry、Tempo、Loki で監視します。
 
 ## Services
@@ -39,6 +40,7 @@ DevHire Cloud は、Java Spring Boot による採用プラットフォームの 
 | application-service | 8085 | Applications, status changes, history |
 | notification-service | 8086 | Internal notifications and optional SMTP delivery |
 | audit-service | 8087 | Audit ingestion and admin search |
+| ai-service | 8088 | Claude Haiku assistant, RAG context, metrics, audit |
 | frontend | 3001 | Next.js role dashboards and job browsing |
 
 ## Run
@@ -52,6 +54,7 @@ docker compose up --build
 - Grafana: `http://localhost:3000`
 - Prometheus: `http://localhost:9090`
 - OpenSearch: `http://localhost:9200`
+- Assistant: `http://localhost:3001/assistant`
 
 ## Verify
 
@@ -85,6 +88,7 @@ npm run build
 - Gateway JWT validation, refresh token rotation, Redis blacklist, CORS, rate limiting.
 - Kafka, transactional outbox, idempotent consumers, audit events.
 - OpenSearch search adapter with PostgreSQL fallback.
+- Claude Haiku AI assistant with citations, streaming UI, metrics, audit events.
 - SMTP notification delivery queue with retry/backoff and persisted status.
 - Trace ID を含む標準エラーレスポンス。
 - Docker Compose full stack, Helm, Argo CD, Kubernetes, AWS Terraform blueprint.
@@ -98,12 +102,14 @@ npm run build
 - [Security and supply chain](security.md)
 - [Deployment runbook](deployment.md)
 - [SLO operations](slo.md)
+- [Claude AI assistant](ai-assistant.md)
+- [Claude Haiku provider](claude-haiku.md)
 - [AWS Terraform blueprint](aws-terraform.md)
 - [10-minute demo script](demo-script.md)
 - [GitHub profile checklist](github-profile.md)
 
-## Near-Term Roadmap
+## Roadmap After v0.1.0
 
-- Claude Haiku ベースの `ai-service`、RAG、citations、streaming UI、metrics、audit events を追加します。
-- Demo data reset automation を追加します。
-- `v0.1.0` portfolio release を準備します。
+- Deploy the AWS blueprint to a real staging account.
+- Add longer load tests and error-budget burn simulations.
+- Add a production email provider sandbox.

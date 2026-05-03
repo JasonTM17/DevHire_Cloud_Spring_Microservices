@@ -145,3 +145,16 @@ Authorization: Bearer {{candidateToken}}
 ### Admin views audit logs
 GET {{baseUrl}}/api/admin/audit-logs?action=approve%20job&page=0&size=20&sort=occurredAt,desc
 Authorization: Bearer {{adminToken}}
+
+### Candidate asks Claude AI assistant
+POST {{baseUrl}}/api/ai/chat
+Authorization: Bearer {{candidateToken}}
+Content-Type: application/json
+
+{
+  "message": "Explain this microservices platform to a recruiter"
+}
+
+### Admin reindexes AI knowledge
+POST {{baseUrl}}/api/admin/ai/knowledge/reindex
+Authorization: Bearer {{adminToken}}

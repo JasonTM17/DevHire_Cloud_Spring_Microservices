@@ -13,6 +13,8 @@ $requiredPaths = @(
     "docs/demo-script.md",
     "docs/slo.md",
     "docs/security.md",
+    "docs/ai-assistant.md",
+    "docs/claude-haiku.md",
     "docs/portfolio-case-study.md",
     "docs/production-readiness.md",
     "SECURITY.md",

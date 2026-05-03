@@ -1211,6 +1211,18 @@ Verification:
 
 Verification:
 
-- `./scripts/docs-quality.ps1` passed on 2026-05-03.
+- `./scripts/docs-quality.ps1` passed on 2026-05-03 after the release docs update.
 - `docker run --rm -v "${PWD}:/repo" -w /repo rhysd/actionlint:latest` passed on 2026-05-03.
 - `docker compose config --quiet` passed on 2026-05-03.
+
+## Phase 50 - AI assistant release documentation
+
+- Added `docs/ai-assistant.md` with endpoints, RAG sources, tools, metrics, audit events, smoke commands, and security notes.
+- Added `docs/claude-haiku.md` with provider configuration, fallback behavior, cost guardrails, and production upgrade path.
+- Added ADR `docs/ADR/0007-claude-haiku-ai-assistant.md`.
+- Updated Vietnamese, English, and Japanese README files so `ai-service` is represented as a delivered service rather than a future roadmap item.
+- Updated `docs/architecture.md`, `docs/api.http`, `CHANGELOG.md`, and `docs/release-notes/v0.1.0.md` for the AI assistant release scope.
+
+Verification:
+
+- `./scripts/docs-quality.ps1` passed on 2026-05-03.

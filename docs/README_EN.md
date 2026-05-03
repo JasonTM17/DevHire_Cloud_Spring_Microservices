@@ -1,6 +1,6 @@
 # DevHire Cloud
 
-DevHire Cloud is a production-style Java Spring Boot microservices recruitment platform built as a backend, DevOps, and solution architecture portfolio project. It models a compact ITviec/LinkedIn Jobs workflow with authentication, employer onboarding, job publishing, candidate applications, notifications, audit logs, search, observability, CI/CD, Docker, Kubernetes, Terraform, and a Next.js UI.
+DevHire Cloud is a production-style Java Spring Boot microservices recruitment platform built as a backend, DevOps, and solution architecture portfolio project. It models a compact ITviec/LinkedIn Jobs workflow with authentication, employer onboarding, job publishing, candidate applications, notifications, audit logs, search, a Claude Haiku AI assistant, observability, CI/CD, Docker, Kubernetes, Terraform, and a Next.js UI.
 
 ## Portfolio Screenshots
 
@@ -25,6 +25,7 @@ Docker runtime through the real API Gateway:
 - Kafka domain events are published through transactional outbox tables.
 - Notification and audit consumers are idempotent.
 - Job search uses OpenSearch with PostgreSQL fallback.
+- `ai-service` answers recruiter questions with Claude Haiku, citations, tool traces, metrics, and safe fallback mode.
 - Observability is wired through Actuator, Prometheus, Grafana, OpenTelemetry, Tempo, and Loki.
 
 ## Services
@@ -39,6 +40,7 @@ Docker runtime through the real API Gateway:
 | application-service | 8085 | Candidate applications, status changes, history |
 | notification-service | 8086 | Internal notifications and optional SMTP delivery |
 | audit-service | 8087 | Audit ingestion and admin log search |
+| ai-service | 8088 | Claude Haiku assistant, RAG context, conversations, metrics, audit |
 | frontend | 3001 | Next.js role dashboards and job browsing |
 
 ## Run
@@ -52,6 +54,7 @@ docker compose up --build
 - Grafana: `http://localhost:3000`
 - Prometheus: `http://localhost:9090`
 - OpenSearch: `http://localhost:9200`
+- Assistant: `http://localhost:3001/assistant`
 
 ## Verify
 
@@ -85,6 +88,7 @@ npm run build
 - Gateway JWT validation, refresh token rotation, Redis token blacklist, CORS, and rate limiting.
 - Kafka, transactional outbox, idempotent consumers, and audit events.
 - OpenSearch search adapter with PostgreSQL fallback.
+- Claude Haiku AI assistant with citations, streaming UI, metrics, and audit events.
 - SMTP notification delivery queue with retry/backoff and persisted delivery status.
 - Standard error response with trace ID.
 - Docker Compose full stack, Helm, Argo CD, Kubernetes, and AWS Terraform blueprint.
@@ -98,12 +102,14 @@ npm run build
 - [Security and supply chain](security.md)
 - [Deployment runbook](deployment.md)
 - [SLO operations](slo.md)
+- [Claude AI assistant](ai-assistant.md)
+- [Claude Haiku provider](claude-haiku.md)
 - [AWS Terraform blueprint](aws-terraform.md)
 - [10-minute demo script](demo-script.md)
 - [GitHub profile checklist](github-profile.md)
 
-## Near-Term Roadmap
+## Roadmap After v0.1.0
 
-- Add `ai-service` powered by Claude Haiku with RAG, citations, streaming UI, metrics, and audit events.
-- Add demo data reset automation.
-- Prepare the `v0.1.0` portfolio release.
+- Deploy the blueprint to a real AWS staging account.
+- Add stronger long-running load tests and error-budget burn simulations.
+- Add a real email provider production sandbox.

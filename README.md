@@ -2,7 +2,7 @@
 
 DevHire Cloud là một dự án portfolio backend/DevOps/Solution Architecture được xây dựng như một nền tảng tuyển dụng mini ITviec/LinkedIn Jobs. Mục tiêu của dự án không phải là demo CRUD đơn giản, mà là chứng minh năng lực thiết kế, triển khai, kiểm thử và vận hành một hệ thống microservices Java Spring Boot production-style.
 
-Repository hiện có Java 21, Spring Boot 3.5.13, Spring Cloud 2025.0.2, API Gateway, JWT security, Kafka/outbox, OpenSearch, PostgreSQL service-owned databases, Docker Compose full stack, observability, CI/CD, Kubernetes/Helm/GitOps, AWS Terraform blueprint, Next.js frontend và bộ kiểm thử tự động.
+Repository hiện có Java 21, Spring Boot 3.5.13, Spring Cloud 2025.0.2, API Gateway, JWT security, Kafka/outbox, OpenSearch, PostgreSQL service-owned databases, Claude Haiku AI assistant, Docker Compose full stack, observability, CI/CD, Kubernetes/Helm/GitOps, AWS Terraform blueprint, Next.js frontend và bộ kiểm thử tự động.
 
 ## Portfolio Screenshots
 
@@ -44,6 +44,7 @@ flowchart LR
     Gateway --> Application["application-service :8085"]
     Gateway --> Notification["notification-service :8086"]
     Gateway --> Audit["audit-service :8087"]
+    Gateway --> AI["ai-service :8088"]
 
     Auth --> AuthDb[("devhire_auth")]
     User --> UserDb[("devhire_user")]
@@ -53,9 +54,11 @@ flowchart LR
     Application --> AppDb[("devhire_application")]
     Notification --> NotificationDb[("devhire_notification")]
     Audit --> AuditDb[("devhire_audit")]
+    AI --> AiDb[("devhire_ai")]
 
     Job -. OpenFeign .-> Company
     Application -. OpenFeign .-> Job
+    AI -. WebClient .-> Job
     Auth --> Kafka["Kafka topics"]
     Company --> Kafka
     Job --> Kafka
@@ -65,6 +68,7 @@ flowchart LR
 
     Prometheus --> Gateway
     Prometheus --> Job
+    Prometheus --> AI
     Grafana --> Prometheus
     Gateway --> OTel["OpenTelemetry Collector"]
     OTel --> Tempo
@@ -79,6 +83,7 @@ flowchart LR
 - Redis cho rate limit và token blacklist.
 - Kafka, transactional outbox, idempotent consumers.
 - OpenSearch job search, PostgreSQL fallback.
+- Anthropic Claude Haiku assistant, RAG-style retrieval, citations, streaming UI.
 - OpenFeign cho service-to-service reads.
 - Springdoc OpenAPI, Actuator, Micrometer, OpenTelemetry.
 - Prometheus, Grafana, Loki, Tempo.
@@ -99,6 +104,7 @@ flowchart LR
 | application-service | 8085 | Candidate apply, employer status tracking, status history |
 | notification-service | 8086 | Internal notification, SMTP email queue/retry |
 | audit-service | 8087 | Audit log ingestion và admin query |
+| ai-service | 8088 | Claude Haiku assistant, RAG, citations, metrics, audit events |
 | common-lib | - | Error model, headers, event DTOs, outbox support |
 | frontend | 3001 | Next.js UI cho jobs, candidate, employer, admin |
 
@@ -113,7 +119,8 @@ flowchart LR
 7. Candidate apply bằng CV URL.
 8. Employer chuyển application sang `INTERVIEW`.
 9. Candidate nhận notification.
-10. Admin xem audit log.
+10. Candidate hỏi AI assistant về demo path hoặc kiến trúc.
+11. Admin xem audit log.
 
 ## Chạy Bằng Docker
 
@@ -131,6 +138,7 @@ URL chính:
 - OpenSearch Dashboards: `http://localhost:5601`
 - Tempo: `http://localhost:3200`
 - Loki: `http://localhost:3100`
+- AI Assistant: `http://localhost:3001/assistant`
 
 Nếu port local bị trùng, chỉnh các biến `*_HOST_PORT` trong `.env`.
 
@@ -189,6 +197,9 @@ Performance smoke:
 - `PATCH /api/applications/{id}/status`
 - `GET /api/notifications`
 - `GET /api/admin/audit-logs`
+- `POST /api/ai/chat`
+- `POST /api/ai/chat/stream`
+- `POST /api/admin/ai/knowledge/reindex`
 
 Xem flow chạy được tại [docs/api.http](docs/api.http).
 
@@ -200,6 +211,7 @@ Xem flow chạy được tại [docs/api.http](docs/api.http).
 - Gateway-side JWT validation, CORS, rate limit.
 - Transactional outbox, Kafka events, idempotent consumers.
 - OpenSearch adapter với fallback PostgreSQL.
+- Claude Haiku AI assistant có fallback demo mode, citations, tool traces, metrics và audit events.
 - Persisted notification delivery status, SMTP retry/backoff và Gmail runbook.
 - Standard error response có `traceId`.
 - Prometheus alerts, Grafana SLO dashboard, trace/log stack.
@@ -218,13 +230,15 @@ Xem flow chạy được tại [docs/api.http](docs/api.http).
 - [SLO operations](docs/slo.md)
 - [Deployment runbook](docs/deployment.md)
 - [Gmail SMTP runbook](docs/gmail-smtp.md)
+- [Claude AI assistant](docs/ai-assistant.md)
+- [Claude Haiku provider](docs/claude-haiku.md)
 - [AWS Terraform blueprint](docs/aws-terraform.md)
 - [10-minute demo script](docs/demo-script.md)
 - [GitHub profile checklist](docs/github-profile.md)
 - [Architecture Decision Records](docs/ADR/0001-microservices-and-service-databases.md)
 
-## Roadmap Gần Nhất
+## Roadmap Sau v0.1.0
 
-- Thêm `ai-service` dùng Claude Haiku, RAG trên jobs/docs/platform state, streaming UI và citations.
-- Thêm script reset demo data.
-- Chuẩn bị release `v0.1.0` với final screenshots và release notes.
+- Deploy AWS Terraform blueprint vào staging account thật.
+- Thêm load test dài hơn và error-budget burn simulation.
+- Tích hợp email provider sandbox production thay vì chỉ Gmail SMTP demo.

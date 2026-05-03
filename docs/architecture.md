@@ -12,6 +12,7 @@ DevHire Cloud is a Java Spring Boot microservices recruitment platform for portf
 - `application-service`: candidate applications, duplicate prevention, status workflow, and status history.
 - `notification-service`: internal notification persistence from application events and optional SMTP email delivery after resolving recipient email from `user-service`.
 - `audit-service`: audit event ingestion and admin audit log search.
+- `ai-service`: Claude Haiku assistant, conversation persistence, curated knowledge retrieval, job/platform tools, metrics, and audit events.
 - `common-lib`: shared API response, error model, constants, security headers, pagination, and event DTO contracts.
 
 ## Data Ownership
@@ -25,6 +26,7 @@ One PostgreSQL container is used locally, but each service has a separate databa
 - `devhire_application`
 - `devhire_notification`
 - `devhire_audit`
+- `devhire_ai`
 
 Services do not share JPA entities and do not read another service's database.
 
@@ -34,6 +36,7 @@ Services do not share JPA entities and do not read another service's database.
 - Synchronous service-to-service queries use OpenFeign:
   - `job-service` calls `company-service` for approved company ownership.
   - `application-service` calls `job-service` for published job and employer ownership facts.
+- `ai-service` uses WebClient for provider calls and job/platform context tools; it never reads another service database directly.
 - Asynchronous communication uses Kafka topics:
   - `audit.events`
   - `application.events`
