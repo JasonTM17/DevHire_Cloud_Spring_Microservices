@@ -1358,3 +1358,20 @@ Verification:
 - `docker run --rm -v "${PWD}:/workspace" -w /workspace grafana/k6:0.56.0 inspect /workspace/perf/k6/role-based-suite.js` passed on 2026-05-03.
 - `git diff --check` passed on 2026-05-03.
 - `mvn -T1 clean verify` passed on 2026-05-03.
+
+## Phase 56 - Chaos and resilience smoke
+
+- Added `scripts/chaos-smoke.ps1` with recoverable local Docker scenarios:
+  - `opensearch`: stops OpenSearch and verifies job search still returns through Gateway fallback.
+  - `kafka`: stops Kafka, creates a company, and checks service-owned outbox pending/failed evidence.
+  - `ai`: verifies Claude provider fallback/circuit evidence and a usable assistant answer.
+  - `mail`: stops Mailpit SMTP sandbox and verifies internal notification persistence after an application flow.
+- The script uses generated smoke entities and restores stopped Compose services when `-Recover` is provided.
+
+Verification:
+
+- PowerShell syntax parse passed for `scripts/chaos-smoke.ps1` on 2026-05-03.
+- `docker compose config --quiet` passed on 2026-05-03.
+- `git diff --check` passed on 2026-05-03.
+- `mvn -T1 clean verify` passed on 2026-05-03.
+- Runtime chaos scenarios are deferred to final stack verification after Mailpit is added in Phase 57.
