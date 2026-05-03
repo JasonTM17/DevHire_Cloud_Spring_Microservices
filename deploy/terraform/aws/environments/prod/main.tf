@@ -8,6 +8,7 @@ locals {
     "application-service",
     "notification-service",
     "audit-service",
+    "ai-service",
     "frontend"
   ])
 
@@ -17,6 +18,7 @@ locals {
     "postgres-password",
     "smtp-username",
     "smtp-password",
+    "anthropic-api-key",
     "oauth-client-secret",
     "opensearch-password"
   ])

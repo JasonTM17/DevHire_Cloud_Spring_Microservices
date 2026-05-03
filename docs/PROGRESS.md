@@ -1054,6 +1054,44 @@ Verification:
 Verification:
 
 - `git diff --check` passed on 2026-05-03.
+
+## Phase 53 - AI provider resilience and admin operations
+
+- Added lightweight Claude provider circuit breaker state in `ai-service`.
+- Added provider failure threshold and circuit-open cooldown configuration.
+- Extended provider diagnostics with circuit state, consecutive failures, cooldown deadline, and safe last-failure metadata.
+- Added Micrometer counters for provider failures and circuit openings.
+- Added service tests for circuit-open fallback behavior.
+- Extended the admin dashboard with an AI provider operations panel:
+  - provider/model/mode,
+  - circuit state,
+  - fallback state,
+  - consecutive failures,
+  - cooldown visibility,
+  - knowledge reindex action.
+- Propagated AI resilience env vars through `.env.example`, Docker Compose, Helm values, AWS Helm values, and Terraform ECR/secret placeholders.
+
+Verification:
+
+- `mvn -T1 -pl common-lib,ai-service test` passed on 2026-05-03.
+- `npm run typecheck` passed on 2026-05-03.
+- `npm run build` passed on 2026-05-03.
+- `docker compose config --quiet` passed on 2026-05-03.
+- `docker run --rm -v "${PWD}:/workspace" -w /workspace hashicorp/terraform:1.10.5 fmt -check -recursive deploy/terraform/aws` passed on 2026-05-03.
+- `./scripts/terraform-validate.ps1` passed on 2026-05-03 for dev, staging, and prod with Terraform init/validate, TFLint, and Trivy config scan.
+- `docker run --rm -v "${PWD}:/workspace" -w /workspace alpine/helm:3.16.4 template ...` passed on 2026-05-03 for local, staging, prod, AWS staging, and AWS prod values.
+- `docker run --rm --entrypoint promtool -v "${PWD}/infra/prometheus:/etc/prometheus" prom/prometheus:v3.0.1 check config /etc/prometheus/prometheus.yml` passed on 2026-05-03 with 10 rules found.
+- `docker compose build ai-service frontend` passed on 2026-05-03.
+- `docker compose up -d --no-deps ai-service frontend` passed on 2026-05-03.
+- `./scripts/ai-eval.ps1 -GatewayUrl http://localhost:8080` passed on 2026-05-03 with provider circuit state `CLOSED`.
+- `./scripts/api-smoke.ps1 -GatewayUrl http://localhost:8080` passed on 2026-05-03.
+- `npm run e2e` passed on 2026-05-03 with the admin AI provider operations panel assertion.
+- `npm run screenshots` passed on 2026-05-03 and refreshed portfolio screenshots.
+- `mvn -T1 clean verify` passed on 2026-05-03.
+- `./scripts/docs-quality.ps1` passed on 2026-05-03.
+- `docker run --rm -v "${PWD}:/repo" -w /repo rhysd/actionlint:latest` passed on 2026-05-03.
+- `docker run --rm -v "${PWD}:/repo" -w /repo zricethezav/gitleaks:latest detect --source /repo --no-git --redact --verbose` passed on 2026-05-03 with no leaks found.
+- `git diff --check` passed on 2026-05-03.
 - `docker run --rm -v "${PWD}:/repo" -w /repo zricethezav/gitleaks:latest detect --source /repo --no-git --redact --verbose` passed on 2026-05-03 with no leaks found.
 - Initial `mvn -T1 clean verify` hit a local JVM native memory allocation failure while the full Docker stack was running; Docker was stopped, ignored JVM crash logs were removed, and the command was rerun with conservative `MAVEN_OPTS`.
 - `mvn -T1 clean verify` passed on 2026-05-03.

@@ -19,6 +19,7 @@ Terraform lives under `deploy/terraform/aws` and is split into reusable modules:
 - `backend.s3.example.hcl` documents S3 state and DynamoDB locking, but is not enabled automatically.
 - Expensive resources are behind toggles and default to disabled in examples.
 - Secrets Manager stores placeholder secret names and ARNs only; secret values must be created outside Git.
+- AI provider secrets are represented as placeholders such as `anthropic-api-key`; Terraform never stores the key value.
 - CI runs validation and security checks only. There is no `terraform apply` workflow.
 
 ## Local Validation
@@ -71,6 +72,7 @@ Terraform exposes outputs that are consumed by the AWS Helm overlays:
 - MSK bootstrap brokers.
 - OpenSearch endpoint.
 - Secrets Manager ARNs.
+- Anthropic API key secret placeholder for `ai-service`.
 
 Render AWS Helm values:
 

@@ -32,6 +32,12 @@ global:
     SPRING_MAIL_SMTP_STARTTLS_ENABLE: "true"
     SPRING_MAIL_SMTP_STARTTLS_REQUIRED: "true"
     SPRING_MAIL_SMTP_SSL_TRUST: smtp.gmail.com
+    ANTHROPIC_BASE_URL: https://api.anthropic.com
+    ANTHROPIC_MODEL: claude-haiku-4-5-20251001
+    ANTHROPIC_MAX_TOKENS: "900"
+    DEVHIRE_AI_DEMO_FALLBACK_ENABLED: "true"
+    DEVHIRE_AI_PROVIDER_FAILURE_THRESHOLD: "3"
+    DEVHIRE_AI_PROVIDER_CIRCUIT_OPEN_SECONDS: "120"
     NEXT_PUBLIC_API_BASE_URL: https://staging.devhire.example.com
 
 secrets:
@@ -78,6 +84,8 @@ services:
   notification-service:
     replicas: 1
   audit-service:
+    replicas: 1
+  ai-service:
     replicas: 1
 
 quota:

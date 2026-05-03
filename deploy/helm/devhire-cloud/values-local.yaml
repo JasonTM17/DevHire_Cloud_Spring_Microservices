@@ -11,6 +11,10 @@ global:
     DEVHIRE_NOTIFICATION_EMAIL_DASHBOARD_BASE_URL: http://localhost:8080
     NEXT_PUBLIC_API_BASE_URL: http://localhost:8080
     DEVHIRE_SEARCH_OPENSEARCH_URL: http://opensearch:9200
+    ANTHROPIC_MODEL: claude-haiku-4-5-20251001
+    DEVHIRE_AI_DEMO_FALLBACK_ENABLED: "true"
+    DEVHIRE_AI_PROVIDER_FAILURE_THRESHOLD: "3"
+    DEVHIRE_AI_PROVIDER_CIRCUIT_OPEN_SECONDS: "60"
 
 secrets:
   createExample: true
@@ -20,6 +24,7 @@ secrets:
     POSTGRES_PASSWORD: devhire_local_password
     SPRING_MAIL_USERNAME: ""
     SPRING_MAIL_PASSWORD: ""
+    ANTHROPIC_API_KEY: ""
 
 ingress:
   enabled: false
@@ -38,3 +43,5 @@ services:
     replicas: 1
     autoscaling:
       enabled: false
+  ai-service:
+    replicas: 1

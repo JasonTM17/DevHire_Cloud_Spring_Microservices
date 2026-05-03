@@ -21,6 +21,7 @@ This runbook describes the production-style deployment assets included in the po
 - Kafka reachable from the cluster.
 - OpenTelemetry Collector or compatible OTLP endpoint.
 - SMTP provider credentials when email delivery is enabled.
+- Anthropic API key when Claude API mode is enabled for `ai-service`.
 - Ingress controller such as NGINX Ingress.
 - Metrics Server when HPA is enabled.
 
@@ -140,6 +141,22 @@ Required production variables:
 - `SPRING_MAIL_SMTP_WRITE_TIMEOUT=5000`
 
 For Gmail-specific local setup and smoke testing, see `docs/gmail-smtp.md`.
+
+## AI Provider Runtime
+
+`ai-service` can run in deterministic fallback mode for demos or Claude API mode when `ANTHROPIC_API_KEY` is supplied by a secret manager.
+
+Important variables:
+
+- `ANTHROPIC_API_KEY` from Kubernetes Secret or cloud secret manager.
+- `ANTHROPIC_BASE_URL=https://api.anthropic.com`
+- `ANTHROPIC_MODEL=claude-haiku-4-5-20251001`
+- `ANTHROPIC_MAX_TOKENS=900`
+- `DEVHIRE_AI_DEMO_FALLBACK_ENABLED=true`
+- `DEVHIRE_AI_PROVIDER_FAILURE_THRESHOLD=3`
+- `DEVHIRE_AI_PROVIDER_CIRCUIT_OPEN_SECONDS=120`
+
+Admins can validate runtime state through `/api/admin/ai/provider/status` or the Admin dashboard AI provider operations panel.
 
 ## Rollback
 
