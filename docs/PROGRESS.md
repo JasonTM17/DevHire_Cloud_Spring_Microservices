@@ -1512,3 +1512,18 @@ Verification:
   - `promtool check config /etc/prometheus/prometheus.yml`
   - `actionlint`
   - `gitleaks detect --source /repo --no-git --redact --verbose`
+
+## Phase 62 - Documentation encoding and SMTP consistency
+
+- Rewrote `docs/gmail-smtp.md` as a clean UTF-8 Vietnamese, English, and Japanese runbook.
+- Rewrote `docs/README_JA.md` to remove encoding artifacts and align it with the v0.2 operations story.
+- Updated `.env.gmail.example` to use the new explicit `GMAIL_SMTP_*` override variables.
+- Clarified that local Docker Compose is pinned to Mailpit and Gmail is opt-in through `docker-compose.smtp-gmail.example.yml`.
+- Hardened `scripts/docs-quality.ps1` with common mojibake marker detection so broken multilingual docs fail fast.
+
+Verification:
+
+- Passed:
+  - `.\scripts\docs-quality.ps1`
+  - `docker compose config --quiet`
+  - `git diff --check`

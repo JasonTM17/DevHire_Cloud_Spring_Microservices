@@ -1,16 +1,16 @@
 # DevHire Cloud
 
-DevHire Cloud は、Java Spring Boot による採用プラットフォームの production-style microservices ポートフォリオです。認証、企業審査、求人公開、応募管理、通知、監査ログ、検索、Claude Haiku AI assistant、監視、CI/CD、Docker、Kubernetes、Terraform、Next.js UI を含みます。
+DevHire Cloud は、Java Spring Boot で構築した採用プラットフォーム型の production-style microservices ポートフォリオです。認証、企業審査、求人公開、応募管理、通知、監査ログ、検索、Claude Haiku AI assistant、監視、CI/CD、Docker、Kubernetes、Terraform、Next.js UI を含みます。
 
 ## Portfolio Screenshots
 
-スクリーンショットは、Playwright と Docker runtime で実際の frontend/API Gateway から取得しています。
+スクリーンショットは Playwright と Docker runtime check から生成しています。
 
 | Jobs | Job Detail |
 |---|---|
 | ![Jobs page](screenshots/frontend-redesign-jobs.png) | ![Job detail](screenshots/frontend-redesign-job-detail.png) |
 
-実際の API Gateway を通した Docker runtime:
+Docker runtime through the real API Gateway:
 
 ![Docker runtime jobs](screenshots/docker-runtime-jobs.png)
 
@@ -24,11 +24,11 @@ Claude AI assistant:
 
 ## Architecture Snapshot
 
-- `api-gateway` が JWT 検証、routing、CORS、Redis rate limit を担当します。
+- `api-gateway` は JWT 検証、routing、CORS、Redis rate limit を担当します。
 - 各 service は独自の PostgreSQL database と Flyway migration を持ちます。
 - Kafka domain events は transactional outbox から publish されます。
-- Notification と Audit の consumer は idempotent です。
-- 求人検索は OpenSearch を使い、PostgreSQL fallback もあります。
+- Notification と Audit の consumer は idempotent に設計されています。
+- 求人検索は OpenSearch を使い、PostgreSQL fallback adapter もあります。
 - `ai-service` は Claude Haiku、citations、tool traces、metrics、fallback mode を持つ assistant です。
 - Actuator、Prometheus、Grafana、OpenTelemetry、Tempo、Loki で監視します。
 
@@ -76,9 +76,6 @@ npm run build
 
 ```powershell
 ./scripts/api-smoke.ps1 -GatewayUrl http://localhost:8080
-```
-
-```powershell
 ./scripts/ai-eval.ps1 -GatewayUrl http://localhost:8080
 ```
 
@@ -112,8 +109,8 @@ Operations smoke gates:
 - Trace ID を含む標準エラーレスポンス。
 - Docker Compose full stack, Helm, Argo CD, Kubernetes, AWS Terraform blueprint.
 - GitHub Actions CI/CD, Trivy, Gitleaks, SBOM, Dependabot, AI eval, role-based k6, chaos smoke, OpenAPI conformance, DR verification, Playwright E2E.
-- Mailpit local email sandbox ã§ real SMTP capture ã‚’è¡Œã„ã€Gmail ã¯ secret-backed optional mode ã§ã™ã€‚
-- Helm ã¨ Argo CD ã‹ã‚‰ AWS Secrets Manager / External Secrets Operator ã«æŽ¥ç¶šã™ã‚‹ sample ã‚’å«ã¿ã¾ã™ã€‚
+- Mailpit local email sandbox で real SMTP capture を行い、Gmail は secret-backed optional mode として扱います。
+- Helm と Argo CD から AWS Secrets Manager / External Secrets Operator へ接続する sample を含みます。
 
 ## Key Docs
 
@@ -129,6 +126,7 @@ Operations smoke gates:
 - [AWS Terraform blueprint](aws-terraform.md)
 - [External Secrets and GitOps](external-secrets.md)
 - [Email sandbox](email-sandbox.md)
+- [Gmail SMTP runbook](gmail-smtp.md)
 - [Backup and restore runbook](runbooks/backup-restore.md)
 - [Recruiter review guide](recruiter-review-guide.md)
 - [Release notes v0.2.0](release-notes/v0.2.0.md)

@@ -40,10 +40,22 @@ try {
         Get-Item CHANGELOG.md
     )
 
+    $mojibakeMarkers = @(
+        [string][char]0x00C3,
+        [string][char]0x00C2,
+        ([string][char]0x00E2 + [string][char]0x20AC),
+        [string][char]0x00E6
+    )
+
     foreach ($file in $markdownFiles) {
         $content = Get-Content -Raw -Encoding UTF8 $file.FullName
         if ($content.Contains([char]0xFFFD)) {
             throw "Replacement character detected in $($file.FullName)"
+        }
+        foreach ($marker in $mojibakeMarkers) {
+            if ($content.Contains($marker)) {
+                throw "Potential mojibake marker detected in $($file.FullName)"
+            }
         }
         if ($content -match "(?i)\b(TODO|FIXME)\b") {
             throw "Unsafe placeholder marker detected in $($file.FullName)"
