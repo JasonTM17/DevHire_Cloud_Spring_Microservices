@@ -1,0 +1,89 @@
+global:
+  namespace: devhire
+  imageRegistry: 123456789012.dkr.ecr.ap-southeast-1.amazonaws.com/devhire-prod
+  imageTag: replace-with-release-sha
+  imagePullPolicy: IfNotPresent
+  serviceAccountName: devhire-aws-workloads
+  automountServiceAccountToken: true
+  serviceAccountAnnotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::123456789012:role/devhire-prod-workload-irsa
+  env:
+    SPRING_PROFILES_ACTIVE: prod
+    CORS_ALLOWED_ORIGINS: https://devhire.example.com
+    POSTGRES_HOST: devhire-prod-postgres.xxxxxx.ap-southeast-1.rds.amazonaws.com
+    POSTGRES_PORT: "5432"
+    SPRING_DATA_REDIS_HOST: devhire-prod-redis.xxxxxx.cache.amazonaws.com
+    SPRING_DATA_REDIS_PORT: "6379"
+    SPRING_KAFKA_BOOTSTRAP_SERVERS: b-1.devhire-prod.xxxxxx.c2.kafka-serverless.ap-southeast-1.amazonaws.com:9098
+    DEVHIRE_SEARCH_PROVIDER: opensearch
+    DEVHIRE_SEARCH_OPENSEARCH_URL: https://search-devhire-prod-xxxxxx.ap-southeast-1.es.amazonaws.com
+    DEVHIRE_SEARCH_OPENSEARCH_INDEX: devhire_jobs
+    DEVHIRE_SEARCH_OPENSEARCH_AUTO_CREATE_INDEX: "false"
+    DEVHIRE_SEARCH_OPENSEARCH_FALLBACK_TO_POSTGRES: "true"
+    OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector.devhire-observability.svc.cluster.local:4318
+    MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "0.1"
+    DEVHIRE_NOTIFICATION_EMAIL_ENABLED: "true"
+    DEVHIRE_NOTIFICATION_EMAIL_FROM: no-reply@devhire.example.com
+    DEVHIRE_NOTIFICATION_EMAIL_REPLY_TO: support@devhire.example.com
+    DEVHIRE_NOTIFICATION_EMAIL_DASHBOARD_BASE_URL: https://devhire.example.com
+    SPRING_MAIL_HOST: smtp.gmail.com
+    SPRING_MAIL_PORT: "587"
+    SPRING_MAIL_SMTP_AUTH: "true"
+    SPRING_MAIL_SMTP_STARTTLS_ENABLE: "true"
+    SPRING_MAIL_SMTP_STARTTLS_REQUIRED: "true"
+    SPRING_MAIL_SMTP_SSL_TRUST: smtp.gmail.com
+    NEXT_PUBLIC_API_BASE_URL: https://devhire.example.com
+
+secrets:
+  createExample: false
+  name: devhire-aws-runtime-secrets
+
+ingress:
+  enabled: true
+  className: alb
+  host: devhire.example.com
+  tls:
+    enabled: true
+    secretName: devhire-prod-tls
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
+    alb.ingress.kubernetes.io/ssl-redirect: "443"
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-southeast-1:123456789012:certificate/replace-with-prod-cert-id
+    alb.ingress.kubernetes.io/load-balancer-attributes: deletion_protection.enabled=true,routing.http2.enabled=true
+
+services:
+  frontend:
+    replicas: 2
+    autoscaling:
+      enabled: true
+      minReplicas: 2
+      maxReplicas: 6
+  api-gateway:
+    replicas: 3
+    autoscaling:
+      enabled: true
+      minReplicas: 3
+      maxReplicas: 8
+  auth-service:
+    replicas: 2
+  user-service:
+    replicas: 2
+  company-service:
+    replicas: 2
+  job-service:
+    replicas: 3
+  application-service:
+    replicas: 2
+  notification-service:
+    replicas: 2
+  audit-service:
+    replicas: 2
+
+quota:
+  hard:
+    requests.cpu: "6"
+    requests.memory: 12Gi
+    limits.cpu: "12"
+    limits.memory: 24Gi

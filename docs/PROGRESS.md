@@ -887,3 +887,31 @@ Verification:
 - Secret scan over changed Terraform/CI/docs/script files found no Gmail app password, SMTP account, AWS key id, or AWS secret key.
 
 Committed as `ci(terraform): add validation security and dependency maintenance`.
+
+## Phase 35 - Helm/GitOps AWS wiring
+
+- Added `values-aws-staging.yaml` and `values-aws-prod.yaml` for AWS deployment overlays.
+- Wired Helm values to Terraform-style placeholders for:
+  - ECR image registry/tag,
+  - RDS PostgreSQL endpoint via `POSTGRES_HOST`,
+  - ElastiCache Redis endpoint,
+  - MSK Serverless Kafka bootstrap brokers,
+  - OpenSearch endpoint/index,
+  - AWS Secrets Manager synced Kubernetes secret name,
+  - ALB ingress annotations and ACM certificate placeholders,
+  - IRSA role ARN annotation on the workload service account.
+- Added optional ServiceAccount annotations and automount control to the Helm chart while keeping local defaults secure.
+- Added `deploy/gitops/argocd-aws-application.yaml` with separate staging and production Argo CD Application samples.
+- Updated Helm documentation with AWS render commands and secret/endpoint replacement notes.
+
+Verification:
+
+- `docker run --rm -v "${PWD}:/workspace" -w /workspace alpine/helm:3.17.0 lint deploy/helm/devhire-cloud` passed on 2026-05-03.
+- `helm template` through Docker passed for `values-aws-staging.yaml` and `values-aws-prod.yaml` on 2026-05-03.
+- `kubeconform -summary -ignore-missing-schemas` passed for rendered AWS staging/prod Helm manifests on 2026-05-03.
+- `kubeconform -summary -ignore-missing-schemas` parsed the AWS Argo CD Application sample and skipped missing Argo CRD schemas as expected.
+- `docker compose config --quiet` passed on 2026-05-03.
+- `mvn -T1 clean verify` passed on 2026-05-03.
+- Secret scan over changed Helm/GitOps/docs files found no Gmail app password, SMTP account, AWS key id, or AWS secret key.
+
+Committed as `chore(deploy): wire helm gitops values for aws`.

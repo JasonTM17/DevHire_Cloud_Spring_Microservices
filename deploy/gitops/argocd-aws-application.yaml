@@ -1,0 +1,54 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: devhire-cloud-aws-staging
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: devhire-cloud
+    app.kubernetes.io/part-of: devhire-cloud
+    devhire.cloud/environment: staging
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices.git
+    targetRevision: master
+    path: deploy/helm/devhire-cloud
+    helm:
+      valueFiles:
+        - values-aws-staging.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: devhire-staging
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: devhire-cloud-aws-prod
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: devhire-cloud
+    app.kubernetes.io/part-of: devhire-cloud
+    devhire.cloud/environment: prod
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices.git
+    targetRevision: master
+    path: deploy/helm/devhire-cloud
+    helm:
+      valueFiles:
+        - values-aws-prod.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: devhire
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true

@@ -13,6 +13,13 @@ helm template devhire-cloud .\deploy\helm\devhire-cloud -f .\deploy\helm\devhire
 helm template devhire-cloud .\deploy\helm\devhire-cloud -f .\deploy\helm\devhire-cloud\values-prod.yaml
 ```
 
+Render AWS overlays wired for Terraform outputs/ECR/RDS/ElastiCache/MSK/OpenSearch placeholders:
+
+```powershell
+helm template devhire-cloud .\deploy\helm\devhire-cloud -f .\deploy\helm\devhire-cloud\values-aws-staging.yaml
+helm template devhire-cloud .\deploy\helm\devhire-cloud -f .\deploy\helm\devhire-cloud\values-aws-prod.yaml
+```
+
 Install example:
 
 ```powershell
@@ -22,5 +29,7 @@ helm upgrade --install devhire-cloud .\deploy\helm\devhire-cloud -f .\deploy\hel
 Production notes:
 
 - `values-prod.yaml` does not create the example secret. Create `devhire-secrets` with a secret manager, SealedSecrets, External Secrets, or your cluster's native secret flow.
+- `values-aws-staging.yaml` and `values-aws-prod.yaml` expect `devhire-aws-runtime-secrets` to be synced from AWS Secrets Manager before rollout.
+- AWS overlay endpoint placeholders should be replaced from Terraform outputs: ECR repository URLs, RDS endpoint, ElastiCache endpoint, MSK bootstrap brokers, OpenSearch endpoint, and IRSA role ARN.
 - Raw Kubernetes manifests under `deploy/k8s` remain as a transparent baseline. Helm is the preferred deployment path for configurable environments.
 - Image tags should be pinned to a release tag or commit SHA during real production deployments.
