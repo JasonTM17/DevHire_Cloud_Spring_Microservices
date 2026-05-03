@@ -58,6 +58,7 @@ docker compose up --build
 - Grafana: `http://localhost:3000`
 - Prometheus: `http://localhost:9090`
 - OpenSearch: `http://localhost:9200`
+- Mailpit email sandbox: `http://localhost:8025`
 - Assistant: `http://localhost:3001/assistant`
 
 ## Verify
@@ -81,6 +82,16 @@ npm run build
 ./scripts/ai-eval.ps1 -GatewayUrl http://localhost:8080
 ```
 
+Operations smoke gates:
+
+```powershell
+./scripts/email-smoke.ps1 -GatewayUrl http://localhost:8080 -MailpitUrl http://localhost:8025
+./scripts/openapi-verify.ps1 -GatewayUrl http://localhost:8080
+./scripts/perf-suite.ps1 -GatewayUrl http://localhost:8080 -Scenario all -Vus 5 -Duration 30s -UseDocker
+./scripts/chaos-smoke.ps1 -GatewayUrl http://localhost:8080 -Scenario all -Recover
+./scripts/dr-verify.ps1 -GatewayUrl http://localhost:8080
+```
+
 ## Demo Accounts
 
 | Role | Email | Password |
@@ -100,7 +111,9 @@ npm run build
 - SMTP notification delivery queue with retry/backoff and persisted delivery status.
 - Standard error response with trace ID.
 - Docker Compose full stack, Helm, Argo CD, Kubernetes, and AWS Terraform blueprint.
-- GitHub Actions CI/CD, Trivy, Gitleaks, SBOM, Dependabot, AI eval, k6 smoke, and Playwright E2E.
+- GitHub Actions CI/CD, Trivy, Gitleaks, SBOM, Dependabot, AI eval, role-based k6, chaos smoke, OpenAPI conformance, DR verification, and Playwright E2E.
+- Mailpit local email sandbox with real SMTP capture and Gmail optional secret-backed mode.
+- External Secrets Operator wiring for AWS Secrets Manager through Helm and Argo CD.
 
 ## Key Docs
 
@@ -114,11 +127,17 @@ npm run build
 - [Claude Haiku provider](claude-haiku.md)
 - [AI evaluation gate](ai-evaluation.md)
 - [AWS Terraform blueprint](aws-terraform.md)
+- [External Secrets and GitOps](external-secrets.md)
+- [Email sandbox](email-sandbox.md)
+- [Backup and restore runbook](runbooks/backup-restore.md)
+- [Recruiter review guide](recruiter-review-guide.md)
+- [Release notes v0.2.0](release-notes/v0.2.0.md)
 - [10-minute demo script](demo-script.md)
 - [GitHub profile checklist](github-profile.md)
 
-## Roadmap After v0.1.0
+## Roadmap After v0.2.0
 
 - Deploy the blueprint to a real AWS staging account.
-- Add stronger long-running load tests and error-budget burn simulations.
-- Add a real email provider production sandbox.
+- Add long-running soak tests and automated error-budget burn simulations.
+- Add production-grade email provider sandbox validation.
+- Add signed container provenance enforcement before release.

@@ -1452,3 +1452,24 @@ Verification:
 - `git diff --check` passed on 2026-05-03.
 - `mvn -T1 clean verify` passed on 2026-05-03.
 - Runtime OpenAPI fetching is deferred to final stack verification.
+
+## Phase 61 - Portfolio evidence v0.2
+
+- Added `docs/recruiter-review-guide.md` for a 15-20 minute reviewer path.
+- Added `docs/release-notes/v0.2.0.md` covering operations-grade hardening scope and verification targets.
+- Updated Vietnamese, English, and Japanese README files with:
+  - Mailpit URL,
+  - operations smoke gates,
+  - role-based k6 suite,
+  - chaos smoke,
+  - DR verification,
+  - OpenAPI conformance,
+  - External Secrets/GitOps references.
+
+Verification:
+
+- Passed:
+  - `.\scripts\docs-quality.ps1`
+  - `docker compose config --quiet`
+  - `git diff --check`
+  - `mvn -T1 clean verify`

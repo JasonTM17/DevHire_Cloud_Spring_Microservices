@@ -1,0 +1,111 @@
+# Recruiter Review Guide
+
+This guide helps a recruiter or senior engineer review DevHire Cloud in 15-20 minutes without reading every file.
+
+## 1. Start With The Case Study
+
+Read:
+
+- `README.md`
+- `docs/README_EN.md`
+- `docs/portfolio-case-study.md`
+- `docs/release-notes/v0.2.0.md`
+
+Look for:
+
+- clear microservice boundaries,
+- service-owned databases,
+- event-driven communication,
+- production verification evidence.
+
+## 2. Inspect Architecture And Service Boundaries
+
+Open:
+
+- `docs/architecture.md`
+- `common-lib/`
+- `api-gateway/`
+- `auth-service/`
+- `job-service/`
+- `application-service/`
+- `notification-service/`
+- `audit-service/`
+- `ai-service/`
+
+Review signals:
+
+- controllers do not return JPA entities,
+- DTOs are separate from entities,
+- Flyway migrations live per service,
+- no service reads another service database directly,
+- contracts/events are versioned and tested.
+
+## 3. Run The Fast Local Proof
+
+```powershell
+docker compose up -d --build
+.\scripts\api-smoke.ps1 -GatewayUrl http://localhost:8080
+.\scripts\ai-eval.ps1 -GatewayUrl http://localhost:8080
+.\scripts\email-smoke.ps1 -GatewayUrl http://localhost:8080 -MailpitUrl http://localhost:8025
+.\scripts\openapi-verify.ps1 -GatewayUrl http://localhost:8080
+```
+
+Useful URLs:
+
+- Frontend: `http://localhost:3001`
+- Assistant: `http://localhost:3001/assistant`
+- Gateway health: `http://localhost:8080/actuator/health`
+- Mailpit: `http://localhost:8025`
+- Grafana: `http://localhost:3000`
+
+## 4. Review Operations Evidence
+
+Open:
+
+- `docs/slo.md`
+- `docs/email-sandbox.md`
+- `docs/external-secrets.md`
+- `docs/runbooks/backup-restore.md`
+- `docs/runbooks/incident-response.md`
+- `docs/release-checklist-v0.2.md`
+
+What to look for:
+
+- SLO and alert coverage,
+- email sandbox and real SMTP secret policy,
+- backup/restore guardrails,
+- chaos smoke scenarios,
+- External Secrets and GitOps wiring,
+- release evidence checklist.
+
+## 5. Review CI/CD And Supply Chain
+
+Open:
+
+- `.github/workflows/ci.yml`
+- `.github/workflows/docker.yml`
+- `.github/workflows/security.yml`
+- `.github/workflows/terraform.yml`
+- `.github/workflows/performance.yml`
+- `.github/workflows/e2e.yml`
+- `.github/dependabot.yml`
+
+Review signals:
+
+- Maven verify runs real tests,
+- Docker images are built through a matrix,
+- Gitleaks and Trivy are present,
+- Terraform validates without apply,
+- k6 and Playwright run as portfolio gates,
+- Dependabot covers Maven, npm, Docker, GitHub Actions, and Terraform.
+
+## 6. Ask The AI Assistant
+
+Try these prompts:
+
+- `Explain this microservices platform to a recruiter`
+- `What production risks does this system handle?`
+- `Show the 10-minute demo path`
+- `Find senior Java jobs matching Kafka and AWS`
+
+The assistant should return citations and tool traces. If no Anthropic key is configured, deterministic fallback mode is expected and safe for demos.

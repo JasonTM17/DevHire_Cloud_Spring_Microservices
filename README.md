@@ -140,6 +140,7 @@ URL chính:
 - Prometheus: `http://localhost:9090`
 - OpenSearch: `http://localhost:9200`
 - OpenSearch Dashboards: `http://localhost:5601`
+- Mailpit email sandbox: `http://localhost:8025`
 - Tempo: `http://localhost:3200`
 - Loki: `http://localhost:3100`
 - AI Assistant: `http://localhost:3001/assistant`
@@ -178,7 +179,16 @@ AI assistant evaluation:
 Performance smoke:
 
 ```powershell
-.\scripts\perf-smoke.ps1 -BaseUrl http://localhost:8080 -Vus 5 -Duration 30s -UseDocker
+.\scripts\perf-suite.ps1 -GatewayUrl http://localhost:8080 -Scenario all -Vus 5 -Duration 30s -UseDocker
+```
+
+Operations smoke:
+
+```powershell
+.\scripts\email-smoke.ps1 -GatewayUrl http://localhost:8080 -MailpitUrl http://localhost:8025
+.\scripts\openapi-verify.ps1 -GatewayUrl http://localhost:8080
+.\scripts\chaos-smoke.ps1 -GatewayUrl http://localhost:8080 -Scenario all -Recover
+.\scripts\dr-verify.ps1 -GatewayUrl http://localhost:8080
 ```
 
 ## Demo Accounts
@@ -225,6 +235,8 @@ Xem flow chạy được tại [docs/api.http](docs/api.http).
 - Claude Haiku AI assistant có fallback demo mode, citations, tool traces, metrics và audit events.
 - Admin dashboard hiển thị AI provider diagnostics, circuit breaker state và knowledge reindex.
 - Persisted notification delivery status, SMTP retry/backoff và Gmail runbook.
+- Mailpit local email sandbox cho SMTP capture thật trong Docker.
+- OpenAPI conformance, role-based k6 suite, chaos smoke và DR verification scripts.
 - Standard error response có `traceId`.
 - Prometheus alerts, Grafana SLO dashboard, trace/log stack.
 - Docker multi-stage images chạy non-root.
@@ -241,17 +253,23 @@ Xem flow chạy được tại [docs/api.http](docs/api.http).
 - [Security and supply chain](docs/security.md)
 - [SLO operations](docs/slo.md)
 - [Deployment runbook](docs/deployment.md)
+- [Email sandbox](docs/email-sandbox.md)
 - [Gmail SMTP runbook](docs/gmail-smtp.md)
+- [Backup and restore runbook](docs/runbooks/backup-restore.md)
+- [External Secrets and GitOps](docs/external-secrets.md)
 - [Claude AI assistant](docs/ai-assistant.md)
 - [Claude Haiku provider](docs/claude-haiku.md)
 - [AI evaluation gate](docs/ai-evaluation.md)
 - [AWS Terraform blueprint](docs/aws-terraform.md)
+- [Recruiter review guide](docs/recruiter-review-guide.md)
+- [Release notes v0.2.0](docs/release-notes/v0.2.0.md)
 - [10-minute demo script](docs/demo-script.md)
 - [GitHub profile checklist](docs/github-profile.md)
 - [Architecture Decision Records](docs/ADR/0001-microservices-and-service-databases.md)
 
-## Roadmap Sau v0.1.0
+## Roadmap Sau v0.2.0
 
 - Deploy AWS Terraform blueprint vào staging account thật.
-- Thêm load test dài hơn và error-budget burn simulation.
-- Tích hợp email provider sandbox production thay vì chỉ Gmail SMTP demo.
+- Thêm soak test dài hơn và automated error-budget burn simulation.
+- Tích hợp email provider sandbox production-grade.
+- Bắt buộc signed container provenance trước release.
