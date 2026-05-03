@@ -1081,3 +1081,40 @@ Verification:
 - `git diff --check` passed on 2026-05-03.
 - UTF-8 sanity check for `README.md`, `docs/README_EN.md`, and `docs/README_JA.md` passed on 2026-05-03 with no replacement characters or common mojibake byte markers.
 - `mvn -T1 clean verify` passed on 2026-05-03.
+
+## Phase 42 - Claude Haiku AI assistant service foundation
+
+- Added Maven module `ai-service` on port `8088`.
+- Added `devhire_ai` PostgreSQL database initialization.
+- Added Flyway schema for:
+  - AI conversations,
+  - AI messages,
+  - knowledge documents and chunks,
+  - usage events,
+  - outbox events.
+- Added Claude Haiku configuration placeholders:
+  - `ANTHROPIC_API_KEY`,
+  - `ANTHROPIC_BASE_URL`,
+  - `ANTHROPIC_MODEL`,
+  - `ANTHROPIC_MAX_TOKENS`,
+  - `DEVHIRE_AI_DEMO_FALLBACK_ENABLED`.
+- Implemented `AnthropicClaudeClient` against the Anthropic Messages API with env-only secrets.
+- Implemented deterministic portfolio fallback when no Anthropic key is configured.
+- Added RAG-style knowledge retrieval from classpath knowledge documents.
+- Added internal tool context:
+  - `search_jobs`,
+  - `get_platform_health_snapshot`.
+- Added conversation/message persistence and usage records.
+- Added audit events through transactional outbox for AI requests and fallback usage.
+- Wired API Gateway routes:
+  - `/api/ai/**`,
+  - `/api/admin/ai/**`.
+- Wired Docker Compose service `ai-service`.
+- Updated Java service Dockerfiles so the new Maven module resolves during Docker builds.
+
+Verification:
+
+- `mvn -T1 -pl common-lib,api-gateway,ai-service test` passed on 2026-05-03.
+- `docker compose config --quiet` passed on 2026-05-03.
+- `git diff --check` passed on 2026-05-03.
+- `mvn -T1 clean verify` passed on 2026-05-03.

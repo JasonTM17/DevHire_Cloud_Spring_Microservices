@@ -1,6 +1,6 @@
 FROM maven:3.9.12-eclipse-temurin-21 AS build
 WORKDIR /workspace
-ARG SERVICE_NAME=api-gateway
+ARG SERVICE_NAME=ai-service
 COPY pom.xml .
 COPY common-lib/pom.xml common-lib/pom.xml
 COPY api-gateway/pom.xml api-gateway/pom.xml
@@ -18,11 +18,11 @@ COPY ${SERVICE_NAME}/src ${SERVICE_NAME}/src
 RUN mvn -B -T1 -pl ${SERVICE_NAME} -am package -DskipTests
 
 FROM eclipse-temurin:21-jre-alpine
-ARG SERVICE_NAME=api-gateway
+ARG SERVICE_NAME=ai-service
 ENV APP_HOME=/app
 WORKDIR ${APP_HOME}
 RUN addgroup -S devhire && adduser -S devhire -G devhire
 COPY --from=build /workspace/${SERVICE_NAME}/target/${SERVICE_NAME}-*.jar app.jar
 USER devhire
-EXPOSE 8080
+EXPOSE 8088
 ENTRYPOINT ["java", "-XX:MaxRAMPercentage=75", "-jar", "app.jar"]

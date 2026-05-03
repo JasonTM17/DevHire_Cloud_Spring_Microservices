@@ -195,6 +195,7 @@ services:
       APPLICATION_SERVICE_URL: http://application-service:8085
       NOTIFICATION_SERVICE_URL: http://notification-service:8086
       AUDIT_SERVICE_URL: http://audit-service:8087
+      AI_SERVICE_URL: http://ai-service:8088
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:3001,http://localhost:${FRONTEND_HOST_PORT:-3001}}
       OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://otel-collector:4318}
     ports:
@@ -419,6 +420,41 @@ services:
     depends_on: *service-depends
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:8087/actuator/health/readiness | grep UP"]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+    networks:
+      - devhire
+
+  ai-service:
+    build:
+      context: .
+      dockerfile: ai-service/Dockerfile
+      args:
+        SERVICE_NAME: ai-service
+    image: devhire/ai-service:local
+    environment:
+      <<: *service-env
+      SERVICE_DATABASE: devhire_ai
+      JOB_SERVICE_URL: http://job-service:8084
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      ANTHROPIC_BASE_URL: ${ANTHROPIC_BASE_URL:-https://api.anthropic.com}
+      ANTHROPIC_MODEL: ${ANTHROPIC_MODEL:-claude-haiku-4-5-20251001}
+      ANTHROPIC_MAX_TOKENS: ${ANTHROPIC_MAX_TOKENS:-900}
+      DEVHIRE_AI_DEMO_FALLBACK_ENABLED: ${DEVHIRE_AI_DEMO_FALLBACK_ENABLED:-true}
+    ports:
+      - "${AI_HOST_PORT:-8088}:8088"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      job-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8088/actuator/health/readiness | grep UP"]
       interval: 15s
       timeout: 5s
       retries: 20

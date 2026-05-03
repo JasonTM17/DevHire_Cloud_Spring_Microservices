@@ -11,6 +11,7 @@ COPY job-service/pom.xml job-service/pom.xml
 COPY application-service/pom.xml application-service/pom.xml
 COPY notification-service/pom.xml notification-service/pom.xml
 COPY audit-service/pom.xml audit-service/pom.xml
+COPY ai-service/pom.xml ai-service/pom.xml
 RUN mvn -B -T1 -pl ${SERVICE_NAME} -am dependency:go-offline
 COPY common-lib/src common-lib/src
 COPY ${SERVICE_NAME}/src ${SERVICE_NAME}/src

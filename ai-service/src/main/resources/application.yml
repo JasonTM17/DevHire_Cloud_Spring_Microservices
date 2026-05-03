@@ -1,0 +1,62 @@
+server:
+  port: ${SERVER_PORT:8088}
+
+spring:
+  application:
+    name: ai-service
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${SERVICE_DATABASE:devhire_ai}}
+    username: ${SPRING_DATASOURCE_USERNAME:${POSTGRES_USER:devhire}}
+    password: ${SPRING_DATASOURCE_PASSWORD:${POSTGRES_PASSWORD:devhire_local_password}}
+  flyway:
+    enabled: true
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:29092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+devhire:
+  outbox:
+    publisher:
+      enabled: ${DEVHIRE_OUTBOX_PUBLISHER_ENABLED:true}
+      batch-size: ${DEVHIRE_OUTBOX_BATCH_SIZE:25}
+      max-attempts: ${DEVHIRE_OUTBOX_MAX_ATTEMPTS:10}
+  ai:
+    demo-fallback-enabled: ${DEVHIRE_AI_DEMO_FALLBACK_ENABLED:true}
+    max-context-chunks: ${DEVHIRE_AI_MAX_CONTEXT_CHUNKS:5}
+    job-service-url: ${JOB_SERVICE_URL:http://localhost:8084}
+    anthropic:
+      api-key: ${ANTHROPIC_API_KEY:}
+      base-url: ${ANTHROPIC_BASE_URL:https://api.anthropic.com}
+      model: ${ANTHROPIC_MODEL:claude-haiku-4-5-20251001}
+      max-tokens: ${ANTHROPIC_MAX_TOKENS:900}
+      version: ${ANTHROPIC_VERSION:2023-06-01}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+      slo:
+        http.server.requests: 50ms,100ms,250ms,500ms,1s,2s,5s
+  tracing:
+    sampling:
+      probability: ${MANAGEMENT_TRACING_SAMPLING_PROBABILITY:1.0}
+  otlp:
+    tracing:
+      endpoint: ${MANAGEMENT_OTLP_TRACING_ENDPOINT:${OTEL_EXPORTER_OTLP_ENDPOINT:http://localhost:4318}/v1/traces}
+
+logging:
+  pattern:
+    level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"

@@ -42,7 +42,8 @@ public class GatewayRoutesConfig {
                                @Value("${devhire.gateway.services.job}") String jobServiceUrl,
                                @Value("${devhire.gateway.services.application}") String applicationServiceUrl,
                                @Value("${devhire.gateway.services.notification}") String notificationServiceUrl,
-                               @Value("${devhire.gateway.services.audit}") String auditServiceUrl) {
+                               @Value("${devhire.gateway.services.audit}") String auditServiceUrl,
+                               @Value("${devhire.gateway.services.ai}") String aiServiceUrl) {
         Function<GatewayFilterSpec, UriSpec> filters = filters(redisRateLimiter, keyResolver);
         return builder.routes()
                 .route("auth-service", route -> route.path("/api/auth/**").filters(filters).uri(authServiceUrl))
@@ -56,6 +57,8 @@ public class GatewayRoutesConfig {
                 .route("job-service", route -> route.path("/api/jobs/**").filters(filters).uri(jobServiceUrl))
                 .route("notification-service", route -> route.path("/api/notifications/**").filters(filters).uri(notificationServiceUrl))
                 .route("audit-service", route -> route.path("/api/admin/audit-logs/**", "/api/admin/audit-logs").filters(filters).uri(auditServiceUrl))
+                .route("admin-ai-service", route -> route.path("/api/admin/ai/**").filters(filters).uri(aiServiceUrl))
+                .route("ai-service", route -> route.path("/api/ai/**").filters(filters).uri(aiServiceUrl))
                 .build();
     }
 
