@@ -1953,3 +1953,16 @@ Verification:
 Note:
 
 - Docker Desktop is not running in the current local shell, so full runtime stack commands are intentionally not marked as executed in this phase.
+
+## Phase 88 - Reconcile v0.3 public release state
+
+- Updated `docs/release-evidence/v0.3.0.md` to mark `v0.3.0` as released, link the public GitHub Release, record the tag target commit, and close the pending release checklist item.
+- Marked `docs/release-notes/v0.3.0.md` as released and aligned `docs/versioning.md` so `v0.3.0` is the latest public portfolio release.
+- Updated `scripts/version-consistency.ps1` so the default latest release gate now checks `v0.3.0`.
+
+Verification:
+
+- Passed:
+  - `.\scripts\version-consistency.ps1`
+  - `.\scripts\docs-quality.ps1`
+  - `git diff --check`

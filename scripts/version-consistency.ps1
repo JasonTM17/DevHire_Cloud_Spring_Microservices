@@ -3,7 +3,7 @@ param(
     [string]$Root = ".",
     [string]$ExpectedMavenVersion = "0.3.0-SNAPSHOT",
     [string]$ExpectedFrontendVersion = "0.3.0",
-    [string]$LatestRelease = "v0.2.0"
+    [string]$LatestRelease = "v0.3.0"
 )
 
 Set-StrictMode -Version Latest

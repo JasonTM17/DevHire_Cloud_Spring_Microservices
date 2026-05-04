@@ -4,7 +4,7 @@ DevHire Cloud uses release tags for portfolio milestones and snapshot versions f
 
 ## Version Rules
 
-- Public release tags use `vX.Y.Z`, for example `v0.2.0`.
+- Public release tags use `vX.Y.Z`, for example `v0.3.0`.
 - The `master` branch moves to the next development version after a release.
 - Maven parent and all service modules must use the same snapshot version.
 - Frontend version should match the next release number without `-SNAPSHOT`.
@@ -14,10 +14,10 @@ DevHire Cloud uses release tags for portfolio milestones and snapshot versions f
 
 ## Current State
 
-- Latest released portfolio version: `v0.2.0`.
+- Latest released portfolio version: `v0.3.0`.
 - Current Maven development version: `0.3.0-SNAPSHOT`.
 - Current frontend development version: `0.3.0`.
-- Next planned release evidence: `docs/release-evidence/v0.3.0.md`.
+- Next planned release evidence: `docs/release-evidence/v0.4.0.md`.
 
 ## Release Flow
 
