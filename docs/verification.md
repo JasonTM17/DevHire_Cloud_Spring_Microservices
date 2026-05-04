@@ -22,6 +22,7 @@ Run docs and Docker syntax only:
 Run runtime proof against an already running Docker stack:
 
 ```powershell
+.\scripts\runtime-preflight.ps1
 .\scripts\portfolio-verify.ps1 -Runtime -GatewayUrl http://localhost:8080
 .\scripts\runtime-evidence-summary.ps1
 ```
@@ -52,7 +53,7 @@ For the operations smoke used in release evidence:
 |---|---|
 | `-Backend` | `mvn -T1 clean verify` and coverage gate |
 | `-Frontend` | `npm ci`, typecheck, production build, Playwright E2E |
-| `-Docker` | `docker compose config --quiet`; with `-StartStack`, also `docker compose up -d --build` |
+| `-Docker` | `docker compose config --quiet`; with `-StartStack`, also runtime preflight and `docker compose up -d --build` |
 | `-Smoke` | API smoke, AI eval, Mailpit email smoke, OpenAPI verify, k6, chaos, DR verify |
 | `-Infra` | Terraform validate, Helm lint/template, Prometheus rules |
 | `-Security` | actionlint and Gitleaks |

@@ -237,6 +237,7 @@ Reviewer-friendly verification:
 ```powershell
 .\scripts\portfolio-verify.ps1 -Docs -Docker
 .\scripts\portfolio-verify.ps1 -Backend -Frontend -Docs
+.\scripts\runtime-preflight.ps1
 .\scripts\portfolio-verify.ps1 -Runtime -GatewayUrl http://localhost:8080
 .\scripts\portfolio-verify.ps1 -All -StartStack
 ```

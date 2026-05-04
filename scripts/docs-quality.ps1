@@ -35,6 +35,7 @@ $requiredPaths = @(
     "docs/runtime-reliability-review.md",
     "docs/runtime-acceptance-matrix.md",
     "docs/repository-hygiene.md",
+    "scripts/runtime-preflight.ps1",
     "deploy/terraform/aws/TERRAFORM_DOCS.md",
     "docs/runbooks/alert-response.md",
     "docs/runbooks/kafka-outbox-incident.md",

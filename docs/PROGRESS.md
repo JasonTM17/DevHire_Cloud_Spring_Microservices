@@ -2012,3 +2012,22 @@ Verification:
   - `.\scripts\docs-quality.ps1`
   - `.\scripts\evidence-audit.ps1`
   - `git diff --check`
+
+## Phase 92 - Runtime preflight and proof workflow
+
+- Added `scripts/runtime-preflight.ps1` to verify Docker CLI availability, Docker daemon readiness, Docker Compose syntax, and local port state for `8080`, `3001`, `8025`, `9090`, and `3000`.
+- Wired runtime preflight into `scripts/portfolio-verify.ps1` before `docker compose up -d --build` whenever `-StartStack` is used.
+- Linked the preflight command from README, verification docs, the runtime acceptance matrix, docs quality, and the evidence manifest.
+
+Verification:
+
+- Passed:
+  - `.\scripts\runtime-preflight.ps1`
+  - `.\scripts\docs-quality.ps1`
+  - `.\scripts\evidence-audit.ps1`
+  - `.\scripts\portfolio-verify.ps1 -Docs -Docker`
+  - `git diff --check`
+
+Note:
+
+- Docker Desktop was available for this phase; preflight passed with Docker server version 29.4.0 and the checked local ports were free.

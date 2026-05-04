@@ -51,6 +51,7 @@
         "scripts/docs-quality.ps1",
         "scripts/evidence-audit.ps1",
         "scripts/repo-hygiene.ps1",
+        "scripts/runtime-preflight.ps1",
         "scripts/terraform-validate.ps1",
         "scripts/check-coverage.ps1"
       ]

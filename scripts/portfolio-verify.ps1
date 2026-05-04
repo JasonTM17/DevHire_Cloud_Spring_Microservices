@@ -252,6 +252,9 @@ try {
             Assert-LastExitCode "docker compose config"
         }
         if ($StartStack) {
+            Invoke-PortfolioStep "runtime preflight" ".\scripts\runtime-preflight.ps1" {
+                & "$PSScriptRoot\runtime-preflight.ps1"
+            }
             Invoke-PortfolioStep "docker compose up" "docker compose up -d --build" {
                 docker compose up -d --build
                 Assert-LastExitCode "docker compose up"
@@ -261,6 +264,9 @@ try {
 
     if ($Runtime) {
         if ($StartStack -and -not $Docker) {
+            Invoke-PortfolioStep "runtime preflight" ".\scripts\runtime-preflight.ps1" {
+                & "$PSScriptRoot\runtime-preflight.ps1"
+            }
             Invoke-PortfolioStep "docker compose up" "docker compose up -d --build" {
                 docker compose up -d --build
                 Assert-LastExitCode "docker compose up"

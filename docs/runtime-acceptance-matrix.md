@@ -15,6 +15,7 @@ Fast static gate:
 Runtime gate after Docker is running:
 
 ```powershell
+.\scripts\runtime-preflight.ps1
 docker compose up -d --build
 .\scripts\portfolio-verify.ps1 -Runtime -GatewayUrl http://localhost:8080
 ```
@@ -29,6 +30,7 @@ Sanitized evidence summary from ignored local reports:
 
 | Runtime capability | Primary command | Evidence signal | Failure means | Primary owner |
 |---|---|---|---|---|
+| Runtime preflight | `runtime-preflight.ps1` | Docker CLI/daemon, Compose syntax, and local port state are reported before stack start | Local machine is not ready for runtime proof | local developer environment |
 | Gateway readiness | `portfolio-verify.ps1 -Runtime` | `/actuator/health/readiness` responds before timeout | Stack is not ready or gateway cannot reach dependencies | `api-gateway` |
 | Auth login and refresh safety | `runtime-reliability.ps1` | login returns token, refresh rotates, old refresh token is rejected, logout blacklists access token | token lifecycle or Redis blacklist is broken | `auth-service`, `api-gateway`, Redis |
 | Company approval workflow | `api-smoke.ps1` | employer creates company and admin approves it through Gateway | RBAC or company workflow is broken | `company-service` |
@@ -53,4 +55,3 @@ Sanitized evidence summary from ignored local reports:
 - Committed docs should summarize status and commands, not copy raw JWTs, API payloads, SMTP messages, or screenshots containing secrets.
 - If Docker is unavailable, mark runtime checks as blocked by environment instead of claiming a pass.
 - AWS remains blueprint-only; no Terraform apply is required for this matrix.
-
