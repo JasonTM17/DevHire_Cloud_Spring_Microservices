@@ -22,7 +22,13 @@ Run only the reliability acceptance suite:
 .\scripts\runtime-reliability.ps1 -GatewayUrl http://localhost:8080
 ```
 
-Generated JSON and Markdown reports are written under `reports/portfolio-verify/` and `reports/runtime-reliability/`. These paths are ignored because they are machine-local evidence.
+Create a sanitized summary from the ignored local runtime reports:
+
+```powershell
+.\scripts\runtime-evidence-summary.ps1
+```
+
+Generated JSON and Markdown reports are written under `reports/portfolio-verify/`, `reports/runtime-reliability/`, and `reports/runtime-evidence/`. These paths are ignored because they are machine-local evidence and may include temporary runtime tokens in raw tool outputs.
 
 ## Runtime Smoke Results
 

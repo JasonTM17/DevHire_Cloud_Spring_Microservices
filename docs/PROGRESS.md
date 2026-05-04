@@ -1934,3 +1934,22 @@ Verification:
   - `.\scripts\docs-quality.ps1`
   - `.\scripts\portfolio-verify.ps1 -Docs -Docker`
   - `git diff --check`
+
+## Phase 87 - Runtime acceptance matrix and sanitized evidence summary
+
+- Added `docs/runtime-acceptance-matrix.md` to map runtime production claims to black-box commands, evidence signals, failure meaning, and owning services.
+- Added `scripts/runtime-evidence-summary.ps1` to summarize the latest ignored runtime reports without copying temporary JWTs, SMTP payloads, provider keys, or generated screenshots.
+- Linked the runtime acceptance matrix and sanitized summary flow from README, the recruiter guide, runtime reliability review, verification docs, docs quality, and the evidence manifest.
+
+Verification:
+
+- Passed:
+  - `.\scripts\runtime-evidence-summary.ps1`
+  - `.\scripts\evidence-audit.ps1`
+  - `.\scripts\docs-quality.ps1`
+  - `.\scripts\portfolio-verify.ps1 -Docs -Docker`
+  - `git diff --check`
+
+Note:
+
+- Docker Desktop is not running in the current local shell, so full runtime stack commands are intentionally not marked as executed in this phase.

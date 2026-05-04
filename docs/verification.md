@@ -23,6 +23,7 @@ Run runtime proof against an already running Docker stack:
 
 ```powershell
 .\scripts\portfolio-verify.ps1 -Runtime -GatewayUrl http://localhost:8080
+.\scripts\runtime-evidence-summary.ps1
 ```
 
 ## Full Portfolio Gate
@@ -75,5 +76,7 @@ For the operations smoke used in release evidence:
 `verify.ps1` writes JSON and Markdown summaries under `reports/verification/`.
 
 `portfolio-verify.ps1` writes JSON and Markdown summaries under `reports/portfolio-verify/`.
+
+`runtime-evidence-summary.ps1` reads the latest ignored runtime reports and writes a sanitized summary under `reports/runtime-evidence/`.
 
 The `reports/` directory is intentionally ignored by Git because it contains generated runtime evidence.

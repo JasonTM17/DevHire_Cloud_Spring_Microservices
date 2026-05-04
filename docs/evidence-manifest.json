@@ -40,6 +40,7 @@
       "requiredPaths": [
         "scripts/portfolio-verify.ps1",
         "scripts/runtime-reliability.ps1",
+        "scripts/runtime-evidence-summary.ps1",
         "scripts/api-smoke.ps1",
         "scripts/ai-eval.ps1",
         "scripts/email-smoke.ps1",
@@ -83,6 +84,7 @@
         "docs/recruiter-review-guide.md",
         "docs/portfolio-case-study.md",
         "docs/runtime-reliability-review.md",
+        "docs/runtime-acceptance-matrix.md",
         "docs/repository-hygiene.md",
         "docs/production-readiness.md",
         "docs/cloud-readiness-review.md",

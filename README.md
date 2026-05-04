@@ -20,7 +20,8 @@ Best reviewer path:
 2. Open [Professional review map](docs/professional-review-map.md) for the 5/15/30-minute review route.
 3. Run `.\scripts\portfolio-verify.ps1 -Docs -Docker` for a fast local gate.
 4. Run `.\scripts\portfolio-verify.ps1 -Runtime -GatewayUrl http://localhost:8080` when Docker is already running and you want runtime proof.
-5. Check [v0.2.0 release evidence](docs/release-evidence/v0.2.0.md) and [v0.3.0 roadmap evidence](docs/release-notes/v0.3.0.md).
+5. Use [Runtime acceptance matrix](docs/runtime-acceptance-matrix.md) to map each production claim to its verification command.
+6. Check [v0.2.0 release evidence](docs/release-evidence/v0.2.0.md) and [v0.3.0 roadmap evidence](docs/release-notes/v0.3.0.md).
 
 ## Production Proof
 
@@ -318,6 +319,7 @@ Xem flow chạy được tại [docs/api.http](docs/api.http).
 - [AWS Terraform blueprint](docs/aws-terraform.md)
 - [Cloud readiness review](docs/cloud-readiness-review.md)
 - [Runtime reliability review](docs/runtime-reliability-review.md)
+- [Runtime acceptance matrix](docs/runtime-acceptance-matrix.md)
 - [Portfolio evidence manifest](docs/evidence-manifest.md)
 - [Repository hygiene guard](docs/repository-hygiene.md)
 - [Unified verification runner](docs/verification.md)

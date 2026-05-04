@@ -13,6 +13,7 @@ Read:
 - `docs/service-catalog.md`
 - `docs/architecture-review-index.md`
 - `docs/evidence-manifest.md`
+- `docs/runtime-acceptance-matrix.md`
 - `docs/release-notes/v0.3.0.md`
 - `docs/release-evidence/v0.3.0.md`
 
@@ -53,6 +54,7 @@ For a short static gate:
 .\scripts\portfolio-verify.ps1 -Docs -Docker
 .\scripts\evidence-audit.ps1
 .\scripts\repo-hygiene.ps1
+.\scripts\runtime-evidence-summary.ps1
 ```
 
 For runtime proof after the Docker stack is up:
@@ -81,6 +83,7 @@ Open:
 - `docs/external-secrets.md`
 - `docs/cloud-readiness-review.md`
 - `docs/runtime-reliability-review.md`
+- `docs/runtime-acceptance-matrix.md`
 - `docs/runbooks/backup-restore.md`
 - `docs/runbooks/incident-response.md`
 - `docs/runbooks/alert-response.md`
