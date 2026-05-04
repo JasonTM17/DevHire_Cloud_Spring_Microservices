@@ -1911,6 +1911,30 @@ Note:
 
 - Public GitHub API confirmed the repo is public and release `v0.3.0` is visible. About/Homepage/Topics remain empty, `master` remains unprotected, and 20 Dependabot PRs remain open until an owner token is used or the actions are completed manually.
 
+## Phase 100 - Public portfolio polish evidence
+
+- Ran the final v0.4.1 public portfolio polish gate set for GitHub governance, Dependabot curation, repository health, version consistency, docs quality, evidence audit, repo hygiene, and static Docker Compose verification.
+- Updated `docs/release-evidence/v0.4.0.md` with the GitHub governance and repository health baseline.
+- `GITHUB_TOKEN` was not set, so no owner-only remote changes were applied. The committed apply scripts remain ready for an owner shell.
+
+Verification:
+
+- Passed:
+  - `.\scripts\github-governance.ps1 -DryRun`
+  - `.\scripts\dependabot-curate.ps1 -DryRun`
+  - `.\scripts\repository-health.ps1`
+  - `.\scripts\version-consistency.ps1`
+  - `.\scripts\docs-quality.ps1`
+  - `.\scripts\evidence-audit.ps1`
+  - `.\scripts\repo-hygiene.ps1`
+  - `.\scripts\portfolio-verify.ps1 -Docs -Docker`
+
+Pending owner-only remote actions:
+
+- Apply About/Homepage/Topics via `.\scripts\github-governance.ps1 -Apply`.
+- Protect `master` via the same script or the GitHub UI fallback.
+- Apply Dependabot labels/comments/closures via `.\scripts\dependabot-curate.ps1 -Apply` when an owner token is available.
+
 ## Phase 84 - Machine-checkable portfolio evidence manifest
 
 - Added `docs/evidence-manifest.json` and `docs/evidence-manifest.md` as a reviewer-facing map of service, runtime, CI/CD, documentation, screenshot, and runbook evidence.
