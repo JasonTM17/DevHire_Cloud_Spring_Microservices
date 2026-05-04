@@ -104,6 +104,28 @@ function Assert-Equals {
     }
 }
 
+function Wait-SearchContainsJob {
+    param(
+        [Parameter(Mandatory = $true)][string]$Token,
+        [Parameter(Mandatory = $true)][string]$JobId,
+        [Parameter(Mandatory = $true)][string]$Keyword,
+        [int]$TimeoutSeconds = 45
+    )
+
+    $encodedKeyword = [uri]::EscapeDataString($Keyword)
+    $deadline = (Get-Date).AddSeconds($TimeoutSeconds)
+    do {
+        $search = Invoke-Api -Method GET -Path "/api/jobs?keyword=$encodedKeyword&size=20&sort=publishedAt,desc" -Token $Token
+        $searchJson = $search | ConvertTo-Json -Depth 12
+        if ($searchJson -match [regex]::Escape($JobId)) {
+            return
+        }
+        Start-Sleep -Seconds 3
+    } while ((Get-Date) -lt $deadline)
+
+    throw "Published job $JobId was not returned by search within ${TimeoutSeconds}s"
+}
+
 Set-EnvDefault -Name "POSTGRES_HOST_PORT" -Value "55432"
 Set-EnvDefault -Name "REDIS_HOST_PORT" -Value "56379"
 Set-EnvDefault -Name "KAFKA_HOST_PORT" -Value "39092"
@@ -195,12 +217,7 @@ try {
     $approvedJob = Invoke-Api -Method PATCH -Path "/api/admin/jobs/$($job.id)/approve" -Token $adminToken
     Assert-Equals -Actual $approvedJob.status -Expected "PUBLISHED" -Message "Job approval failed"
 
-    Start-Sleep -Seconds 3
-    $search = Invoke-Api -Method GET -Path "/api/jobs?keyword=Smoke&size=5" -Token $candidateToken
-    $searchJson = $search | ConvertTo-Json -Depth 12
-    if ($searchJson -notmatch [regex]::Escape($job.id)) {
-        throw "Published job $($job.id) was not returned by search"
-    }
+    Wait-SearchContainsJob -Token $candidateToken -JobId $job.id -Keyword "Smoke $stamp"
 
     $application = Invoke-Api -Method POST -Path "/api/jobs/$($job.id)/applications" -Token $candidateToken -Body @{
         cvUrl       = "https://cdn.devhire.local/cv/final-smoke.pdf"

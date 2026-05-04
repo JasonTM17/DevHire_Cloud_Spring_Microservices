@@ -18,8 +18,8 @@ Best reviewer path:
 
 1. Scan the screenshots and release evidence below.
 2. Open [Professional review map](docs/professional-review-map.md) for the 5/15/30-minute review route.
-3. Run `.\scripts\verify.ps1 -Docs -Docker` for a fast local gate.
-4. Run Docker and smoke tests when you want runtime proof.
+3. Run `.\scripts\portfolio-verify.ps1 -Docs -Docker` for a fast local gate.
+4. Run `.\scripts\portfolio-verify.ps1 -Runtime -GatewayUrl http://localhost:8080` when Docker is already running and you want runtime proof.
 5. Check [v0.2.0 release evidence](docs/release-evidence/v0.2.0.md) and [v0.3.0 roadmap evidence](docs/release-notes/v0.3.0.md).
 
 ## Production Proof
@@ -230,6 +230,17 @@ Operations smoke:
 .\scripts\chaos-smoke.ps1 -GatewayUrl http://localhost:8080 -Scenario all -Recover
 .\scripts\dr-verify.ps1 -GatewayUrl http://localhost:8080
 ```
+
+Reviewer-friendly verification:
+
+```powershell
+.\scripts\portfolio-verify.ps1 -Docs -Docker
+.\scripts\portfolio-verify.ps1 -Backend -Frontend -Docs
+.\scripts\portfolio-verify.ps1 -Runtime -GatewayUrl http://localhost:8080
+.\scripts\portfolio-verify.ps1 -All -StartStack
+```
+
+`portfolio-verify.ps1` writes ignored JSON and Markdown evidence under `reports/portfolio-verify/`.
 
 ## Demo Accounts
 

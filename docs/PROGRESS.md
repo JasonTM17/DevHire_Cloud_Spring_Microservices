@@ -1834,3 +1834,18 @@ Verification:
   - `.\scripts\openapi-verify.ps1 -GatewayUrl http://localhost:8080`
   - `.\scripts\perf-suite.ps1 -GatewayUrl http://localhost:8080 -Scenario all -Vus 2 -Duration 10s`
   - `cd frontend && npm run screenshots`
+
+## Phase 80 - One-command reviewer verification
+
+- Added `scripts/portfolio-verify.ps1` with reviewer-friendly `-Backend`, `-Frontend`, `-Docker`, `-Runtime`, `-Security`, `-Docs`, and `-All` scopes.
+- Reused existing Maven, coverage, frontend, compose, smoke, AI eval, Mailpit, OpenAPI, perf, actionlint, Gitleaks, docs, version, and API compatibility scripts.
+- Added ignored JSON and Markdown report output under `reports/portfolio-verify/`.
+- Documented the portfolio verifier in README, `docs/recruiter-review-guide.md`, and `docs/verification.md`.
+- Hardened API smoke job search verification for OpenSearch eventual consistency and isolated verifier step environment variables so nested scripts cannot leak local port defaults into later checks.
+
+Verification:
+
+- Passed:
+  - `.\scripts\portfolio-verify.ps1 -Docs -Docker`
+  - `.\scripts\portfolio-verify.ps1 -Runtime -GatewayUrl http://localhost:8080`
+  - `git diff --check`

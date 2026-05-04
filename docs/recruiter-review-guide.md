@@ -44,13 +44,20 @@ Review signals:
 
 ## 3. Run The Fast Local Proof
 
+For a short static gate:
+
+```powershell
+.\scripts\portfolio-verify.ps1 -Docs -Docker
+```
+
+For runtime proof after the Docker stack is up:
+
 ```powershell
 docker compose up -d --build
-.\scripts\api-smoke.ps1 -GatewayUrl http://localhost:8080
-.\scripts\ai-eval.ps1 -GatewayUrl http://localhost:8080
-.\scripts\email-smoke.ps1 -GatewayUrl http://localhost:8080 -MailpitUrl http://localhost:8025
-.\scripts\openapi-verify.ps1 -GatewayUrl http://localhost:8080
+.\scripts\portfolio-verify.ps1 -Runtime -GatewayUrl http://localhost:8080
 ```
+
+The portfolio verifier writes JSON and Markdown reports under `reports/portfolio-verify/`; the directory is intentionally ignored because it contains generated runtime evidence.
 
 Useful URLs:
 
