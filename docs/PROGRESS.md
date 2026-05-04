@@ -1785,3 +1785,17 @@ Verification:
   - `cd frontend && npm run build`
   - `cd frontend && npm run e2e:mobile`
   - `git diff --check`
+
+## Phase 77 - Operations runbooks and v0.3 release evidence
+
+- Added operations runbooks for alert response, Kafka/outbox incidents, OpenSearch degradation, SMTP provider outage, AI provider outage, and database restore drills.
+- Added `docs/release-notes/v0.3.0.md` and `docs/release-evidence/v0.3.0.md`.
+- Refreshed `docs/recruiter-review-guide.md` for v0.3 review paths, security evidence, AI safety, and new operations runbooks.
+- Linked v0.3 release evidence and release notes from README and the documentation quality gate.
+
+Verification:
+
+- Passed:
+  - `.\scripts\docs-quality.ps1`
+  - `docker compose config --quiet`
+  - `git diff --check`

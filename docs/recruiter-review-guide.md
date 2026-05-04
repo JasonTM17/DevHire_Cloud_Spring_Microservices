@@ -9,8 +9,9 @@ Read:
 - `README.md`
 - `docs/README_EN.md`
 - `docs/portfolio-case-study.md`
-- `docs/release-notes/v0.2.0.md`
-- `docs/release-evidence/v0.2.0.md`
+- `docs/professional-review-map.md`
+- `docs/release-notes/v0.3.0.md`
+- `docs/release-evidence/v0.3.0.md`
 
 Look for:
 
@@ -66,10 +67,16 @@ Open:
 - `docs/slo.md`
 - `docs/email-sandbox.md`
 - `docs/external-secrets.md`
+- `docs/cloud-readiness-review.md`
 - `docs/runbooks/backup-restore.md`
 - `docs/runbooks/incident-response.md`
-- `docs/release-checklist-v0.2.md`
-- `docs/release-evidence/v0.2.0.md`
+- `docs/runbooks/alert-response.md`
+- `docs/runbooks/kafka-outbox-incident.md`
+- `docs/runbooks/opensearch-degradation.md`
+- `docs/runbooks/smtp-provider-outage.md`
+- `docs/runbooks/ai-provider-outage.md`
+- `docs/runbooks/database-restore-drill.md`
+- `docs/release-evidence/v0.3.0.md`
 
 What to look for:
 
@@ -87,6 +94,8 @@ Open:
 - `.github/workflows/ci.yml`
 - `.github/workflows/docker.yml`
 - `.github/workflows/security.yml`
+- `.github/workflows/codeql.yml`
+- `.github/workflows/scorecard.yml`
 - `.github/workflows/terraform.yml`
 - `.github/workflows/performance.yml`
 - `.github/workflows/e2e.yml`
@@ -97,6 +106,7 @@ Review signals:
 - Maven verify runs real tests,
 - Docker images are built through a matrix,
 - Gitleaks and Trivy are present,
+- CodeQL and Scorecard evidence is present,
 - Terraform validates without apply,
 - k6 and Playwright run as portfolio gates,
 - Dependabot covers Maven, npm, Docker, GitHub Actions, and Terraform.
@@ -111,3 +121,9 @@ Try these prompts:
 - `Find senior Java jobs matching Kafka and AWS`
 
 The assistant should return citations and tool traces. If no Anthropic key is configured, deterministic fallback mode is expected and safe for demos.
+
+Also try:
+
+- `How do you handle prompt injection and secret safety?`
+
+The assistant should refuse secret-exfiltration style prompts and still show citations/tool traces.
