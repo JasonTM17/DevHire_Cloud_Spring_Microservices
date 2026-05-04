@@ -299,6 +299,8 @@ Xem flow chạy được tại [docs/api.http](docs/api.http).
 ## Tài Liệu Quan Trọng
 
 - [Architecture](docs/architecture.md)
+- [Service catalog](docs/service-catalog.md)
+- [Architecture review index](docs/architecture-review-index.md)
 - [Portfolio case study](docs/portfolio-case-study.md)
 - [Production readiness](docs/production-readiness.md)
 - [Security and supply chain](docs/security.md)

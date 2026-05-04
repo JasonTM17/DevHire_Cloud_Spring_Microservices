@@ -17,7 +17,7 @@ Expected takeaway: the project is built as a production/platform portfolio with 
 
 Use this path when reviewing backend and DevOps depth.
 
-1. Read `docs/architecture.md` and `docs/portfolio-case-study.md`.
+1. Read `docs/service-catalog.md`, `docs/architecture-review-index.md`, `docs/architecture.md`, and `docs/portfolio-case-study.md`.
 2. Inspect `api-gateway`, `auth-service`, `job-service`, `application-service`, `notification-service`, `audit-service`, and `ai-service`.
 3. Open `docs/slo.md`, `docs/security.md`, `docs/external-secrets.md`, and `docs/runbooks/backup-restore.md`.
 4. Review `scripts/verify.ps1`, `scripts/api-smoke.ps1`, `scripts/chaos-smoke.ps1`, and `scripts/terraform-validate.ps1`.

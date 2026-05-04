@@ -10,6 +10,8 @@ Read:
 - `docs/README_EN.md`
 - `docs/portfolio-case-study.md`
 - `docs/professional-review-map.md`
+- `docs/service-catalog.md`
+- `docs/architecture-review-index.md`
 - `docs/evidence-manifest.md`
 - `docs/release-notes/v0.3.0.md`
 - `docs/release-evidence/v0.3.0.md`

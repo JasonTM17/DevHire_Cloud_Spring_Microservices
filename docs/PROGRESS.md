@@ -1905,3 +1905,16 @@ Verification:
   - `.\scripts\evidence-audit.ps1`
   - `.\scripts\docs-quality.ps1`
   - `git diff --check`
+
+## Phase 85 - Service catalog and architecture review index
+
+- Added `docs/service-catalog.md` with service ownership, database boundaries, sync contracts, async events, review files, and operations URLs.
+- Added `docs/architecture-review-index.md` with 5-minute, backend, DevOps, AI/product, runtime, and residual-risk review paths.
+- Linked the new review docs from README, professional review map, recruiter guide, docs-quality, and the evidence manifest.
+
+Verification:
+
+- Passed:
+  - `.\scripts\evidence-audit.ps1`
+  - `.\scripts\docs-quality.ps1`
+  - `git diff --check`
