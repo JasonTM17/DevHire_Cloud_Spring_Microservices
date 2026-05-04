@@ -1893,6 +1893,24 @@ Verification:
   - `.\scripts\docs-quality.ps1`
   - `git diff --check`
 
+## Phase 99 - Public repository health dashboard
+
+- Added `scripts/repository-health.ps1` to read public GitHub metadata, release state, branch protection summary, latest workflow runs, Dependabot PR categories, and local evidence file status.
+- Added `docs/repository-health.md` as the public health dashboard and linked it from README and recruiter review docs.
+- Updated docs quality and evidence manifest gates so repository governance artifacts remain checked.
+
+Verification:
+
+- Passed:
+  - `.\scripts\repository-health.ps1`
+  - `.\scripts\docs-quality.ps1`
+  - `.\scripts\evidence-audit.ps1`
+  - `git diff --check`
+
+Note:
+
+- Public GitHub API confirmed the repo is public and release `v0.3.0` is visible. About/Homepage/Topics remain empty, `master` remains unprotected, and 20 Dependabot PRs remain open until an owner token is used or the actions are completed manually.
+
 ## Phase 84 - Machine-checkable portfolio evidence manifest
 
 - Added `docs/evidence-manifest.json` and `docs/evidence-manifest.md` as a reviewer-facing map of service, runtime, CI/CD, documentation, screenshot, and runbook evidence.

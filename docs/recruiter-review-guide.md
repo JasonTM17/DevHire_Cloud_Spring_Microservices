@@ -19,6 +19,7 @@ Read:
 - `docs/release-notes/v0.4.0.md`
 - `docs/release-evidence/v0.4.0.md`
 - `docs/github-owner-actions.md`
+- `docs/repository-health.md`
 - `docs/dependency-triage-v0.4.md`
 - `docs/dependabot-cleanup-v0.4.md`
 
