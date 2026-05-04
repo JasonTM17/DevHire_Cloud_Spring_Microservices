@@ -291,6 +291,7 @@ Xem flow chạy được tại [docs/api.http](docs/api.http).
 - [Portfolio case study](docs/portfolio-case-study.md)
 - [Production readiness](docs/production-readiness.md)
 - [Security and supply chain](docs/security.md)
+- [Security evidence](docs/security-evidence.md)
 - [SLO operations](docs/slo.md)
 - [Deployment runbook](docs/deployment.md)
 - [Email sandbox](docs/email-sandbox.md)

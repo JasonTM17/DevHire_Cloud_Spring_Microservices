@@ -1719,3 +1719,19 @@ Verification:
   - `.\scripts\docs-quality.ps1`
   - `mvn -T1 clean verify`
   - `git diff --check`
+
+## Phase 73 - Security and supply chain maturity
+
+- Added GitHub CodeQL analysis for Java/Kotlin and JavaScript/TypeScript.
+- Added OpenSSF Scorecard workflow in artifact-first mode so posture can be reviewed without making PRs flaky.
+- Added `docs/security-evidence.md` mapping secret scanning, Trivy, SBOM, dependency review, CodeQL, Scorecard, JWT, and CORS evidence.
+- Added gateway security headers for common browser/API hardening.
+- Linked security evidence from README and the documentation quality gate.
+
+Verification:
+
+- Passed:
+  - `docker run --rm -v "${PWD}:/repo" -w /repo rhysd/actionlint:latest`
+  - `.\scripts\docs-quality.ps1`
+  - `mvn -T1 clean verify`
+  - `git diff --check`

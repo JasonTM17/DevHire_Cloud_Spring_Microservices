@@ -24,6 +24,7 @@ $requiredPaths = @(
     "docs/dependency-maintenance.md",
     "docs/api-compatibility.md",
     "docs/contracts/api-compatibility-manifest.json",
+    "docs/security-evidence.md",
     "SECURITY.md",
     "CONTRIBUTING.md",
     "CHANGELOG.md",

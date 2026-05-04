@@ -20,6 +20,8 @@ import java.util.function.Function;
 public class GatewayRoutesConfig {
     private static final String API_REWRITE_REGEX = "/api/(?<segment>.*)";
     private static final String API_REWRITE_REPLACEMENT = "/${segment}";
+    private static final String CONTENT_SECURITY_POLICY = "default-src 'self'; frame-ancestors 'none'";
+    private static final String PERMISSIONS_POLICY = "camera=(), geolocation=(), microphone=()";
 
     @Bean
     RedisRateLimiter redisRateLimiter(@Value("${devhire.gateway.rate-limit.replenish-rate:20}") int replenishRate,
@@ -64,6 +66,11 @@ public class GatewayRoutesConfig {
 
     private static Function<GatewayFilterSpec, UriSpec> filters(RedisRateLimiter redisRateLimiter, KeyResolver keyResolver) {
         return filter -> filter
+                .addResponseHeader("X-Content-Type-Options", "nosniff")
+                .addResponseHeader("X-Frame-Options", "DENY")
+                .addResponseHeader("Referrer-Policy", "no-referrer")
+                .addResponseHeader("Permissions-Policy", PERMISSIONS_POLICY)
+                .addResponseHeader("Content-Security-Policy", CONTENT_SECURITY_POLICY)
                 .rewritePath(API_REWRITE_REGEX, API_REWRITE_REPLACEMENT)
                 .requestRateLimiter(config -> config
                         .setRateLimiter(redisRateLimiter)
