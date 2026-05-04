@@ -13,7 +13,7 @@
 
     <groupId>com.devhire</groupId>
     <artifactId>devhire-cloud</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>0.3.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>DevHire Cloud</name>
     <description>Production-ready microservices recruitment platform portfolio project.</description>

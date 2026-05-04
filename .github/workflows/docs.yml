@@ -25,3 +25,7 @@ jobs:
       - name: Validate portfolio documentation
         shell: pwsh
         run: ./scripts/docs-quality.ps1
+
+      - name: Validate version consistency
+        shell: pwsh
+        run: ./scripts/version-consistency.ps1

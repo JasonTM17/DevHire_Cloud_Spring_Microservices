@@ -1643,3 +1643,28 @@ Verification:
   - `.\scripts\github-repo-polish.ps1 -DryRun`
   - `.\scripts\docs-quality.ps1`
   - `git diff --check`
+
+## Phase 69 - Version and release hygiene
+
+- Moved Maven parent and all service modules from `0.1.0-SNAPSHOT` to `0.3.0-SNAPSHOT`.
+- Moved frontend `package.json` and `package-lock.json` versions from `0.1.0` to `0.3.0`.
+- Added `docs/versioning.md` to document release tags, snapshot development versions, GHCR image tags, and evidence locations.
+- Added `scripts/version-consistency.ps1` to verify Maven module versions, frontend version, changelog release date, and v0.2.0 release notes/evidence.
+- Added the version consistency gate to `.github/workflows/docs.yml`.
+
+Verification:
+
+- Passed:
+  - `.\scripts\version-consistency.ps1`
+  - `.\scripts\docs-quality.ps1`
+  - `docker run --rm -v "${PWD}:/repo" -w /repo rhysd/actionlint:latest`
+  - `mvn -T1 clean verify`
+  - `.\scripts\check-coverage.ps1`
+  - `docker compose config --quiet`
+  - `git diff --check`
+
+Note:
+
+- The first Maven run hit local JVM native memory pressure while the full Docker stack was still running.
+- The stack was stopped with `docker compose stop` only; no Docker volumes or data were deleted.
+- The verification passed after freeing local runtime memory.
