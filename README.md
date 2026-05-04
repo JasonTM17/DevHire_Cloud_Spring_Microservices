@@ -300,6 +300,7 @@ Xem flow chạy được tại [docs/api.http](docs/api.http).
 - [External Secrets and GitOps](docs/external-secrets.md)
 - [Claude AI assistant](docs/ai-assistant.md)
 - [Claude Haiku provider](docs/claude-haiku.md)
+- [AI safety](docs/ai-safety.md)
 - [AI evaluation gate](docs/ai-evaluation.md)
 - [AWS Terraform blueprint](docs/aws-terraform.md)
 - [Cloud readiness review](docs/cloud-readiness-review.md)

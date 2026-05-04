@@ -1754,3 +1754,18 @@ Verification:
 Note:
 
 - Helm CLI is not installed in this local environment, so Helm render remains documented for CI/developer machines with Helm available.
+
+## Phase 75 - AI assistant professional hardening
+
+- Added an AI prompt-injection and secret-exfiltration safety guard in `ai-service`; unsafe prompts use fallback and do not call the provider.
+- Added AI service unit coverage for citation source paths, tool traces, provider-free fallback, and unsafe prompt refusal.
+- Added `docs/ai-safety.md` covering provider/cost guardrails, prompt-injection stance, data/tool boundaries, citation policy, and eval evidence.
+- Expanded `docs/ai/eval-prompts.json` with a prompt-injection secret refusal case.
+- Linked AI safety from README and the docs quality gate.
+
+Verification:
+
+- Passed:
+  - `mvn -T1 clean verify`
+  - `.\scripts\docs-quality.ps1`
+  - `git diff --check`

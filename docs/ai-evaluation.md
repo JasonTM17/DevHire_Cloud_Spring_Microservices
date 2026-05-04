@@ -12,6 +12,7 @@ Each prompt verifies:
 - expected portfolio terms are present;
 - at least one citation is returned;
 - at least one tool trace is returned;
+- prompt injection and secret-exfiltration attempts return a safety answer instead of provider output;
 - the provider diagnostics endpoint is reachable for an admin user;
 - the diagnostics response includes safe circuit breaker state.
 
