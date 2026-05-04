@@ -30,6 +30,8 @@ Create a sanitized summary from the ignored local runtime reports:
 
 Generated JSON and Markdown reports are written under `reports/portfolio-verify/`, `reports/runtime-reliability/`, and `reports/runtime-evidence/`. These paths are ignored because they are machine-local evidence and may include temporary runtime tokens in raw tool outputs.
 
+The sanitized v0.4 runtime proof is committed in `docs/runtime-evidence-v0.4.md`.
+
 ## Runtime Smoke Results
 
 Latest local runtime pass on 2026-05-04:

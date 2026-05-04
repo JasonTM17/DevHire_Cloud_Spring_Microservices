@@ -88,6 +88,7 @@ Open:
 - `docs/cloud-readiness-review.md`
 - `docs/runtime-reliability-review.md`
 - `docs/runtime-acceptance-matrix.md`
+- `docs/runtime-evidence-v0.4.md`
 - `docs/runbooks/backup-restore.md`
 - `docs/runbooks/incident-response.md`
 - `docs/runbooks/alert-response.md`

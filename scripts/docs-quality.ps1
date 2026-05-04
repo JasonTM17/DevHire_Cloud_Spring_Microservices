@@ -34,6 +34,7 @@ $requiredPaths = @(
     "docs/cloud-readiness-review.md",
     "docs/runtime-reliability-review.md",
     "docs/runtime-acceptance-matrix.md",
+    "docs/runtime-evidence-v0.4.md",
     "docs/repository-hygiene.md",
     "scripts/runtime-preflight.ps1",
     "deploy/terraform/aws/TERRAFORM_DOCS.md",

@@ -2031,3 +2031,20 @@ Verification:
 Note:
 
 - Docker Desktop was available for this phase; preflight passed with Docker server version 29.4.0 and the checked local ports were free.
+
+## Phase 93 - Sanitized runtime evidence pack v0.4
+
+- Ran `docker compose up -d --build` successfully for the full local stack.
+- Ran `scripts/portfolio-verify.ps1 -Runtime -GatewayUrl http://localhost:8080`; the runtime verifier passed API smoke, runtime reliability, AI eval, Mailpit email smoke, OpenAPI verify, and k6 role smoke.
+- Ran `scripts/runtime-evidence-summary.ps1`; the sanitized summary reported portfolio verification, runtime reliability, AI evaluation, k6 role suite, and API compatibility as passed.
+- Added `docs/runtime-evidence-v0.4.md` and linked it from README, recruiter guide, runtime reliability review, docs quality, release evidence, and the evidence manifest.
+
+Verification:
+
+- Passed:
+  - `docker compose up -d --build`
+  - `.\scripts\portfolio-verify.ps1 -Runtime -GatewayUrl http://localhost:8080`
+  - `.\scripts\runtime-evidence-summary.ps1`
+  - `.\scripts\docs-quality.ps1`
+  - `.\scripts\evidence-audit.ps1`
+  - `git diff --check`

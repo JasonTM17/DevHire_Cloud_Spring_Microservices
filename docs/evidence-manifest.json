@@ -86,6 +86,7 @@
         "docs/portfolio-case-study.md",
         "docs/runtime-reliability-review.md",
         "docs/runtime-acceptance-matrix.md",
+        "docs/runtime-evidence-v0.4.md",
         "docs/repository-hygiene.md",
         "docs/production-readiness.md",
         "docs/cloud-readiness-review.md",

@@ -321,6 +321,7 @@ Xem flow chạy được tại [docs/api.http](docs/api.http).
 - [Cloud readiness review](docs/cloud-readiness-review.md)
 - [Runtime reliability review](docs/runtime-reliability-review.md)
 - [Runtime acceptance matrix](docs/runtime-acceptance-matrix.md)
+- [Runtime evidence v0.4](docs/runtime-evidence-v0.4.md)
 - [Portfolio evidence manifest](docs/evidence-manifest.md)
 - [Repository hygiene guard](docs/repository-hygiene.md)
 - [Unified verification runner](docs/verification.md)
