@@ -36,6 +36,20 @@ Remove-Item Env:\GITHUB_TOKEN
 
 The script writes sanitized JSON and Markdown reports under `reports/github-governance/`. That directory is ignored because it is generated evidence.
 
+## GitHub Actions Route
+
+If local Browser automation or local tokens are unavailable, use the audited workflow route:
+
+1. Create a repository secret named `REPO_GOVERNANCE_TOKEN`.
+2. The token must have repository administration permission for `JasonTM17/DevHire_Cloud_Spring_Microservices`.
+3. Open `Actions -> Repository Governance`.
+4. Run with `mode=dry-run` first.
+5. Run with `mode=apply` to update About, homepage, topics, and `master` branch protection.
+
+The workflow is defined in `.github/workflows/repository-governance.yml` and uploads sanitized governance reports as workflow artifacts. It does not print the token.
+
+This is the recommended fallback when the in-app browser cannot control GitHub settings and `GITHUB_TOKEN` is not set locally.
+
 ## Target Repository Metadata
 
 Description:

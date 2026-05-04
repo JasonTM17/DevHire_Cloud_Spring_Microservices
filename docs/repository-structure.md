@@ -43,6 +43,13 @@ Use:
 .\scripts\clean-local-artifacts.ps1 -DryRun
 ```
 
+## GitHub Facade Ownership
+
+Public About/Homepage/Topics and branch protection are not stored in Git. They are applied through:
+
+- local `scripts/github-governance.ps1 -Apply` with a short-lived owner token, or
+- the manual `Repository Governance` GitHub Actions workflow using `REPO_GOVERNANCE_TOKEN`.
+
 ## Why `.stitch/` Was Removed
 
 The original UI design system lived under `.stitch/DESIGN.md`. For a public engineering portfolio, a root tool workspace folder reads as an implementation artifact. The content now lives in [design-system.md](design-system.md), where it is reviewable as product/design evidence.

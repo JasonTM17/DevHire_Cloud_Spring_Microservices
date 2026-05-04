@@ -60,6 +60,12 @@ Remove-Item Env:\GITHUB_TOKEN
 
 If the token lacks repository administration permission, apply branch protection manually with [branch protection](branch-protection.md).
 
+Alternative audited route:
+
+- add repository secret `REPO_GOVERNANCE_TOKEN`,
+- run `Actions -> Repository Governance -> mode=dry-run`,
+- run `mode=apply` after reviewing the artifact.
+
 ## Related Evidence
 
 - [GitHub governance](github-governance.md)

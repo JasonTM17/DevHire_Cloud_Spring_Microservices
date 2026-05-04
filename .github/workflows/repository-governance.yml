@@ -1,0 +1,58 @@
+name: Repository Governance
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Run a safe preview or apply repository About/Homepage/Topics/branch protection."
+        required: true
+        type: choice
+        default: dry-run
+        options:
+          - dry-run
+          - apply
+
+permissions:
+  contents: read
+
+jobs:
+  repository-governance:
+    name: Repository Governance
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Dry-run repository governance
+        if: ${{ inputs.mode == 'dry-run' }}
+        shell: pwsh
+        run: ./scripts/github-governance.ps1 -DryRun
+
+      - name: Apply repository governance
+        if: ${{ inputs.mode == 'apply' }}
+        shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ secrets.REPO_GOVERNANCE_TOKEN }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:GITHUB_TOKEN)) {
+            throw "REPO_GOVERNANCE_TOKEN repository secret is required for apply mode."
+          }
+          ./scripts/github-governance.ps1 -Apply
+
+      - name: Verify repository health
+        shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ secrets.REPO_GOVERNANCE_TOKEN }}
+        run: ./scripts/repository-health.ps1
+
+      - name: Upload governance reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: repository-governance-reports
+          path: |
+            reports/github-governance/
+            reports/repository-health/
+          if-no-files-found: ignore

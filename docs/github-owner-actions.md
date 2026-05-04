@@ -68,6 +68,18 @@ Remove-Item Env:\GITHUB_TOKEN
 
 Branch protection is also included in `scripts/github-governance.ps1 -Apply`. If the token lacks repository administration permission, use the UI fallback in `docs/branch-protection.md`.
 
+## GitHub Actions Apply Route
+
+Use this route when local browser automation is unavailable or you do not want to keep an owner token in the local shell:
+
+1. Create repository secret `REPO_GOVERNANCE_TOKEN` with repository administration permission.
+2. Open `Actions -> Repository Governance`.
+3. Run `mode=dry-run`.
+4. Review the uploaded governance report artifact.
+5. Run `mode=apply`.
+
+The workflow uses the same target metadata as the local script and verifies repository health after the apply step.
+
 ## API Verification Snapshot
 
 The expected repository metadata payload is:

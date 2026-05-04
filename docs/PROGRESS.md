@@ -1965,6 +1965,27 @@ Verification:
   - `.\scripts\repo-hygiene.ps1`
   - `git diff --check`
 
+## Phase 105 - Audited GitHub governance workflow
+
+- Browser plugin was requested, but the in-app browser backend failed to start in this session with an app-server path error.
+- GitHub CLI is not installed and no `GITHUB_TOKEN`/`GH_TOKEN` is configured locally, so direct remote About editing is not available from this shell.
+- Added `.github/workflows/repository-governance.yml` as a second professional apply path: set repository secret `REPO_GOVERNANCE_TOKEN`, run `Repository Governance` with `mode=dry-run`, then run `mode=apply`.
+- Updated README and governance docs so the About/Homepage/Topics/branch-protection route is clear and auditable through GitHub Actions.
+
+Verification:
+
+- Passed:
+  - `.\scripts\docs-quality.ps1`
+  - `.\scripts\evidence-audit.ps1`
+  - `.\scripts\portfolio-verify.ps1 -Docs -Docker`
+  - `.\scripts\github-governance.ps1 -DryRun`
+  - `.\scripts\repository-health.ps1`
+  - `git diff --check`
+
+Note:
+
+- `docker run rhysd/actionlint` could not run because Docker Desktop was not running in this shell. The failure was a Docker daemon connection error, not a workflow lint result.
+
 ## Phase 102 - Local artifact cleanup guard
 
 - Added `scripts/clean-local-artifacts.ps1` with `-DryRun` by default and safe `-Apply` deletion for ignored generated artifacts.
