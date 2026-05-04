@@ -4,6 +4,20 @@ All notable changes to DevHire Cloud are documented here.
 
 The project follows Conventional Commits and keeps release notes under `docs/release-notes/`.
 
+## 0.4.0 - Unreleased
+
+### Added
+
+- Runtime proof workflow hardening, dependency triage evidence, and v0.4 release baseline documentation.
+
+## 0.3.0 - 2026-05-04
+
+### Added
+
+- Professional portfolio review facade, service catalog, architecture review index, and machine-checkable evidence manifest.
+- GitHub CodeQL, supply-chain evidence, API compatibility gates, AI safety evaluation, and frontend product polish.
+- Runtime reliability acceptance coverage, repository hygiene guard, sanitized runtime evidence summary, and v0.3 public release evidence.
+
 ## 0.2.0 - 2026-05-03
 
 ### Added

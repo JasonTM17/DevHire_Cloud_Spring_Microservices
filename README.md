@@ -21,7 +21,7 @@ Best reviewer path:
 3. Run `.\scripts\portfolio-verify.ps1 -Docs -Docker` for a fast local gate.
 4. Run `.\scripts\portfolio-verify.ps1 -Runtime -GatewayUrl http://localhost:8080` when Docker is already running and you want runtime proof.
 5. Use [Runtime acceptance matrix](docs/runtime-acceptance-matrix.md) to map each production claim to its verification command.
-6. Check [v0.2.0 release evidence](docs/release-evidence/v0.2.0.md) and [v0.3.0 roadmap evidence](docs/release-notes/v0.3.0.md).
+6. Check [v0.3.0 release evidence](docs/release-evidence/v0.3.0.md) and [v0.4.0 evidence baseline](docs/release-evidence/v0.4.0.md).
 
 ## Production Proof
 
@@ -328,9 +328,11 @@ Xem flow chạy được tại [docs/api.http](docs/api.http).
 - [API compatibility policy](docs/api-compatibility.md)
 - [Release evidence v0.2.0](docs/release-evidence/v0.2.0.md)
 - [Release evidence v0.3.0](docs/release-evidence/v0.3.0.md)
+- [Release evidence v0.4.0](docs/release-evidence/v0.4.0.md)
 - [Recruiter review guide](docs/recruiter-review-guide.md)
 - [Release notes v0.2.0](docs/release-notes/v0.2.0.md)
 - [Release notes v0.3.0](docs/release-notes/v0.3.0.md)
+- [Release notes v0.4.0](docs/release-notes/v0.4.0.md)
 - [10-minute demo script](docs/demo-script.md)
 - [GitHub profile checklist](docs/github-profile.md)
 - [Architecture Decision Records](docs/ADR/0001-microservices-and-service-databases.md)

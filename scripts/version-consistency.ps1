@@ -1,8 +1,8 @@
 [CmdletBinding()]
 param(
     [string]$Root = ".",
-    [string]$ExpectedMavenVersion = "0.3.0-SNAPSHOT",
-    [string]$ExpectedFrontendVersion = "0.3.0",
+    [string]$ExpectedMavenVersion = "0.4.0-SNAPSHOT",
+    [string]$ExpectedFrontendVersion = "0.4.0",
     [string]$LatestRelease = "v0.3.0"
 )
 
@@ -60,6 +60,12 @@ if (Test-Path $packageLockPath) {
 }
 
 $changelog = Get-Content -Raw -Encoding UTF8 (Join-Path $rootPath "CHANGELOG.md")
+if ($changelog -notmatch "## 0\.4\.0 - Unreleased") {
+    throw "CHANGELOG.md does not record the active 0.4.0 development section."
+}
+if ($changelog -notmatch "## 0\.3\.0 - 2026-05-04") {
+    throw "CHANGELOG.md does not record the released 0.3.0 date."
+}
 if ($changelog -notmatch "## 0\.2\.0 - 2026-05-03") {
     throw "CHANGELOG.md does not record the released 0.2.0 date."
 }

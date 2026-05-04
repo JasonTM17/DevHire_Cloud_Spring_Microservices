@@ -1966,3 +1966,21 @@ Verification:
   - `.\scripts\version-consistency.ps1`
   - `.\scripts\docs-quality.ps1`
   - `git diff --check`
+
+## Phase 89 - Open v0.4 development cycle
+
+- Bumped the Maven reactor from `0.3.0-SNAPSHOT` to `0.4.0-SNAPSHOT`.
+- Bumped the frontend package and lockfile from `0.3.0` to `0.4.0`.
+- Added `docs/release-notes/v0.4.0.md` and `docs/release-evidence/v0.4.0.md` as the v0.4 release baseline.
+- Added `0.4.0 - Unreleased` and `0.3.0 - 2026-05-04` sections to `CHANGELOG.md`.
+- Updated version, docs quality, evidence manifest, README, and recruiter guide links for the v0.4 development cycle.
+
+Verification:
+
+- Passed:
+  - `.\scripts\version-consistency.ps1`
+  - `.\scripts\docs-quality.ps1`
+  - `.\scripts\evidence-audit.ps1`
+  - `mvn -T1 clean verify`
+  - `cd frontend && npm run typecheck && npm run build`
+  - `git diff --check`

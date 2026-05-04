@@ -16,6 +16,8 @@ Read:
 - `docs/runtime-acceptance-matrix.md`
 - `docs/release-notes/v0.3.0.md`
 - `docs/release-evidence/v0.3.0.md`
+- `docs/release-notes/v0.4.0.md`
+- `docs/release-evidence/v0.4.0.md`
 
 Look for:
 
