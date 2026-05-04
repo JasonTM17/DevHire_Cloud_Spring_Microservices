@@ -11,3 +11,10 @@ enable_rds         = false
 enable_redis       = false
 enable_msk         = false
 enable_opensearch  = false
+
+extra_tags = {
+  Owner              = "platform-team"
+  CostCenter         = "recruitment-platform"
+  DataClassification = "confidential"
+  ExpiresOn          = "not-applicable"
+}

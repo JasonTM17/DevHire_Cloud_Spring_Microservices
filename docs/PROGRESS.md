@@ -1735,3 +1735,22 @@ Verification:
   - `.\scripts\docs-quality.ps1`
   - `mvn -T1 clean verify`
   - `git diff --check`
+
+## Phase 74 - Cloud blueprint professionalization
+
+- Added `deploy/terraform/aws/TERRAFORM_DOCS.md` with table-driven environment, variable, module, output, and Helm consumption references.
+- Added `docs/cloud-readiness-review.md` covering deployable scope, AWS account prerequisites, placeholder domain convention, remote state migration, bootstrap checklist, rollback path, and cost guardrails.
+- Enriched dev/staging/prod Terraform tfvars examples with tagging policy examples.
+- Linked the cloud review path from Terraform docs, root README, and the docs quality gate.
+
+Verification:
+
+- Passed:
+  - `.\scripts\docs-quality.ps1`
+  - `docker compose config --quiet`
+  - `.\scripts\terraform-validate.ps1 -SkipTflint -SkipTrivy`
+  - `git diff --check`
+
+Note:
+
+- Helm CLI is not installed in this local environment, so Helm render remains documented for CI/developer machines with Helm available.

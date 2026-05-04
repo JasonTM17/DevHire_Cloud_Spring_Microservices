@@ -2,6 +2,8 @@
 
 The AWS Terraform blueprint is a production-style reference architecture for DevHire Cloud. It is safe by default: CI validates and scans the code, but never applies infrastructure and never requires cloud credentials.
 
+For the v0.3 professional review path, also read `docs/cloud-readiness-review.md` and `deploy/terraform/aws/TERRAFORM_DOCS.md`.
+
 ## Scope
 
 Terraform lives under `deploy/terraform/aws` and is split into reusable modules:

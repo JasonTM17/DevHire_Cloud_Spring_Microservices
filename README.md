@@ -302,6 +302,7 @@ Xem flow chạy được tại [docs/api.http](docs/api.http).
 - [Claude Haiku provider](docs/claude-haiku.md)
 - [AI evaluation gate](docs/ai-evaluation.md)
 - [AWS Terraform blueprint](docs/aws-terraform.md)
+- [Cloud readiness review](docs/cloud-readiness-review.md)
 - [Unified verification runner](docs/verification.md)
 - [Versioning and release hygiene](docs/versioning.md)
 - [Dependency maintenance policy](docs/dependency-maintenance.md)

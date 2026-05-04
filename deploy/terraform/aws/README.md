@@ -12,6 +12,8 @@ It is intentionally safe for portfolio use: CI validates and scans the code, but
 - `modules/secrets`: AWS Secrets Manager secret placeholders without secret values.
 - `environments/dev|staging|prod`: environment entrypoints.
 
+For a table-driven module and output reference, see `deploy/terraform/aws/TERRAFORM_DOCS.md`.
+
 ## Safe Validation
 
 ```bash
@@ -26,6 +28,8 @@ scripts/terraform-validate.ps1
 ```
 
 Remote state is disabled by default. Use `backend.s3.example.hcl` only after creating a real S3 bucket and DynamoDB lock table.
+
+The end-to-end account bootstrap and remote-state migration review lives in `docs/cloud-readiness-review.md`.
 
 ## Cost Guardrails
 

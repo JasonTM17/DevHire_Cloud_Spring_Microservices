@@ -25,6 +25,8 @@ $requiredPaths = @(
     "docs/api-compatibility.md",
     "docs/contracts/api-compatibility-manifest.json",
     "docs/security-evidence.md",
+    "docs/cloud-readiness-review.md",
+    "deploy/terraform/aws/TERRAFORM_DOCS.md",
     "SECURITY.md",
     "CONTRIBUTING.md",
     "CHANGELOG.md",
