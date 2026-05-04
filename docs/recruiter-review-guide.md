@@ -10,6 +10,7 @@ Read:
 - `docs/README_EN.md`
 - `docs/portfolio-case-study.md`
 - `docs/professional-review-map.md`
+- `docs/evidence-manifest.md`
 - `docs/release-notes/v0.3.0.md`
 - `docs/release-evidence/v0.3.0.md`
 
@@ -48,6 +49,7 @@ For a short static gate:
 
 ```powershell
 .\scripts\portfolio-verify.ps1 -Docs -Docker
+.\scripts\evidence-audit.ps1
 ```
 
 For runtime proof after the Docker stack is up:

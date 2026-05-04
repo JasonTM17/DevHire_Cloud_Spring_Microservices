@@ -1892,3 +1892,16 @@ Verification:
 - Passed:
   - `.\scripts\docs-quality.ps1`
   - `git diff --check`
+
+## Phase 84 - Machine-checkable portfolio evidence manifest
+
+- Added `docs/evidence-manifest.json` and `docs/evidence-manifest.md` as a reviewer-facing map of service, runtime, CI/CD, documentation, screenshot, and runbook evidence.
+- Added `scripts/evidence-audit.ps1` to validate required evidence paths and ensure forbidden runtime/secret artifacts are not tracked by Git.
+- Linked the evidence manifest from README and the recruiter review guide.
+
+Verification:
+
+- Passed:
+  - `.\scripts\evidence-audit.ps1`
+  - `.\scripts\docs-quality.ps1`
+  - `git diff --check`

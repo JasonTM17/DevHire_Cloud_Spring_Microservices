@@ -316,6 +316,7 @@ Xem flow chạy được tại [docs/api.http](docs/api.http).
 - [AWS Terraform blueprint](docs/aws-terraform.md)
 - [Cloud readiness review](docs/cloud-readiness-review.md)
 - [Runtime reliability review](docs/runtime-reliability-review.md)
+- [Portfolio evidence manifest](docs/evidence-manifest.md)
 - [Unified verification runner](docs/verification.md)
 - [Versioning and release hygiene](docs/versioning.md)
 - [Dependency maintenance policy](docs/dependency-maintenance.md)

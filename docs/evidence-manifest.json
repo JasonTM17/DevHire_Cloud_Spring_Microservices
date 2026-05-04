@@ -1,0 +1,141 @@
+{
+  "version": "0.4.0",
+  "generatedFor": "DevHire Cloud - Microservices Recruitment Platform",
+  "description": "Machine-checkable portfolio evidence manifest for reviewer and CI validation.",
+  "categories": [
+    {
+      "name": "microservice-source",
+      "description": "Production service modules and shared library are present.",
+      "requiredPaths": [
+        "pom.xml",
+        "common-lib/pom.xml",
+        "api-gateway/pom.xml",
+        "auth-service/pom.xml",
+        "user-service/pom.xml",
+        "company-service/pom.xml",
+        "job-service/pom.xml",
+        "application-service/pom.xml",
+        "notification-service/pom.xml",
+        "audit-service/pom.xml",
+        "ai-service/pom.xml"
+      ]
+    },
+    {
+      "name": "runtime-infrastructure",
+      "description": "Local runtime, observability, and deployment blueprints are documented and executable.",
+      "requiredPaths": [
+        "docker-compose.yml",
+        ".env.example",
+        "infra/prometheus/prometheus.yml",
+        "infra/grafana/dashboards/devhire-slo-overview.json",
+        "deploy/helm/devhire-cloud/Chart.yaml",
+        "deploy/gitops/argocd-application.yaml",
+        "deploy/terraform/aws/environments/dev/main.tf",
+        "deploy/terraform/aws/TERRAFORM_DOCS.md"
+      ]
+    },
+    {
+      "name": "verification-scripts",
+      "description": "Reviewer, smoke, reliability, security, and operations scripts exist.",
+      "requiredPaths": [
+        "scripts/portfolio-verify.ps1",
+        "scripts/runtime-reliability.ps1",
+        "scripts/api-smoke.ps1",
+        "scripts/ai-eval.ps1",
+        "scripts/email-smoke.ps1",
+        "scripts/openapi-verify.ps1",
+        "scripts/perf-suite.ps1",
+        "scripts/chaos-smoke.ps1",
+        "scripts/dr-verify.ps1",
+        "scripts/docs-quality.ps1",
+        "scripts/terraform-validate.ps1",
+        "scripts/check-coverage.ps1"
+      ]
+    },
+    {
+      "name": "ci-cd-security",
+      "description": "GitHub Actions cover build, Docker, docs, security, CodeQL, Terraform, E2E, and performance.",
+      "requiredPaths": [
+        ".github/workflows/ci.yml",
+        ".github/workflows/docker.yml",
+        ".github/workflows/docs.yml",
+        ".github/workflows/security.yml",
+        ".github/workflows/codeql.yml",
+        ".github/workflows/terraform.yml",
+        ".github/workflows/e2e.yml",
+        ".github/workflows/performance.yml",
+        ".github/dependabot.yml",
+        ".gitleaks.toml"
+      ]
+    },
+    {
+      "name": "portfolio-documentation",
+      "description": "Reviewer-facing case study, architecture, operations, release, and safety documents are present.",
+      "requiredPaths": [
+        "README.md",
+        "docs/README_EN.md",
+        "docs/README_JA.md",
+        "docs/professional-review-map.md",
+        "docs/recruiter-review-guide.md",
+        "docs/portfolio-case-study.md",
+        "docs/runtime-reliability-review.md",
+        "docs/production-readiness.md",
+        "docs/cloud-readiness-review.md",
+        "docs/security-evidence.md",
+        "docs/ai-safety.md",
+        "docs/verification.md",
+        "docs/release-evidence/v0.3.0.md",
+        "docs/release-notes/v0.3.0.md"
+      ]
+    },
+    {
+      "name": "visual-evidence",
+      "description": "Playwright-generated screenshots demonstrate product and operations surfaces.",
+      "requiredPaths": [
+        "docs/screenshots/jobs-page.png",
+        "docs/screenshots/job-detail.png",
+        "docs/screenshots/candidate-dashboard.png",
+        "docs/screenshots/employer-dashboard.png",
+        "docs/screenshots/admin-dashboard.png",
+        "docs/screenshots/assistant-page.png",
+        "docs/screenshots/ops-mailpit.png",
+        "docs/screenshots/ops-grafana-slo.png",
+        "docs/screenshots/ops-openapi-job-service.png"
+      ]
+    },
+    {
+      "name": "runbooks",
+      "description": "Operational runbooks cover incidents, degraded dependencies, and disaster recovery.",
+      "requiredPaths": [
+        "docs/runbooks/alert-response.md",
+        "docs/runbooks/kafka-outbox-incident.md",
+        "docs/runbooks/opensearch-degradation.md",
+        "docs/runbooks/smtp-provider-outage.md",
+        "docs/runbooks/ai-provider-outage.md",
+        "docs/runbooks/database-restore-drill.md",
+        "docs/runbooks/backup-restore.md"
+      ]
+    }
+  ],
+  "forbiddenTrackedPatterns": [
+    ".env",
+    ".env.local",
+    ".env.gmail",
+    ".env.smtp",
+    ".env.claude",
+    "*.tfstate",
+    "*.tfstate.*",
+    "*.tfplan",
+    "reports/*",
+    "backups/*",
+    "hs_err_pid*",
+    "replay_pid*"
+  ],
+  "recommendedCommands": [
+    ".\\scripts\\portfolio-verify.ps1 -Docs -Docker",
+    ".\\scripts\\portfolio-verify.ps1 -Runtime -GatewayUrl http://localhost:8080",
+    ".\\scripts\\runtime-reliability.ps1 -GatewayUrl http://localhost:8080",
+    "mvn -T1 clean verify",
+    "cd frontend && npm run typecheck && npm run build"
+  ]
+}
