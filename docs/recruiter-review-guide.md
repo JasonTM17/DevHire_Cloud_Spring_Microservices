@@ -75,6 +75,7 @@ Open:
 - `docs/email-sandbox.md`
 - `docs/external-secrets.md`
 - `docs/cloud-readiness-review.md`
+- `docs/runtime-reliability-review.md`
 - `docs/runbooks/backup-restore.md`
 - `docs/runbooks/incident-response.md`
 - `docs/runbooks/alert-response.md`

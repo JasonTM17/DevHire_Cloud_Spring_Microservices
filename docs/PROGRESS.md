@@ -1880,3 +1880,15 @@ Verification:
   - `.\scripts\portfolio-verify.ps1 -Runtime -GatewayUrl http://localhost:8080`
   - `.\scripts\docs-quality.ps1`
   - `git diff --check`
+
+## Phase 83 - Runtime reliability review pack
+
+- Added `docs/runtime-reliability-review.md` as a recruiter/staff-engineer review pack for runtime smoke results, degraded dependency behavior, outbox recovery, search fallback, SMTP sandbox, AI fallback, and backup/restore drills.
+- Linked runtime reliability evidence from README, `docs/recruiter-review-guide.md`, and `docs/release-evidence/v0.3.0.md`.
+- Added the new review document to `scripts/docs-quality.ps1`.
+
+Verification:
+
+- Passed:
+  - `.\scripts\docs-quality.ps1`
+  - `git diff --check`

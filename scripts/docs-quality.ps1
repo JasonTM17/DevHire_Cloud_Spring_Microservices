@@ -27,6 +27,7 @@ $requiredPaths = @(
     "docs/contracts/api-compatibility-manifest.json",
     "docs/security-evidence.md",
     "docs/cloud-readiness-review.md",
+    "docs/runtime-reliability-review.md",
     "deploy/terraform/aws/TERRAFORM_DOCS.md",
     "docs/runbooks/alert-response.md",
     "docs/runbooks/kafka-outbox-incident.md",
