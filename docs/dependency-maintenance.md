@@ -22,6 +22,7 @@ DevHire Cloud keeps Dependabot enabled because dependency hygiene is part of the
 - Do not merge dependency PRs without green CI, Docker, Security, and Docs workflows.
 - Record the inventory under `reports/dependabot/` as generated evidence; reports are intentionally not committed.
 - Current triage evidence lives in `docs/dependency-triage-v0.4.md`.
+- Cleanup and label/comment automation lives in `docs/dependabot-cleanup-v0.4.md` and `scripts/dependabot-curate.ps1`.
 
 ## Local Inventory
 
@@ -30,6 +31,14 @@ DevHire Cloud keeps Dependabot enabled because dependency hygiene is part of the
 ```
 
 The script reads open pull requests through the public GitHub API by default. If rate limits are hit, set `GITHUB_TOKEN` in the current shell. The token is never printed.
+
+## Local Curation Dry Run
+
+```powershell
+.\scripts\dependabot-curate.ps1 -DryRun
+```
+
+The curation script never merges pull requests. With an owner token it can apply labels/comments, and deferred-major PR closure requires the explicit `-CloseDeferred` switch.
 
 ## Acceptance Criteria For Merging A Batch
 

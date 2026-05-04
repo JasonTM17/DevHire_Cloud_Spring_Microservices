@@ -20,6 +20,7 @@ Read:
 - `docs/release-evidence/v0.4.0.md`
 - `docs/github-owner-actions.md`
 - `docs/dependency-triage-v0.4.md`
+- `docs/dependabot-cleanup-v0.4.md`
 
 Look for:
 

@@ -2107,3 +2107,21 @@ Verification:
 Note:
 
 - `GITHUB_TOKEN` was not set, so branch protection was not applied remotely. The script now contains the owner-token apply path and the UI fallback is documented.
+
+## Phase 97 - Dependabot PR triage and noise reduction
+
+- Added `scripts/dependabot-curate.ps1` with safe `-DryRun` by default and owner-token `-Apply` for labels/comments.
+- Added explicit `-CloseDeferred` for deferred-major cleanup; the script never merges dependency PRs automatically.
+- Added `docs/dependabot-cleanup-v0.4.md` and linked it from dependency maintenance and reviewer docs.
+
+Verification:
+
+- Passed:
+  - `.\scripts\dependabot-curate.ps1 -DryRun`
+  - `.\scripts\docs-quality.ps1`
+  - `.\scripts\evidence-audit.ps1`
+  - `git diff --check`
+
+Note:
+
+- Dry-run found 20 open Dependabot PRs: 11 `safe-batch`, 8 `defer-major`, and 1 `manual-review`. No labels, comments, closures, or merges were applied because `GITHUB_TOKEN` was not set.
