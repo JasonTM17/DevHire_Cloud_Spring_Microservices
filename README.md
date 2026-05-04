@@ -335,6 +335,7 @@ Xem flow chạy được tại [docs/api.http](docs/api.http).
 - [Release notes v0.4.0](docs/release-notes/v0.4.0.md)
 - [10-minute demo script](docs/demo-script.md)
 - [GitHub profile checklist](docs/github-profile.md)
+- [GitHub owner actions](docs/github-owner-actions.md)
 - [Architecture Decision Records](docs/ADR/0001-microservices-and-service-databases.md)
 
 ## Roadmap Sau v0.2.0

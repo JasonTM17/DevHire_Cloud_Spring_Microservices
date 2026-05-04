@@ -1984,3 +1984,17 @@ Verification:
   - `mvn -T1 clean verify`
   - `cd frontend && npm run typecheck && npm run build`
   - `git diff --check`
+
+## Phase 90 - GitHub publication checklist
+
+- Ran `scripts/github-repo-polish.ps1 -DryRun` and recorded the exact metadata/topics payload in `docs/github-owner-actions.md`.
+- Confirmed `GITHUB_TOKEN` is not set locally, so `scripts/github-repo-polish.ps1 -Apply` was intentionally not run.
+- Confirmed via GitHub API that the repository is public but About description, homepage, and topics are still empty owner actions.
+- Linked `docs/github-owner-actions.md` from README and the recruiter guide.
+
+Verification:
+
+- Passed:
+  - `.\scripts\github-repo-polish.ps1 -DryRun`
+  - `.\scripts\docs-quality.ps1`
+  - `git diff --check`

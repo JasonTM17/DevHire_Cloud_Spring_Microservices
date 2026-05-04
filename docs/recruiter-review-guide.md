@@ -18,6 +18,7 @@ Read:
 - `docs/release-evidence/v0.3.0.md`
 - `docs/release-notes/v0.4.0.md`
 - `docs/release-evidence/v0.4.0.md`
+- `docs/github-owner-actions.md`
 
 Look for:
 
@@ -104,6 +105,7 @@ What to look for:
 - chaos smoke scenarios,
 - External Secrets and GitOps wiring,
 - release evidence checklist.
+- GitHub About/Topics/Homepage owner checklist.
 
 ## 5. Review CI/CD And Supply Chain
 

@@ -2,6 +2,12 @@
 
 These actions require repository owner permissions and are intentionally not forced by CI. Use `scripts/github-repo-polish.ps1 -DryRun` to preview the repository metadata payload.
 
+Current local verification on 2026-05-04:
+
+- `scripts/github-repo-polish.ps1 -DryRun` produced the metadata payload below.
+- `GITHUB_TOKEN` was not set in the local shell, so `-Apply` was intentionally not run.
+- GitHub API reported the repository is public, with empty About description, homepage, and topics. These remain owner actions until a short-lived owner token is available.
+
 ## About Section
 
 Description:
@@ -60,6 +66,49 @@ Remove-Item Env:\GITHUB_TOKEN
 ```
 
 Branch protection remains a manual owner action because required-check names and admin permissions vary by repository.
+
+## API Verification Snapshot
+
+The expected repository metadata payload is:
+
+```json
+{
+  "description": "Production-grade Java 21 Spring Boot microservices recruitment platform with JWT, Kafka, OpenSearch, Docker, Kubernetes, Terraform, observability, CI/CD, and Claude Haiku AI RAG assistant.",
+  "homepage": "https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.3.0",
+  "has_issues": true,
+  "has_projects": true,
+  "has_wiki": true
+}
+```
+
+The expected topics payload is:
+
+```json
+{
+  "names": [
+    "java",
+    "spring-boot",
+    "microservices",
+    "spring-cloud",
+    "postgresql",
+    "kafka",
+    "opensearch",
+    "redis",
+    "docker",
+    "kubernetes",
+    "terraform",
+    "aws",
+    "prometheus",
+    "grafana",
+    "nextjs",
+    "anthropic",
+    "claude",
+    "rag",
+    "devops",
+    "portfolio"
+  ]
+}
+```
 
 ## Releases And Packages
 

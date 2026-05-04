@@ -16,6 +16,8 @@ Add these badges near the top of `README.md` after the repository is public and 
 
 ## About
 
+Owner action status: not applied from the local shell because `GITHUB_TOKEN` was not configured. The repository is public, but GitHub API currently reports empty About description, homepage, and topics.
+
 Description:
 
 ```text
