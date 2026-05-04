@@ -12,6 +12,7 @@ Read:
 - `docs/professional-review-map.md`
 - `docs/service-catalog.md`
 - `docs/architecture-review-index.md`
+- `docs/design-system.md`
 - `docs/evidence-manifest.md`
 - `docs/runtime-acceptance-matrix.md`
 - `docs/release-notes/v0.3.0.md`

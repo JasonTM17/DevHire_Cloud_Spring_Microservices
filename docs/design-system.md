@@ -32,7 +32,7 @@ DevHire Cloud should read as a production SaaS recruitment operations platform, 
 - Use compact buttons with icons for commands.
 - Cards and panels use 8px radius maximum, 1px borders, and low-shadow hover states.
 - Company imagery should use crisp logo marks with fallback initials.
-- Production/DevOps credibility should be visible through small operational signals: API gateway, outbox, OpenSearch, Kafka, CI/CD, observability.
+- Production and DevOps credibility should be visible through small operational signals: API gateway, outbox, OpenSearch, Kafka, CI/CD, observability.
 
 ## Component Notes
 
@@ -42,3 +42,7 @@ DevHire Cloud should read as a production SaaS recruitment operations platform, 
 - Secondary action: cobalt `#2563eb`.
 - Status chips: small, high-contrast, semantic colors.
 - Tables: fixed row rhythm, subtle background, clear right-aligned actions.
+
+## Repository Facade Decision
+
+This document used to live under `.stitch/DESIGN.md`. It is now a normal portfolio document under `docs/` so the GitHub root presents as an engineering repository rather than a tool workspace export.

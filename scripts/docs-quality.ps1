@@ -26,6 +26,7 @@ $requiredPaths = @(
     "docs/github-governance.md",
     "docs/branch-protection.md",
     "docs/repository-health.md",
+    "docs/design-system.md",
     "docs/versioning.md",
     "docs/dependency-maintenance.md",
     "docs/dependency-triage-v0.4.md",

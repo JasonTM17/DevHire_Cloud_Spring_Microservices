@@ -1935,6 +1935,19 @@ Pending owner-only remote actions:
 - Protect `master` via the same script or the GitHub UI fallback.
 - Apply Dependabot labels/comments/closures via `.\scripts\dependabot-curate.ps1 -Apply` when an owner token is available.
 
+## Phase 101 - Public facade root cleanup
+
+- Moved the frontend operations design system from `.stitch/DESIGN.md` to `docs/design-system.md` so the repository root no longer exposes a tool-workspace artifact folder.
+- Kept the design system content as portfolio evidence and linked it from README and the recruiter review guide.
+- Updated docs quality and evidence manifest checks so the design system remains part of the verified documentation set.
+
+Verification:
+
+- Passed:
+  - `.\scripts\docs-quality.ps1`
+  - `.\scripts\evidence-audit.ps1`
+  - `git diff --check`
+
 ## Phase 84 - Machine-checkable portfolio evidence manifest
 
 - Added `docs/evidence-manifest.json` and `docs/evidence-manifest.md` as a reviewer-facing map of service, runtime, CI/CD, documentation, screenshot, and runbook evidence.
