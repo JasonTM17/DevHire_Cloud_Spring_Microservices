@@ -2125,3 +2125,15 @@ Verification:
 Note:
 
 - Dry-run found 20 open Dependabot PRs: 11 `safe-batch`, 8 `defer-major`, and 1 `manual-review`. No labels, comments, closures, or merges were applied because `GITHUB_TOKEN` was not set.
+
+## Phase 98 - README and repository landing polish
+
+- Updated the README first viewport with an English executive summary, reviewer quick links, latest release link, runtime evidence link, architecture/security/cloud evidence links, and one-command verification examples.
+- Kept the Vietnamese case-study content in the README while moving the most recruiter-relevant proof signals above it.
+- Linked the upcoming repository health dashboard from the README so the public GitHub presentation has a clear governance evidence path.
+
+Verification:
+
+- Passed:
+  - `.\scripts\docs-quality.ps1`
+  - `git diff --check`

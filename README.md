@@ -6,6 +6,33 @@
 [![Docs](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/docs.yml/badge.svg)](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/docs.yml)
 [![Terraform](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/terraform.yml/badge.svg)](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/terraform.yml)
 
+DevHire Cloud is a production-grade Java 21/Spring Boot microservices portfolio for a recruitment platform: API Gateway, JWT/refresh security, service-owned PostgreSQL databases, Kafka/outbox reliability, OpenSearch search, Next.js frontend, Claude Haiku RAG assistant, Docker runtime, Kubernetes/Helm/GitOps, AWS Terraform blueprint, observability, CI/CD, security scanning, and reviewer-friendly evidence.
+
+## Reviewer Quick Links
+
+| Need | Open |
+|---|---|
+| Latest public release | [v0.3.0 release](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.3.0) |
+| Runtime proof | [Runtime evidence v0.4](docs/runtime-evidence-v0.4.md) |
+| 5/15/30 minute review route | [Professional review map](docs/professional-review-map.md) |
+| Service boundaries | [Service catalog](docs/service-catalog.md) |
+| Architecture decisions | [Architecture review index](docs/architecture-review-index.md) |
+| Security and supply chain | [Security evidence](docs/security-evidence.md) |
+| Cloud deployment blueprint | [Cloud readiness review](docs/cloud-readiness-review.md) |
+| Public repo governance | [Repository health](docs/repository-health.md) |
+
+Fast reviewer gate:
+
+```powershell
+.\scripts\portfolio-verify.ps1 -Docs -Docker
+```
+
+Runtime gate when the Docker stack is running:
+
+```powershell
+.\scripts\portfolio-verify.ps1 -Runtime -GatewayUrl http://localhost:8080
+```
+
 DevHire Cloud là một dự án portfolio backend/DevOps/Solution Architecture được xây dựng như một nền tảng tuyển dụng mini ITviec/LinkedIn Jobs. Mục tiêu của dự án không phải là demo CRUD đơn giản, mà là chứng minh năng lực thiết kế, triển khai, kiểm thử và vận hành một hệ thống microservices Java Spring Boot production-style.
 
 Repository hiện có Java 21, Spring Boot 3.5.13, Spring Cloud 2025.0.2, API Gateway, JWT security, Kafka/outbox, OpenSearch, PostgreSQL service-owned databases, Claude Haiku AI assistant, Docker Compose full stack, observability, CI/CD, Kubernetes/Helm/GitOps, AWS Terraform blueprint, Next.js frontend và bộ kiểm thử tự động.
