@@ -1,12 +1,13 @@
 # GitHub Owner Actions
 
-These actions require repository owner permissions and are intentionally not forced by CI. Use `scripts/github-repo-polish.ps1 -DryRun` to preview the repository metadata payload.
+These actions require repository owner permissions and are intentionally not forced by CI. Use `scripts/github-governance.ps1 -DryRun` to preview the repository metadata, release, and branch-protection state.
 
 Current local verification on 2026-05-04:
 
-- `scripts/github-repo-polish.ps1 -DryRun` produced the metadata payload below.
+- `scripts/github-governance.ps1 -DryRun` produced the metadata payload below and checked the public release/branch state.
 - `GITHUB_TOKEN` was not set in the local shell, so `-Apply` was intentionally not run.
 - GitHub API reported the repository is public, with empty About description, homepage, and topics. These remain owner actions until a short-lived owner token is available.
+- The older `scripts/github-repo-polish.ps1` remains for compatibility; `scripts/github-governance.ps1` is now the preferred owner-facing automation.
 
 ## About Section
 
@@ -51,17 +52,17 @@ Recommended required checks:
 
 ## Dry-Run Publication Command
 
-Preview the exact GitHub metadata payload:
+Preview the exact GitHub metadata payload and public governance status:
 
 ```powershell
-.\scripts\github-repo-polish.ps1 -DryRun
+.\scripts\github-governance.ps1 -DryRun
 ```
 
 Apply it only from an owner shell with a short-lived `GITHUB_TOKEN`:
 
 ```powershell
 $env:GITHUB_TOKEN = "<owner-token>"
-.\scripts\github-repo-polish.ps1 -Apply
+.\scripts\github-governance.ps1 -Apply
 Remove-Item Env:\GITHUB_TOKEN
 ```
 

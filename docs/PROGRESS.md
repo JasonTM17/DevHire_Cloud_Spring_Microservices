@@ -2071,3 +2071,21 @@ Previously passed in this v0.4 baseline:
 - `docker compose up -d --build`
 - `.\scripts\portfolio-verify.ps1 -Runtime -GatewayUrl http://localhost:8080`
 - `.\scripts\runtime-evidence-summary.ps1`
+
+## Phase 95 - GitHub governance automation
+
+- Added `scripts/github-governance.ps1` with safe `-DryRun` by default and `-Apply` only when `GITHUB_TOKEN` is available in the current shell.
+- The script checks public repository metadata, release visibility, default branch state, and branch protection readability, then writes sanitized reports under ignored `reports/github-governance/`.
+- Added `docs/github-governance.md` and updated owner-facing GitHub documentation to point at the new automation instead of the older metadata-only script.
+
+Verification:
+
+- Passed:
+  - `.\scripts\github-governance.ps1 -DryRun`
+  - `.\scripts\docs-quality.ps1`
+  - `.\scripts\evidence-audit.ps1`
+  - `git diff --check`
+
+Note:
+
+- `GITHUB_TOKEN` was not set, so GitHub metadata was not applied remotely. The dry-run report confirmed release `v0.3.0` is visible, while About/Homepage/Topics remain empty and `master` is not protected.

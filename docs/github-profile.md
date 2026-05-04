@@ -16,7 +16,7 @@ Add these badges near the top of `README.md` after the repository is public and 
 
 ## About
 
-Owner action status: not applied from the local shell because `GITHUB_TOKEN` was not configured. The repository is public, but GitHub API currently reports empty About description, homepage, and topics.
+Owner action status: not applied from the local shell because `GITHUB_TOKEN` was not configured. The repository is public, but GitHub API currently reports empty About description, homepage, and topics. Preview or apply the target state with `scripts/github-governance.ps1`.
 
 Description:
 
@@ -72,6 +72,22 @@ portfolio
 - Enable secret scanning if available for the account.
 - Add `CODEOWNERS` review requirement.
 - Keep release `v0.3.0` visible as the current public portfolio release.
+
+## Automation
+
+Preview the full GitHub publication target:
+
+```powershell
+.\scripts\github-governance.ps1 -DryRun
+```
+
+Apply About/Homepage/Topics only from an owner shell:
+
+```powershell
+$env:GITHUB_TOKEN = "<owner-token>"
+.\scripts\github-governance.ps1 -Apply
+Remove-Item Env:\GITHUB_TOKEN
+```
 
 ## Manual Release Flow
 

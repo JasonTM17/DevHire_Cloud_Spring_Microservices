@@ -52,6 +52,7 @@
         "scripts/evidence-audit.ps1",
         "scripts/repo-hygiene.ps1",
         "scripts/runtime-preflight.ps1",
+        "scripts/github-governance.ps1",
         "scripts/terraform-validate.ps1",
         "scripts/check-coverage.ps1"
       ]
@@ -94,6 +95,7 @@
         "docs/ai-safety.md",
         "docs/verification.md",
         "docs/dependency-triage-v0.4.md",
+        "docs/github-governance.md",
         "docs/release-evidence/v0.3.0.md",
         "docs/release-notes/v0.3.0.md",
         "docs/release-evidence/v0.4.0.md",
