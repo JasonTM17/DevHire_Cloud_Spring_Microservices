@@ -13,7 +13,7 @@ Production-grade Java 21 Spring Boot microservices recruitment platform with JWT
 Homepage:
 
 ```text
-https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.2.0
+https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.3.0
 ```
 
 Topics:
@@ -44,7 +44,7 @@ Recommended required checks:
 
 ## Releases And Packages
 
-- Keep `v0.2.0` visible as the current production portfolio release.
+- Keep `v0.3.0` visible as the current production portfolio release.
 - Keep GHCR packages public if available for the account.
 - Future releases should be created by pushing `vX.Y.Z` tags from a green `master` commit.
 - Release notes should point to `docs/release-evidence/<version>.md`.
@@ -55,5 +55,5 @@ Recommended required checks:
 - [ ] Fill homepage.
 - [ ] Add topics.
 - [ ] Enable branch protection.
-- [ ] Confirm release `v0.2.0` is public.
+- [ ] Confirm release `v0.3.0` is public.
 - [ ] Confirm GHCR images are visible or document account limitation.

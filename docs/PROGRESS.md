@@ -1799,3 +1799,19 @@ Verification:
   - `.\scripts\docs-quality.ps1`
   - `docker compose config --quiet`
   - `git diff --check`
+
+## Phase 78 - Finalize v0.3.0 public release evidence
+
+- Updated v0.3.0 release evidence with GitHub Actions links for CI, Docker Images, Documentation, Security, and CodeQL runs on pushed commit `6d8f722`.
+- Updated GitHub owner action guidance so the repository homepage and release checklist point at `v0.3.0`.
+- Kept annotated tag creation as the final post-push release step.
+
+Verification:
+
+- Passed:
+  - `mvn -T1 clean verify`
+  - `cd frontend && npm run typecheck`
+  - `cd frontend && npm run build`
+  - `docker compose config --quiet`
+  - `.\scripts\docs-quality.ps1`
+  - `git diff --check`
