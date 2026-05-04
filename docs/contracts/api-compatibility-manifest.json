@@ -1,0 +1,148 @@
+{
+  "version": "0.3.0",
+  "generatedReportsDirectory": "reports/api-compatibility",
+  "policy": {
+    "breakingChangesRequire": [
+      "major version release note",
+      "consumer migration note",
+      "contract fixture update",
+      "green CI compatibility gate"
+    ],
+    "runtimeSnapshots": "Generated OpenAPI documents belong in reports/ and are not committed."
+  },
+  "services": [
+    {
+      "name": "auth-service",
+      "localPort": 8081,
+      "gatewayPrefix": "/api",
+      "endpoints": [
+        { "method": "POST", "localPath": "/auth/register", "gatewayPath": "/api/auth/register", "surface": "public" },
+        { "method": "POST", "localPath": "/auth/login", "gatewayPath": "/api/auth/login", "surface": "public" },
+        { "method": "POST", "localPath": "/auth/refresh", "gatewayPath": "/api/auth/refresh", "surface": "public" },
+        { "method": "POST", "localPath": "/auth/logout", "gatewayPath": "/api/auth/logout", "surface": "authenticated" },
+        { "method": "GET", "localPath": "/auth/me", "gatewayPath": "/api/auth/me", "surface": "authenticated" }
+      ]
+    },
+    {
+      "name": "user-service",
+      "localPort": 8082,
+      "gatewayPrefix": "/api",
+      "endpoints": [
+        { "method": "GET", "localPath": "/users/me", "gatewayPath": "/api/users/me", "surface": "authenticated" },
+        { "method": "PUT", "localPath": "/users/me", "gatewayPath": "/api/users/me", "surface": "authenticated" },
+        { "method": "GET", "localPath": "/users/{id}", "gatewayPath": "/api/users/{id}", "surface": "authenticated" }
+      ]
+    },
+    {
+      "name": "company-service",
+      "localPort": 8083,
+      "gatewayPrefix": "/api",
+      "endpoints": [
+        { "method": "POST", "localPath": "/companies", "gatewayPath": "/api/companies", "surface": "employer" },
+        { "method": "GET", "localPath": "/companies", "gatewayPath": "/api/companies", "surface": "public" },
+        { "method": "GET", "localPath": "/companies/{id}", "gatewayPath": "/api/companies/{id}", "surface": "public" },
+        { "method": "PATCH", "localPath": "/admin/companies/{id}/approve", "gatewayPath": "/api/admin/companies/{id}/approve", "surface": "admin" },
+        { "method": "PATCH", "localPath": "/admin/companies/{id}/reject", "gatewayPath": "/api/admin/companies/{id}/reject", "surface": "admin" },
+        { "method": "GET", "localPath": "/internal/companies/{id}", "gatewayPath": null, "surface": "internal" }
+      ]
+    },
+    {
+      "name": "job-service",
+      "localPort": 8084,
+      "gatewayPrefix": "/api",
+      "endpoints": [
+        { "method": "POST", "localPath": "/jobs", "gatewayPath": "/api/jobs", "surface": "employer" },
+        { "method": "GET", "localPath": "/jobs", "gatewayPath": "/api/jobs", "surface": "public" },
+        { "method": "GET", "localPath": "/jobs/{id}", "gatewayPath": "/api/jobs/{id}", "surface": "public" },
+        { "method": "PUT", "localPath": "/jobs/{id}", "gatewayPath": "/api/jobs/{id}", "surface": "employer" },
+        { "method": "PATCH", "localPath": "/jobs/{id}/submit-review", "gatewayPath": "/api/jobs/{id}/submit-review", "surface": "employer" },
+        { "method": "PATCH", "localPath": "/admin/jobs/{id}/approve", "gatewayPath": "/api/admin/jobs/{id}/approve", "surface": "admin" },
+        { "method": "PATCH", "localPath": "/admin/jobs/{id}/reject", "gatewayPath": "/api/admin/jobs/{id}/reject", "surface": "admin" },
+        { "method": "PATCH", "localPath": "/jobs/{id}/close", "gatewayPath": "/api/jobs/{id}/close", "surface": "employer" },
+        { "method": "GET", "localPath": "/internal/jobs/{id}", "gatewayPath": null, "surface": "internal" }
+      ]
+    },
+    {
+      "name": "application-service",
+      "localPort": 8085,
+      "gatewayPrefix": "/api",
+      "endpoints": [
+        { "method": "POST", "localPath": "/jobs/{jobId}/applications", "gatewayPath": "/api/jobs/{jobId}/applications", "surface": "candidate" },
+        { "method": "GET", "localPath": "/applications/me", "gatewayPath": "/api/applications/me", "surface": "candidate" },
+        { "method": "GET", "localPath": "/employer/jobs/{jobId}/applications", "gatewayPath": "/api/employer/jobs/{jobId}/applications", "surface": "employer" },
+        { "method": "PATCH", "localPath": "/applications/{id}/status", "gatewayPath": "/api/applications/{id}/status", "surface": "employer" },
+        { "method": "PATCH", "localPath": "/applications/{id}/withdraw", "gatewayPath": "/api/applications/{id}/withdraw", "surface": "candidate" }
+      ]
+    },
+    {
+      "name": "notification-service",
+      "localPort": 8086,
+      "gatewayPrefix": "/api",
+      "endpoints": [
+        { "method": "GET", "localPath": "/notifications", "gatewayPath": "/api/notifications", "surface": "authenticated" },
+        { "method": "PATCH", "localPath": "/notifications/{id}/read", "gatewayPath": "/api/notifications/{id}/read", "surface": "authenticated" },
+        { "method": "PATCH", "localPath": "/notifications/read-all", "gatewayPath": "/api/notifications/read-all", "surface": "authenticated" }
+      ]
+    },
+    {
+      "name": "audit-service",
+      "localPort": 8087,
+      "gatewayPrefix": "/api",
+      "endpoints": [
+        { "method": "GET", "localPath": "/admin/audit-logs", "gatewayPath": "/api/admin/audit-logs", "surface": "admin" }
+      ]
+    },
+    {
+      "name": "ai-service",
+      "localPort": 8088,
+      "gatewayPrefix": "/api",
+      "endpoints": [
+        { "method": "POST", "localPath": "/ai/chat", "gatewayPath": "/api/ai/chat", "surface": "authenticated" },
+        { "method": "POST", "localPath": "/ai/chat/stream", "gatewayPath": "/api/ai/chat/stream", "surface": "authenticated" },
+        { "method": "GET", "localPath": "/ai/conversations", "gatewayPath": "/api/ai/conversations", "surface": "authenticated" },
+        { "method": "GET", "localPath": "/ai/conversations/{id}", "gatewayPath": "/api/ai/conversations/{id}", "surface": "authenticated" },
+        { "method": "DELETE", "localPath": "/ai/conversations/{id}", "gatewayPath": "/api/ai/conversations/{id}", "surface": "authenticated" },
+        { "method": "POST", "localPath": "/admin/ai/knowledge/reindex", "gatewayPath": "/api/admin/ai/knowledge/reindex", "surface": "admin" },
+        { "method": "GET", "localPath": "/admin/ai/provider/status", "gatewayPath": "/api/admin/ai/provider/status", "surface": "admin" }
+      ]
+    }
+  ],
+  "asyncContracts": [
+    {
+      "topic": "application.events",
+      "eventType": "APPLICATION_SUBMITTED",
+      "version": 1,
+      "consumers": ["notification-service", "audit-service"]
+    },
+    {
+      "topic": "application.events",
+      "eventType": "APPLICATION_STATUS_CHANGED",
+      "version": 1,
+      "consumers": ["notification-service", "audit-service"]
+    },
+    {
+      "topic": "job.events",
+      "eventType": "JOB_APPROVED",
+      "version": 1,
+      "consumers": ["audit-service"]
+    },
+    {
+      "topic": "company.events",
+      "eventType": "COMPANY_APPROVED",
+      "version": 1,
+      "consumers": ["audit-service"]
+    },
+    {
+      "topic": "audit.events",
+      "eventType": "AUDIT_LOG_RECORDED",
+      "version": 1,
+      "consumers": ["audit-service"]
+    },
+    {
+      "topic": "notification.events",
+      "eventType": "NOTIFICATION_CREATED",
+      "version": 1,
+      "consumers": ["audit-service"]
+    }
+  ]
+}

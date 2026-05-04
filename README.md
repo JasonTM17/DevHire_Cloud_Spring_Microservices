@@ -304,6 +304,7 @@ Xem flow chạy được tại [docs/api.http](docs/api.http).
 - [Unified verification runner](docs/verification.md)
 - [Versioning and release hygiene](docs/versioning.md)
 - [Dependency maintenance policy](docs/dependency-maintenance.md)
+- [API compatibility policy](docs/api-compatibility.md)
 - [Release evidence v0.2.0](docs/release-evidence/v0.2.0.md)
 - [Recruiter review guide](docs/recruiter-review-guide.md)
 - [Release notes v0.2.0](docs/release-notes/v0.2.0.md)

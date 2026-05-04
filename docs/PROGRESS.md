@@ -1704,3 +1704,18 @@ Verification:
   - `mvn -T1 clean verify`
   - `.\scripts\check-coverage.ps1`
   - `git diff --check`
+
+## Phase 72 - API compatibility and contract evidence
+
+- Added `docs/contracts/api-compatibility-manifest.json` as the committed source of truth for public, internal, and async contracts.
+- Added `scripts/api-compatibility.ps1` with manifest-only validation and runtime OpenAPI comparison against service docs.
+- Added `docs/api-compatibility.md` to document breaking-change rules, generated snapshot policy, and provider/consumer contract evidence.
+- Linked the API compatibility policy from README and the documentation quality gate.
+
+Verification:
+
+- Passed:
+  - `.\scripts\api-compatibility.ps1 -ManifestOnly`
+  - `.\scripts\docs-quality.ps1`
+  - `mvn -T1 clean verify`
+  - `git diff --check`
