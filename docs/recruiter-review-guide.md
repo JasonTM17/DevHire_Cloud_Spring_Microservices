@@ -10,6 +10,7 @@ Read:
 - `docs/README_EN.md`
 - `docs/portfolio-case-study.md`
 - `docs/professional-review-map.md`
+- `docs/repository-structure.md`
 - `docs/service-catalog.md`
 - `docs/architecture-review-index.md`
 - `docs/design-system.md`

@@ -37,6 +37,15 @@ Generated reports are written under `reports/repository-health/` and are ignored
 - open Dependabot PR count by category,
 - local evidence documents for release, runtime, governance, security, and cloud readiness.
 
+## Root Facade And Artifact Policy
+
+The root should show engineering intent, not local tool output:
+
+- `.stitch/` was removed from tracked files; the UI design source now lives in [design-system.md](design-system.md).
+- [Repository structure](repository-structure.md) explains every top-level folder that remains.
+- `scripts/clean-local-artifacts.ps1` cleans ignored generated artifacts while keeping `.env` and `frontend/node_modules` unless explicitly requested.
+- `scripts/repo-hygiene.ps1` verifies no forbidden runtime, secret, report, or crash artifacts are tracked.
+
 ## Owner Actions
 
 If the script reports missing public metadata or unprotected `master`, run:

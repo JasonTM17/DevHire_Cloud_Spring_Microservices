@@ -1969,6 +1969,19 @@ Note:
 
 - Cleanup removed generated reports/build outputs/JVM crash logs and the ignored `.github/java-upgrade/` tool artifact. `.env` and `frontend/node_modules` were intentionally kept.
 
+## Phase 103 - Repository structure review path
+
+- Added `docs/repository-structure.md` so reviewers can understand every top-level folder as intentional portfolio evidence.
+- Updated README reviewer quick links, recruiter guide, repository health docs, docs quality, and evidence manifest.
+- Documented why `.stitch/` was removed and how local artifacts are kept out of tracked source.
+
+Verification:
+
+- Passed:
+  - `.\scripts\docs-quality.ps1`
+  - `.\scripts\evidence-audit.ps1`
+  - `git diff --check`
+
 ## Phase 84 - Machine-checkable portfolio evidence manifest
 
 - Added `docs/evidence-manifest.json` and `docs/evidence-manifest.md` as a reviewer-facing map of service, runtime, CI/CD, documentation, screenshot, and runbook evidence.
