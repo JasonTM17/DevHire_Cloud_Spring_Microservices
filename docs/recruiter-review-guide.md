@@ -19,6 +19,7 @@ Read:
 - `docs/release-notes/v0.4.0.md`
 - `docs/release-evidence/v0.4.0.md`
 - `docs/github-owner-actions.md`
+- `docs/dependency-triage-v0.4.md`
 
 Look for:
 
@@ -96,6 +97,7 @@ Open:
 - `docs/runbooks/ai-provider-outage.md`
 - `docs/runbooks/database-restore-drill.md`
 - `docs/release-evidence/v0.3.0.md`
+- `docs/release-evidence/v0.4.0.md`
 
 What to look for:
 
@@ -104,7 +106,7 @@ What to look for:
 - backup/restore guardrails,
 - chaos smoke scenarios,
 - External Secrets and GitOps wiring,
-- release evidence checklist.
+- release evidence checklist,
 - GitHub About/Topics/Homepage owner checklist.
 
 ## 5. Review CI/CD And Supply Chain

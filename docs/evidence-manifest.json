@@ -91,6 +91,7 @@
         "docs/security-evidence.md",
         "docs/ai-safety.md",
         "docs/verification.md",
+        "docs/dependency-triage-v0.4.md",
         "docs/release-evidence/v0.3.0.md",
         "docs/release-notes/v0.3.0.md",
         "docs/release-evidence/v0.4.0.md",

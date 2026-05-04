@@ -25,6 +25,7 @@ $requiredPaths = @(
     "docs/github-owner-actions.md",
     "docs/versioning.md",
     "docs/dependency-maintenance.md",
+    "docs/dependency-triage-v0.4.md",
     "docs/api-compatibility.md",
     "docs/evidence-manifest.md",
     "docs/evidence-manifest.json",

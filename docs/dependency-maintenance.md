@@ -14,13 +14,14 @@ DevHire Cloud keeps Dependabot enabled because dependency hygiene is part of the
 | Node major | Defer until Docker/frontend compatibility review | Runtime major upgrades can affect Next.js build and image behavior. |
 | Spring platform major | Defer until compatibility matrix review | Spring Boot/Spring Cloud compatibility is a hard production constraint. |
 
-## Current v0.3 Strategy
+## Current v0.4 Strategy
 
 - Use curated batches instead of merging all open PRs at once.
 - Prioritize GitHub Actions and Docker patch/minor updates.
 - Keep risky major upgrades documented until a dedicated migration phase.
 - Do not merge dependency PRs without green CI, Docker, Security, and Docs workflows.
 - Record the inventory under `reports/dependabot/` as generated evidence; reports are intentionally not committed.
+- Current triage evidence lives in `docs/dependency-triage-v0.4.md`.
 
 ## Local Inventory
 

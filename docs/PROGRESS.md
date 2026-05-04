@@ -1998,3 +1998,17 @@ Verification:
   - `.\scripts\github-repo-polish.ps1 -DryRun`
   - `.\scripts\docs-quality.ps1`
   - `git diff --check`
+
+## Phase 91 - Dependabot triage evidence
+
+- Ran `scripts/dependabot-inventory.ps1`; the generated ignored report found 20 open Dependabot PRs: 9 Docker, 1 GitHub Actions, 4 Maven, 3 npm/frontend, and 3 Terraform.
+- Added `docs/dependency-triage-v0.4.md` with curated merge/defer batches for Actions, Docker base images, frontend tooling, Maven compatibility, Node 25, and Terraform AWS provider 6.x.
+- Updated dependency maintenance docs, README, recruiter guide, docs quality, and the evidence manifest.
+
+Verification:
+
+- Passed:
+  - `.\scripts\dependabot-inventory.ps1`
+  - `.\scripts\docs-quality.ps1`
+  - `.\scripts\evidence-audit.ps1`
+  - `git diff --check`
