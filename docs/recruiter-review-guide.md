@@ -52,6 +52,7 @@ For a short static gate:
 ```powershell
 .\scripts\portfolio-verify.ps1 -Docs -Docker
 .\scripts\evidence-audit.ps1
+.\scripts\repo-hygiene.ps1
 ```
 
 For runtime proof after the Docker stack is up:

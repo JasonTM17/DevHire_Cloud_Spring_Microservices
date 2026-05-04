@@ -319,6 +319,7 @@ Xem flow chạy được tại [docs/api.http](docs/api.http).
 - [Cloud readiness review](docs/cloud-readiness-review.md)
 - [Runtime reliability review](docs/runtime-reliability-review.md)
 - [Portfolio evidence manifest](docs/evidence-manifest.md)
+- [Repository hygiene guard](docs/repository-hygiene.md)
 - [Unified verification runner](docs/verification.md)
 - [Versioning and release hygiene](docs/versioning.md)
 - [Dependency maintenance policy](docs/dependency-maintenance.md)

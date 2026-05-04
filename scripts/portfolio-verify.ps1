@@ -203,6 +203,12 @@ try {
         Invoke-PortfolioStep "api compatibility manifest" ".\scripts\api-compatibility.ps1 -ManifestOnly" {
             & "$PSScriptRoot\api-compatibility.ps1" -ManifestOnly
         }
+        Invoke-PortfolioStep "evidence audit" ".\scripts\evidence-audit.ps1" {
+            & "$PSScriptRoot\evidence-audit.ps1"
+        }
+        Invoke-PortfolioStep "repository hygiene" ".\scripts\repo-hygiene.ps1" {
+            & "$PSScriptRoot\repo-hygiene.ps1"
+        }
         Invoke-PortfolioStep "git diff whitespace" "git diff --check" {
             git diff --check
             Assert-LastExitCode "git diff --check"

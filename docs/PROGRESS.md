@@ -1918,3 +1918,19 @@ Verification:
   - `.\scripts\evidence-audit.ps1`
   - `.\scripts\docs-quality.ps1`
   - `git diff --check`
+
+## Phase 86 - Repository hygiene guard
+
+- Added `scripts/repo-hygiene.ps1` to verify forbidden runtime artifacts are not tracked, important ignore patterns exist, visible untracked sensitive artifacts are absent, and `.gitattributes` keeps text normalization enabled.
+- Added `docs/repository-hygiene.md` and linked it from README and the recruiter guide.
+- Wired evidence audit and repository hygiene into `scripts/portfolio-verify.ps1 -Docs`.
+- Added the hygiene script and document to the evidence manifest and docs quality gate.
+
+Verification:
+
+- Passed:
+  - `.\scripts\repo-hygiene.ps1`
+  - `.\scripts\evidence-audit.ps1`
+  - `.\scripts\docs-quality.ps1`
+  - `.\scripts\portfolio-verify.ps1 -Docs -Docker`
+  - `git diff --check`

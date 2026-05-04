@@ -67,7 +67,7 @@ For the operations smoke used in release evidence:
 | `-Docker` | `docker compose config --quiet`; with `-StartStack`, also `docker compose up -d --build` |
 | `-Runtime` | Gateway readiness, API smoke, runtime reliability acceptance, AI eval, Mailpit email smoke, OpenAPI verify, role-based k6 smoke |
 | `-Security` | actionlint and Gitleaks through Docker |
-| `-Docs` | docs quality, version consistency, API compatibility manifest, and `git diff --check` |
+| `-Docs` | docs quality, version consistency, API compatibility manifest, evidence audit, repository hygiene, and `git diff --check` |
 | `-All` | all portfolio verifier scopes |
 
 ## Reports

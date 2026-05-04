@@ -48,6 +48,8 @@
         "scripts/chaos-smoke.ps1",
         "scripts/dr-verify.ps1",
         "scripts/docs-quality.ps1",
+        "scripts/evidence-audit.ps1",
+        "scripts/repo-hygiene.ps1",
         "scripts/terraform-validate.ps1",
         "scripts/check-coverage.ps1"
       ]
@@ -81,6 +83,7 @@
         "docs/recruiter-review-guide.md",
         "docs/portfolio-case-study.md",
         "docs/runtime-reliability-review.md",
+        "docs/repository-hygiene.md",
         "docs/production-readiness.md",
         "docs/cloud-readiness-review.md",
         "docs/security-evidence.md",
