@@ -2048,3 +2048,26 @@ Verification:
   - `.\scripts\docs-quality.ps1`
   - `.\scripts\evidence-audit.ps1`
   - `git diff --check`
+
+## Phase 94 - v0.4 evidence baseline verification
+
+- Updated `docs/release-evidence/v0.4.0.md` with the passed local baseline for version consistency, docs quality, evidence audit, repository hygiene, Docker Compose config, backend verify, frontend build, and runtime proof.
+- Confirmed the Docker stack remains running with backend services, frontend, PostgreSQL, Redis, Kafka, OpenSearch, Mailpit, Prometheus, Grafana, Loki, Tempo, and OTel Collector.
+
+Verification:
+
+- Passed:
+  - `.\scripts\version-consistency.ps1`
+  - `.\scripts\docs-quality.ps1`
+  - `.\scripts\evidence-audit.ps1`
+  - `.\scripts\repo-hygiene.ps1`
+  - `.\scripts\portfolio-verify.ps1 -Docs -Docker`
+  - `git diff --check`
+
+Previously passed in this v0.4 baseline:
+
+- `mvn -T1 clean verify`
+- `cd frontend && npm run typecheck && npm run build`
+- `docker compose up -d --build`
+- `.\scripts\portfolio-verify.ps1 -Runtime -GatewayUrl http://localhost:8080`
+- `.\scripts\runtime-evidence-summary.ps1`
