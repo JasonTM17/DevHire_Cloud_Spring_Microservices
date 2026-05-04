@@ -45,6 +45,7 @@ $requiredPaths = @(
     "scripts/github-governance.ps1",
     "scripts/dependabot-curate.ps1",
     "scripts/repository-health.ps1",
+    "scripts/clean-local-artifacts.ps1",
     "deploy/terraform/aws/TERRAFORM_DOCS.md",
     "docs/runbooks/alert-response.md",
     "docs/runbooks/kafka-outbox-incident.md",

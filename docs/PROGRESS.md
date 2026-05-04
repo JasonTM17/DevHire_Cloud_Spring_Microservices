@@ -1948,6 +1948,27 @@ Verification:
   - `.\scripts\evidence-audit.ps1`
   - `git diff --check`
 
+## Phase 102 - Local artifact cleanup guard
+
+- Added `scripts/clean-local-artifacts.ps1` with `-DryRun` by default and safe `-Apply` deletion for ignored generated artifacts.
+- The cleanup guard removes generated reports, Maven `target/` directories, frontend build/test outputs, and JVM crash logs when applied.
+- `.env` and `frontend/node_modules` are intentionally kept unless `-IncludeLocalEnv` or `-IncludeNodeModules` is explicitly provided.
+- Documented the cleanup workflow in `docs/repository-hygiene.md` and added the script to docs/evidence gates.
+
+Verification:
+
+- Passed:
+  - `.\scripts\clean-local-artifacts.ps1 -DryRun`
+  - `.\scripts\clean-local-artifacts.ps1 -Apply`
+  - `.\scripts\repo-hygiene.ps1`
+  - `.\scripts\docs-quality.ps1`
+  - `.\scripts\evidence-audit.ps1`
+  - `git diff --check`
+
+Note:
+
+- Cleanup removed generated reports/build outputs/JVM crash logs and the ignored `.github/java-upgrade/` tool artifact. `.env` and `frontend/node_modules` were intentionally kept.
+
 ## Phase 84 - Machine-checkable portfolio evidence manifest
 
 - Added `docs/evidence-manifest.json` and `docs/evidence-manifest.md` as a reviewer-facing map of service, runtime, CI/CD, documentation, screenshot, and runbook evidence.

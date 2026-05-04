@@ -55,6 +55,7 @@
         "scripts/github-governance.ps1",
         "scripts/dependabot-curate.ps1",
         "scripts/repository-health.ps1",
+        "scripts/clean-local-artifacts.ps1",
         "scripts/terraform-validate.ps1",
         "scripts/check-coverage.ps1"
       ]
