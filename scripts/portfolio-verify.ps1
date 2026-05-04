@@ -266,6 +266,9 @@ try {
         Invoke-PortfolioStep "api smoke" ".\scripts\api-smoke.ps1 -GatewayUrl $GatewayUrl" {
             & "$PSScriptRoot\api-smoke.ps1" -GatewayUrl $GatewayUrl
         }
+        Invoke-PortfolioStep "runtime reliability acceptance" ".\scripts\runtime-reliability.ps1 -GatewayUrl $GatewayUrl" {
+            & "$PSScriptRoot\runtime-reliability.ps1" -GatewayUrl $GatewayUrl
+        }
         Invoke-PortfolioStep "ai eval" ".\scripts\ai-eval.ps1 -GatewayUrl $GatewayUrl" {
             & "$PSScriptRoot\ai-eval.ps1" -GatewayUrl $GatewayUrl
         }

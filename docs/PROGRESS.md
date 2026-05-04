@@ -1866,3 +1866,17 @@ Verification:
 Note:
 
 - `GITHUB_TOKEN` was not set locally, so `scripts/github-repo-polish.ps1 -Apply` was intentionally not run.
+
+## Phase 82 - Cross-service runtime reliability acceptance coverage
+
+- Added `scripts/runtime-reliability.ps1` for black-box Gateway acceptance of auth refresh rotation/logout blacklist, job search publication, duplicate application prevention, application status persistence, notification/audit ingestion, and AI prompt-injection refusal.
+- Added optional `-IncludeChaos` support to delegate OpenSearch fallback chaos recovery to the existing chaos smoke script.
+- Wired runtime reliability acceptance into `scripts/portfolio-verify.ps1 -Runtime`.
+
+Verification:
+
+- Passed:
+  - `.\scripts\runtime-reliability.ps1 -GatewayUrl http://localhost:8080`
+  - `.\scripts\portfolio-verify.ps1 -Runtime -GatewayUrl http://localhost:8080`
+  - `.\scripts\docs-quality.ps1`
+  - `git diff --check`

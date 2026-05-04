@@ -65,7 +65,7 @@ For the operations smoke used in release evidence:
 | `-Backend` | `mvn -T1 clean verify` and coverage gate |
 | `-Frontend` | frontend typecheck and production build |
 | `-Docker` | `docker compose config --quiet`; with `-StartStack`, also `docker compose up -d --build` |
-| `-Runtime` | Gateway readiness, API smoke, AI eval, Mailpit email smoke, OpenAPI verify, role-based k6 smoke |
+| `-Runtime` | Gateway readiness, API smoke, runtime reliability acceptance, AI eval, Mailpit email smoke, OpenAPI verify, role-based k6 smoke |
 | `-Security` | actionlint and Gitleaks through Docker |
 | `-Docs` | docs quality, version consistency, API compatibility manifest, and `git diff --check` |
 | `-All` | all portfolio verifier scopes |
