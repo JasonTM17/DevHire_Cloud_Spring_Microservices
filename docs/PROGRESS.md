@@ -1668,3 +1668,23 @@ Note:
 - The first Maven run hit local JVM native memory pressure while the full Docker stack was still running.
 - The stack was stopped with `docker compose stop` only; no Docker volumes or data were deleted.
 - The verification passed after freeing local runtime memory.
+
+## Phase 70 - Dependabot triage program
+
+- Added `docs/dependency-maintenance.md` with curated batch policy for GitHub Actions, Docker, Maven, npm, Terraform, Node, and Spring updates.
+- Added `scripts/dependabot-inventory.ps1` to classify open Dependabot pull requests by category and risk.
+- Added `.github/workflows/dependency-maintenance.yml` to generate inventory artifacts manually or weekly.
+- Linked the maintenance policy from README and docs quality checks.
+
+Verification:
+
+- Passed:
+  - `.\scripts\dependabot-inventory.ps1`
+  - `.\scripts\docs-quality.ps1`
+  - `docker run --rm -v "${PWD}:/repo" -w /repo rhysd/actionlint:latest`
+  - `git diff --check`
+
+Inventory snapshot:
+
+- Open Dependabot PRs: 20.
+- Groups: 9 Docker, 3 npm, 4 Maven, 3 Terraform, 1 GitHub Actions.

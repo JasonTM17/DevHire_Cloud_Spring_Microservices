@@ -1,0 +1,33 @@
+name: Dependency Maintenance
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 3 * * 1"
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  inventory:
+    name: Dependabot inventory
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Generate inventory
+        shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./scripts/dependabot-inventory.ps1
+
+      - name: Upload inventory
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependabot-inventory
+          path: reports/dependabot/
+          if-no-files-found: error
