@@ -1849,3 +1849,20 @@ Verification:
   - `.\scripts\portfolio-verify.ps1 -Docs -Docker`
   - `.\scripts\portfolio-verify.ps1 -Runtime -GatewayUrl http://localhost:8080`
   - `git diff --check`
+
+## Phase 81 - GitHub publication polish
+
+- Updated `scripts/github-repo-polish.ps1` so the default homepage points at the `v0.3.0` public release.
+- Updated GitHub profile and owner-action docs with the final v0.3 About homepage, topics, required checks, and dry-run/apply instructions.
+- Kept GitHub metadata apply as an owner-only action because no `GITHUB_TOKEN` is configured in this local shell.
+
+Verification:
+
+- Passed:
+  - `.\scripts\github-repo-polish.ps1 -DryRun`
+  - `.\scripts\docs-quality.ps1`
+  - `git diff --check`
+
+Note:
+
+- `GITHUB_TOKEN` was not set locally, so `scripts/github-repo-polish.ps1 -Apply` was intentionally not run.

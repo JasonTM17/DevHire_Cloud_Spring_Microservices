@@ -39,8 +39,27 @@ Recommended required checks:
 - `Docker Images`
 - `Security / Gitleaks Secret Scan`
 - `Security / Trivy Filesystem Scan`
+- `CodeQL / Analyze`
 - `Documentation / Portfolio docs quality`
 - `Terraform / Validate AWS Blueprint`
+
+## Dry-Run Publication Command
+
+Preview the exact GitHub metadata payload:
+
+```powershell
+.\scripts\github-repo-polish.ps1 -DryRun
+```
+
+Apply it only from an owner shell with a short-lived `GITHUB_TOKEN`:
+
+```powershell
+$env:GITHUB_TOKEN = "<owner-token>"
+.\scripts\github-repo-polish.ps1 -Apply
+Remove-Item Env:\GITHUB_TOKEN
+```
+
+Branch protection remains a manual owner action because required-check names and admin permissions vary by repository.
 
 ## Releases And Packages
 

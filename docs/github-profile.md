@@ -25,7 +25,7 @@ Production-grade Java 21 Spring Boot microservices recruitment platform with JWT
 Website:
 
 ```text
-https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices
+https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.3.0
 ```
 
 Topics:
@@ -61,6 +61,7 @@ portfolio
   - `CI / Maven Verify`
   - `Docker Images`
   - `Security / Gitleaks Secret Scan`
+  - `CodeQL / Analyze`
   - `Terraform / Validate AWS Blueprint`
   - `Docs / Documentation Quality`
   - `AI Evaluation / Claude Assistant Smoke`
@@ -68,11 +69,11 @@ portfolio
 - Enable Dependabot alerts.
 - Enable secret scanning if available for the account.
 - Add `CODEOWNERS` review requirement.
-- Create release `v0.2.0` after the operations-grade verification checklist passes.
+- Keep release `v0.3.0` visible as the current public portfolio release.
 
 ## Manual Release Flow
 
-1. Open a release PR using the checklist in `docs/release-checklist-v0.2.md`.
-2. Attach sanitized screenshots or command summaries for Docker, smoke, performance, chaos, OpenAPI, Terraform, security, and docs gates.
-3. Merge only after `docs/PROGRESS.md` and `docs/release-notes/v0.2.0.md` match the actual verification.
-4. Create tag `v0.2.0` and paste the release notes summary.
+1. Open a release PR using the checklist in `docs/release-checklist-v0.2.md` plus the current release evidence file.
+2. Attach sanitized screenshots or command summaries for Docker, smoke, performance, OpenAPI, Terraform, security, and docs gates.
+3. Merge only after `docs/PROGRESS.md`, release notes, and release evidence match the actual verification.
+4. Create an annotated `vX.Y.Z` tag from a green `master` commit and let `.github/workflows/release.yml` publish the release.
