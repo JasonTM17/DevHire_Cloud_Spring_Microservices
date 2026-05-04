@@ -10,6 +10,13 @@ param(
     [string]$OutputDir = "reports/github-governance",
     [string]$Homepage = "https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.3.0",
     [string]$Description = "Production-grade Java 21 Spring Boot microservices recruitment platform with JWT, Kafka, OpenSearch, Docker, Kubernetes, Terraform, observability, CI/CD, and Claude Haiku AI RAG assistant.",
+    [string[]]$RequiredChecks = @(
+        "CI",
+        "Docker Images",
+        "Documentation",
+        "Security",
+        "CodeQL"
+    ),
     [string[]]$Topics = @(
         "java",
         "spring-boot",
@@ -75,6 +82,28 @@ $repoPayload = [ordered]@{
 
 $topicsPayload = [ordered]@{
     names = $Topics
+}
+
+$branchProtectionPayload = [ordered]@{
+    required_status_checks = [ordered]@{
+        strict = $true
+        contexts = $RequiredChecks
+    }
+    enforce_admins = $false
+    required_pull_request_reviews = [ordered]@{
+        dismiss_stale_reviews = $true
+        require_code_owner_reviews = $true
+        required_approving_review_count = 1
+        require_last_push_approval = $false
+    }
+    restrictions = $null
+    required_conversation_resolution = $true
+    allow_force_pushes = $false
+    allow_deletions = $false
+    block_creations = $false
+    required_linear_history = $false
+    lock_branch = $false
+    allow_fork_syncing = $true
 }
 
 function Invoke-GitHubJson {
@@ -146,6 +175,11 @@ if ($Apply) {
         throw "Repository topics update failed: $($topicsApply.error)"
     }
 
+    $branchProtectionApply = Invoke-GitHubJson -Method Put -Uri "$apiRoot/branches/$DefaultBranch/protection" -Body $branchProtectionPayload
+    if (-not $branchProtectionApply.ok) {
+        throw "Branch protection update failed. Confirm the token has repository administration permission. Error: $($branchProtectionApply.error)"
+    }
+
     $repoResult = Invoke-GitHubJson -Method Get -Uri $apiRoot
     $branchResult = Invoke-GitHubJson -Method Get -Uri "$apiRoot/branches/$DefaultBranch"
     $protectionResult = Invoke-GitHubJson -Method Get -Uri "$apiRoot/branches/$DefaultBranch/protection"
@@ -173,6 +207,7 @@ $summary = [ordered]@{
         topics = $Topics
         defaultBranch = $DefaultBranch
         latestRelease = $LatestRelease
+        branchProtection = $branchProtectionPayload
     }
     current = $current
     api = [ordered]@{
@@ -211,6 +246,7 @@ $lines.Add("")
 $lines.Add("- Description: $Description")
 $lines.Add("- Homepage: $Homepage")
 $lines.Add("- Topics: $($Topics -join ', ')")
+$lines.Add("- Required checks: $($RequiredChecks -join ', ')")
 $lines.Add("")
 $lines.Add("## Current Public Metadata")
 $lines.Add("")
@@ -247,5 +283,5 @@ Write-Host "  $mdPath"
 
 if ($DryRun) {
     Write-Host ""
-    Write-Host "Dry run only. Re-run with -Apply and GITHUB_TOKEN to update repository About/Homepage/Topics."
+    Write-Host "Dry run only. Re-run with -Apply and GITHUB_TOKEN to update repository About/Homepage/Topics and branch protection."
 }

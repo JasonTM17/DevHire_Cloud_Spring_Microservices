@@ -56,6 +56,21 @@ Topics:
 java, spring-boot, microservices, spring-cloud, postgresql, kafka, opensearch, redis, docker, kubernetes, terraform, aws, prometheus, grafana, nextjs, anthropic, claude, rag, devops, portfolio
 ```
 
+## Target Branch Protection
+
+`scripts/github-governance.ps1 -Apply` also applies the default `master` branch protection payload when the token has administration permission:
+
+- require pull requests before merge through protected-branch flow,
+- require 1 approving review,
+- require Code Owners review,
+- dismiss stale approvals,
+- require conversation resolution,
+- require up-to-date required checks,
+- block force pushes,
+- block deletion.
+
+Required checks are intentionally limited to stable portfolio gates: `CI`, `Docker Images`, `Documentation`, `Security`, and `CodeQL`.
+
 ## Token Safety
 
 - The token is read only from `GITHUB_TOKEN` in the current shell.

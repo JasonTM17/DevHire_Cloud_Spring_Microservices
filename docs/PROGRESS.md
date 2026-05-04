@@ -2089,3 +2089,21 @@ Verification:
 Note:
 
 - `GITHUB_TOKEN` was not set, so GitHub metadata was not applied remotely. The dry-run report confirmed release `v0.3.0` is visible, while About/Homepage/Topics remain empty and `master` is not protected.
+
+## Phase 96 - Branch protection and required checks
+
+- Extended `scripts/github-governance.ps1` so `-Apply` also configures `master` branch protection when the owner token has repository administration permission.
+- Added stable required checks for `CI`, `Docker Images`, `Documentation`, `Security`, and `CodeQL`; heavy AI/E2E/performance workflows stay non-required portfolio evidence gates.
+- Added `docs/branch-protection.md` with exact API automation behavior and GitHub UI fallback steps.
+
+Verification:
+
+- Passed:
+  - `.\scripts\github-governance.ps1 -DryRun`
+  - `.\scripts\docs-quality.ps1`
+  - `.\scripts\evidence-audit.ps1`
+  - `git diff --check`
+
+Note:
+
+- `GITHUB_TOKEN` was not set, so branch protection was not applied remotely. The script now contains the owner-token apply path and the UI fallback is documented.

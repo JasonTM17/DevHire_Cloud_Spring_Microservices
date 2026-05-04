@@ -66,7 +66,7 @@ $env:GITHUB_TOKEN = "<owner-token>"
 Remove-Item Env:\GITHUB_TOKEN
 ```
 
-Branch protection remains a manual owner action because required-check names and admin permissions vary by repository.
+Branch protection is also included in `scripts/github-governance.ps1 -Apply`. If the token lacks repository administration permission, use the UI fallback in `docs/branch-protection.md`.
 
 ## API Verification Snapshot
 

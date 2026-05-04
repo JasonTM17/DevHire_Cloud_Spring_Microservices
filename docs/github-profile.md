@@ -89,6 +89,8 @@ $env:GITHUB_TOKEN = "<owner-token>"
 Remove-Item Env:\GITHUB_TOKEN
 ```
 
+The same apply command attempts branch protection for `master` with the required checks documented in `docs/branch-protection.md`.
+
 ## Manual Release Flow
 
 1. Open a release PR using the checklist in `docs/release-checklist-v0.2.md` plus the current release evidence file.
