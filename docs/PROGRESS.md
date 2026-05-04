@@ -1688,3 +1688,19 @@ Inventory snapshot:
 
 - Open Dependabot PRs: 20.
 - Groups: 9 Docker, 3 npm, 4 Maven, 3 Terraform, 1 GitHub Actions.
+
+## Phase 71 - Backend architecture coverage
+
+- Added ArchUnit as a test dependency inherited by service modules.
+- Added architecture boundary tests for gateway, auth, user, company, job, application, notification, audit, and AI services.
+- Locked key layering rules:
+  - controllers must not depend on JPA entities,
+  - services must not depend on controllers,
+  - services must not directly depend on sibling service implementation packages outside `common-lib`.
+
+Verification:
+
+- Passed:
+  - `mvn -T1 clean verify`
+  - `.\scripts\check-coverage.ps1`
+  - `git diff --check`
