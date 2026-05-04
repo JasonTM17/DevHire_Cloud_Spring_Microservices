@@ -19,7 +19,8 @@ const suggestedPrompts = [
   "Explain this microservices platform to a recruiter",
   "Find senior Java jobs matching Kafka and AWS",
   "Show the 10-minute demo path",
-  "What production risks does this system handle?"
+  "What production risks does this system handle?",
+  "How do you handle prompt injection and secret safety?"
 ];
 
 export default function AssistantPage() {
@@ -199,6 +200,10 @@ export default function AssistantPage() {
               </div>
             ))}
             {!latestAssistant?.toolTraces?.length ? <p className="muted">Tool traces appear after the first answer.</p> : null}
+          </div>
+          <div className="safety-note">
+            <strong>Safety guard</strong>
+            <span>Provider keys, hidden prompts, tokens, and credentials are refused before provider execution.</span>
           </div>
         </aside>
       </div>

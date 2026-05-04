@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Activity, BriefcaseBusiness, Clock3, Database, Filter, MapPin, Search, ShieldCheck, SlidersHorizontal } from "lucide-react";
+import { Activity, BriefcaseBusiness, Clock3, Database, Filter, Loader2, MapPin, Search, ShieldCheck, SlidersHorizontal } from "lucide-react";
 import Link from "next/link";
 import { CompanyLogo } from "@/components/CompanyLogo";
 import { MetricCard } from "@/components/MetricCard";
@@ -17,6 +17,7 @@ export default function JobsPage() {
   const [location, setLocation] = useState("");
   const [jobs, setJobs] = useState<PageResponse<Job> | null>(null);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
 
   const params = useMemo(() => {
     const value = new URLSearchParams({ page: "0", size: "12", sort: "publishedAt,desc" });
@@ -27,6 +28,7 @@ export default function JobsPage() {
   }, [keyword, skill, location]);
 
   useEffect(() => {
+    setLoading(true);
     api.jobs(params)
       .then((page) => {
         setJobs(page);
@@ -35,7 +37,8 @@ export default function JobsPage() {
       .catch((ex) => {
         setJobs(previewJobs);
         setError(previewMessage(ex));
-      });
+      })
+      .finally(() => setLoading(false));
   }, [params]);
 
   const visibleJobs = jobs?.content ?? [];
@@ -103,7 +106,21 @@ export default function JobsPage() {
       {error ? <p className="error preview-note">{error}</p> : null}
       <div className="results-layout">
         <div className="job-grid" data-testid="job-grid">
-          {visibleJobs.map((job) => {
+          {loading ? (
+            <div className="empty-state">
+              <Loader2 className="spin" size={18} />
+              <strong>Loading published jobs</strong>
+              <span>Calling Gateway, search adapter, and job-service.</span>
+            </div>
+          ) : null}
+          {!loading && visibleJobs.length === 0 ? (
+            <div className="empty-state">
+              <Search size={18} />
+              <strong>No jobs match this filter</strong>
+              <span>Try a broader keyword, skill, or location.</span>
+            </div>
+          ) : null}
+          {!loading && visibleJobs.map((job) => {
             const brand = brandForJob(job);
             return (
               <Link className="job-card" data-testid="job-card" href={`/jobs/${job.id}`} key={job.id}>

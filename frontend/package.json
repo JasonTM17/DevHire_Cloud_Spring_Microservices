@@ -7,10 +7,11 @@
     "build": "next build",
     "start": "next start --hostname 0.0.0.0 --port 3000",
     "typecheck": "tsc --noEmit",
-    "e2e": "playwright test e2e/devhire-smoke.spec.ts e2e/assistant-smoke.spec.ts",
+    "e2e": "playwright test e2e/devhire-smoke.spec.ts e2e/assistant-smoke.spec.ts --project=chromium",
+    "e2e:mobile": "playwright test e2e/mobile-smoke.spec.ts --project=mobile-chrome",
     "e2e:report": "playwright show-report",
-    "screenshots": "playwright test e2e/portfolio-screenshots.spec.ts e2e/ops-screenshots.spec.ts",
-    "screenshots:ops": "playwright test e2e/ops-screenshots.spec.ts"
+    "screenshots": "playwright test e2e/portfolio-screenshots.spec.ts e2e/ops-screenshots.spec.ts --project=chromium",
+    "screenshots:ops": "playwright test e2e/ops-screenshots.spec.ts --project=chromium"
   },
   "dependencies": {
     "lucide-react": "1.14.0",

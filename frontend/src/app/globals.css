@@ -1015,6 +1015,8 @@ textarea {
 .prompt-chip,
 .citation,
 .tool-trace,
+.safety-note,
+.empty-state,
 .assistant-login {
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -1069,6 +1071,32 @@ textarea {
   margin: 0;
   color: var(--muted);
   font-size: 13px;
+}
+
+.safety-note,
+.empty-state {
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+}
+
+.safety-note {
+  border-color: #bae6fd;
+  background: #f0f9ff;
+  color: #075985;
+}
+
+.safety-note span,
+.empty-state span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.empty-state {
+  min-height: 172px;
+  place-items: center;
+  grid-column: 1 / -1;
+  text-align: center;
 }
 
 .assistant-login {
@@ -1158,5 +1186,62 @@ textarea {
 
   .inline-form {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 620px) {
+  .sidebar {
+    padding: 14px;
+  }
+
+  .nav-list {
+    grid-template-columns: 1fr;
+  }
+
+  .rail-health {
+    display: none;
+  }
+
+  .hero-actions,
+  .filter-tabs {
+    width: 100%;
+  }
+
+  .filter-tabs {
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+
+  .topbar h1 {
+    font-size: 18px;
+  }
+
+  .chat-panel {
+    min-height: auto;
+  }
+
+  .chat-message,
+  .chat-message.user {
+    grid-template-columns: 1fr;
+  }
+
+  .chat-message.user .chat-avatar {
+    order: 0;
+  }
+
+  .chat-avatar {
+    width: 100%;
+    height: 32px;
+    justify-content: flex-start;
+    padding: 0 10px;
+  }
+
+  .chat-bubble {
+    max-width: 100%;
+  }
+
+  .table-row {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }

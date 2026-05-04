@@ -1769,3 +1769,19 @@ Verification:
   - `mvn -T1 clean verify`
   - `.\scripts\docs-quality.ps1`
   - `git diff --check`
+
+## Phase 76 - Frontend product polish
+
+- Added loading and empty states to the jobs workspace so search behavior looks intentional when Gateway is slow or filters return no data.
+- Added an AI safety affordance and recruiter prompt to the assistant workspace.
+- Tightened mobile CSS for navigation, chat messages, filter tabs, table rows, and overflow handling.
+- Added Playwright mobile smoke coverage for jobs and assistant pages.
+- Kept screenshot/browser evidence honest: Browser plugin was not used here; Playwright mobile smoke ran against a temporary local Next server.
+
+Verification:
+
+- Passed:
+  - `cd frontend && npm run typecheck`
+  - `cd frontend && npm run build`
+  - `cd frontend && npm run e2e:mobile`
+  - `git diff --check`

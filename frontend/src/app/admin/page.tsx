@@ -142,7 +142,7 @@ export default function AdminPage() {
           <div className="table-row">
             <div>
               <strong>{aiProvider?.provider ?? "anthropic"} / {aiProvider?.model ?? "loading"}</strong>
-              <small>{aiProvider?.baseUrlHost ?? "provider host"} · Anthropic version {aiProvider?.anthropicVersion ?? "unknown"}</small>
+              <small>{aiProvider?.baseUrlHost ?? "provider host"} - Anthropic version {aiProvider?.anthropicVersion ?? "unknown"}</small>
             </div>
             <span className={aiCircuitOpen ? "badge warn" : "badge live"}>{aiProvider?.circuitBreakerState ?? "CHECKING"}</span>
           </div>
