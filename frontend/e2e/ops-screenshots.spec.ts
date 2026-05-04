@@ -20,8 +20,10 @@ async function capture(page: Page, name: string) {
 
 async function loginFrontendAsAdmin(page: Page) {
   await page.goto(`${urls.frontend}/login`);
-  await page.getByLabel("Email").fill("admin@devhire.local");
-  await page.getByLabel("Password").fill("Admin@123456");
+  await expect(page.getByTestId("login-page")).toBeVisible();
+  await page.getByRole("button", { name: /ADMIN\s+admin@devhire\.local/i }).click();
+  await expect(page.getByLabel("Email")).toHaveValue("admin@devhire.local");
+  await expect(page.getByLabel("Password")).toHaveValue("Admin@123456");
   await page.getByRole("button", { name: "Sign in" }).click();
   await expect(page.getByTestId("admin-dashboard")).toBeVisible();
 }

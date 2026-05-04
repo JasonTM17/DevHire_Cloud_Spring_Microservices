@@ -1815,3 +1815,22 @@ Verification:
   - `docker compose config --quiet`
   - `.\scripts\docs-quality.ps1`
   - `git diff --check`
+
+## Phase 79 - Full runtime demo evidence
+
+- Built and started the full Docker Compose stack with Gateway, all backend services, frontend, PostgreSQL, Redis, Kafka, OpenSearch, Mailpit, Prometheus, Grafana, Loki, Tempo, and OTel Collector.
+- Ran runtime acceptance through the real Gateway for API smoke, AI eval, Mailpit email smoke, OpenAPI verification, and role-based k6 performance smoke.
+- Refreshed portfolio screenshots from Playwright against the running Docker stack.
+- Stabilized screenshot login helpers by selecting hydrated demo account buttons and asserting form values before submit.
+- Updated v0.3.0 release evidence with runtime pass/fail details and latency numbers.
+
+Verification:
+
+- Passed:
+  - `docker compose up -d --build`
+  - `.\scripts\api-smoke.ps1 -GatewayUrl http://localhost:8080`
+  - `.\scripts\ai-eval.ps1 -GatewayUrl http://localhost:8080`
+  - `.\scripts\email-smoke.ps1 -GatewayUrl http://localhost:8080 -MailpitUrl http://localhost:8025`
+  - `.\scripts\openapi-verify.ps1 -GatewayUrl http://localhost:8080`
+  - `.\scripts\perf-suite.ps1 -GatewayUrl http://localhost:8080 -Scenario all -Vus 2 -Duration 10s`
+  - `cd frontend && npm run screenshots`

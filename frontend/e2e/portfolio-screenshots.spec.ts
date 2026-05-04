@@ -35,8 +35,9 @@ async function login(page: Page, account: keyof typeof accounts) {
   const user = accounts[account];
   await page.goto("/login");
   await expect(page.getByTestId("login-page")).toBeVisible();
-  await page.getByLabel("Email").fill(user.email);
-  await page.getByLabel("Password").fill(user.password);
+  await page.getByRole("button", { name: new RegExp(`${account.toUpperCase()}\\s+${user.email}`) }).click();
+  await expect(page.getByLabel("Email")).toHaveValue(user.email);
+  await expect(page.getByLabel("Password")).toHaveValue(user.password);
   await page.getByRole("button", { name: "Sign in" }).click();
   await expect(page).toHaveURL(new RegExp(`${user.dashboard}$`));
   await expect(page.getByTestId(user.testId)).toBeVisible();
