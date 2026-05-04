@@ -1948,6 +1948,23 @@ Verification:
   - `.\scripts\evidence-audit.ps1`
   - `git diff --check`
 
+## Phase 104 - GitHub public metadata verification
+
+- Checked for `GITHUB_TOKEN`; it was not set, so `scripts/github-governance.ps1 -Apply` was intentionally skipped.
+- Reran `scripts/github-governance.ps1 -DryRun` and `scripts/repository-health.ps1`.
+- Public GitHub API still reports empty About/Homepage/Topics and `master protected=false`; release `v0.3.0` remains visible.
+- Updated owner action, repository health, and release evidence docs with the v0.4.2 status.
+
+Verification:
+
+- Passed:
+  - `.\scripts\github-governance.ps1 -DryRun`
+  - `.\scripts\repository-health.ps1`
+  - `.\scripts\docs-quality.ps1`
+  - `.\scripts\evidence-audit.ps1`
+  - `.\scripts\repo-hygiene.ps1`
+  - `git diff --check`
+
 ## Phase 102 - Local artifact cleanup guard
 
 - Added `scripts/clean-local-artifacts.ps1` with `-DryRun` by default and safe `-Apply` deletion for ignored generated artifacts.

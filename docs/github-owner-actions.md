@@ -5,7 +5,7 @@ These actions require repository owner permissions and are intentionally not for
 Current local verification on 2026-05-04:
 
 - `scripts/github-governance.ps1 -DryRun` produced the metadata payload below and checked the public release/branch state.
-- `GITHUB_TOKEN` was not set in the local shell, so `-Apply` was intentionally not run.
+- v0.4.2 verification also found `GITHUB_TOKEN` was not set in the local shell, so `-Apply` was intentionally skipped.
 - GitHub API reported the repository is public, with empty About description, homepage, and topics. These remain owner actions until a short-lived owner token is available.
 - The older `scripts/github-repo-polish.ps1` remains for compatibility; `scripts/github-governance.ps1` is now the preferred owner-facing automation.
 

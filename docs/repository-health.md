@@ -18,6 +18,8 @@ Latest v0.4.1 health scan focus:
 | Dependabot PRs | Curated through `scripts/dependabot-curate.ps1` |
 | Runtime evidence | `docs/runtime-evidence-v0.4.md` |
 
+v0.4.2 verification result: `GITHUB_TOKEN` was not set locally, so owner-only remote updates were skipped by design. Public API still reports empty About/Homepage/Topics and `master protected=false`.
+
 ## Generate A Fresh Report
 
 ```powershell
