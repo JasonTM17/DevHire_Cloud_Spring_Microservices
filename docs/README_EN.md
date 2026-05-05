@@ -27,7 +27,7 @@ DevHire Cloud models a compact ITviec / LinkedIn Jobs platform with authenticati
 | Current hardening evidence | `v0.4.6 / v0.4.7` public credibility pass | [Review evidence](REVIEW_EVIDENCE.md), [release evidence](release-evidence/v0.4.6.md) |
 | GitHub About / homepage / topics | Applied through governance automation | [Repository governance](github-governance.md) |
 | Branch protection | `master` protected; strict admin enforcement is part of the v0.4.7 gate | [Branch protection](branch-protection.md) |
-| Dependabot queue | Deferred-major PRs are closed; remaining safe PRs are curated by policy | [Dependabot cleanup](dependabot-cleanup-v0.4.md) |
+| Dependabot queue | 0 open PRs after zero-noise cleanup | [Dependabot cleanup](dependabot-cleanup-v0.4.md) |
 | E2E smoke | Self-starting desktop and mobile frontend smoke | `cd frontend && npm run e2e:all` |
 
 ## Reviewer Quick Links

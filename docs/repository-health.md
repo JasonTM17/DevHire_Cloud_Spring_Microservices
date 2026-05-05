@@ -15,11 +15,11 @@ Latest v0.4.6 health scan focus:
 | Topics | 20 topics applied and verified with owner-authenticated GitHub API |
 | Default branch | `master` |
 | Branch protection | Applied; public branch API reports `master protected=true`; `/protection` detail is public-limited without an owner token |
-| Dependabot PRs | Zero-noise automation is available; remaining safe/manual PRs are merged only when clean and green, otherwise closed with comments |
+| Dependabot PRs | 0 open PRs after zero-noise cleanup; future updates are handled by scheduled curated batches |
 | Runtime evidence | `docs/runtime-evidence-v0.4.md` |
 | E2E posture | `cd frontend && npm run e2e:all` is self-starting; desktop + mobile smoke passed locally |
 
-v0.4.6 verification result: owner-authenticated GitHub API confirmed the repository description, homepage, 20 topics, and `master protected=true`. Deferred-major Dependabot PRs were closed through the curation script. v0.4.7 adds a zero-noise pass for the remaining PR queue and treats public-limited protection detail reads as informational when the public branch endpoint confirms protection.
+v0.4.6 verification result: owner-authenticated GitHub API confirmed the repository description, homepage, 20 topics, and `master protected=true`. Deferred-major Dependabot PRs were closed through the curation script, the final zero-noise pass reduced open Dependabot PRs to 0, and `github-workflow-status.ps1 -RequireGreen` passed for the latest `master` head.
 
 Commands executed for this snapshot:
 

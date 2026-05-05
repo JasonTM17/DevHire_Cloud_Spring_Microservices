@@ -10,7 +10,7 @@ This is the short reviewer-facing evidence path. `docs/PROGRESS.md` remains an i
 | Current development evidence | `v0.4.6` public credibility, self-starting E2E, and repository-facade gates are committed on `master` |
 | GitHub About/Homepage/Topics | Applied through owner-authenticated GitHub API; 20 topics are set |
 | Branch protection | Applied on `master`; public branch API confirms `protected=true`, and detailed protection reads are owner-token only |
-| Dependabot posture | Zero-noise policy added: clean safe PRs may be squash-merged, while pending, failing, unreadable, conflicted, or runtime-major PRs are closed/deferred with comments |
+| Dependabot posture | Zero-noise cleanup applied: open Dependabot PR count is 0; future updates are handled through scheduled curated batches |
 | E2E posture | `cd frontend && npm run e2e:all` is self-starting and passed locally with 5 desktop + 2 mobile smoke tests |
 | Coverage posture | Parent JaCoCo baseline raised to 35%; per-module script thresholds ratchet current measured modules |
 | Deployment posture | Prod Helm avoids `latest`, requires secret refs, and security image scans fail actionable HIGH/CRITICAL findings |
@@ -72,6 +72,6 @@ The public facade owner actions have been applied through the local Git credenti
 - Homepage points to the `v0.3.0` release.
 - 20 topics are set.
 - `master` branch protection is enabled after required check context audit passed.
-- Deferred-major Dependabot PRs were closed with curation comments; the zero-noise script can finish the remaining queue without merging unreadable or risky updates.
+- Deferred-major Dependabot PRs were closed with curation comments; the zero-noise pass closed/deferred the remaining queue without merging unreadable or risky updates.
 
 Remaining owner/account-level item: GHCR public package visibility may still require account settings.

@@ -21,7 +21,7 @@ DevHire Cloud is a production-grade Java 21/Spring Boot microservices portfolio 
 | About description | Applied | Verified through owner-authenticated GitHub API |
 | Topics | Applied: 20 topics | Verified through owner-authenticated GitHub API |
 | Branch protection | Applied on `master` | Required check contexts audited before apply |
-| Dependabot queue | 12 PRs remain: 11 safe, 1 manual review | 8 deferred-major PRs closed with curation comments |
+| Dependabot queue | 0 open PRs after zero-noise cleanup | Remaining updates are handled by scheduled curated batches |
 | E2E preview | Self-starting desktop + mobile smoke passed locally | `cd frontend && npm run e2e:all` |
 
 ## Reviewer Quick Links
