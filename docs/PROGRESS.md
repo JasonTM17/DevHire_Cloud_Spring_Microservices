@@ -2616,3 +2616,4 @@ Notes:
 
 - `.\scripts\professionalism-audit.ps1` still reports owner-only public facade actions as pending because no local `REPO_GOVERNANCE_TOKEN` / `GITHUB_TOKEN` was available.
 - Full Docker runtime smoke was not rerun in this phase; v0.4.4 evidence distinguishes static evidence from runtime evidence instead of marking runtime as passed without execution.
+- Post-push repository governance and health reports were adjusted to show release API access as `unavailable` when unauthenticated GitHub API calls return 401/403/429, instead of reporting a false missing release.

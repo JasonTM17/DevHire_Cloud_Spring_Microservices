@@ -179,6 +179,16 @@ $releaseResult = Invoke-GitHubJson -Method Get -Uri "$apiRoot/releases/tags/$Lat
 $branchResult = Invoke-GitHubJson -Method Get -Uri "$apiRoot/branches/$DefaultBranch"
 $protectionResult = Invoke-GitHubJson -Method Get -Uri "$apiRoot/branches/$DefaultBranch/protection"
 
+$releaseStatus = if ($releaseResult.ok) {
+    "visible"
+} elseif ($releaseResult.statusCode -eq 404) {
+    "missing"
+} elseif ($releaseResult.statusCode -in @(401, 403, 429)) {
+    "unavailable"
+} else {
+    "unknown"
+}
+
 if ($Apply) {
     if (-not $hasToken) {
         throw "GITHUB_TOKEN or REPO_GOVERNANCE_TOKEN is required for -Apply. Set a short-lived owner token in the current shell; never commit it."
@@ -214,7 +224,8 @@ $current = [ordered]@{
     topics = if ($repoResult.ok -and $repoResult.value.topics) { @($repoResult.value.topics) } else { @() }
     defaultBranch = if ($repoResult.ok) { $repoResult.value.default_branch } else { $null }
     visibility = if ($repoResult.ok) { $repoResult.value.visibility } else { $null }
-    latestReleaseVisible = $releaseResult.ok
+    latestReleaseStatus = $releaseStatus
+    latestReleaseVisible = if ($releaseResult.ok) { $true } else { $null }
     branchProtected = if ($branchResult.ok) { [bool]$branchResult.value.protected } else { $false }
     branchProtectionReadable = $protectionResult.ok
 }
@@ -248,7 +259,8 @@ $summary = [ordered]@{
         if (-not $current.homepage) { "Fill GitHub homepage." }
         if (@($current.topics).Count -eq 0) { "Add repository topics." }
         if (-not $current.branchProtected) { "Enable branch protection for $DefaultBranch." }
-        if (-not $current.latestReleaseVisible) { "Confirm $LatestRelease release is public." }
+        if ($current.latestReleaseStatus -eq "missing") { "Confirm $LatestRelease release is public." }
+        if ($current.latestReleaseStatus -eq "unknown") { "Check $LatestRelease release visibility manually." }
     )
 }
 
@@ -264,7 +276,7 @@ $lines.Add("- Generated: $($summary.generatedAt)")
 $lines.Add("- Repository: $Owner/$Repo")
 $lines.Add("- Mode: $($summary.mode)")
 $lines.Add("- Token present: $hasToken")
-$lines.Add("- Latest release visible: $($current.latestReleaseVisible)")
+$lines.Add("- Latest release status: $($current.latestReleaseStatus)")
 $lines.Add("- Branch protected: $($current.branchProtected)")
 $lines.Add("- Branch protection readable: $($current.branchProtectionReadable)")
 $lines.Add("")
@@ -299,7 +311,7 @@ Write-Host "GitHub governance summary:"
 Write-Host ("  repository            : {0}/{1}" -f $Owner, $Repo)
 Write-Host ("  mode                  : {0}" -f $summary.mode)
 Write-Host ("  token present          : {0}" -f $hasToken)
-Write-Host ("  release {0} visible    : {1}" -f $LatestRelease, $current.latestReleaseVisible)
+Write-Host ("  release {0} status     : {1}" -f $LatestRelease, $current.latestReleaseStatus)
 Write-Host ("  branch protected       : {0}" -f $current.branchProtected)
 Write-Host ("  description current    : {0}" -f ($(if ($current.description) { "set" } else { "empty" })))
 Write-Host ("  homepage current       : {0}" -f ($(if ($current.homepage) { "set" } else { "empty" })))

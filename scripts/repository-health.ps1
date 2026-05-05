@@ -139,6 +139,16 @@ $metadata = [ordered]@{
     defaultBranch = if ($repoResult.ok) { $repoResult.value.default_branch } else { $null }
 }
 
+$releaseStatus = if ($releaseResult.ok) {
+    "visible"
+} elseif ($releaseResult.statusCode -eq 404) {
+    "missing"
+} elseif ($releaseResult.statusCode -in @(401, 403, 429)) {
+    "unavailable"
+} else {
+    "unknown"
+}
+
 $branchProtected = if ($branchResult.ok) { [bool]$branchResult.value.protected } else { $false }
 
 $health = [ordered]@{
@@ -148,8 +158,11 @@ $health = [ordered]@{
     metadata = $metadata
     latestRelease = [ordered]@{
         version = $LatestRelease
-        visible = $releaseResult.ok
+        status = $releaseStatus
+        visible = if ($releaseResult.ok) { $true } else { $null }
         url = if ($releaseResult.ok) { $releaseResult.value.html_url } else { $null }
+        statusCode = $releaseResult.statusCode
+        error = $releaseResult.error
     }
     branch = [ordered]@{
         name = $DefaultBranch
@@ -184,7 +197,7 @@ $lines.Add("")
 $lines.Add("- Generated: $($health.generatedAt)")
 $lines.Add("- Repository: $Owner/$Repo")
 $lines.Add("- Token present: $hasToken")
-$lines.Add("- Latest release visible: $($health.latestRelease.visible)")
+$lines.Add("- Latest release status: $($health.latestRelease.status)")
 $lines.Add("- Branch protected: $($health.branch.protected)")
 $lines.Add("- Open Dependabot PRs: $($health.dependabot.openCount)")
 $lines.Add("")
@@ -239,7 +252,7 @@ Write-Host ("  token present      : {0}" -f $hasToken)
 Write-Host ("  description set    : {0}" -f $metadata.descriptionSet)
 Write-Host ("  homepage set       : {0}" -f $metadata.homepageSet)
 Write-Host ("  topic count        : {0}" -f $metadata.topicCount)
-Write-Host ("  release visible    : {0}" -f $health.latestRelease.visible)
+Write-Host ("  release status     : {0}" -f $health.latestRelease.status)
 Write-Host ("  branch protected   : {0}" -f $health.branch.protected)
 Write-Host ("  dependabot PRs     : {0}" -f $health.dependabot.openCount)
 Write-Host ""
