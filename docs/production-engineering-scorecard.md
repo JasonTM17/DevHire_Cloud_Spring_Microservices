@@ -14,9 +14,9 @@ This scorecard gives reviewers a fast, evidence-backed view of DevHire Cloud as 
 | Cloud readiness | 8/10 | Docker Compose, Kubernetes manifests, Helm chart with immutable prod image defaults, Argo CD samples, AWS Terraform blueprint, External Secrets wiring |
 | Runtime reviewer proof | 8.5/10 | Self-starting frontend E2E smoke, portfolio verification scripts, API smoke, AI eval, Mailpit smoke, OpenAPI verify, performance and chaos smoke wrappers |
 | AI portfolio layer | 8/10 | Claude Haiku assistant, RAG citations, fallback mode, tool traces, AI safety docs, eval dataset |
-| Public GitHub facade | 9/10 | About/Homepage/Topics and `master` branch protection are applied; governance workflow, facade assertion, and settings-as-code keep the route repeatable |
+| Public GitHub facade | 9.5/10 | About/Homepage/Topics and `master` branch protection are applied; facade assertion handles public-limited protection details correctly, and settings-as-code disables admin bypass |
 
-Overall portfolio posture: **8.4/10 production engineering evidence**, with the main remaining gap being hosted CI confirmation for the latest post-apply documentation commit and any account-level GHCR visibility settings.
+Overall portfolio posture: **8.6/10 production engineering evidence**, with the main remaining gap being hosted CI confirmation for the latest governance commit, zero-noise Dependabot execution, and any account-level GHCR visibility settings.
 
 ## Architecture
 
@@ -108,7 +108,8 @@ Evidence:
 These are not code gaps. They are account or release-operation follow-ups:
 
 - confirm latest post-apply GitHub Actions are green;
-- optionally tag `v0.4.6` after hosted CI/E2E are green;
+- run zero-noise Dependabot cleanup after the governance PR merges;
+- tag `v0.4.6` after hosted CI/E2E are green and strict branch protection is verified;
 - confirm GHCR package visibility if public package browsing is part of the demo.
 
 Evidence:

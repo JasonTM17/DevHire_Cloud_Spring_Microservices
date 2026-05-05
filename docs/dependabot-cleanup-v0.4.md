@@ -113,3 +113,26 @@ Initial v0.4.6 dry-run evidence categorized the public Dependabot queue as:
 | Manual review | 1 | Keep open until scoped review |
 
 After `Dependabot Curation -> close-deferred`, the visible PR count dropped to 12: 11 safe-batch PRs and 1 manual-review PR.
+
+## v0.4.7 Zero-Noise Policy
+
+The next public cleanup step is stricter:
+
+```powershell
+.\scripts\dependabot-zero-noise.ps1 -DryRun
+```
+
+With an owner token, the apply mode follows this policy:
+
+- safe PRs merge only when GitHub reports `mergeable_state=clean` and readable checks are green;
+- safe PRs with pending, failing, conflicted, or unreadable checks close with a scheduled dependency refresh comment;
+- runtime-major or manual-review PRs close with a migration rationale;
+- no PR is auto-merged when check status cannot be read.
+
+```powershell
+$env:GITHUB_TOKEN = "<short-lived owner token>"
+.\scripts\dependabot-zero-noise.ps1 -Apply
+Remove-Item Env:\GITHUB_TOKEN
+```
+
+The matching workflow mode is `Actions -> Dependabot Curation -> zero-noise`. The expected public result is a PR badge of zero, unless the owner intentionally keeps a clearly documented maintenance PR open.

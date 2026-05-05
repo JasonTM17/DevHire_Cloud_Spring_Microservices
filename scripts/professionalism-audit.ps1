@@ -24,8 +24,15 @@ $headers = @{
     "User-Agent" = "DevHire-Professionalism-Audit"
 }
 
-if (-not [string]::IsNullOrWhiteSpace($env:GITHUB_TOKEN)) {
-    $headers["Authorization"] = "Bearer $env:GITHUB_TOKEN"
+$token = if (-not [string]::IsNullOrWhiteSpace($env:GITHUB_TOKEN)) {
+    $env:GITHUB_TOKEN
+} elseif (-not [string]::IsNullOrWhiteSpace($env:REPO_GOVERNANCE_TOKEN)) {
+    $env:REPO_GOVERNANCE_TOKEN
+} else {
+    $null
+}
+if (-not [string]::IsNullOrWhiteSpace($token)) {
+    $headers["Authorization"] = "Bearer $token"
 }
 
 function Invoke-GitHubJson {
@@ -161,6 +168,8 @@ try {
         "scripts/github-governance.ps1",
         "scripts/domain-placeholder-audit.ps1",
         "scripts/professionalism-audit.ps1",
+        "scripts/dependabot-zero-noise.ps1",
+        "scripts/github-workflow-status.ps1",
         "scripts/repo-hygiene.ps1",
         "scripts/docs-quality.ps1",
         "scripts/evidence-audit.ps1"
@@ -218,7 +227,7 @@ try {
         status = $overall
         generatedAt = (Get-Date).ToString("o")
         repository = "$Owner/$Repo"
-        tokenPresent = -not [string]::IsNullOrWhiteSpace($env:GITHUB_TOKEN)
+        tokenPresent = -not [string]::IsNullOrWhiteSpace($token)
         github = [ordered]@{
             metadata = $metadata
             branchProtected = $branchProtected

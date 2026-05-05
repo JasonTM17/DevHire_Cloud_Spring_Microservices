@@ -4,20 +4,20 @@ DevHire Cloud keeps repository presentation as a first-class portfolio artifact.
 
 ## Current Public State
 
-The public GitHub API snapshot taken during the v0.4.3 governance pass showed:
+The owner-authenticated GitHub API snapshot taken during the v0.4.7 governance pass showed:
 
 | Area | Status |
 |---|---|
 | Repository visibility | Public |
-| About description | Empty on GitHub UI until owner apply |
-| Homepage | Empty on GitHub UI until owner apply |
-| Topics | Empty on GitHub UI until owner apply |
+| About description | Applied |
+| Homepage | Applied |
+| Topics | 20 topics applied |
 | Latest release | `v0.3.0` public |
 | Default branch | `master` |
-| Branch protection | Not enabled in the public branch list |
-| Dependabot PRs | 20 open PRs, tracked by the curated Dependabot cleanup playbook |
+| Branch protection | Public branch API reports `master protected=true` |
+| Dependabot PRs | 12 before the zero-noise pass, tracked by the curated Dependabot cleanup playbook |
 
-The repository content now includes automation and exact owner fallback steps. If a short-lived owner token is available, the GitHub metadata can be applied from the local shell without pasting the token into chat or committing it.
+The repository content includes automation and exact owner fallback steps. If a short-lived owner token is available, the GitHub metadata and branch protection can be re-applied from the local shell without pasting the token into chat or committing it.
 
 Latest local verification:
 
@@ -26,7 +26,7 @@ Latest local verification:
 .\scripts\repository-health.ps1
 ```
 
-`GITHUB_TOKEN` was not set, so no remote setting was changed. This is intentional: owner-only GitHub settings must be applied through a short-lived owner token or the audited `Repository Governance` workflow using `REPO_GOVERNANCE_TOKEN`.
+Without a token, local verification uses public API signals and records branch protection detail reads as `public-limited`. Owner-only GitHub settings must still be mutated through a short-lived owner token or the audited `Repository Governance` workflow using `REPO_GOVERNANCE_TOKEN`.
 
 ## Automation
 
@@ -125,6 +125,7 @@ java, spring-boot, microservices, spring-cloud, postgresql, kafka, opensearch, r
 - dismiss stale approvals,
 - require conversation resolution,
 - require up-to-date required checks,
+- enforce the same rules for administrators,
 - block force pushes,
 - block deletion.
 

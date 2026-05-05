@@ -25,9 +25,16 @@ $headers = @{
     "User-Agent" = "DevHire-Repository-Health"
 }
 
-$hasToken = -not [string]::IsNullOrWhiteSpace($env:GITHUB_TOKEN)
+$token = if (-not [string]::IsNullOrWhiteSpace($env:GITHUB_TOKEN)) {
+    $env:GITHUB_TOKEN
+} elseif (-not [string]::IsNullOrWhiteSpace($env:REPO_GOVERNANCE_TOKEN)) {
+    $env:REPO_GOVERNANCE_TOKEN
+} else {
+    $null
+}
+$hasToken = -not [string]::IsNullOrWhiteSpace($token)
 if ($hasToken) {
-    $headers["Authorization"] = "Bearer $env:GITHUB_TOKEN"
+    $headers["Authorization"] = "Bearer $token"
 }
 
 function Invoke-GitHubJson {
@@ -168,6 +175,7 @@ $health = [ordered]@{
         name = $DefaultBranch
         protected = $branchProtected
         protectionReadable = $protectionResult.ok
+        protectionDetailMode = if ($protectionResult.ok) { "readable" } elseif ($branchProtected -and $protectionResult.statusCode -in @(401, 403)) { "public-limited" } else { "unavailable" }
         protectionStatusCode = $protectionResult.statusCode
     }
     workflows = $workflowRows
@@ -199,6 +207,7 @@ $lines.Add("- Repository: $Owner/$Repo")
 $lines.Add("- Token present: $hasToken")
 $lines.Add("- Latest release status: $($health.latestRelease.status)")
 $lines.Add("- Branch protected: $($health.branch.protected)")
+$lines.Add("- Branch protection detail mode: $($health.branch.protectionDetailMode)")
 $lines.Add("- Open Dependabot PRs: $($health.dependabot.openCount)")
 $lines.Add("")
 $lines.Add("## Metadata")

@@ -1,161 +1,226 @@
 # DevHire Cloud
 
-DevHire Cloud is a production-style Java Spring Boot microservices recruitment platform built as a backend, DevOps, and solution architecture portfolio project. It models a compact ITviec/LinkedIn Jobs workflow with authentication, employer onboarding, job publishing, candidate applications, notifications, audit logs, search, a Claude Haiku AI assistant, observability, CI/CD, Docker, Kubernetes, Terraform, and a Next.js UI.
+Production-grade Java 21 / Spring Boot microservices recruitment platform for backend, DevOps, cloud, and solution architecture portfolio review.
 
-## Portfolio Screenshots
+[Vietnamese](../README.md) | [English](README_EN.md) | [Japanese](README_JA.md)
 
-Screenshots are generated from the real frontend through Playwright and Docker runtime checks.
+DevHire Cloud models a compact ITviec / LinkedIn Jobs platform with authentication, employer onboarding, company and job review, candidate applications, notifications, audit logging, search, AI-assisted recruiter explanations, observability, CI/CD, Docker, Kubernetes, Helm, GitOps, Terraform, and reviewer evidence.
 
-| Jobs | Job Detail |
+## 30-Second Proof
+
+| Signal | Evidence |
 |---|---|
-| ![Jobs page](screenshots/jobs-page.png) | ![Job detail](screenshots/job-detail.png) |
+| Microservices | API Gateway plus eight backend services, each with its own package boundary, database schema, Flyway migrations, and API contracts |
+| Security | JWT access tokens, refresh rotation, Redis blacklist, RBAC, CORS, rate limiting, secret policy, Gitleaks, Trivy, CodeQL |
+| Reliability | Kafka events, transactional outbox, retry/dead-letter states, idempotent consumers, chaos smoke scripts |
+| Search | OpenSearch adapter with PostgreSQL fallback and runtime smoke coverage |
+| Operations | Actuator, Prometheus, Grafana SLO dashboard, Loki, Tempo, OpenTelemetry, Mailpit, backup/restore runbooks |
+| Delivery | Maven verify, frontend typecheck/build/E2E, Docker image matrix, SBOM, security scans, release evidence |
+| Cloud readiness | Docker Compose, Kubernetes manifests, Helm chart, Argo CD sample, AWS Terraform blueprint, External Secrets wiring |
+| AI layer | Claude Haiku assistant with RAG-style citations, tool traces, fallback mode, metrics, audit events, and eval scripts |
 
-Docker runtime through the real API Gateway:
+## Public Repository Status
 
-![Docker runtime jobs](screenshots/docker-runtime-jobs.png)
-
-| Candidate | Employer | Admin |
+| Item | Current state | Verification |
 |---|---|---|
-| ![Candidate dashboard](screenshots/candidate-dashboard.png) | ![Employer dashboard](screenshots/employer-dashboard.png) | ![Admin dashboard](screenshots/admin-dashboard.png) |
+| Latest public release | `v0.3.0` | [GitHub release](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.3.0) |
+| Current hardening evidence | `v0.4.6 / v0.4.7` public credibility pass | [Review evidence](REVIEW_EVIDENCE.md), [release evidence](release-evidence/v0.4.6.md) |
+| GitHub About / homepage / topics | Applied through governance automation | [Repository governance](github-governance.md) |
+| Branch protection | `master` protected; strict admin enforcement is part of the v0.4.7 gate | [Branch protection](branch-protection.md) |
+| Dependabot queue | Deferred-major PRs are closed; remaining safe PRs are curated by policy | [Dependabot cleanup](dependabot-cleanup-v0.4.md) |
+| E2E smoke | Self-starting desktop and mobile frontend smoke | `cd frontend && npm run e2e:all` |
 
-Claude AI assistant:
+## Reviewer Quick Links
 
-![Claude AI assistant](screenshots/assistant-page.png)
-
-Operations evidence from the local stack:
-
-| AI Provider Ops | Mailpit SMTP Sandbox |
+| Need | Open |
 |---|---|
-| ![AI provider operations](screenshots/ops-ai-provider.png) | ![Mailpit sandbox](screenshots/ops-mailpit.png) |
+| Canonical evidence pack | [REVIEW_EVIDENCE.md](REVIEW_EVIDENCE.md) |
+| 5 / 15 / 30 minute review route | [professional-review-map.md](professional-review-map.md) |
+| Production scorecard | [production-engineering-scorecard.md](production-engineering-scorecard.md) |
+| Runtime proof | [runtime-evidence-v0.4.md](runtime-evidence-v0.4.md) |
+| Service catalog | [service-catalog.md](service-catalog.md) |
+| Architecture decisions | [architecture-review-index.md](architecture-review-index.md) |
+| API compatibility | [api-compatibility.md](api-compatibility.md) |
+| Security and supply chain | [security-evidence.md](security-evidence.md) |
+| Cloud blueprint | [cloud-readiness-review.md](cloud-readiness-review.md) |
+| Demo script | [demo-script.md](demo-script.md) |
 
-| OpenAPI Job Service | Prometheus SLO Rules | Grafana SLO Dashboard |
-|---|---|---|
-| ![OpenAPI job service](screenshots/ops-openapi-job-service.png) | ![Prometheus rules](screenshots/ops-prometheus-rules.png) | ![Grafana SLO dashboard](screenshots/ops-grafana-slo.png) |
+Fast local verification:
 
-The Prometheus and Grafana images are rendered from `infra/prometheus/rules/devhire-slo.yml` and `infra/grafana/dashboards/devhire-slo-overview.json`, so reviewers see the actual alert rules, panel inventory, queries, and SLO scope instead of a blank loading UI.
+```powershell
+.\scripts\portfolio-verify.ps1 -Docs -Docker
+```
 
-## Architecture Snapshot
+Frontend E2E without Docker:
 
-- `api-gateway` is the public ingress for JWT validation, routing, CORS, and Redis rate limiting.
-- Each backend service owns its PostgreSQL database and Flyway migrations.
-- Kafka domain events are published through transactional outbox tables.
-- Notification and audit consumers are idempotent.
-- Job search uses OpenSearch with PostgreSQL fallback.
-- `ai-service` answers recruiter questions with Claude Haiku, citations, tool traces, metrics, and safe fallback mode.
-- Observability is wired through Actuator, Prometheus, Grafana, OpenTelemetry, Tempo, and Loki.
+```powershell
+cd frontend
+npm ci
+npm run e2e:all
+```
+
+Full runtime gate after the Docker stack is running:
+
+```powershell
+.\scripts\portfolio-verify.ps1 -Runtime -GatewayUrl http://localhost:8080
+```
+
+## Architecture
+
+```mermaid
+flowchart LR
+    Browser["Next.js Frontend :3001"] --> Gateway["api-gateway :8080"]
+    Client["API client / docs/api.http"] --> Gateway
+    Gateway --> Auth["auth-service :8081"]
+    Gateway --> User["user-service :8082"]
+    Gateway --> Company["company-service :8083"]
+    Gateway --> Job["job-service :8084"]
+    Gateway --> Application["application-service :8085"]
+    Gateway --> Notification["notification-service :8086"]
+    Gateway --> Audit["audit-service :8087"]
+    Gateway --> AI["ai-service :8088"]
+    Application --> Kafka["Kafka topics"]
+    Job --> Search["OpenSearch"]
+    Notification --> Mailpit["Mailpit / SMTP"]
+    Auth --> Redis["Redis"]
+    Auth --> PgAuth[("PostgreSQL auth DB")]
+    User --> PgUser[("PostgreSQL user DB")]
+    Company --> PgCompany[("PostgreSQL company DB")]
+    Job --> PgJob[("PostgreSQL job DB")]
+    Application --> PgApp[("PostgreSQL application DB")]
+    Notification --> PgNotification[("PostgreSQL notification DB")]
+    Audit --> PgAudit[("PostgreSQL audit DB")]
+    AI --> PgAI[("PostgreSQL AI DB")]
+```
 
 ## Services
 
 | Service | Port | Responsibility |
 |---|---:|---|
-| api-gateway | 8080 | Public ingress, JWT validation, routing, CORS, rate limiting |
-| auth-service | 8081 | Register, login, refresh rotation, logout, current user |
-| user-service | 8082 | Candidate and employer profiles |
-| company-service | 8083 | Company onboarding and admin review |
-| job-service | 8084 | Job workflow and OpenSearch search |
-| application-service | 8085 | Candidate applications, status changes, history |
-| notification-service | 8086 | Internal notifications and optional SMTP delivery |
-| audit-service | 8087 | Audit ingestion and admin log search |
-| ai-service | 8088 | Claude Haiku assistant, RAG context, conversations, metrics, audit |
-| frontend | 3001 | Next.js role dashboards and job browsing |
+| `api-gateway` | 8080 | Public ingress, JWT validation, CORS, Redis rate limiting, routing |
+| `auth-service` | 8081 | Register, login, refresh rotation, logout, `/auth/me`, demo accounts |
+| `user-service` | 8082 | Candidate and employer profile management |
+| `company-service` | 8083 | Employer company onboarding and admin approval workflow |
+| `job-service` | 8084 | Job CRUD, review workflow, search/filter/page/sort |
+| `application-service` | 8085 | Candidate applications, duplicate prevention, status history |
+| `notification-service` | 8086 | Internal notifications, SMTP queue, Mailpit/Gmail profiles |
+| `audit-service` | 8087 | Kafka audit ingestion and admin audit filters |
+| `ai-service` | 8088 | Claude Haiku assistant, conversations, RAG context, tool traces |
+| `frontend` | 3001 | Next.js job browsing, dashboards, assistant workspace |
 
-## Run
+## Main Business Flow
+
+1. Candidate, employer, or admin signs in through the gateway.
+2. Employer creates a company profile.
+3. Admin approves or rejects the company.
+4. Employer creates and submits a job for review.
+5. Admin approves the job and it becomes searchable.
+6. Candidate searches jobs, opens job detail, and applies with a CV URL.
+7. Employer reviews applications and changes status.
+8. Candidate receives internal and optional email notifications.
+9. Audit service records important actions.
+10. AI assistant explains the platform, demo route, jobs, risks, and operations evidence with citations.
+
+## Run Locally
 
 ```bash
 docker compose up --build
 ```
 
-- Frontend: `http://localhost:3001`
-- Gateway: `http://localhost:8080`
-- Grafana: `http://localhost:3000`
-- Prometheus: `http://localhost:9090`
-- OpenSearch: `http://localhost:9200`
-- Mailpit email sandbox: `http://localhost:8025`
-- Assistant: `http://localhost:3001/assistant`
+Local URLs:
 
-## Verify
+| Component | URL |
+|---|---|
+| Frontend | `http://localhost:3001` |
+| API Gateway | `http://localhost:8080` |
+| Swagger through services | `/swagger-ui.html` on each service port |
+| Grafana | `http://localhost:3000` |
+| Prometheus | `http://localhost:9090` |
+| OpenSearch | `http://localhost:9200` |
+| Mailpit | `http://localhost:8025` |
+| AI assistant | `http://localhost:3001/assistant` |
+
+## Verification Commands
+
+Backend:
 
 ```bash
 mvn -T1 clean verify
 ```
 
+Coverage:
+
+```powershell
+.\scripts\check-coverage.ps1
+```
+
+Frontend:
+
 ```powershell
 cd frontend
-npm ci
 npm run typecheck
 npm run build
+npm run e2e:all
 ```
 
+Runtime smoke:
+
 ```powershell
-./scripts/api-smoke.ps1 -GatewayUrl http://localhost:8080
+.\scripts\api-smoke.ps1 -GatewayUrl http://localhost:8080
+.\scripts\ai-eval.ps1 -GatewayUrl http://localhost:8080
+.\scripts\email-smoke.ps1 -GatewayUrl http://localhost:8080 -MailpitUrl http://localhost:8025
+.\scripts\openapi-verify.ps1 -GatewayUrl http://localhost:8080
+.\scripts\perf-suite.ps1 -GatewayUrl http://localhost:8080 -Scenario all -Vus 5 -Duration 30s -UseDocker
 ```
 
-```powershell
-./scripts/ai-eval.ps1 -GatewayUrl http://localhost:8080
-```
-
-Operations smoke gates:
+Repository evidence:
 
 ```powershell
-./scripts/email-smoke.ps1 -GatewayUrl http://localhost:8080 -MailpitUrl http://localhost:8025
-./scripts/openapi-verify.ps1 -GatewayUrl http://localhost:8080
-./scripts/perf-suite.ps1 -GatewayUrl http://localhost:8080 -Scenario all -Vus 5 -Duration 30s -UseDocker
-./scripts/chaos-smoke.ps1 -GatewayUrl http://localhost:8080 -Scenario all -Recover
-./scripts/dr-verify.ps1 -GatewayUrl http://localhost:8080
+.\scripts\docs-quality.ps1
+.\scripts\evidence-audit.ps1
+.\scripts\repo-hygiene.ps1
+.\scripts\public-portfolio-audit.ps1
+.\scripts\github-facade-assert.ps1 -AllowOwnerActions
 ```
 
 ## Demo Accounts
 
 | Role | Email | Password |
 |---|---|---|
-| ADMIN | `admin@devhire.local` | `Admin@123456` |
-| EMPLOYER | `employer@devhire.local` | `Employer@123456` |
-| CANDIDATE | `candidate@devhire.local` | `Candidate@123456` |
+| Admin | `admin@devhire.local` | `Admin@123456` |
+| Employer | `employer@devhire.local` | `Employer@123456` |
+| Candidate | `candidate@devhire.local` | `Candidate@123456` |
 
-## Production Highlights
+## Portfolio Screenshots
 
-- Java 21, Spring Boot 3.5.13, Spring Cloud 2025.0.2.
-- Service-owned databases, Flyway, constraints, indexes, and optimistic locking.
-- Gateway JWT validation, refresh token rotation, Redis token blacklist, CORS, and rate limiting.
-- Kafka, transactional outbox, idempotent consumers, and audit events.
-- OpenSearch search adapter with PostgreSQL fallback.
-- Claude Haiku AI assistant with citations, streaming UI, provider circuit breaker, metrics, and audit events.
-- SMTP notification delivery queue with retry/backoff and persisted delivery status.
-- Standard error response with trace ID.
-- Docker Compose full stack, Helm, Argo CD, Kubernetes, and AWS Terraform blueprint.
-- GitHub Actions CI/CD, Trivy, Gitleaks, SBOM, Dependabot, AI eval, role-based k6, chaos smoke, OpenAPI conformance, DR verification, and Playwright E2E.
-- Mailpit local email sandbox with real SMTP capture and Gmail optional secret-backed mode.
-- External Secrets Operator wiring for AWS Secrets Manager through Helm and Argo CD.
+Screenshots are generated from the real frontend through Playwright and Docker/runtime checks, then promoted into `docs/screenshots`.
 
-## Key Docs
+| Jobs | Job Detail |
+|---|---|
+| ![Jobs page](screenshots/jobs-page.png) | ![Job detail](screenshots/job-detail.png) |
 
-- [Reviewer evidence pack](REVIEW_EVIDENCE.md)
-- [Architecture](architecture.md)
-- [Portfolio case study](portfolio-case-study.md)
-- [Production readiness](production-readiness.md)
-- [Security and supply chain](security.md)
-- [Deployment runbook](deployment.md)
-- [SLO operations](slo.md)
-- [Claude AI assistant](ai-assistant.md)
-- [Claude Haiku provider](claude-haiku.md)
-- [AI evaluation gate](ai-evaluation.md)
-- [AWS Terraform blueprint](aws-terraform.md)
-- [Unified verification runner](verification.md)
-- [External Secrets and GitOps](external-secrets.md)
-- [Email sandbox](email-sandbox.md)
-- [Backup and restore runbook](runbooks/backup-restore.md)
-- [Release evidence v0.3.0](release-evidence/v0.3.0.md)
-- [Release evidence v0.4.0](release-evidence/v0.4.0.md)
-- [Release evidence v0.4.4](release-evidence/v0.4.4.md)
-- [Recruiter review guide](recruiter-review-guide.md)
-- [Release notes v0.3.0](release-notes/v0.3.0.md)
-- [Release notes v0.4.0](release-notes/v0.4.0.md)
-- [10-minute demo script](demo-script.md)
-- [GitHub profile checklist](github-profile.md)
+| Candidate | Employer | Admin |
+|---|---|---|
+| ![Candidate dashboard](screenshots/candidate-dashboard.png) | ![Employer dashboard](screenshots/employer-dashboard.png) | ![Admin dashboard](screenshots/admin-dashboard.png) |
 
-## Roadmap After v0.4.x
+![Claude AI assistant](screenshots/assistant-page.png)
 
-- Deploy the blueprint to a real AWS staging account.
-- Add long-running soak tests and automated error-budget burn simulations.
-- Add production-grade email provider sandbox validation.
-- Add signed container provenance enforcement before release.
+| OpenAPI | Prometheus Rules | Grafana SLO |
+|---|---|---|
+| ![OpenAPI job service](screenshots/ops-openapi-job-service.png) | ![Prometheus rules](screenshots/ops-prometheus-rules.png) | ![Grafana SLO dashboard](screenshots/ops-grafana-slo.png) |
+
+## Why This Looks Like Production Engineering
+
+- The repository includes service code, migrations, tests, Dockerfiles, GitHub workflows, Helm, Terraform, runbooks, SLO dashboards, and evidence scripts.
+- Runtime claims are mapped to commands instead of prose-only assertions.
+- GitHub repository metadata, branch protection, Dependabot triage, release evidence, and workflow status are treated as part of the product surface.
+- Sensitive configuration is environment-driven; `.env`, tokens, SMTP credentials, AWS credentials, generated reports, backups, and `tfstate` are ignored.
+- Heavy gates are separated from fast reviewer gates so the project remains inspectable without pretending every expensive smoke test should block each pull request.
+
+## Roadmap
+
+- Deploy the AWS blueprint into a real staging account.
+- Add longer soak tests and automated error-budget burn simulations.
+- Enforce signed container provenance before production release.
+- Add a real email provider sandbox validation outside local Mailpit.
+- Add more consumer-driven contracts for every synchronous internal API.

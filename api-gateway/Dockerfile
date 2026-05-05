@@ -12,7 +12,6 @@ COPY application-service/pom.xml application-service/pom.xml
 COPY notification-service/pom.xml notification-service/pom.xml
 COPY audit-service/pom.xml audit-service/pom.xml
 COPY ai-service/pom.xml ai-service/pom.xml
-RUN mvn -B -T1 -pl ${SERVICE_NAME} -am dependency:go-offline
 COPY common-lib/src common-lib/src
 COPY ${SERVICE_NAME}/src ${SERVICE_NAME}/src
 RUN mvn -B -T1 -pl ${SERVICE_NAME} -am package -DskipTests
@@ -32,6 +31,7 @@ LABEL org.opencontainers.image.title="DevHire Cloud api-gateway" \
       org.opencontainers.image.licenses="MIT"
 ENV APP_HOME=/app
 WORKDIR ${APP_HOME}
+RUN apk upgrade --no-cache
 RUN addgroup -S devhire && adduser -S devhire -G devhire
 COPY --from=build /workspace/${SERVICE_NAME}/target/${SERVICE_NAME}-*.jar app.jar
 USER devhire

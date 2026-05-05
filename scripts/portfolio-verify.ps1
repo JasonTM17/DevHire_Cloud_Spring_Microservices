@@ -184,7 +184,7 @@ function Write-PortfolioReport {
     $lines.Add("|---|---|---:|---|")
     foreach ($step in $steps) {
         $safeCommand = $step.command.Replace("|", "\|")
-        $lines.Add("| $($step.name) | $($step.status) | $($step.durationSeconds)s | `$safeCommand` |")
+        $lines.Add("| $($step.name) | $($step.status) | $($step.durationSeconds)s | ``$safeCommand`` |")
     }
     $lines | Set-Content -Path $mdPath -Encoding UTF8
 
@@ -230,6 +230,9 @@ try {
     if ($PublicFacade) {
         Invoke-PortfolioStep "public GitHub facade assertion" ".\scripts\github-facade-assert.ps1 -AllowOwnerActions" {
             & "$PSScriptRoot\github-facade-assert.ps1" -AllowOwnerActions
+        }
+        Invoke-PortfolioStep "public GitHub workflow status" ".\scripts\github-workflow-status.ps1" {
+            & "$PSScriptRoot\github-workflow-status.ps1"
         }
     }
 

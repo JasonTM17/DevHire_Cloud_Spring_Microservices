@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: "Preview, label safe batches, or close deferred major Dependabot PRs."
+        description: "Preview, label safe batches, close deferred major PRs, or run zero-noise policy."
         required: true
         type: choice
         default: dry-run
@@ -12,6 +12,7 @@ on:
           - dry-run
           - label-safe
           - close-deferred
+          - zero-noise
 
 permissions:
   contents: read
@@ -46,6 +47,8 @@ jobs:
             ./scripts/dependabot-curate.ps1 -Apply -SafeOnly
           } elseif ($mode -eq "close-deferred") {
             ./scripts/dependabot-curate.ps1 -Apply -CloseDeferred
+          } elseif ($mode -eq "zero-noise") {
+            ./scripts/dependabot-zero-noise.ps1 -Apply
           } else {
             throw "Unsupported Dependabot curation mode: $mode"
           }
@@ -55,5 +58,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: dependabot-curation-reports
-          path: reports/dependabot-curate/
+          path: |
+            reports/dependabot-curate/
+            reports/dependabot-zero-noise/
           if-no-files-found: ignore

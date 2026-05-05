@@ -2,12 +2,11 @@
 
 These actions require repository owner permissions and are intentionally not forced by CI. Use `scripts/github-governance.ps1 -DryRun` to preview the repository metadata, release, and branch-protection state.
 
-Current local verification on 2026-05-05:
+Current verification on 2026-05-05:
 
-- `scripts/github-governance.ps1 -DryRun` produced the metadata payload below and checked the public release/branch state.
-- v0.4.3 verification also found `GITHUB_TOKEN` was not set in the local shell, so `-Apply` was intentionally skipped.
-- GitHub API reported the repository is public, with empty About description, homepage, and topics. These remain owner actions until a short-lived owner token is available.
-- Owner-authenticated GitHub API now reports repository metadata applied and `master protected=true`.
+- `scripts/github-governance.ps1 -DryRun` produces the metadata payload below and checks the public release/branch state.
+- Owner-authenticated GitHub API reports repository metadata applied and `master protected=true`.
+- Public facade assertion now treats `master protected=true` from the public branch endpoint as pass even when detailed `/protection` reads require owner permissions.
 - GitHub API reported release `v0.3.0` is visible.
 - The older `scripts/github-repo-polish.ps1` remains for compatibility; `scripts/github-governance.ps1` is now the preferred owner-facing automation.
 
@@ -38,6 +37,7 @@ Protect `master` with:
 - require pull request before merge,
 - require Code Owners review,
 - require status checks before merge,
+- apply rules to administrators,
 - block force pushes,
 - block branch deletion,
 - require conversation resolution.
@@ -124,18 +124,18 @@ This route is still owner-controlled. It makes the desired GitHub state reviewab
 
 ## Latest Verification Output
 
-The latest v0.4.5 local dry-run reported:
+The latest v0.4.7 target state is:
 
 ```text
-description current : empty
-homepage current    : empty
-topics current      : 0
+description current : set
+homepage current    : set
+topics current      : 20
 release v0.3.0      : visible
-branch protected    : false
-dependabot PRs      : 20
+branch protected    : true
+dependabot PRs      : 12 before zero-noise cleanup
 ```
 
-This means the source repository now contains audited automation plus `.github/settings.yml`, but the public GitHub facade still needs owner execution or GitHub Settings app reconciliation.
+The remaining public cleanup item is dependency queue noise. The v0.4.7 zero-noise pass can merge clean safe PRs and close/defer the rest through audited comments.
 
 ## API Verification Snapshot
 
@@ -193,6 +193,6 @@ The expected topics payload is:
 - [x] Audit required check contexts before branch protection.
 - [x] Enable branch protection on `master`.
 - [x] Verify facade state with owner-authenticated GitHub API.
-- [ ] Add repository secret `REPO_GOVERNANCE_TOKEN` later if you want future browser-free governance workflow runs.
+- [ ] Add or keep repository secret `REPO_GOVERNANCE_TOKEN` if you want future browser-free governance workflow runs.
 - [x] Confirm release `v0.3.0` is public.
 - [ ] Confirm GHCR images are visible or document account limitation.

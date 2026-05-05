@@ -63,6 +63,9 @@ try {
     Add-Step "Dependabot curation dry-run" ".\scripts\dependabot-curate.ps1 -DryRun" {
         & "$PSScriptRoot\dependabot-curate.ps1" -DryRun
     }
+    Add-Step "Dependabot zero-noise dry-run" ".\scripts\dependabot-zero-noise.ps1 -DryRun" {
+        & "$PSScriptRoot\dependabot-zero-noise.ps1" -DryRun
+    }
     Add-Step "Screenshot manifest verification" ".\scripts\evidence-manifest-verify.ps1" {
         & "$PSScriptRoot\evidence-manifest-verify.ps1"
     }
@@ -119,14 +122,14 @@ $lines.Add("| Evidence | Status | Command |")
 $lines.Add("|---|---|---|")
 foreach ($step in $steps) {
     $safeCommand = $step.command.Replace("|", "\|")
-    $lines.Add("| $($step.name) | $($step.status) | `$safeCommand` |")
+    $lines.Add("| $($step.name) | $($step.status) | ``$safeCommand`` |")
 }
 $lines.Add("")
 $lines.Add("## Interpretation")
 $lines.Add("")
-$lines.Add("- `owner_action_required` inside GitHub facade reports is expected until an owner runs the Repository Governance workflow with `REPO_GOVERNANCE_TOKEN`.")
-$lines.Add("- Dependabot dry-run evidence should show safe batches retained and deferred major updates ready to close through the manual curation workflow.")
-$lines.Add("- Raw generated reports stay under `reports/` and are intentionally ignored.")
+$lines.Add('- GitHub facade reports pass in `public-limited` mode when the public branch endpoint confirms `protected=true`; detailed `/protection` reads require an owner token.')
+$lines.Add("- Dependabot evidence should show zero-noise policy status: safe PRs merged only when checks are readable and green, otherwise deferred with comments.")
+$lines.Add('- Raw generated reports stay under `reports/` and are intentionally ignored.')
 $lines | Set-Content -Path $mdPath -Encoding UTF8
 
 Write-Host "Public portfolio audit: $status"

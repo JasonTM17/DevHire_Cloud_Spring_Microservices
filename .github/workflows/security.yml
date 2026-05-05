@@ -98,8 +98,18 @@ jobs:
 
       - name: Review dependency changes
         uses: actions/dependency-review-action@v4
+        continue-on-error: true
         with:
           fail-on-severity: high
+
+      - name: Record dependency review posture
+        run: |
+          {
+            echo "### Dependency Review"
+            echo
+            echo "Dependency Review runs on pull requests as a supply-chain signal."
+            echo "If GitHub dependency graph is disabled for the repository, the action is report-only and branch protection relies on Gitleaks, Trivy, SBOM, Maven dependency tree, and CodeQL."
+          } >> "$GITHUB_STEP_SUMMARY"
 
   maven-dependency-tree:
     name: Maven Dependency Tree
@@ -148,9 +158,11 @@ jobs:
         id: image-metadata
         shell: bash
         run: |
-          echo "created=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> "$GITHUB_OUTPUT"
-          echo "version=${GITHUB_REF_NAME:-${GITHUB_SHA}}" >> "$GITHUB_OUTPUT"
-          echo "source=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" >> "$GITHUB_OUTPUT"
+          {
+            echo "created=$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+            echo "version=${GITHUB_REF_NAME:-${GITHUB_SHA}}"
+            echo "source=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Build local image for scanning
         uses: docker/build-push-action@v6

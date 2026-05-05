@@ -3,6 +3,7 @@ param(
     [switch]$AllowOwnerActions,
     [switch]$MetadataOnly,
     [switch]$BranchProtectionOnly,
+    [switch]$RequireProtectionDetails,
 
     [string]$Owner = "JasonTM17",
     [string]$Repo = "DevHire_Cloud_Spring_Microservices",
@@ -56,13 +57,14 @@ $token = if (-not [string]::IsNullOrWhiteSpace($env:GITHUB_TOKEN)) {
 } else {
     $null
 }
+$tokenPresent = -not [string]::IsNullOrWhiteSpace($token)
 
 $headers = @{
     "Accept" = "application/vnd.github+json"
     "X-GitHub-Api-Version" = "2022-11-28"
     "User-Agent" = "DevHire-GitHub-Facade-Assert"
 }
-if (-not [string]::IsNullOrWhiteSpace($token)) {
+if ($tokenPresent) {
     $headers["Authorization"] = "Bearer $token"
 }
 
@@ -130,9 +132,17 @@ if (-not $BranchProtectionOnly) {
 
 if (-not $MetadataOnly) {
     $branchProtected = if ($branchResult.ok) { [bool]$branchResult.value.protected } else { $false }
-    $protectionReadable = $protectionResult.ok
+    $protectionDetailsRequired = [bool]$RequireProtectionDetails -or $tokenPresent
     $checks.Add((New-Check -Name "branch protected" -Passed $branchProtected -Details "protected=$branchProtected"))
-    $checks.Add((New-Check -Name "branch protection readable" -Passed $protectionReadable -Details "statusCode=$($protectionResult.statusCode)"))
+
+    if ($protectionResult.ok) {
+        $checks.Add((New-Check -Name "branch protection details" -Passed $true -Details "readable=true"))
+    } elseif (-not $protectionDetailsRequired -and $branchProtected -and $protectionResult.statusCode -in @(401, 403)) {
+        $checks.Add((New-Check -Name "branch protection details" -Passed $true -Details "public-limited statusCode=$($protectionResult.statusCode); branch endpoint confirms protected=true"))
+    } else {
+        $detailMode = if ($protectionDetailsRequired) { "required" } else { "best-effort" }
+        $checks.Add((New-Check -Name "branch protection details" -Passed $false -Details "$detailMode statusCode=$($protectionResult.statusCode)"))
+    }
 }
 
 $failedChecks = @($checks | Where-Object { -not $_.passed })
@@ -148,8 +158,9 @@ $summary = [pscustomobject]@{
     status = $status
     generatedAt = (Get-Date).ToString("o")
     repository = "$Owner/$Repo"
-    tokenPresent = -not [string]::IsNullOrWhiteSpace($token)
+    tokenPresent = $tokenPresent
     allowOwnerActions = [bool]$AllowOwnerActions
+    requireProtectionDetails = [bool]$RequireProtectionDetails
     checks = @($checks)
     failedChecks = @($failedChecks)
 }
