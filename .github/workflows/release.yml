@@ -58,10 +58,12 @@ jobs:
           else
             version="${GITHUB_REF_NAME}"
           fi
-          echo "IMAGE_NAME=ghcr.io/${owner}/devhire/${{ matrix.service }}" >> "${GITHUB_ENV}"
-          echo "VERSION_TAG=${version}" >> "${GITHUB_ENV}"
-          echo "BUILD_CREATED=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> "${GITHUB_ENV}"
-          echo "VCS_URL=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" >> "${GITHUB_ENV}"
+          {
+            echo "IMAGE_NAME=ghcr.io/${owner}/devhire/${{ matrix.service }}"
+            echo "VERSION_TAG=${version}"
+            echo "BUILD_CREATED=$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+            echo "VCS_URL=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}"
+          } >> "${GITHUB_ENV}"
 
       - name: Build and push image
         uses: docker/build-push-action@v6

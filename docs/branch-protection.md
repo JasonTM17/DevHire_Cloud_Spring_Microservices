@@ -14,6 +14,7 @@ Recommended protection for `master`:
 | Dismiss stale approvals | Enabled |
 | Require conversation resolution | Enabled |
 | Require branches up to date before merge | Enabled through strict status checks |
+| Apply rules to administrators | Enabled |
 | Force pushes | Blocked |
 | Branch deletion | Blocked |
 
@@ -68,6 +69,7 @@ Set:
 - Dismiss stale pull request approvals when new commits are pushed
 - Require status checks to pass before merging
 - Require branches to be up to date before merging
+- Do not allow administrators to bypass the rules
 - Add required checks: `Maven Verify`, `Portfolio docs quality`, `Gitleaks Secret Scan`, `Trivy Filesystem Scan`, `Generate SBOM`, `Maven Dependency Tree`, `Build api-gateway`, `Build frontend`, `Analyze java-kotlin`, `Analyze javascript-typescript`
 - Require conversation resolution before merging
 - Block force pushes

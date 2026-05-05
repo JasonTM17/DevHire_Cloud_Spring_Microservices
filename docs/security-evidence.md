@@ -10,7 +10,7 @@ This page maps DevHire Cloud security controls to concrete repository evidence. 
 | Filesystem vulnerability scan | `.github/workflows/security.yml` | push, pull request, schedule | Trivy scans the repository and uploads a report artifact. |
 | Docker image scan | `.github/workflows/security.yml` | pull request, manual, schedule | Trivy scans each service image and fails on actionable HIGH/CRITICAL findings. |
 | SBOM | `.github/workflows/security.yml` | push, pull request, schedule | Anchore Syft emits a CycloneDX SBOM artifact. |
-| Dependency review | `.github/workflows/security.yml` | pull request | GitHub dependency review fails high-severity dependency changes. |
+| Dependency review | `.github/workflows/security.yml` | pull request | GitHub dependency review runs as a supply-chain signal; if GitHub dependency graph is unavailable, the job records the limitation while the hard gates remain Gitleaks, Trivy, SBOM, Maven dependency tree, and CodeQL. |
 | Static application analysis | `.github/workflows/codeql.yml` | push, pull request, schedule | CodeQL analyzes Java/Kotlin and JavaScript/TypeScript. |
 | OpenSSF posture | `.github/workflows/scorecard.yml` | manual, schedule, targeted pull request | Scorecard SARIF is uploaded as an artifact first, then can become a harder gate later. |
 | Dependabot triage | `.github/workflows/dependency-maintenance.yml` | manual, weekly | Open Dependabot PRs are grouped into low-risk, medium-risk, and deferred major batches. |
@@ -27,7 +27,7 @@ Every backend service image and the Next.js frontend image now carries Open Cont
 
 The `Docker Images` and `Security` workflows pass these values during pull request and branch builds. The `Release Images` workflow publishes the same metadata to GHCR and tags every image by both release version and commit SHA. SBOM generation and Trivy scanning then attach to images that can be traced back to repository source, commit, and release evidence.
 
-Trivy filesystem scanning blocks critical repository vulnerabilities. Trivy image scanning now runs for pull requests, manual runs, and schedules, and it fails on actionable HIGH/CRITICAL image vulnerabilities instead of only uploading advisory artifacts.
+Trivy filesystem scanning blocks critical repository vulnerabilities. Trivy image scanning now runs for pull requests, manual runs, and schedules, and it fails on actionable HIGH/CRITICAL image vulnerabilities instead of only uploading advisory artifacts. Runtime Docker images run `apk upgrade --no-cache` during image build so fixed Alpine packages, such as security-patched TLS libraries, are pulled into the final non-root image layers. The Maven parent also pins `tomcat.version` when a patched embedded Tomcat line is available before the next Spring Boot service release.
 
 ## Runtime Security Controls
 

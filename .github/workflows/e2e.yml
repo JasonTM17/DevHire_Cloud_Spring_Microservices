@@ -1,6 +1,9 @@
 name: E2E Smoke
 
 on:
+  push:
+    branches:
+      - master
   pull_request:
   workflow_dispatch:
   schedule:

@@ -2809,6 +2809,49 @@ Notes:
 
 - Public portfolio audit passes while still reporting the true owner-only blocker: GitHub About/Homepage/Topics are empty and `master protected=false` until governance apply runs with `REPO_GOVERNANCE_TOKEN`.
 
+## v0.4.7 Public finalization preparation
+
+- Fixed `scripts/github-facade-assert.ps1` so public branch API `protected=true` is accepted as the public reviewer signal when `/protection` detail is owner-token limited.
+- Updated `scripts/github-governance.ps1` and `.github/settings.yml` to enforce admin protection bypass removal.
+- Added `scripts/dependabot-zero-noise.ps1` for the final dependency queue burn-down policy: merge only clean green safe PRs, close/defer the rest with comments.
+- Added `scripts/github-workflow-status.ps1` to validate CI, Docker Images, Documentation, Security, CodeQL, and E2E Smoke against the latest `master` head SHA.
+- Updated public evidence docs so they no longer report stale owner-action blockers after the public facade has already been applied.
+
+Verification before commit:
+
+- Passed `.\scripts\github-facade-assert.ps1`.
+- Passed `.\scripts\dependabot-zero-noise.ps1 -DryRun`; public queue had 12 PRs, all close/defer candidates because no remaining PR met clean-and-green merge criteria.
+- `.\scripts\github-workflow-status.ps1` ran and reported CI, Docker Images, Documentation, Security, and CodeQL green for `a5a3ae8`; E2E Smoke was missing on `master` because the workflow did not previously trigger on push. v0.4.7 adds that trigger.
+- Passed `.\scripts\docs-quality.ps1`.
+- Passed `.\scripts\evidence-audit.ps1`.
+- Passed `.\scripts\evidence-manifest-verify.ps1`.
+- Passed `.\scripts\repo-hygiene.ps1`.
+- Passed `.\scripts\domain-placeholder-audit.ps1`.
+- Passed `.\scripts\professionalism-audit.ps1`.
+- Passed `.\scripts\public-portfolio-audit.ps1`.
+- Passed `.\scripts\public-portfolio-audit.ps1 -RunE2E` after switching `dependabot-zero-noise.ps1` from Search API to the open-pulls API, avoiding Search API 403 during owner-token runs.
+- Passed `.\scripts\portfolio-verify.ps1 -Docs -Docker -PublicFacade`.
+- Passed `cd frontend; npm run e2e:all`.
+- Passed `mvn -T1 clean verify`.
+- Passed `.\scripts\check-coverage.ps1`.
+- Passed `docker run --rm -v "${PWD}:/repo" -w /repo rhysd/actionlint:latest`.
+- PR check review found Trivy Image Scan failures caused by fixed Alpine `gnutls` findings in runtime base images; all service Dockerfiles now run `apk upgrade --no-cache` in the final runtime stage instead of weakening the scan.
+- PR check review then found embedded Tomcat HIGH findings in servlet services; the parent build pins `tomcat.version` to `10.1.54`, the fixed line available on Maven Central, instead of disabling Trivy library scanning.
+- PR check review found GitHub Dependency Review unsupported because dependency graph is an owner account setting; the workflow now records that limitation while keeping Gitleaks, Trivy, SBOM, Maven dependency tree, and CodeQL as hard gates.
+
+Notes:
+
+- `.\scripts\github-check-contexts.ps1 -RequireAvailable` needs an owner token or workflow token; without token GitHub returned 403. This is expected for strict apply and will be rerun with a token before branch protection is re-applied.
+- Follow-up PR check review found two Docker hardening gaps:
+  - frontend Trivy was scanning the bundled global `npm` tree in the runtime image, so the final stage now removes `npm`/`npx` after build because the standalone Next.js runtime does not need them;
+  - `job-service` Docker build failed in a cache-only `dependency:go-offline` step, so Java service Dockerfiles now rely on the real Maven package build as the source of truth instead of a brittle prefetch step.
+- Restored the trilingual documentation surface: root README now links Vietnamese, English, and Japanese immediately, and `docs/README_EN.md` plus `docs/README_JA.md` were rewritten as reviewer-facing production case studies rather than short summaries.
+- Local Docker verification after the fix:
+  - passed `docker build -f frontend/Dockerfile -t devhire-frontend:local .`;
+  - passed `docker build -f job-service/Dockerfile -t devhire-job-service:local .`;
+  - passed `docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy:0.67.2 image --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 devhire-frontend:local`;
+  - passed `docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy:0.67.2 image --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 devhire-job-service:local`.
+
 ## v0.4.6 Phase 125 - README first-screen reviewer polish
 
 - Added a public GitHub status matrix to the README first viewport.
