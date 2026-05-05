@@ -1,5 +1,7 @@
 [CmdletBinding()]
 param(
+    [switch]$RequireAvailable,
+
     [string]$Owner = "JasonTM17",
     [string]$Repo = "DevHire_Cloud_Spring_Microservices",
     [string]$Branch = "master",
@@ -54,16 +56,72 @@ function Invoke-GitHubJson {
 
     try {
         $value = Invoke-RestMethod -Method Get -Uri $Uri -Headers $headers
-        [pscustomobject]@{ ok = $true; value = $value; error = $null }
+        [pscustomobject]@{ ok = $true; statusCode = 200; value = $value; error = $null }
     } catch {
-        [pscustomobject]@{ ok = $false; value = $null; error = $_.Exception.Message }
+        $statusCode = $null
+        if ($_.Exception.Response -and $_.Exception.Response.StatusCode) {
+            $statusCode = [int]$_.Exception.Response.StatusCode
+        }
+        [pscustomobject]@{ ok = $false; statusCode = $statusCode; value = $null; error = $_.Exception.Message }
     }
 }
 
 $apiRoot = "https://api.github.com/repos/$Owner/$Repo"
 $runsResult = Invoke-GitHubJson -Uri "$apiRoot/actions/runs?branch=$Branch&per_page=30"
 if (-not $runsResult.ok) {
-    throw "Cannot read workflow runs: $($runsResult.error)"
+    $tokenPresent = -not [string]::IsNullOrWhiteSpace($token)
+    $softUnavailable = -not $RequireAvailable -and -not $tokenPresent -and $runsResult.statusCode -in @(401, 403, 429)
+
+    $summary = [ordered]@{
+        status = "unavailable"
+        generatedAt = (Get-Date).ToString("o")
+        repository = "$Owner/$Repo"
+        branch = $Branch
+        tokenPresent = $tokenPresent
+        requireAvailable = [bool]$RequireAvailable
+        expectedContexts = $ExpectedContexts
+        observedContexts = @()
+        missingContexts = $ExpectedContexts
+        successfulJobs = @()
+        unavailableReason = "Cannot read workflow runs: $($runsResult.error)"
+        statusCode = $runsResult.statusCode
+    }
+
+    $stamp = Get-Date -Format "yyyyMMdd-HHmmss"
+    $jsonPath = Join-Path $outputRoot "github-check-contexts-$stamp.json"
+    $mdPath = Join-Path $outputRoot "github-check-contexts-$stamp.md"
+    $summary | ConvertTo-Json -Depth 20 | Set-Content -Path $jsonPath -Encoding UTF8
+
+    $lines = [System.Collections.Generic.List[string]]::new()
+    $lines.Add("# GitHub Required Check Context Audit")
+    $lines.Add("")
+    $lines.Add("- Status: unavailable")
+    $lines.Add("- Repository: $Owner/$Repo")
+    $lines.Add("- Branch: $Branch")
+    $lines.Add("- Generated: $($summary.generatedAt)")
+    $lines.Add("- Token present: $tokenPresent")
+    $lines.Add("- Require available: $([bool]$RequireAvailable)")
+    $lines.Add("- HTTP status: $($runsResult.statusCode)")
+    $lines.Add("- Reason: $($summary.unavailableReason)")
+    $lines.Add("")
+    $lines.Add("## Expected Contexts")
+    $lines.Add("")
+    foreach ($context in $ExpectedContexts) {
+        $lines.Add("- UNKNOWN - $context")
+    }
+    $lines | Set-Content -Path $mdPath -Encoding UTF8
+
+    Write-Host "GitHub required check context audit: unavailable"
+    Write-Host "Reports:"
+    Write-Host "  $jsonPath"
+    Write-Host "  $mdPath"
+
+    if (-not $softUnavailable) {
+        throw "Cannot read workflow runs: $($runsResult.error)"
+    }
+
+    Write-Host "Continuing because no owner token is available and -RequireAvailable was not requested."
+    return
 }
 
 $jobs = [System.Collections.Generic.List[object]]::new()
@@ -100,6 +158,7 @@ $summary = [ordered]@{
     repository = "$Owner/$Repo"
     branch = $Branch
     tokenPresent = -not [string]::IsNullOrWhiteSpace($token)
+    requireAvailable = [bool]$RequireAvailable
     expectedContexts = $ExpectedContexts
     observedContexts = $contextNames
     missingContexts = $missing

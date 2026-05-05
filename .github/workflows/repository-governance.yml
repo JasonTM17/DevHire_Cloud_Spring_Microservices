@@ -13,6 +13,7 @@ on:
           - apply-metadata
           - apply-branch-protection
           - apply-all
+          - verify-only
 
 permissions:
   actions: read
@@ -43,6 +44,7 @@ jobs:
             throw "REPO_GOVERNANCE_TOKEN repository secret is required for apply mode."
           }
           ./scripts/github-governance.ps1 -Apply -MetadataOnly
+          ./scripts/github-facade-assert.ps1 -MetadataOnly
 
       - name: Apply branch protection
         if: ${{ inputs.mode == 'apply-branch-protection' }}
@@ -53,8 +55,9 @@ jobs:
           if ([string]::IsNullOrWhiteSpace($env:GITHUB_TOKEN)) {
             throw "REPO_GOVERNANCE_TOKEN repository secret is required for apply mode."
           }
-          ./scripts/github-check-contexts.ps1
+          ./scripts/github-check-contexts.ps1 -RequireAvailable
           ./scripts/github-governance.ps1 -Apply -BranchProtectionOnly
+          ./scripts/github-facade-assert.ps1 -BranchProtectionOnly
 
       - name: Apply all repository governance
         if: ${{ inputs.mode == 'apply-all' }}
@@ -65,8 +68,21 @@ jobs:
           if ([string]::IsNullOrWhiteSpace($env:GITHUB_TOKEN)) {
             throw "REPO_GOVERNANCE_TOKEN repository secret is required for apply mode."
           }
-          ./scripts/github-check-contexts.ps1
+          ./scripts/github-check-contexts.ps1 -RequireAvailable
           ./scripts/github-governance.ps1 -Apply
+          ./scripts/github-facade-assert.ps1
+
+      - name: Verify public facade
+        if: ${{ inputs.mode == 'verify-only' }}
+        shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ secrets.REPO_GOVERNANCE_TOKEN }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:GITHUB_TOKEN)) {
+            throw "REPO_GOVERNANCE_TOKEN repository secret is required for verify mode."
+          }
+          ./scripts/github-check-contexts.ps1 -RequireAvailable
+          ./scripts/github-facade-assert.ps1
 
       - name: Verify repository health
         shell: pwsh
@@ -81,5 +97,7 @@ jobs:
           name: repository-governance-reports
           path: |
             reports/github-governance/
+            reports/github-facade/
+            reports/github-check-contexts/
             reports/repository-health/
           if-no-files-found: ignore

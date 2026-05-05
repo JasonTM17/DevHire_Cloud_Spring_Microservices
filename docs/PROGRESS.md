@@ -2646,3 +2646,24 @@ Notes:
 
 - Browser Use was attempted first, but the in-app browser backend could not start the Codex app-server in this environment. Verification fell back to committed Playwright screenshots and GitHub public API scripts.
 - GitHub About/Homepage/Topics and `master` protection still require owner action through `REPO_GOVERNANCE_TOKEN`, local owner token, or the GitHub Settings app.
+
+## v0.4.6 Phase 121 - Enforced GitHub public facade apply workflow
+
+- Added `scripts/github-facade-assert.ps1` so repository metadata and branch protection can be verified as a hard gate after owner apply.
+- Added `Repository Governance` workflow mode `verify-only`.
+- Updated `apply-metadata`, `apply-branch-protection`, and `apply-all` workflow paths to run facade assertions after mutation.
+- Uploaded facade assertion and check-context artifacts from the governance workflow.
+- Updated owner-action documentation with the exact dry-run, apply, verify sequence.
+
+Verification:
+
+- Passed:
+  - `.\scripts\github-facade-assert.ps1 -AllowOwnerActions`
+  - `.\scripts\github-check-contexts.ps1`
+  - `.\scripts\docs-quality.ps1`
+  - `git diff --check`
+
+Notes:
+
+- `github-facade-assert.ps1` correctly reports `owner_action_required` because the public repository still has empty About/Homepage/Topics and `master protected=false`.
+- `github-check-contexts.ps1` now records `unavailable` instead of failing local unauthenticated runs when GitHub returns 401/403/429; the governance workflow uses `-RequireAvailable` so owner-token apply remains strict.

@@ -92,11 +92,24 @@ Use this route when local browser automation is unavailable or you do not want t
 2. Open `Actions -> Repository Governance`.
 3. Run `mode=dry-run`.
 4. Review the uploaded governance report artifact.
-5. Run `mode=apply-metadata` to fix the GitHub About/Homepage/Topics sidebar.
-6. Run `mode=apply-branch-protection` after confirming the required checks are green.
-7. Use `mode=apply-all` only when you intentionally want both operations in one run.
+5. Run `mode=apply-metadata` to fix the GitHub About/Homepage/Topics sidebar; the workflow now fails if metadata is still empty after apply.
+6. Run `mode=apply-branch-protection` after confirming the required checks are green; the workflow now runs `github-check-contexts.ps1` and fails if `master protected=true` is not visible after apply.
+7. Run `mode=verify-only` to prove the public facade is applied without mutating settings.
+8. Use `mode=apply-all` only when you intentionally want both operations in one run.
 
-The workflow uses the same target metadata as the local script and verifies repository health after the apply step.
+The workflow uses the same target metadata as the local script and uploads sanitized governance, facade assertion, check-context, and repository-health reports after every run.
+
+Local owner-shell equivalent:
+
+```powershell
+$env:GITHUB_TOKEN = "<owner-token>"
+.\scripts\github-governance.ps1 -Apply -MetadataOnly
+.\scripts\github-facade-assert.ps1 -MetadataOnly
+.\scripts\github-check-contexts.ps1
+.\scripts\github-governance.ps1 -Apply -BranchProtectionOnly
+.\scripts\github-facade-assert.ps1 -BranchProtectionOnly
+Remove-Item Env:\GITHUB_TOKEN
+```
 
 ## Settings-As-Code Apply Route
 
@@ -176,9 +189,10 @@ The expected topics payload is:
 
 ## Owner Checklist
 
-- [ ] Fill About description with `Repository Governance -> apply-metadata`.
-- [ ] Fill homepage with `Repository Governance -> apply-metadata`.
-- [ ] Add topics with `Repository Governance -> apply-metadata`.
+- [ ] Add repository secret `REPO_GOVERNANCE_TOKEN` with administration permission.
+- [ ] Run `Repository Governance -> dry-run`.
+- [ ] Fill About description, homepage, and topics with `Repository Governance -> apply-metadata`.
 - [ ] Enable branch protection with `Repository Governance -> apply-branch-protection`.
+- [ ] Run `Repository Governance -> verify-only`.
 - [x] Confirm release `v0.3.0` is public.
 - [ ] Confirm GHCR images are visible or document account limitation.
