@@ -206,6 +206,9 @@ try {
         Invoke-PortfolioStep "evidence audit" ".\scripts\evidence-audit.ps1" {
             & "$PSScriptRoot\evidence-audit.ps1"
         }
+        Invoke-PortfolioStep "evidence manifest image verification" ".\scripts\evidence-manifest-verify.ps1" {
+            & "$PSScriptRoot\evidence-manifest-verify.ps1"
+        }
         Invoke-PortfolioStep "repository hygiene" ".\scripts\repo-hygiene.ps1" {
             & "$PSScriptRoot\repo-hygiene.ps1"
         }

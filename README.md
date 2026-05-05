@@ -13,6 +13,7 @@ DevHire Cloud is a production-grade Java 21/Spring Boot microservices portfolio 
 | Need | Open |
 |---|---|
 | Latest public release | [v0.3.0 release](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.3.0) |
+| Canonical reviewer evidence | [Review evidence pack](docs/REVIEW_EVIDENCE.md) |
 | Runtime proof | [Runtime evidence v0.4](docs/runtime-evidence-v0.4.md) |
 | 5/15/30 minute review route | [Professional review map](docs/professional-review-map.md) |
 | Root layout | [Repository structure](docs/repository-structure.md) |
@@ -52,7 +53,7 @@ Best reviewer path:
 3. Run `.\scripts\portfolio-verify.ps1 -Docs -Docker` for a fast local gate.
 4. Run `.\scripts\portfolio-verify.ps1 -Runtime -GatewayUrl http://localhost:8080` when Docker is already running and you want runtime proof.
 5. Use [Runtime acceptance matrix](docs/runtime-acceptance-matrix.md) to map each production claim to its verification command.
-6. Check [v0.3.0 release evidence](docs/release-evidence/v0.3.0.md) and [v0.4.0 evidence baseline](docs/release-evidence/v0.4.0.md).
+6. Check [Review evidence pack](docs/REVIEW_EVIDENCE.md), [v0.3.0 release evidence](docs/release-evidence/v0.3.0.md), and [v0.4.0 evidence baseline](docs/release-evidence/v0.4.0.md).
 
 ## Production Proof
 
@@ -355,6 +356,7 @@ Xem flow chạy được tại [docs/api.http](docs/api.http).
 - [Runtime reliability review](docs/runtime-reliability-review.md)
 - [Runtime acceptance matrix](docs/runtime-acceptance-matrix.md)
 - [Runtime evidence v0.4](docs/runtime-evidence-v0.4.md)
+- [Reviewer evidence pack](docs/REVIEW_EVIDENCE.md)
 - [Portfolio evidence manifest](docs/evidence-manifest.md)
 - [Repository hygiene guard](docs/repository-hygiene.md)
 - [Unified verification runner](docs/verification.md)
@@ -362,11 +364,9 @@ Xem flow chạy được tại [docs/api.http](docs/api.http).
 - [Dependency maintenance policy](docs/dependency-maintenance.md)
 - [Dependency triage v0.4](docs/dependency-triage-v0.4.md)
 - [API compatibility policy](docs/api-compatibility.md)
-- [Release evidence v0.2.0](docs/release-evidence/v0.2.0.md)
 - [Release evidence v0.3.0](docs/release-evidence/v0.3.0.md)
 - [Release evidence v0.4.0](docs/release-evidence/v0.4.0.md)
 - [Recruiter review guide](docs/recruiter-review-guide.md)
-- [Release notes v0.2.0](docs/release-notes/v0.2.0.md)
 - [Release notes v0.3.0](docs/release-notes/v0.3.0.md)
 - [Release notes v0.4.0](docs/release-notes/v0.4.0.md)
 - [10-minute demo script](docs/demo-script.md)
@@ -374,7 +374,7 @@ Xem flow chạy được tại [docs/api.http](docs/api.http).
 - [GitHub owner actions](docs/github-owner-actions.md)
 - [Architecture Decision Records](docs/ADR/0001-microservices-and-service-databases.md)
 
-## Roadmap Sau v0.2.0
+## Roadmap Sau v0.4.x
 
 - Deploy AWS Terraform blueprint vào staging account thật.
 - Thêm soak test dài hơn và automated error-budget burn simulation.

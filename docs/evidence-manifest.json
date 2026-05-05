@@ -59,6 +59,7 @@
         "scripts/domain-placeholder-audit.ps1",
         "scripts/professionalism-audit.ps1",
         "scripts/visual-evidence-audit.ps1",
+        "scripts/evidence-manifest-verify.ps1",
         "scripts/terraform-validate.ps1",
         "scripts/check-coverage.ps1"
       ]
@@ -87,6 +88,8 @@
         "README.md",
         "docs/README_EN.md",
         "docs/README_JA.md",
+        "LICENSE",
+        "docs/REVIEW_EVIDENCE.md",
         "docs/professional-review-map.md",
         "docs/service-catalog.md",
         "docs/architecture-review-index.md",
@@ -122,11 +125,16 @@
       "requiredPaths": [
         "docs/screenshots/jobs-page.png",
         "docs/screenshots/job-detail.png",
+        "docs/screenshots/frontend-redesign-jobs.png",
+        "docs/screenshots/frontend-redesign-job-detail.png",
+        "docs/screenshots/docker-runtime-jobs.png",
         "docs/screenshots/candidate-dashboard.png",
         "docs/screenshots/employer-dashboard.png",
         "docs/screenshots/admin-dashboard.png",
         "docs/screenshots/assistant-page.png",
+        "docs/screenshots/ops-ai-provider.png",
         "docs/screenshots/ops-mailpit.png",
+        "docs/screenshots/ops-prometheus-rules.png",
         "docs/screenshots/ops-grafana-slo.png",
         "docs/screenshots/ops-openapi-job-service.png"
       ]
@@ -161,6 +169,7 @@
   ],
   "recommendedCommands": [
     ".\\scripts\\portfolio-verify.ps1 -Docs -Docker",
+    ".\\scripts\\evidence-manifest-verify.ps1",
     ".\\scripts\\portfolio-verify.ps1 -Runtime -GatewayUrl http://localhost:8080",
     ".\\scripts\\runtime-reliability.ps1 -GatewayUrl http://localhost:8080",
     "mvn -T1 clean verify",

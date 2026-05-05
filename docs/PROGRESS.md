@@ -2485,3 +2485,19 @@ Verification:
   - `.\scripts\dependabot-curate.ps1 -DryRun`
   - `.\scripts\docs-quality.ps1`
   - `git diff --check`
+
+## v0.4.4 Phase 114 - Reviewer evidence canonicalization
+
+- Added root `LICENSE` to match the Docker OCI license metadata and improve the GitHub community profile surface.
+- Added `docs/REVIEW_EVIDENCE.md` as the curated reviewer evidence pack so `docs/PROGRESS.md` can stay an internal engineering diary.
+- Updated README, English README, and Japanese README release links so reviewer-facing docs no longer foreground stale v0.2 roadmap/evidence paths.
+- Added `scripts/evidence-manifest-verify.ps1` and wired it into `scripts/portfolio-verify.ps1 -Docs`.
+- Updated `docs/evidence-manifest.json` so every screenshot used by the README files is represented in the machine-checkable evidence manifest.
+
+Verification:
+
+- Passed:
+  - `.\scripts\evidence-manifest-verify.ps1`
+  - `.\scripts\docs-quality.ps1`
+  - `.\scripts\evidence-audit.ps1`
+  - `git diff --check`
