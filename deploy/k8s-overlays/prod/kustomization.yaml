@@ -40,5 +40,5 @@ patches:
         path: /spec/tls
         value:
           - hosts:
-              - devhire.example.com
+              - replace-with-owned-domain
             secretName: devhire-api-tls

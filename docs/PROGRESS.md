@@ -2281,3 +2281,23 @@ Verification:
 Note:
 
 - `GITHUB_TOKEN` was not set locally, so remote GitHub About/Homepage/Topics and branch protection were not applied. This remains an owner action and is tracked honestly in the repository health docs.
+
+## Phase 107 - Domain and placeholder professionalization
+
+- Added Helm global public-facing settings: `global.publicDomain`, `global.publicBaseUrl`, `global.smtpFrom`, and `global.smtpReplyTo`.
+- Updated Helm ConfigMap and Ingress templates so CORS, frontend API base URL, notification dashboard URL, sender address, reply-to address, and ingress host are derived from centralized values unless explicitly overridden.
+- Replaced scattered raw Kubernetes `devhire.example.com` and `smtp.example.com` placeholders with a single documented replacement block.
+- Added `scripts/domain-placeholder-audit.ps1` and wired it into documentation quality and the evidence manifest.
+
+Verification:
+
+- Passed:
+  - `.\scripts\domain-placeholder-audit.ps1`
+  - `.\scripts\docs-quality.ps1`
+  - `.\scripts\evidence-audit.ps1`
+  - `docker compose config --quiet`
+  - `git diff --check`
+
+Note:
+
+- `helm` is not installed in the current local shell, so Helm render/lint will be verified in the final pass only if the CLI becomes available or through CI/container tooling.

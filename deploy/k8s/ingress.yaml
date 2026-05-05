@@ -11,7 +11,8 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: devhire.example.com
+    # Replace with a DNS name you own before applying raw manifests.
+    - host: replace-with-owned-domain
       http:
         paths:
           - path: /api

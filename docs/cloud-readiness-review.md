@@ -22,13 +22,26 @@ DevHire Cloud is cloud-ready as a blueprint and evidence package. It is not pret
 
 ## Placeholder Domain Convention
 
-The repository uses `devhire.example.com` and `staging.devhire.example.com` as documented placeholder hostnames only. They mean:
+The Helm chart centralizes public-facing placeholders through:
+
+- `global.publicDomain`
+- `global.publicBaseUrl`
+- `global.smtpFrom`
+- `global.smtpReplyTo`
+
+The default placeholder uses the reserved `.invalid` convention, for example `devhire.invalid` and `staging.devhire.invalid`. They mean:
 
 - replace with a domain you own before any real deployment;
 - update Helm values, Kubernetes ingress, CORS, email dashboard URL, frontend API base URL, and GitHub repository homepage together;
 - never use the placeholder values in a public production environment.
 
-This convention is intentionally explicit so reviewers can search for `devhire.example.com` and see every place a real domain must be wired.
+Raw Kubernetes manifests keep a single replacement block using `replace-with-owned-domain` and `replace-with-smtp-host`. Helm is the preferred deployment path for real environments because those values are centralized and auditable.
+
+Audit command:
+
+```powershell
+.\scripts\domain-placeholder-audit.ps1
+```
 
 ## Remote State Migration
 
@@ -90,4 +103,3 @@ helm template devhire-cloud .\deploy\helm\devhire-cloud -f .\deploy\helm\devhire
 ```
 
 Use the full Terraform validation script without skip flags when Docker has enough time and network access to pull the scanner images.
-

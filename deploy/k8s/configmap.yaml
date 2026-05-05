@@ -6,13 +6,18 @@ metadata:
     app.kubernetes.io/name: devhire-cloud
     app.kubernetes.io/part-of: devhire-cloud
 data:
+  # Replacement block before applying raw manifests:
+  # - replace-with-owned-domain: public DNS name you own.
+  # - no-reply@replace-with-owned-domain: verified sender address.
+  # - support@replace-with-owned-domain: monitored reply-to address.
+  # - replace-with-smtp-host: SMTP provider host or in-cluster sandbox.
   SPRING_PROFILES_ACTIVE: prod
   SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka.devhire-platform.svc.cluster.local:9092
   SPRING_DATA_REDIS_HOST: redis.devhire-platform.svc.cluster.local
   SPRING_DATA_REDIS_PORT: "6379"
   OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector.devhire-observability.svc.cluster.local:4318
   MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "0.1"
-  CORS_ALLOWED_ORIGINS: https://devhire.example.com
+  CORS_ALLOWED_ORIGINS: https://replace-with-owned-domain
   AUTH_SERVICE_URL: http://auth-service:8081
   USER_SERVICE_URL: http://user-service:8082
   COMPANY_SERVICE_URL: http://company-service:8083
@@ -26,15 +31,15 @@ data:
   DEVHIRE_SEARCH_OPENSEARCH_AUTO_CREATE_INDEX: "false"
   DEVHIRE_SEARCH_OPENSEARCH_FALLBACK_TO_POSTGRES: "true"
   DEVHIRE_NOTIFICATION_EMAIL_ENABLED: "true"
-  DEVHIRE_NOTIFICATION_EMAIL_FROM: no-reply@devhire.example.com
-  DEVHIRE_NOTIFICATION_EMAIL_REPLY_TO: support@devhire.example.com
-  DEVHIRE_NOTIFICATION_EMAIL_DASHBOARD_BASE_URL: https://devhire.example.com
+  DEVHIRE_NOTIFICATION_EMAIL_FROM: no-reply@replace-with-owned-domain
+  DEVHIRE_NOTIFICATION_EMAIL_REPLY_TO: support@replace-with-owned-domain
+  DEVHIRE_NOTIFICATION_EMAIL_DASHBOARD_BASE_URL: https://replace-with-owned-domain
   DEVHIRE_NOTIFICATION_EMAIL_BATCH_SIZE: "25"
   DEVHIRE_NOTIFICATION_EMAIL_MAX_ATTEMPTS: "5"
   DEVHIRE_NOTIFICATION_EMAIL_RETRY_INITIAL_DELAY_SECONDS: "30"
   DEVHIRE_NOTIFICATION_EMAIL_RETRY_MAX_DELAY_SECONDS: "900"
   DEVHIRE_NOTIFICATION_EMAIL_RATE_LIMIT_PER_MINUTE: "60"
-  SPRING_MAIL_HOST: smtp.example.com
+  SPRING_MAIL_HOST: replace-with-smtp-host
   SPRING_MAIL_PORT: "587"
   SPRING_MAIL_SMTP_AUTH: "true"
   SPRING_MAIL_SMTP_STARTTLS_ENABLE: "true"
@@ -44,4 +49,4 @@ data:
   SPRING_MAIL_SMTP_TIMEOUT: "5000"
   SPRING_MAIL_SMTP_WRITE_TIMEOUT: "5000"
   MANAGEMENT_HEALTH_MAIL_ENABLED: "true"
-  NEXT_PUBLIC_API_BASE_URL: https://devhire.example.com
+  NEXT_PUBLIC_API_BASE_URL: https://replace-with-owned-domain

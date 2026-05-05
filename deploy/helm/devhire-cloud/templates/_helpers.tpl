@@ -17,6 +17,26 @@ app.kubernetes.io/part-of: devhire-cloud
 devhire-config
 {{- end -}}
 
+{{- define "devhire.publicDomain" -}}
+{{- default "devhire.invalid" .Values.global.publicDomain -}}
+{{- end -}}
+
+{{- define "devhire.publicBaseUrl" -}}
+{{- default (printf "https://%s" (include "devhire.publicDomain" .)) .Values.global.publicBaseUrl -}}
+{{- end -}}
+
+{{- define "devhire.smtpFrom" -}}
+{{- default (printf "no-reply@%s" (include "devhire.publicDomain" .)) .Values.global.smtpFrom -}}
+{{- end -}}
+
+{{- define "devhire.smtpReplyTo" -}}
+{{- default (printf "support@%s" (include "devhire.publicDomain" .)) .Values.global.smtpReplyTo -}}
+{{- end -}}
+
+{{- define "devhire.ingressHost" -}}
+{{- default (include "devhire.publicDomain" .) .Values.ingress.host -}}
+{{- end -}}
+
 {{- define "devhire.secretName" -}}
 {{- .Values.secrets.name | default "devhire-secrets" -}}
 {{- end -}}
