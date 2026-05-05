@@ -27,7 +27,7 @@ Production-grade Java 21 Spring Boot microservices recruitment platform with JWT
 Website:
 
 ```text
-https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.3.0
+https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.4.6
 ```
 
 Topics:

@@ -2875,3 +2875,17 @@ Verification:
 - Passed:
   - `.\scripts\docs-quality.ps1`
   - `git diff --check`
+
+## v0.4.6 homepage governance gate alignment
+
+- Merged the homepage governance PR after all PR checks passed and immediately re-applied strict branch protection.
+- Verified the live GitHub repository metadata now points its homepage to the public `v0.4.6` release.
+- Found and fixed a stale local gate expectation: `scripts/github-facade-assert.ps1` still expected the old `v0.3.0` release homepage even though the remote repository had already been updated to `v0.4.6`.
+- Updated the legacy repository polish script, settings-as-code, and GitHub profile guidance so future governance dry-runs and reviewer docs use `v0.4.6`.
+
+Verification before PR:
+
+- Passed:
+  - `.\scripts\github-facade-assert.ps1 -RequireProtectionDetails`
+  - `.\scripts\docs-quality.ps1`
+  - `git diff --check`
