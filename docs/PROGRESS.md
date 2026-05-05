@@ -2591,3 +2591,28 @@ Verification:
 Reason:
 
 - `helm` is not installed in this local environment, so Helm rendering remains a CI/owner-machine validation step.
+
+## v0.4.4 Phase 119 - Professional release evidence pack
+
+- Added `docs/release-evidence/v0.4.4.md` with change summary, commands run, coverage snapshot, screenshot manifest, not-run constraints, and owner-only follow-up.
+- Linked v0.4.4 evidence from root README, English README, Japanese README, and `docs/REVIEW_EVIDENCE.md`.
+- Added v0.4.4 release evidence to `docs/evidence-manifest.json` and `scripts/docs-quality.ps1`.
+
+Verification:
+
+- Passed:
+  - `.\scripts\docs-quality.ps1`
+  - `.\scripts\evidence-audit.ps1`
+  - `.\scripts\evidence-manifest-verify.ps1`
+  - `.\scripts\visual-evidence-audit.ps1`
+  - `.\scripts\repo-hygiene.ps1`
+  - `.\scripts\portfolio-verify.ps1 -Docs -Docker`
+  - `.\scripts\version-consistency.ps1`
+  - `.\scripts\professionalism-audit.ps1`
+  - `docker compose config --quiet`
+  - `git diff --check`
+
+Notes:
+
+- `.\scripts\professionalism-audit.ps1` still reports owner-only public facade actions as pending because no local `REPO_GOVERNANCE_TOKEN` / `GITHUB_TOKEN` was available.
+- Full Docker runtime smoke was not rerun in this phase; v0.4.4 evidence distinguishes static evidence from runtime evidence instead of marking runtime as passed without execution.

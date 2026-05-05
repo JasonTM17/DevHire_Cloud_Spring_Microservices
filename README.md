@@ -53,7 +53,7 @@ Best reviewer path:
 3. Run `.\scripts\portfolio-verify.ps1 -Docs -Docker` for a fast local gate.
 4. Run `.\scripts\portfolio-verify.ps1 -Runtime -GatewayUrl http://localhost:8080` when Docker is already running and you want runtime proof.
 5. Use [Runtime acceptance matrix](docs/runtime-acceptance-matrix.md) to map each production claim to its verification command.
-6. Check [Review evidence pack](docs/REVIEW_EVIDENCE.md), [v0.3.0 release evidence](docs/release-evidence/v0.3.0.md), and [v0.4.0 evidence baseline](docs/release-evidence/v0.4.0.md).
+6. Check [Review evidence pack](docs/REVIEW_EVIDENCE.md), [v0.3.0 release evidence](docs/release-evidence/v0.3.0.md), and [v0.4.4 professionalization evidence](docs/release-evidence/v0.4.4.md).
 
 ## Production Proof
 
@@ -366,6 +366,7 @@ Xem flow chạy được tại [docs/api.http](docs/api.http).
 - [API compatibility policy](docs/api-compatibility.md)
 - [Release evidence v0.3.0](docs/release-evidence/v0.3.0.md)
 - [Release evidence v0.4.0](docs/release-evidence/v0.4.0.md)
+- [Release evidence v0.4.4](docs/release-evidence/v0.4.4.md)
 - [Recruiter review guide](docs/recruiter-review-guide.md)
 - [Release notes v0.3.0](docs/release-notes/v0.3.0.md)
 - [Release notes v0.4.0](docs/release-notes/v0.4.0.md)

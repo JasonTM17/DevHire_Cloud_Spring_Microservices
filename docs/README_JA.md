@@ -144,6 +144,7 @@ Operations smoke gates:
 - [Backup and restore runbook](runbooks/backup-restore.md)
 - [Release evidence v0.3.0](release-evidence/v0.3.0.md)
 - [Release evidence v0.4.0](release-evidence/v0.4.0.md)
+- [Release evidence v0.4.4](release-evidence/v0.4.4.md)
 - [Recruiter review guide](recruiter-review-guide.md)
 - [Release notes v0.3.0](release-notes/v0.3.0.md)
 - [Release notes v0.4.0](release-notes/v0.4.0.md)
