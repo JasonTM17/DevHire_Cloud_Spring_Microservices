@@ -2319,3 +2319,39 @@ Verification:
 Note:
 
 - The full `npm run e2e` suite still depends on the live Gateway login flow and will be part of the final runtime/full-stack verification.
+
+## Phase 109 - Backend production workflow coverage
+
+- Added auth service coverage for refresh token rotation and logout access-token blacklist behavior.
+- Strengthened application workflow tests for duplicate prevention, submitted status history, employer status history, and event/audit publishing.
+- Added notification listener coverage for duplicate status-change events and map payload idempotency.
+- Added job search coverage for the OpenSearch failure path when PostgreSQL fallback is disabled.
+- Added architecture rules to services with optimistic-locking entities so any entity field named `version` must be annotated with `@Version`.
+- Raised the explicit per-module coverage gates in `scripts/check-coverage.ps1` where the current verified baseline safely supports the higher threshold.
+
+Verification:
+
+- Passed:
+  - `mvn -T1 -pl auth-service,application-service,notification-service,job-service,company-service,user-service -am test`
+  - `mvn -T1 -pl auth-service,application-service,notification-service,job-service,company-service,user-service -am verify`
+  - `mvn -T1 clean verify`
+  - `.\scripts\check-coverage.ps1`
+
+Coverage gate after ratchet:
+
+| Module | Result |
+|---|---|
+| ai-service | 45.1% / 40.0% |
+| api-gateway | 36.9% / 35.0% |
+| application-service | 63.6% / 60.0% |
+| audit-service | 64.0% / 60.0% |
+| auth-service | 44.3% / 40.0% |
+| common-lib | 41.2% / 35.0% |
+| company-service | 62.7% / 60.0% |
+| job-service | 52.7% / 50.0% |
+| notification-service | 76.1% / 65.0% |
+| user-service | 76.0% / 72.0% |
+
+Note:
+
+- Testcontainers-based repository integration tests were skipped by their existing Docker availability guard when no valid Docker environment was available to Testcontainers during Maven verify.

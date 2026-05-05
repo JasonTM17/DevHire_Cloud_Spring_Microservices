@@ -1,6 +1,8 @@
 package com.devhire.auth.service;
 
 import com.devhire.auth.dto.request.LoginRequest;
+import com.devhire.auth.dto.request.LogoutRequest;
+import com.devhire.auth.dto.request.RefreshTokenRequest;
 import com.devhire.auth.dto.request.RegisterRequest;
 import com.devhire.auth.entity.RefreshToken;
 import com.devhire.auth.entity.UserAccount;
@@ -12,6 +14,7 @@ import com.devhire.common.exception.DevHireException;
 import com.devhire.common.security.UserRole;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -89,5 +92,42 @@ class AuthServiceTest {
                 .isInstanceOf(DevHireException.class)
                 .hasMessageContaining("Invalid email or password");
     }
-}
 
+    @Test
+    void refreshRotatesRefreshTokenAndRevokesOldToken() {
+        UUID userId = UUID.randomUUID();
+        UserAccount account = new UserAccount("candidate@example.com", "hash", UserRole.CANDIDATE);
+        ReflectionTestUtils.setField(account, "id", userId);
+        RefreshToken existing = new RefreshToken(userId, "old-hash", Instant.now().plusSeconds(3600));
+        when(jwtService.hashToken("old-refresh")).thenReturn("old-hash");
+        when(jwtService.createRefreshToken())
+                .thenReturn(new JwtService.TokenDetails("new-refresh", Instant.now().plusSeconds(86_400)));
+        when(jwtService.hashToken("new-refresh")).thenReturn("new-hash");
+        when(refreshTokenRepository.findByTokenHash("old-hash")).thenReturn(Optional.of(existing));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(account));
+
+        var response = authService.refresh(new RefreshTokenRequest("old-refresh"));
+
+        ArgumentCaptor<RefreshToken> savedToken = ArgumentCaptor.forClass(RefreshToken.class);
+        verify(refreshTokenRepository).save(savedToken.capture());
+        assertThat(response.refreshToken()).isEqualTo("new-refresh");
+        assertThat(existing.getRevokedAt()).isNotNull();
+        assertThat(existing.getReplacedByTokenHash()).isEqualTo("new-hash");
+        assertThat(savedToken.getValue().getTokenHash()).isEqualTo("new-hash");
+        assertThat(savedToken.getValue().getUserId()).isEqualTo(userId);
+    }
+
+    @Test
+    void logoutRevokesRefreshTokenAndBlacklistsAccessToken() {
+        UUID userId = UUID.randomUUID();
+        RefreshToken existing = new RefreshToken(userId, "refresh-hash", Instant.now().plusSeconds(3600));
+        when(jwtService.hashToken("refresh-token")).thenReturn("refresh-hash");
+        when(refreshTokenRepository.findByTokenHash("refresh-hash")).thenReturn(Optional.of(existing));
+
+        authService.logout(new LogoutRequest("refresh-token"), "Bearer access-token");
+
+        assertThat(existing.getRevokedAt()).isNotNull();
+        assertThat(existing.getReplacedByTokenHash()).isNull();
+        verify(jwtService).blacklistAccessToken("access-token");
+    }
+}

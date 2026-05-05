@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -64,6 +65,19 @@ class OpenSearchJobSearchAdapterTest {
 
         assertThat(page.getContent()).containsExactly(job);
         verify(fallback).searchPublished(criteria, pageable);
+    }
+
+    @Test
+    void searchRethrowsOpenSearchFailureWhenFallbackDisabled() {
+        var propertiesWithoutFallback = new OpenSearchProperties(
+                "http://localhost:9200", "devhire_jobs", true, false);
+        var strictAdapter = new OpenSearchJobSearchAdapter(client, propertiesWithoutFallback, repository, fallback);
+        var criteria = new JobSearchCriteria("java", null, null, null, null, null);
+        when(client.search(eq("devhire_jobs"), any())).thenThrow(new IllegalStateException("cluster unavailable"));
+
+        assertThatThrownBy(() -> strictAdapter.searchPublished(criteria, PageRequest.of(0, 10)))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("cluster unavailable");
     }
 
     @Test

@@ -5,16 +5,16 @@ param(
 $ErrorActionPreference = "Stop"
 
 $thresholds = @{
-    "ai-service"           = 0.35
+    "ai-service"           = 0.40
     "api-gateway"          = 0.35
     "application-service"  = 0.60
-    "audit-service"        = 0.55
-    "auth-service"         = 0.28
-    "common-lib"           = 0.10
-    "company-service"      = 0.55
-    "job-service"          = 0.45
-    "notification-service" = 0.45
-    "user-service"         = 0.70
+    "audit-service"        = 0.60
+    "auth-service"         = 0.40
+    "common-lib"           = 0.35
+    "company-service"      = 0.60
+    "job-service"          = 0.50
+    "notification-service" = 0.65
+    "user-service"         = 0.72
 }
 
 $rootPath = (Resolve-Path $Root).Path

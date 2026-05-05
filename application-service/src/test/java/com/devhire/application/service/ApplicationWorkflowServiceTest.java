@@ -5,6 +5,7 @@ import com.devhire.application.client.dto.JobInternalResponse;
 import com.devhire.application.dto.request.ApplicationStatusUpdateRequest;
 import com.devhire.application.dto.request.SubmitApplicationRequest;
 import com.devhire.application.entity.ApplicationStatus;
+import com.devhire.application.entity.ApplicationStatusHistory;
 import com.devhire.application.entity.JobApplication;
 import com.devhire.application.event.ApplicationEventPublisher;
 import com.devhire.application.mapper.ApplicationMapper;
@@ -14,6 +15,7 @@ import com.devhire.common.exception.DevHireException;
 import com.devhire.common.security.AuthenticatedUser;
 import com.devhire.common.security.UserRole;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.Instant;
@@ -24,6 +26,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class ApplicationWorkflowServiceTest {
@@ -47,8 +51,15 @@ class ApplicationWorkflowServiceTest {
         var response = service.submit(new AuthenticatedUser(candidateId, "candidate@example.com", UserRole.CANDIDATE),
                 jobId, new SubmitApplicationRequest("https://cv.example/cv.pdf", "Hello"));
 
+        ArgumentCaptor<ApplicationStatusHistory> history = ArgumentCaptor.forClass(ApplicationStatusHistory.class);
+        verify(historyRepository).save(history.capture());
         assertThat(response.status()).isEqualTo(ApplicationStatus.SUBMITTED);
         assertThat(response.employerId()).isEqualTo(employerId);
+        assertThat(ReflectionTestUtils.getField(history.getValue(), "oldStatus")).isNull();
+        assertThat(ReflectionTestUtils.getField(history.getValue(), "newStatus")).isEqualTo(ApplicationStatus.SUBMITTED);
+        assertThat(ReflectionTestUtils.getField(history.getValue(), "changedBy")).isEqualTo(candidateId);
+        verify(eventPublisher).publishSubmitted(any());
+        verify(eventPublisher).publishAudit(any());
     }
 
     @Test
@@ -65,6 +76,9 @@ class ApplicationWorkflowServiceTest {
                 jobId, new SubmitApplicationRequest("https://cv.example/cv.pdf", "Hello")
         )).isInstanceOf(DevHireException.class)
                 .hasMessageContaining("already applied");
+        verify(applicationRepository, never()).save(any(JobApplication.class));
+        verify(historyRepository, never()).save(any(ApplicationStatusHistory.class));
+        verify(eventPublisher, never()).publishSubmitted(any());
     }
 
     @Test
@@ -81,7 +95,14 @@ class ApplicationWorkflowServiceTest {
         var response = service.updateStatus(new AuthenticatedUser(employerId, "employer@example.com", UserRole.EMPLOYER),
                 appId, new ApplicationStatusUpdateRequest(ApplicationStatus.INTERVIEW, "Interview"));
 
+        ArgumentCaptor<ApplicationStatusHistory> history = ArgumentCaptor.forClass(ApplicationStatusHistory.class);
+        verify(historyRepository).save(history.capture());
         assertThat(response.status()).isEqualTo(ApplicationStatus.INTERVIEW);
+        assertThat(ReflectionTestUtils.getField(history.getValue(), "oldStatus")).isEqualTo(ApplicationStatus.SUBMITTED);
+        assertThat(ReflectionTestUtils.getField(history.getValue(), "newStatus")).isEqualTo(ApplicationStatus.INTERVIEW);
+        assertThat(ReflectionTestUtils.getField(history.getValue(), "note")).isEqualTo("Interview");
+        verify(eventPublisher).publishStatusChanged(any());
+        verify(eventPublisher).publishAudit(any());
     }
 
     private static JobApplication persisted(JobApplication application) {
@@ -91,4 +112,3 @@ class ApplicationWorkflowServiceTest {
         return application;
     }
 }
-
