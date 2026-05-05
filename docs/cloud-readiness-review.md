@@ -43,6 +43,15 @@ Audit command:
 .\scripts\domain-placeholder-audit.ps1
 ```
 
+## Production Release Defaults
+
+`deploy/helm/devhire-cloud/values-prod.yaml` is intentionally stricter than local values:
+
+- image tags must be release or commit-SHA based; the prod file uses `sha-REPLACE_WITH_GIT_SHA` as an explicit replacement marker instead of `latest`;
+- `imagePullPolicy` is `Always` so a new immutable tag is pulled during rollout;
+- `global.requireSecretRefs=true`, so pods that need secret material cannot silently boot without the expected Kubernetes Secret;
+- local values keep secret refs optional for `helm template` and reviewer-friendly development.
+
 ## Remote State Migration
 
 Default validation uses local backend and `terraform init -backend=false`.

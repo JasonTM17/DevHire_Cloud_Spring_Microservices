@@ -8,7 +8,7 @@ This page maps DevHire Cloud security controls to concrete repository evidence. 
 | --- | --- | --- | --- |
 | Secret scanning | `.github/workflows/security.yml` | push, pull request, schedule | Gitleaks blocks committed secrets using `.gitleaks.toml`. |
 | Filesystem vulnerability scan | `.github/workflows/security.yml` | push, pull request, schedule | Trivy scans the repository and uploads a report artifact. |
-| Docker image scan | `.github/workflows/security.yml` | manual, schedule | Trivy scans each service image with report artifacts, non-blocking for portfolio schedules. |
+| Docker image scan | `.github/workflows/security.yml` | pull request, manual, schedule | Trivy scans each service image and fails on actionable HIGH/CRITICAL findings. |
 | SBOM | `.github/workflows/security.yml` | push, pull request, schedule | Anchore Syft emits a CycloneDX SBOM artifact. |
 | Dependency review | `.github/workflows/security.yml` | pull request | GitHub dependency review fails high-severity dependency changes. |
 | Static application analysis | `.github/workflows/codeql.yml` | push, pull request, schedule | CodeQL analyzes Java/Kotlin and JavaScript/TypeScript. |
@@ -25,7 +25,9 @@ Every backend service image and the Next.js frontend image now carries Open Cont
 - `org.opencontainers.image.created` records the UTC build timestamp;
 - `org.opencontainers.image.title`, `description`, and `licenses` make image inventory output readable for reviewers and scanners.
 
-The `Docker Images` workflow passes these values during pull request and branch builds. The `Release Images` workflow publishes the same metadata to GHCR and tags every image by both release version and commit SHA. SBOM generation and Trivy scanning then attach to images that can be traced back to repository source, commit, and release evidence.
+The `Docker Images` and `Security` workflows pass these values during pull request and branch builds. The `Release Images` workflow publishes the same metadata to GHCR and tags every image by both release version and commit SHA. SBOM generation and Trivy scanning then attach to images that can be traced back to repository source, commit, and release evidence.
+
+Trivy filesystem scanning blocks critical repository vulnerabilities. Trivy image scanning now runs for pull requests, manual runs, and schedules, and it fails on actionable HIGH/CRITICAL image vulnerabilities instead of only uploading advisory artifacts.
 
 ## Runtime Security Controls
 

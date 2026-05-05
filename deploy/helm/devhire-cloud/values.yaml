@@ -4,6 +4,7 @@ global:
   imageRegistry: ghcr.io/jasontm17/devhire
   imageTag: latest
   imagePullPolicy: IfNotPresent
+  requireSecretRefs: false
   publicDomain: devhire.invalid
   publicBaseUrl: https://devhire.invalid
   smtpFrom: no-reply@devhire.invalid

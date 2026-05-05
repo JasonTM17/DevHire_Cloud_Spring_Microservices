@@ -13,6 +13,7 @@ This is the short reviewer-facing evidence path. `docs/PROGRESS.md` remains an i
 | Dependabot posture | 20 open PRs are categorized by `scripts/dependabot-curate.ps1`; config now limits new PR fan-out |
 | E2E posture | PR-safe frontend preview smoke is wired; full Docker browser smoke remains manual/scheduled |
 | Coverage posture | Parent JaCoCo baseline raised to 35%; per-module script thresholds ratchet current measured modules |
+| Deployment posture | Prod Helm avoids `latest`, requires secret refs, and security image scans fail actionable HIGH/CRITICAL findings |
 
 ## What To Review First
 

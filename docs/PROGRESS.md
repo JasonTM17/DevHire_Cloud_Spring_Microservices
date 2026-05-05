@@ -2569,3 +2569,25 @@ Coverage gate snapshot:
 | job-service | 52.7% | 52.0% |
 | notification-service | 76.1% | 75.0% |
 | user-service | 76.0% | 75.0% |
+
+## v0.4.4 Phase 118 - Deployment and supply-chain hardening
+
+- Updated production Helm defaults to avoid mutable `latest` tags by using `sha-REPLACE_WITH_GIT_SHA` and `imagePullPolicy: Always`.
+- Added `global.requireSecretRefs`; production values set it to `true` so workloads that require secrets cannot silently boot without the referenced Kubernetes Secret.
+- Updated the Security workflow image scan lane to run on pull requests as well as manual/scheduled runs.
+- Added image metadata computation to the Security workflow and changed Trivy image scan `exit-code` to `1` for actionable HIGH/CRITICAL image findings.
+- Updated security evidence, cloud readiness, reviewer evidence, and scorecard docs.
+
+Verification:
+
+- Passed:
+  - `docker compose config --quiet`
+  - `.\scripts\docs-quality.ps1`
+  - `git diff --check`
+- Not run:
+  - `helm lint deploy/helm/devhire-cloud`
+  - `helm template ...`
+
+Reason:
+
+- `helm` is not installed in this local environment, so Helm rendering remains a CI/owner-machine validation step.

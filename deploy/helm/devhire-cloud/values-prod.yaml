@@ -1,8 +1,9 @@
 global:
   namespace: devhire
   imageRegistry: ghcr.io/jasontm17/devhire
-  imageTag: latest
-  imagePullPolicy: IfNotPresent
+  imageTag: sha-REPLACE_WITH_GIT_SHA
+  imagePullPolicy: Always
+  requireSecretRefs: true
   publicDomain: devhire.invalid
   publicBaseUrl: https://devhire.invalid
   smtpFrom: no-reply@devhire.invalid

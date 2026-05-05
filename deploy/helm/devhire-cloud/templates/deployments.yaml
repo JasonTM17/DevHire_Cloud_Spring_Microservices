@@ -39,7 +39,7 @@ spec:
 {{- if $service.secretRef }}
             - secretRef:
                 name: {{ include "devhire.secretName" $ }}
-                optional: true
+                optional: {{ not ($.Values.global.requireSecretRefs | default false) }}
 {{- end }}
           readinessProbe:
             httpGet:

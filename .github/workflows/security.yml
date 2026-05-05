@@ -120,7 +120,7 @@ jobs:
 
   image-scan:
     name: Trivy Image Scan ${{ matrix.service }}
-    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule' || github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 45
     strategy:
@@ -144,6 +144,14 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Compute image metadata
+        id: image-metadata
+        shell: bash
+        run: |
+          echo "created=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> "$GITHUB_OUTPUT"
+          echo "version=${GITHUB_REF_NAME:-${GITHUB_SHA}}" >> "$GITHUB_OUTPUT"
+          echo "source=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" >> "$GITHUB_OUTPUT"
+
       - name: Build local image for scanning
         uses: docker/build-push-action@v6
         with:
@@ -151,13 +159,19 @@ jobs:
           file: ${{ matrix.service }}/Dockerfile
           build-args: |
             SERVICE_NAME=${{ matrix.service }}
+            BUILD_VERSION=${{ steps.image-metadata.outputs.version }}
+            VCS_REF=${{ github.sha }}
+            VCS_URL=${{ steps.image-metadata.outputs.source }}
+            BUILD_CREATED=${{ steps.image-metadata.outputs.created }}
             NEXT_PUBLIC_API_BASE_URL=${{ vars.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080' }}
           tags: devhire/${{ matrix.service }}:security-${{ github.sha }}
           labels: |
             org.opencontainers.image.title=devhire-${{ matrix.service }}
             org.opencontainers.image.description=DevHire Cloud ${{ matrix.service }} image
-            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.source=${{ steps.image-metadata.outputs.source }}
             org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.version=${{ steps.image-metadata.outputs.version }}
+            org.opencontainers.image.created=${{ steps.image-metadata.outputs.created }}
             org.opencontainers.image.licenses=MIT
           load: true
 
@@ -172,7 +186,7 @@ jobs:
           format: table
           output: security-reports/trivy-image-${{ matrix.service }}.txt
           severity: HIGH,CRITICAL
-          exit-code: "0"
+          exit-code: "1"
           ignore-unfixed: true
 
       - name: Upload image scan report
