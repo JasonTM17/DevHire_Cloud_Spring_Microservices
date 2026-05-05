@@ -6,6 +6,9 @@ const screenshotsDir = path.resolve(__dirname, "..", "..", "docs", "screenshots"
 const urls = {
   frontend: process.env.E2E_FRONTEND_URL ?? "http://localhost:3001",
   gateway: process.env.E2E_GATEWAY_URL ?? "http://localhost:8080",
+  jobService:
+    process.env.E2E_JOB_SERVICE_URL ??
+    `http://localhost:${process.env.JOB_HOST_PORT ?? "8084"}`,
   mailpit: process.env.MAILPIT_URL ?? "http://localhost:8025"
 };
 
@@ -38,7 +41,7 @@ test.describe("operations portfolio screenshots", () => {
     await expect(page.locator("body")).toContainText(/Mailpit|Inbox|Messages/i);
     await capture(page, "ops-mailpit");
 
-    await page.goto(`${urls.gateway.replace(":8080", ":8084")}/swagger-ui/index.html`);
+    await page.goto(`${urls.jobService}/swagger-ui/index.html`);
     await expect(page.locator("body")).toContainText(/Swagger|OpenAPI|job/i);
     await capture(page, "ops-openapi-job-service");
   });

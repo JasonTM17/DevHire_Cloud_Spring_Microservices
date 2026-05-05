@@ -2852,6 +2852,12 @@ Notes:
   - passed `docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy:0.67.2 image --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 devhire-frontend:local`;
   - passed `docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy:0.67.2 image --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 devhire-job-service:local`.
 
+## v0.4.7 E2E runtime port fix
+
+- After the public finalization PR merged, the `Docker Compose Browser Smoke` workflow failed only in the screenshot capture phase.
+- Root cause: the full-stack CI run maps job-service to `JOB_HOST_PORT=18084`, but `frontend/e2e/ops-screenshots.spec.ts` inferred the OpenAPI URL by replacing `:8080` with `:8084`, which only works for default local ports.
+- Fixed the test contract by introducing `E2E_JOB_SERVICE_URL` and setting it explicitly in `scripts/e2e-smoke.ps1`.
+
 ## v0.4.6 Phase 125 - README first-screen reviewer polish
 
 - Added a public GitHub status matrix to the README first viewport.

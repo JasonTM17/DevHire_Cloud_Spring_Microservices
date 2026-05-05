@@ -132,6 +132,8 @@ try {
         }
         npx playwright install chromium
         $env:E2E_FRONTEND_URL = $FrontendUrl
+        $env:E2E_GATEWAY_URL = $GatewayUrl
+        $env:E2E_JOB_SERVICE_URL = "http://localhost:$env:JOB_HOST_PORT"
         npm run e2e
         if ($LASTEXITCODE -ne 0) {
             throw "Playwright E2E failed"
