@@ -12,11 +12,11 @@ This scorecard gives reviewers a fast, evidence-backed view of DevHire Cloud as 
 | Observability and SLOs | 8/10 | Actuator, Prometheus rules, Grafana SLO dashboard, Loki, Tempo, OpenTelemetry, runtime evidence docs |
 | CI/CD and release governance | 8/10 | Maven verify, frontend build, ratcheted coverage gate, Docker matrix, docs/security/terraform workflows, release notes, release evidence |
 | Cloud readiness | 8/10 | Docker Compose, Kubernetes manifests, Helm chart with immutable prod image defaults, Argo CD samples, AWS Terraform blueprint, External Secrets wiring |
-| Runtime reviewer proof | 8/10 | PR-safe frontend E2E smoke, portfolio verification scripts, API smoke, AI eval, Mailpit smoke, OpenAPI verify, performance and chaos smoke wrappers |
+| Runtime reviewer proof | 8.5/10 | Self-starting frontend E2E smoke, portfolio verification scripts, API smoke, AI eval, Mailpit smoke, OpenAPI verify, performance and chaos smoke wrappers |
 | AI portfolio layer | 8/10 | Claude Haiku assistant, RAG citations, fallback mode, tool traces, AI safety docs, eval dataset |
-| Public GitHub facade | 6/10 | Governance scripts and docs exist, but About/Topics/branch protection require owner token to apply remotely |
+| Public GitHub facade | 7/10 | Governance workflow, facade assertion, settings-as-code, and owner checklist exist; About/Topics/branch protection still require owner token to apply remotely |
 
-Overall portfolio posture: **8/10 production engineering evidence**, with the main remaining gap being owner-applied GitHub metadata and protected branch state.
+Overall portfolio posture: **8.1/10 production engineering evidence**, with the main remaining gap being owner-applied GitHub metadata and protected branch state.
 
 ## Architecture
 
@@ -74,6 +74,7 @@ Evidence:
 - `.github/workflows/release.yml`
 - [Versioning](versioning.md)
 - [Release evidence v0.4](release-evidence/v0.4.0.md)
+- [v0.4.6 public credibility evidence](release-evidence/v0.4.6.md)
 
 ## Cloud Readiness
 
@@ -93,6 +94,8 @@ Runtime proof is script-first so reviewers can run evidence without reading ever
 Evidence:
 
 - `scripts/portfolio-verify.ps1`
+- `cd frontend && npm run e2e:all`
+- `scripts/public-portfolio-audit.ps1`
 - `scripts/api-smoke.ps1`
 - `scripts/ai-eval.ps1`
 - `scripts/email-smoke.ps1`
@@ -114,5 +117,7 @@ Evidence:
 - [GitHub governance](github-governance.md)
 - [Branch protection](branch-protection.md)
 - [Repository health](repository-health.md)
+- [v0.4.6 public credibility evidence](release-evidence/v0.4.6.md)
 - `scripts/github-governance.ps1 -DryRun`
+- `scripts/github-facade-assert.ps1 -AllowOwnerActions`
 - `scripts/professionalism-audit.ps1`

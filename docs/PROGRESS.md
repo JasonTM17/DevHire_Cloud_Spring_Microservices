@@ -1893,6 +1893,29 @@ Verification:
   - `.\scripts\docs-quality.ps1`
   - `git diff --check`
 
+## v0.4.6 Phase 126 - Public credibility release evidence baseline
+
+- Added `docs/release-evidence/v0.4.6.md` with commands run, GitHub facade status, E2E result, Dependabot curation result, and release/tag decision.
+- Added v0.4.6 evidence to docs quality and evidence manifest gates.
+- Updated the production engineering scorecard with the stronger E2E/self-audit posture and the still-pending owner-only GitHub facade gap.
+
+Verification:
+
+- Passed:
+  - `.\scripts\docs-quality.ps1`
+  - `.\scripts\evidence-manifest-verify.ps1`
+  - `.\scripts\repo-hygiene.ps1`
+  - `.\scripts\dependabot-curate.ps1 -DryRun`
+  - `cd frontend && npm run e2e:all`
+  - `.\scripts\portfolio-verify.ps1 -Docs -Docker -PublicFacade`
+  - `.\scripts\public-portfolio-audit.ps1`
+  - `git diff --check`
+
+Notes:
+
+- `mvn -T1 clean verify` was not rerun in this final evidence-only phase because no Java sources or Maven build files changed.
+- The project was not tagged as `v0.4.6` because public GitHub About/Homepage/Topics and branch protection still require owner-token apply and verification.
+
 ## Phase 99 - Public repository health dashboard
 
 - Added `scripts/repository-health.ps1` to read public GitHub metadata, release state, branch protection summary, latest workflow runs, Dependabot PR categories, and local evidence file status.
