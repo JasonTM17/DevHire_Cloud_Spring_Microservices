@@ -58,6 +58,7 @@
         "scripts/clean-local-artifacts.ps1",
         "scripts/domain-placeholder-audit.ps1",
         "scripts/professionalism-audit.ps1",
+        "scripts/visual-evidence-audit.ps1",
         "scripts/terraform-validate.ps1",
         "scripts/check-coverage.ps1"
       ]
@@ -94,6 +95,7 @@
         "docs/runtime-reliability-review.md",
         "docs/runtime-acceptance-matrix.md",
         "docs/runtime-evidence-v0.4.md",
+        "docs/observability-evidence.md",
         "docs/repository-hygiene.md",
         "docs/production-readiness.md",
         "docs/cloud-readiness-review.md",

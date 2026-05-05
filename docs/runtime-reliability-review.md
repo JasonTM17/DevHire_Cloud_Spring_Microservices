@@ -43,7 +43,7 @@ Latest local runtime pass on 2026-05-04:
 | OpenAPI conformance | Required paths for auth, user, company, job, application, notification, audit, and AI services were fetched from live service ports. |
 | Mailpit email | Application notification flow produced captured sandbox email messages. |
 | k6 role suite | 43/43 checks passed with 0% failed requests in the local 2 VU smoke run. |
-| Screenshot suite | Jobs, job detail, role dashboards, assistant, Mailpit, OpenAPI, Prometheus, and Grafana screenshots were refreshed from the running stack. |
+| Screenshot suite | Jobs, job detail, role dashboards, assistant, Mailpit, OpenAPI, and operations evidence were refreshed. Prometheus/Grafana evidence is rendered from provisioned config to avoid blank loading screenshots. |
 
 ## Degraded Dependency Behavior
 

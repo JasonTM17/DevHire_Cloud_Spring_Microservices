@@ -7,7 +7,7 @@ This map helps a recruiter, senior engineer, or hiring manager review DevHire Cl
 Use this path when you only want a fast signal.
 
 1. Open `README.md` and scan the 30-second review, production proof table, and screenshots.
-2. Open `docs/release-evidence/v0.2.0.md` and confirm that CI, Docker, Security, and Documentation passed on the public repository.
+2. Open `docs/release-evidence/v0.4.0.md` and confirm that CI, Docker, Security, Documentation, runtime, and evidence gates are tracked.
 3. Open `docs/github-owner-actions.md` and check whether About, topics, release, and branch protection are configured on GitHub.
 4. Check `.github/workflows/` to confirm the repository has real CI/CD workflows, not only local scripts.
 
@@ -19,7 +19,7 @@ Use this path when reviewing backend and DevOps depth.
 
 1. Read `docs/service-catalog.md`, `docs/architecture-review-index.md`, `docs/architecture.md`, and `docs/portfolio-case-study.md`.
 2. Inspect `api-gateway`, `auth-service`, `job-service`, `application-service`, `notification-service`, `audit-service`, and `ai-service`.
-3. Open `docs/slo.md`, `docs/security.md`, `docs/external-secrets.md`, and `docs/runbooks/backup-restore.md`.
+3. Open `docs/slo.md`, `docs/observability-evidence.md`, `docs/security.md`, `docs/external-secrets.md`, and `docs/runbooks/backup-restore.md`.
 4. Review `scripts/verify.ps1`, `scripts/api-smoke.ps1`, `scripts/chaos-smoke.ps1`, and `scripts/terraform-validate.ps1`.
 5. Scan `docs/recruiter-review-guide.md` for the demo flow and suggested AI assistant prompts.
 

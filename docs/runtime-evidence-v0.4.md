@@ -30,6 +30,7 @@ This document is a sanitized evidence pack. Raw generated reports remain under `
 | OpenAPI verify | Passed | 8 services checked through live `/v3/api-docs` endpoints |
 | k6 role suite | Passed | 43/43 assertions, 0% failed requests, Gateway p95 about 100ms, AI p95 about 80ms |
 | Sanitized evidence summary | Passed | `runtime-evidence-summary.ps1` reported all tracked sources passing |
+| Observability visual evidence | Passed | Prometheus/Grafana screenshots are rendered from provisioned config and checked by `visual-evidence-audit.ps1` |
 
 ## Runtime URLs
 
@@ -53,4 +54,3 @@ docker compose up -d --build
 - Do not commit files from `reports/`.
 - Do not copy JWTs, refresh tokens, SMTP message bodies, provider keys, or raw API payloads into committed docs.
 - If runtime proof fails in another environment, update this file with the exact failing command and reason instead of claiming a pass.
-

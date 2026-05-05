@@ -209,6 +209,9 @@ try {
         Invoke-PortfolioStep "repository hygiene" ".\scripts\repo-hygiene.ps1" {
             & "$PSScriptRoot\repo-hygiene.ps1"
         }
+        Invoke-PortfolioStep "visual evidence audit" ".\scripts\visual-evidence-audit.ps1" {
+            & "$PSScriptRoot\visual-evidence-audit.ps1"
+        }
         Invoke-PortfolioStep "git diff whitespace" "git diff --check" {
             git diff --check
             Assert-LastExitCode "git diff --check"

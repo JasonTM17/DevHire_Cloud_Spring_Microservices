@@ -86,15 +86,17 @@ Claude AI assistant:
 
 ![Claude AI assistant](docs/screenshots/assistant-page.png)
 
-Operations evidence từ stack local:
+Operations evidence từ stack local và repository-owned observability config:
 
 | AI Provider Ops | Mailpit SMTP Sandbox |
 |---|---|
 | ![AI provider operations](docs/screenshots/ops-ai-provider.png) | ![Mailpit sandbox](docs/screenshots/ops-mailpit.png) |
 
-| OpenAPI Job Service | Prometheus Rules | Grafana SLO |
+| OpenAPI Job Service | Prometheus SLO Rules | Grafana SLO Dashboard |
 |---|---|---|
 | ![OpenAPI job service](docs/screenshots/ops-openapi-job-service.png) | ![Prometheus rules](docs/screenshots/ops-prometheus-rules.png) | ![Grafana SLO dashboard](docs/screenshots/ops-grafana-slo.png) |
+
+Hai ảnh Prometheus/Grafana ở trên được render từ `infra/prometheus/rules/devhire-slo.yml` và `infra/grafana/dashboards/devhire-slo-overview.json`, để reviewer thấy rõ alert rules, dashboard panels, queries và SLO scope thay vì một UI đang loading.
 
 ## Vì Sao Dự Án Này Đáng Xem
 

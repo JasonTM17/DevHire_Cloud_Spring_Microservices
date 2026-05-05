@@ -28,9 +28,11 @@ Operations evidence from the local stack:
 |---|---|
 | ![AI provider operations](screenshots/ops-ai-provider.png) | ![Mailpit sandbox](screenshots/ops-mailpit.png) |
 
-| OpenAPI Job Service | Prometheus Rules | Grafana SLO |
+| OpenAPI Job Service | Prometheus SLO Rules | Grafana SLO Dashboard |
 |---|---|---|
 | ![OpenAPI job service](screenshots/ops-openapi-job-service.png) | ![Prometheus rules](screenshots/ops-prometheus-rules.png) | ![Grafana SLO dashboard](screenshots/ops-grafana-slo.png) |
+
+The Prometheus and Grafana images are rendered from `infra/prometheus/rules/devhire-slo.yml` and `infra/grafana/dashboards/devhire-slo-overview.json`, so reviewers see the actual alert rules, panel inventory, queries, and SLO scope instead of a blank loading UI.
 
 ## Architecture Snapshot
 

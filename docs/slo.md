@@ -76,6 +76,8 @@ The SLO dashboard includes:
 - AI assistant p95 latency.
 - AI tool calls and Claude fallback count.
 
+The README operations screenshots for Prometheus and Grafana are rendered from the same repository-owned configuration instead of from a potentially empty live UI page. See [observability evidence](observability-evidence.md) for the screenshot generation and quality-gate policy.
+
 AI assistant metrics are emitted by `ai-service`:
 
 - `devhire_ai_chat_requests_total`
@@ -118,4 +120,13 @@ Runtime smoke after starting the stack:
 ```powershell
 scripts/api-smoke.ps1 -GatewayUrl http://localhost:8080
 scripts/perf-smoke.ps1 -BaseUrl http://localhost:8080 -Vus 2 -Duration 10s -UseDocker
+```
+
+Regenerate and validate operations screenshots:
+
+```powershell
+cd frontend
+npm run screenshots:ops-evidence
+cd ..
+.\scripts\visual-evidence-audit.ps1
 ```

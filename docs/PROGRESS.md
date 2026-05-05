@@ -2415,3 +2415,41 @@ Remote state remains unchanged until an owner token is used:
 - Homepage: empty
 - Topics: 0
 - `master` protected: false
+
+## Phase 113 - Observability evidence hardening
+
+- Replaced weak Prometheus/Grafana loading-state screenshots with high-fidelity Playwright-rendered evidence generated from repository-owned configuration:
+  - `infra/prometheus/rules/devhire-slo.yml`
+  - `infra/grafana/dashboards/devhire-slo-overview.json`
+- Added `frontend/e2e/ops-evidence-render.spec.ts` to render readable operations evidence for alert rules, SLO panels, PromQL expressions, dashboard panel counts, and AI operations metrics.
+- Updated `npm run screenshots` and `npm run screenshots:ops` so runtime screenshots cannot overwrite Prometheus/Grafana evidence with blank live UI captures.
+- Added `scripts/visual-evidence-audit.ps1` and wired it into:
+  - `scripts/portfolio-verify.ps1 -Docs`,
+  - `.github/workflows/docs.yml`,
+  - `scripts/docs-quality.ps1`,
+  - `docs/evidence-manifest.json`.
+- Added `docs/observability-evidence.md` and linked the evidence policy from SLO, runtime evidence, recruiter guide, and review map documentation.
+
+Verification:
+
+- Passed:
+  - `cd frontend && npm run typecheck`
+  - `cd frontend && npm run build`
+  - `cd frontend && npm run screenshots:ops-evidence`
+  - `.\scripts\visual-evidence-audit.ps1`
+  - `.\scripts\docs-quality.ps1`
+  - `.\scripts\evidence-audit.ps1`
+  - `.\scripts\portfolio-verify.ps1 -Docs -Docker`
+  - `docker compose config --quiet`
+  - `git diff --check`
+
+Visual evidence gate:
+
+| Screenshot | Size | Resolution |
+|---|---:|---:|
+| `ops-prometheus-rules.png` | 478.8 KB | 1600 x 1797 |
+| `ops-grafana-slo.png` | 422.2 KB | 1600 x 1434 |
+
+Note:
+
+- Browser Use visual inspection was attempted after regeneration, but the in-app browser backend timed out while enabling the page. The fallback verification is Playwright-rendered screenshot generation plus the committed PNG quality audit above.

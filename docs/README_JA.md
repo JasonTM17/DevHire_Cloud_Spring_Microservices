@@ -28,9 +28,11 @@ Local stack から取得した operations evidence:
 |---|---|
 | ![AI provider operations](screenshots/ops-ai-provider.png) | ![Mailpit sandbox](screenshots/ops-mailpit.png) |
 
-| OpenAPI Job Service | Prometheus Rules | Grafana SLO |
+| OpenAPI Job Service | Prometheus SLO Rules | Grafana SLO Dashboard |
 |---|---|---|
 | ![OpenAPI job service](screenshots/ops-openapi-job-service.png) | ![Prometheus rules](screenshots/ops-prometheus-rules.png) | ![Grafana SLO dashboard](screenshots/ops-grafana-slo.png) |
+
+Prometheus と Grafana の画像は `infra/prometheus/rules/devhire-slo.yml` と `infra/grafana/dashboards/devhire-slo-overview.json` からレンダリングしており、空の loading UI ではなく alert rules、dashboard panels、queries、SLO scope を確認できます。
 
 ## Architecture Snapshot
 

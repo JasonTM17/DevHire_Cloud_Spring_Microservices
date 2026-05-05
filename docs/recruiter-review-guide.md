@@ -93,6 +93,7 @@ Open:
 - `docs/runtime-reliability-review.md`
 - `docs/runtime-acceptance-matrix.md`
 - `docs/runtime-evidence-v0.4.md`
+- `docs/observability-evidence.md`
 - `docs/runbooks/backup-restore.md`
 - `docs/runbooks/incident-response.md`
 - `docs/runbooks/alert-response.md`
@@ -107,6 +108,7 @@ Open:
 What to look for:
 
 - SLO and alert coverage,
+- source-backed Prometheus/Grafana evidence, not blank dashboard screenshots,
 - email sandbox and real SMTP secret policy,
 - backup/restore guardrails,
 - chaos smoke scenarios,
