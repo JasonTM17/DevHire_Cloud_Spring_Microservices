@@ -2728,3 +2728,16 @@ Verification:
 Notes:
 
 - Public portfolio audit passes while still reporting the true owner-only blocker: GitHub About/Homepage/Topics are empty and `master protected=false` until governance apply runs with `REPO_GOVERNANCE_TOKEN`.
+
+## v0.4.6 Phase 125 - README first-screen reviewer polish
+
+- Added a public GitHub status matrix to the README first viewport.
+- Added the self-starting frontend E2E command beside the fast static/Docker reviewer gate.
+- Moved Vietnamese narrative out of the immediate first screen so the top of GitHub shows proof, links, and current public state first.
+- Updated the 30-second review path to include v0.4.6 public credibility evidence.
+
+Verification:
+
+- Passed:
+  - `.\scripts\docs-quality.ps1`
+  - `git diff --check`

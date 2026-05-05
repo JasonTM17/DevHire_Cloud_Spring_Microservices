@@ -10,6 +10,18 @@
 
 DevHire Cloud is a production-grade Java 21/Spring Boot microservices portfolio for a recruitment platform: API Gateway, JWT/refresh security, service-owned PostgreSQL databases, Kafka/outbox reliability, OpenSearch search, Next.js frontend, Claude Haiku RAG assistant, Docker runtime, Kubernetes/Helm/GitOps, AWS Terraform blueprint, observability, CI/CD, security scanning, and reviewer-friendly evidence.
 
+## Public GitHub Status
+
+| Signal | Current Public State | Verification / Owner Action |
+|---|---|---|
+| Latest release | `v0.3.0` is public | [Release](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.3.0) |
+| Current hardening evidence | `v0.4.6` on `master` | [Review evidence](docs/REVIEW_EVIDENCE.md) |
+| About description | Pending owner apply | `Repository Governance -> apply-metadata` |
+| Topics | Pending owner apply | `Repository Governance -> apply-metadata` |
+| Branch protection | Pending owner apply | `Repository Governance -> apply-branch-protection`, then `verify-only` |
+| Dependabot queue | 20 PRs categorized: 11 safe, 8 deferred major, 1 manual review | [Dependabot cleanup](docs/dependabot-cleanup-v0.4.md) |
+| E2E preview | Self-starting desktop + mobile smoke passed locally | `cd frontend && npm run e2e:all` |
+
 ## Reviewer Quick Links
 
 | Need | Open |
@@ -34,15 +46,18 @@ Fast reviewer gate:
 .\scripts\portfolio-verify.ps1 -Docs -Docker
 ```
 
+Frontend browser smoke without Docker:
+
+```powershell
+cd frontend
+npm run e2e:all
+```
+
 Runtime gate when the Docker stack is running:
 
 ```powershell
 .\scripts\portfolio-verify.ps1 -Runtime -GatewayUrl http://localhost:8080
 ```
-
-DevHire Cloud là một dự án portfolio backend/DevOps/Solution Architecture được xây dựng như một nền tảng tuyển dụng mini ITviec/LinkedIn Jobs. Mục tiêu của dự án không phải là demo CRUD đơn giản, mà là chứng minh năng lực thiết kế, triển khai, kiểm thử và vận hành một hệ thống microservices Java Spring Boot production-style.
-
-Repository hiện có Java 21, Spring Boot 3.5.13, Spring Cloud 2025.0.2, API Gateway, JWT security, Kafka/outbox, OpenSearch, PostgreSQL service-owned databases, Claude Haiku AI assistant, Docker Compose full stack, observability, CI/CD, Kubernetes/Helm/GitOps, AWS Terraform blueprint, Next.js frontend và bộ kiểm thử tự động.
 
 ## 30-Second Review
 
@@ -55,7 +70,7 @@ Best reviewer path:
 3. Run `.\scripts\portfolio-verify.ps1 -Docs -Docker` for a fast local gate.
 4. Run `.\scripts\portfolio-verify.ps1 -Runtime -GatewayUrl http://localhost:8080` when Docker is already running and you want runtime proof.
 5. Use [Runtime acceptance matrix](docs/runtime-acceptance-matrix.md) to map each production claim to its verification command.
-6. Check [Review evidence pack](docs/REVIEW_EVIDENCE.md), [v0.3.0 release evidence](docs/release-evidence/v0.3.0.md), and [v0.4.4 professionalization evidence](docs/release-evidence/v0.4.4.md).
+6. Check [Review evidence pack](docs/REVIEW_EVIDENCE.md), [v0.3.0 release evidence](docs/release-evidence/v0.3.0.md), [v0.4.4 professionalization evidence](docs/release-evidence/v0.4.4.md), and [v0.4.6 public credibility evidence](docs/release-evidence/v0.4.6.md).
 
 ## Production Proof
 
