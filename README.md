@@ -21,6 +21,7 @@ DevHire Cloud is a production-grade Java 21/Spring Boot microservices portfolio 
 | Product UI system | [Operations design system](docs/design-system.md) |
 | Security and supply chain | [Security evidence](docs/security-evidence.md) |
 | Cloud deployment blueprint | [Cloud readiness review](docs/cloud-readiness-review.md) |
+| Production engineering scorecard | [Scorecard](docs/production-engineering-scorecard.md) |
 | Public repo governance | [Repository health](docs/repository-health.md) |
 | About/Topics apply path | [GitHub governance](docs/github-governance.md) |
 

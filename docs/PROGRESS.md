@@ -2371,3 +2371,24 @@ Verification:
   - `.\scripts\docs-quality.ps1`
   - `.\scripts\evidence-audit.ps1`
   - `git diff --check`
+
+## Phase 111 - Production engineering scorecard and professionalism audit
+
+- Added `docs/production-engineering-scorecard.md` with conservative scoring across architecture, security, reliability, observability, CI/CD, cloud readiness, runtime proof, AI, and public GitHub facade.
+- Added `scripts/professionalism-audit.ps1` to summarize GitHub metadata, branch protection, Dependabot PR count, workflow evidence, placeholder hygiene, ignored artifacts, required docs/scripts, and tracked artifact status.
+- Linked the scorecard from the README reviewer quick links.
+- Added the scorecard and audit script to documentation quality checks and the evidence manifest.
+
+Verification:
+
+- Passed:
+  - `.\scripts\professionalism-audit.ps1`
+  - `.\scripts\domain-placeholder-audit.ps1`
+  - `.\scripts\docs-quality.ps1`
+  - `git diff --check`
+
+Professionalism audit result:
+
+- Status: `passed_with_owner_actions`
+- Owner actions still required: repository About description, homepage, topics, and `master` branch protection.
+- Open Dependabot PRs reported by GitHub public API: 20.

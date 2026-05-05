@@ -57,6 +57,7 @@
         "scripts/repository-health.ps1",
         "scripts/clean-local-artifacts.ps1",
         "scripts/domain-placeholder-audit.ps1",
+        "scripts/professionalism-audit.ps1",
         "scripts/terraform-validate.ps1",
         "scripts/check-coverage.ps1"
       ]
@@ -104,6 +105,7 @@
         "docs/github-governance.md",
         "docs/branch-protection.md",
         "docs/repository-health.md",
+        "docs/production-engineering-scorecard.md",
         "docs/repository-structure.md",
         "docs/design-system.md",
         "docs/release-evidence/v0.3.0.md",
