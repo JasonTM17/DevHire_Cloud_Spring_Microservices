@@ -2686,3 +2686,26 @@ Verification:
 Notes:
 
 - Dry-run evidence still shows 20 open Dependabot PRs: 11 safe-batch, 8 deferred-major, and 1 manual-review. Actual close/label operations require `REPO_GOVERNANCE_TOKEN` through the manual workflow or an owner shell.
+
+## v0.4.6 Phase 123 - Self-starting frontend E2E preview smoke
+
+- Added `frontend/scripts/e2e-preview.mjs`, which builds the frontend, starts a Next.js preview server, waits for `/jobs`, runs desktop and mobile Playwright smoke, and stops the server.
+- Added reviewer-friendly npm commands:
+  - `npm run e2e:preview`
+  - `npm run e2e:preview:mobile`
+  - `npm run e2e:all`
+- Updated the E2E workflow to use `npm run e2e:all` instead of hand-written preview startup logic in YAML.
+- The preview script auto-selects a free port when `3001` is already occupied, preventing false failures against a stale local server.
+
+Verification:
+
+- Passed:
+  - `cd frontend && npm run e2e:all`
+  - `.\scripts\docs-quality.ps1`
+  - `.\scripts\evidence-manifest-verify.ps1`
+  - `git diff --check`
+
+Notes:
+
+- The first local attempt exposed a stale server on port `3001`; the script was then hardened to select an available preview port automatically.
+- The passing run used `http://127.0.0.1:3002`, with 5 desktop smoke tests and 2 mobile smoke tests passing.

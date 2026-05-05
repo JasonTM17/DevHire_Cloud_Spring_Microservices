@@ -54,6 +54,7 @@ $requiredPaths = @(
     "scripts/github-facade-assert.ps1",
     "scripts/dependabot-curate.ps1",
     "scripts/repository-health.ps1",
+    "frontend/scripts/e2e-preview.mjs",
     "scripts/clean-local-artifacts.ps1",
     "scripts/domain-placeholder-audit.ps1",
     "scripts/professionalism-audit.ps1",
