@@ -17,15 +17,20 @@ Recommended protection for `master`:
 | Force pushes | Blocked |
 | Branch deletion | Blocked |
 
-Required checks:
+Required checks use the exact job contexts GitHub exposes to branch protection:
 
-- `CI`
-- `Docker Images`
-- `Documentation`
-- `Security`
-- `CodeQL`
+- `Maven Verify`
+- `Portfolio docs quality`
+- `Gitleaks Secret Scan`
+- `Trivy Filesystem Scan`
+- `Generate SBOM`
+- `Maven Dependency Tree`
+- `Build api-gateway`
+- `Build frontend`
+- `Analyze java-kotlin`
+- `Analyze javascript-typescript`
 
-AI, E2E, performance, and runtime smoke workflows are intentionally not required checks because they can be heavy, scheduled, or manually triggered. They remain portfolio evidence gates.
+AI, full Docker E2E, performance, and runtime smoke workflows are intentionally not required checks because they can be heavy, scheduled, or manually triggered. They remain portfolio evidence gates.
 
 ## Automation
 
@@ -39,6 +44,7 @@ Apply protection from an owner shell:
 
 ```powershell
 $env:GITHUB_TOKEN = "<short-lived-owner-token>"
+.\scripts\github-check-contexts.ps1
 .\scripts\github-governance.ps1 -Apply -BranchProtectionOnly
 Remove-Item Env:\GITHUB_TOKEN
 ```
@@ -62,7 +68,7 @@ Set:
 - Dismiss stale pull request approvals when new commits are pushed
 - Require status checks to pass before merging
 - Require branches to be up to date before merging
-- Add required checks: `CI`, `Docker Images`, `Documentation`, `Security`, `CodeQL`
+- Add required checks: `Maven Verify`, `Portfolio docs quality`, `Gitleaks Secret Scan`, `Trivy Filesystem Scan`, `Generate SBOM`, `Maven Dependency Tree`, `Build api-gateway`, `Build frontend`, `Analyze java-kotlin`, `Analyze javascript-typescript`
 - Require conversation resolution before merging
 - Block force pushes
 - Block deletions

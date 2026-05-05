@@ -15,6 +15,7 @@ on:
           - apply-all
 
 permissions:
+  actions: read
   contents: read
 
 jobs:
@@ -52,6 +53,7 @@ jobs:
           if ([string]::IsNullOrWhiteSpace($env:GITHUB_TOKEN)) {
             throw "REPO_GOVERNANCE_TOKEN repository secret is required for apply mode."
           }
+          ./scripts/github-check-contexts.ps1
           ./scripts/github-governance.ps1 -Apply -BranchProtectionOnly
 
       - name: Apply all repository governance
@@ -63,6 +65,7 @@ jobs:
           if ([string]::IsNullOrWhiteSpace($env:GITHUB_TOKEN)) {
             throw "REPO_GOVERNANCE_TOKEN repository secret is required for apply mode."
           }
+          ./scripts/github-check-contexts.ps1
           ./scripts/github-governance.ps1 -Apply
 
       - name: Verify repository health

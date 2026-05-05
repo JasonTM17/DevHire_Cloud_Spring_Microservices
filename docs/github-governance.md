@@ -44,7 +44,13 @@ $env:GITHUB_TOKEN = "<short-lived-owner-token>"
 Remove-Item Env:\GITHUB_TOKEN
 ```
 
-Apply branch protection separately after the visible metadata is fixed:
+Audit the required check contexts before applying branch protection:
+
+```powershell
+.\scripts\github-check-contexts.ps1
+```
+
+Apply branch protection separately after the visible metadata is fixed and the context audit is green:
 
 ```powershell
 $env:GITHUB_TOKEN = "<short-lived-owner-token>"
@@ -63,7 +69,7 @@ If local Browser automation or local tokens are unavailable, use the audited wor
 3. Open `Actions -> Repository Governance`.
 4. Run with `mode=dry-run` first.
 5. Run with `mode=apply-metadata` to update the About description, homepage, and topics that appear in the right sidebar.
-6. Run with `mode=apply-branch-protection` after the main workflows are green and you are ready to protect `master`.
+6. Run with `mode=apply-branch-protection` after the main workflows are green and you are ready to protect `master`; the workflow runs `scripts/github-check-contexts.ps1` first.
 7. Use `mode=apply-all` only when you want to update metadata and branch protection in one owner-approved run.
 
 The workflow is defined in `.github/workflows/repository-governance.yml` and uploads sanitized governance reports as workflow artifacts. It does not print the token.
@@ -103,7 +109,20 @@ java, spring-boot, microservices, spring-cloud, postgresql, kafka, opensearch, r
 - block force pushes,
 - block deletion.
 
-Required checks are intentionally limited to stable portfolio gates: `CI`, `Docker Images`, `Documentation`, `Security`, and `CodeQL`.
+Required checks use stable job contexts, not broad workflow names:
+
+- `Maven Verify`
+- `Portfolio docs quality`
+- `Gitleaks Secret Scan`
+- `Trivy Filesystem Scan`
+- `Generate SBOM`
+- `Maven Dependency Tree`
+- `Build api-gateway`
+- `Build frontend`
+- `Analyze java-kotlin`
+- `Analyze javascript-typescript`
+
+`scripts/github-check-contexts.ps1` reads recent successful GitHub Actions jobs and fails if any required context is missing before branch protection is applied.
 
 ## Token Safety
 

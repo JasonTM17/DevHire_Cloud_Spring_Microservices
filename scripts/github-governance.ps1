@@ -13,11 +13,16 @@ param(
     [string]$Homepage = "https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.3.0",
     [string]$Description = "Production-grade Java 21 Spring Boot microservices recruitment platform with JWT, Kafka, OpenSearch, Docker, Kubernetes, Terraform, observability, CI/CD, and Claude Haiku AI RAG assistant.",
     [string[]]$RequiredChecks = @(
-        "CI",
-        "Docker Images",
-        "Documentation",
-        "Security",
-        "CodeQL"
+        "Maven Verify",
+        "Portfolio docs quality",
+        "Gitleaks Secret Scan",
+        "Trivy Filesystem Scan",
+        "Generate SBOM",
+        "Maven Dependency Tree",
+        "Build api-gateway",
+        "Build frontend",
+        "Analyze java-kotlin",
+        "Analyze javascript-typescript"
     ),
     [string[]]$Topics = @(
         "java",
@@ -269,6 +274,7 @@ $lines.Add("- Description: $Description")
 $lines.Add("- Homepage: $Homepage")
 $lines.Add("- Topics: $($Topics -join ', ')")
 $lines.Add("- Required checks: $($RequiredChecks -join ', ')")
+$lines.Add("- Required check audit: run `scripts/github-check-contexts.ps1` before applying branch protection.")
 $lines.Add("")
 $lines.Add("## Current Public Metadata")
 $lines.Add("")
@@ -306,5 +312,5 @@ Write-Host "  $mdPath"
 if ($DryRun) {
     Write-Host ""
     Write-Host "Dry run only. Re-run with -Apply -MetadataOnly and GITHUB_TOKEN or REPO_GOVERNANCE_TOKEN to fix the GitHub About/Homepage/Topics sidebar first."
-    Write-Host "Then run -Apply -BranchProtectionOnly when you are ready to enforce required checks on $DefaultBranch."
+    Write-Host "Then run scripts/github-check-contexts.ps1 and -Apply -BranchProtectionOnly when you are ready to enforce required checks on $DefaultBranch."
 }

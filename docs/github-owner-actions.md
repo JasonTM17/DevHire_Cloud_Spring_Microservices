@@ -44,13 +44,18 @@ Protect `master` with:
 
 Recommended required checks:
 
-- `CI / Maven Verify`
-- `Docker Images`
-- `Security / Gitleaks Secret Scan`
-- `Security / Trivy Filesystem Scan`
-- `CodeQL / Analyze`
-- `Documentation / Portfolio docs quality`
-- `Terraform / Validate AWS Blueprint`
+- `Maven Verify`
+- `Portfolio docs quality`
+- `Gitleaks Secret Scan`
+- `Trivy Filesystem Scan`
+- `Generate SBOM`
+- `Maven Dependency Tree`
+- `Build api-gateway`
+- `Build frontend`
+- `Analyze java-kotlin`
+- `Analyze javascript-typescript`
+
+Run `.\scripts\github-check-contexts.ps1` before applying branch protection. The script validates these exact job contexts against recent successful workflow runs so GitHub branch protection does not get configured with broad workflow names that never complete.
 
 ## Dry-Run Publication Command
 
@@ -72,6 +77,7 @@ Then apply branch protection:
 
 ```powershell
 $env:GITHUB_TOKEN = "<owner-token>"
+.\scripts\github-check-contexts.ps1
 .\scripts\github-governance.ps1 -Apply -BranchProtectionOnly
 Remove-Item Env:\GITHUB_TOKEN
 ```

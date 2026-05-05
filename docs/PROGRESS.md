@@ -2453,3 +2453,21 @@ Visual evidence gate:
 Note:
 
 - Browser Use visual inspection was attempted after regeneration, but the in-app browser backend timed out while enabling the page. The fallback verification is Playwright-rendered screenshot generation plus the committed PNG quality audit above.
+
+## v0.4.4 Phase 112 - Public GitHub facade control activation
+
+- Added `scripts/github-check-contexts.ps1` to verify exact GitHub branch-protection status check contexts from recent successful workflow jobs before any owner-only protection apply.
+- Updated `scripts/github-governance.ps1` to use real job context names such as `Maven Verify`, `Portfolio docs quality`, `Build api-gateway`, `Build frontend`, and CodeQL language jobs instead of broad workflow names.
+- Wired the context audit into `.github/workflows/repository-governance.yml` for `apply-branch-protection` and `apply-all`.
+- Updated GitHub governance, branch protection, and owner-action docs so the public facade path is explicit and cannot accidentally apply invalid required checks.
+
+Verification:
+
+- Passed:
+  - `.\scripts\github-check-contexts.ps1`
+  - `.\scripts\github-governance.ps1 -DryRun`
+  - `git diff --check`
+
+Remote state:
+
+- `REPO_GOVERNANCE_TOKEN` / `GITHUB_TOKEN` was not available locally, so About/Homepage/Topics and `master` protection were not applied from this environment. The workflow path remains the owner-approved apply route.
