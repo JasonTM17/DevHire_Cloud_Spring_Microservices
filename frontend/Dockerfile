@@ -1,9 +1,9 @@
-FROM node:24-alpine AS deps
+FROM node:25-alpine AS deps
 WORKDIR /app
 COPY frontend/package*.json ./
 RUN npm ci
 
-FROM node:24-alpine AS builder
+FROM node:25-alpine AS builder
 WORKDIR /app
 ARG NEXT_PUBLIC_API_BASE_URL=http://localhost:8080
 ENV NEXT_TELEMETRY_DISABLED=1
@@ -12,7 +12,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY frontend ./
 RUN npm run build
 
-FROM node:24-alpine AS runner
+FROM node:25-alpine AS runner
 WORKDIR /app
 ARG SERVICE_NAME=frontend
 ARG BUILD_VERSION=0.4.0
