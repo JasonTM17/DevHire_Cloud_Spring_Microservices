@@ -12,7 +12,7 @@ This scorecard gives reviewers a fast, evidence-backed view of DevHire Cloud as 
 | Observability and SLOs | 8/10 | Actuator, Prometheus rules, Grafana SLO dashboard, Loki, Tempo, OpenTelemetry, runtime evidence docs |
 | CI/CD and release governance | 8/10 | Maven verify, frontend build, Docker matrix, docs/security/terraform workflows, release notes, release evidence |
 | Cloud readiness | 8/10 | Docker Compose, Kubernetes manifests, Helm chart, Argo CD samples, AWS Terraform blueprint, External Secrets wiring |
-| Runtime reviewer proof | 7/10 | Portfolio verification scripts, API smoke, AI eval, Mailpit smoke, OpenAPI verify, performance and chaos smoke wrappers |
+| Runtime reviewer proof | 8/10 | PR-safe frontend E2E smoke, portfolio verification scripts, API smoke, AI eval, Mailpit smoke, OpenAPI verify, performance and chaos smoke wrappers |
 | AI portfolio layer | 8/10 | Claude Haiku assistant, RAG citations, fallback mode, tool traces, AI safety docs, eval dataset |
 | Public GitHub facade | 6/10 | Governance scripts and docs exist, but About/Topics/branch protection require owner token to apply remotely |
 
@@ -88,7 +88,7 @@ Evidence:
 
 ## Runtime Proof
 
-Runtime proof is script-first so reviewers can run evidence without reading every service. Full runtime proof depends on Docker being available locally; when Docker is unavailable, the repo records the blocker honestly.
+Runtime proof is script-first so reviewers can run evidence without reading every service. Pull requests get a lightweight frontend preview smoke that does not need Docker, while full runtime proof depends on Docker being available locally; when Docker is unavailable, the repo records the blocker honestly.
 
 Evidence:
 

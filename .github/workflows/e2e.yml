@@ -1,6 +1,7 @@
 name: E2E Smoke
 
 on:
+  pull_request:
   workflow_dispatch:
   schedule:
     - cron: "0 19 * * 1"
@@ -9,8 +10,80 @@ permissions:
   contents: read
 
 jobs:
+  frontend-preview-smoke:
+    name: Frontend Preview Smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Typecheck frontend
+        working-directory: frontend
+        run: npm run typecheck
+
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build
+
+      - name: Install Playwright Chromium
+        working-directory: frontend
+        run: npx playwright install --with-deps chromium
+
+      - name: Start frontend preview
+        working-directory: frontend
+        shell: bash
+        env:
+          NEXT_PUBLIC_API_BASE_URL: http://127.0.0.1:18080
+        run: |
+          nohup npx next start --hostname 127.0.0.1 --port 3001 > ../frontend-preview.log 2>&1 &
+          for i in {1..40}; do
+            if curl -fsS http://127.0.0.1:3001/jobs >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat ../frontend-preview.log
+          exit 1
+
+      - name: Run frontend smoke and mobile checks
+        working-directory: frontend
+        env:
+          E2E_FRONTEND_URL: http://127.0.0.1:3001
+        run: |
+          npm run e2e
+          npm run e2e:mobile
+
+      - name: Verify API compatibility manifest
+        shell: pwsh
+        run: ./scripts/api-compatibility.ps1 -ManifestOnly
+
+      - name: Upload Playwright preview report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-preview-report
+          path: |
+            frontend/playwright-report
+            frontend/test-results
+            frontend-preview.log
+          if-no-files-found: ignore
+
   browser-smoke:
     name: Docker Compose Browser Smoke
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 45
 

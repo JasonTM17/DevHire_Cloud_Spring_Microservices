@@ -11,6 +11,7 @@ This is the short reviewer-facing evidence path. `docs/PROGRESS.md` remains an i
 | GitHub About/Homepage/Topics | Owner action required until `Repository Governance` apply mode runs |
 | Branch protection | Owner action required until the required check context audit and apply mode run |
 | Dependabot posture | 20 open PRs are categorized by `scripts/dependabot-curate.ps1`; config now limits new PR fan-out |
+| E2E posture | PR-safe frontend preview smoke is wired; full Docker browser smoke remains manual/scheduled |
 
 ## What To Review First
 

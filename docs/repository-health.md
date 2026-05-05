@@ -17,6 +17,7 @@ Latest v0.4.3 health scan focus:
 | Branch protection | Public branch API reports `master protected=false`; owner apply still required |
 | Dependabot PRs | 20 open PRs; curated through `scripts/dependabot-curate.ps1` |
 | Runtime evidence | `docs/runtime-evidence-v0.4.md` |
+| E2E posture | PR-safe frontend preview smoke is wired; full Docker browser smoke stays manual/scheduled |
 
 v0.4.3 verification result: `GITHUB_TOKEN` was not set locally, so owner-only remote updates were skipped by design. Public API still reports empty About/Homepage/Topics and `master protected=false`; release `v0.3.0` remains visible.
 
@@ -74,6 +75,15 @@ Alternative audited route:
 - run `Actions -> Repository Governance -> mode=dry-run`,
 - run `mode=apply-metadata` after reviewing the artifact,
 - run `mode=apply-branch-protection` after confirming the required checks are green.
+
+## E2E Evidence Posture
+
+`E2E Smoke` now has two lanes:
+
+- `Frontend Preview Smoke` runs on pull requests without Docker. It builds the Next.js app, starts it locally, exercises Playwright desktop/mobile smoke through deterministic preview fallbacks, and verifies API compatibility in manifest mode.
+- `Docker Compose Browser Smoke` remains manual/scheduled because it starts the full stack and is intentionally heavier.
+
+The public branch protection target should use stable required contexts first; the heavy Docker E2E lane stays evidence-oriented until it is consistently green in the hosted environment.
 
 ## Related Evidence
 

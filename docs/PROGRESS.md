@@ -2525,3 +2525,19 @@ Verification:
 Note:
 
 - A root-level `npx playwright` invocation was accidentally attempted first and failed because it did not load `frontend/playwright.config.ts`; the screenshot capture was rerun correctly from `frontend` before promotion.
+
+## v0.4.4 Phase 116 - Runtime gate and E2E credibility
+
+- Added a PR-safe `Frontend Preview Smoke` job to `.github/workflows/e2e.yml`.
+- The PR lane builds the Next.js app, starts it on `127.0.0.1:3001`, runs desktop and mobile Playwright smoke through deterministic preview fallbacks, and verifies API compatibility in manifest mode.
+- Kept the full `Docker Compose Browser Smoke` lane manual/scheduled because it starts the full stack and remains heavier runtime evidence.
+- Updated repository health, scorecard, and reviewer evidence docs to distinguish PR-safe E2E from full Docker browser smoke.
+
+Verification:
+
+- Passed:
+  - `.\scripts\api-compatibility.ps1 -ManifestOnly`
+  - `.\scripts\docs-quality.ps1`
+  - `git diff --check`
+  - local `cd frontend && npm run e2e`
+  - local `cd frontend && npm run e2e:mobile`
