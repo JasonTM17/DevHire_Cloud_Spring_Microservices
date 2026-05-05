@@ -14,6 +14,7 @@ $outputRoot = if ([System.IO.Path]::IsPathRooted($OutputDir)) {
 }
 
 $blockedPatterns = @(
+    ("example" + "\.com"),
     ("devhire" + "\.example\.com"),
     ("staging\.devhire" + "\.example\.com"),
     ("smtp" + "\.example\.com")

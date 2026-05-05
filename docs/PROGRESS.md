@@ -1927,6 +1927,18 @@ Verification:
 - Passed:
   - `cd frontend && npm run e2e:all`
 
+## v0.4.6 Follow-up - Runtime placeholder tightening
+
+- Replaced the Helm sample SMTP username `smtp-user@example.com` with `replace-with-smtp-username` so runtime values no longer carry an unmanaged example-domain email.
+- Tightened `scripts/domain-placeholder-audit.ps1` to block any `example.com` usage outside approved docs/tests/report paths.
+
+Verification:
+
+- Passed:
+  - `.\scripts\domain-placeholder-audit.ps1`
+  - `.\scripts\docs-quality.ps1`
+  - `git diff --check`
+
 ## Phase 99 - Public repository health dashboard
 
 - Added `scripts/repository-health.ps1` to read public GitHub metadata, release state, branch protection summary, latest workflow runs, Dependabot PR categories, and local evidence file status.

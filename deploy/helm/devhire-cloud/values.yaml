@@ -71,7 +71,7 @@ secrets:
     JWT_SECRET: replace-with-strong-jwt-secret
     POSTGRES_USER: devhire
     POSTGRES_PASSWORD: replace-with-database-password
-    SPRING_MAIL_USERNAME: smtp-user@example.com
+    SPRING_MAIL_USERNAME: replace-with-smtp-username
     SPRING_MAIL_PASSWORD: replace-with-smtp-password
     ANTHROPIC_API_KEY: replace-with-anthropic-key
 
