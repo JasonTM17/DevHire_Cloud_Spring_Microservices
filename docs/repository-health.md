@@ -9,7 +9,7 @@ Latest v0.4.6 health scan focus:
 | Area | Status |
 |---|---|
 | Repository visibility | Public |
-| Latest release | `v0.3.0` is visible |
+| Latest release | `v0.4.6` is visible |
 | About description | Applied and verified with owner-authenticated GitHub API |
 | Homepage | Applied and verified with owner-authenticated GitHub API |
 | Topics | 20 topics applied and verified with owner-authenticated GitHub API |

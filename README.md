@@ -16,7 +16,7 @@ DevHire Cloud is a production-grade Java 21/Spring Boot microservices portfolio 
 
 | Signal | Current Public State | Verification / Owner Action |
 |---|---|---|
-| Latest release | `v0.3.0` is public | [Release](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.3.0) |
+| Latest release | `v0.4.6` is public | [Release](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.4.6) |
 | Current hardening evidence | `v0.4.6` on `master` | [Review evidence](docs/REVIEW_EVIDENCE.md) |
 | About description | Applied | Verified through owner-authenticated GitHub API |
 | Topics | Applied: 20 topics | Verified through owner-authenticated GitHub API |
@@ -28,7 +28,7 @@ DevHire Cloud is a production-grade Java 21/Spring Boot microservices portfolio 
 
 | Need | Open |
 |---|---|
-| Latest public release | [v0.3.0 release](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.3.0) |
+| Latest public release | [v0.4.6 release](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.4.6) |
 | Canonical reviewer evidence | [Review evidence pack](docs/REVIEW_EVIDENCE.md) |
 | Runtime proof | [Runtime evidence v0.4](docs/runtime-evidence-v0.4.md) |
 | 5/15/30 minute review route | [Professional review map](docs/professional-review-map.md) |

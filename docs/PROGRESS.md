@@ -2860,6 +2860,8 @@ Notes:
 - Opened and merged the fix via PR after strict branch protection was enabled; owner self-review was correctly rejected by GitHub, so an audited temporary admin-enforcement relaxation was used for the merge and strict protection was immediately re-applied.
 - Final hosted checks for `master` commit `4de1548` passed, including `Docker Compose Browser Smoke`.
 - `dependabot-zero-noise.ps1 -Apply` reduced open Dependabot PRs to 0, and `github-workflow-status.ps1 -RequireGreen` passed for the latest `master` head.
+- Tagged and published `v0.4.6`; release workflow passed for all service images and created the GitHub Release.
+- Updated the GitHub homepage target from `v0.3.0` to the new `v0.4.6` release through owner-authenticated governance apply.
 
 ## v0.4.6 Phase 125 - README first-screen reviewer polish
 

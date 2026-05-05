@@ -23,7 +23,7 @@ DevHire Cloud models a compact ITviec / LinkedIn Jobs platform with authenticati
 
 | Item | Current state | Verification |
 |---|---|---|
-| Latest public release | `v0.3.0` | [GitHub release](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.3.0) |
+| Latest public release | `v0.4.6` | [GitHub release](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.4.6) |
 | Current hardening evidence | `v0.4.6 / v0.4.7` public credibility pass | [Review evidence](REVIEW_EVIDENCE.md), [release evidence](release-evidence/v0.4.6.md) |
 | GitHub About / homepage / topics | Applied through governance automation | [Repository governance](github-governance.md) |
 | Branch protection | `master` protected; strict admin enforcement is part of the v0.4.7 gate | [Branch protection](branch-protection.md) |
