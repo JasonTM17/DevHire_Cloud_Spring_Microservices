@@ -48,6 +48,9 @@ test.describe("DevHire Cloud portfolio smoke", () => {
     await page.getByTestId("job-card").first().click();
     await expect(page.getByTestId("job-detail-page")).toBeVisible();
     await expect(page.getByRole("heading", { name: "Apply" })).toBeVisible();
+    await expect(page.getByLabel("CV URL")).toHaveValue("");
+    await expect(page.getByLabel("CV URL")).not.toHaveValue(/example\.com/);
+    await expect(page.getByLabel("CV URL")).toHaveAttribute("placeholder", /storage\.devhire\.local/);
     await expect(page.getByRole("button", { name: "Submit application" })).toBeVisible();
   });
 

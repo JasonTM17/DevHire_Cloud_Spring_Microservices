@@ -8,17 +8,22 @@ import { StatusPill } from "@/components/StatusPill";
 import { api } from "@/lib/api";
 import { brandForJob } from "@/lib/demoCompanies";
 import { previewJobs } from "@/lib/previewData";
+import { getSession } from "@/lib/session";
 import type { Job } from "@/types/domain";
 
 export default function JobDetailPage() {
   const params = useParams<{ id: string }>();
   const [job, setJob] = useState<Job | null>(null);
-  const [cvUrl, setCvUrl] = useState("https://example.com/candidate-cv.pdf");
+  const [cvUrl, setCvUrl] = useState("");
   const [coverLetter, setCoverLetter] = useState("I am interested in this role and available for interview.");
+  const [hasSession, setHasSession] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [loadWarning, setLoadWarning] = useState("");
   const [message, setMessage] = useState("");
+  const [messageTone, setMessageTone] = useState<"success" | "error">("success");
 
   useEffect(() => {
+    setHasSession(Boolean(getSession()?.accessToken));
     api.job(params.id)
       .then((value) => {
         setJob(value);
@@ -32,11 +37,27 @@ export default function JobDetailPage() {
 
   async function apply() {
     setMessage("");
+    const normalizedCvUrl = cvUrl.trim();
+    if (!hasSession) {
+      setMessageTone("error");
+      setMessage("Sign in as Candidate before submitting an application through the Gateway.");
+      return;
+    }
+    if (!normalizedCvUrl) {
+      setMessageTone("error");
+      setMessage("Add a secure CV URL before submitting. The platform stores metadata only, not the CV file.");
+      return;
+    }
+    setSubmitting(true);
     try {
-      await api.apply(params.id, cvUrl, coverLetter);
-      setMessage("Application submitted.");
+      await api.apply(params.id, normalizedCvUrl, coverLetter.trim());
+      setMessageTone("success");
+      setMessage("Application submitted. Notification and audit events will be created by the platform.");
     } catch (ex) {
-      setMessage(ex instanceof Error ? ex.message : "Cannot submit application");
+      setMessageTone("error");
+      setMessage(applicationMessage(ex));
+    } finally {
+      setSubmitting(false);
     }
   }
 
@@ -113,17 +134,27 @@ export default function JobDetailPage() {
         </div>
         <label>
           CV URL
-          <input value={cvUrl} onChange={(event) => setCvUrl(event.target.value)} />
+          <input
+            aria-describedby="cv-url-help"
+            placeholder="https://storage.devhire.local/cv/your-name.pdf"
+            type="url"
+            value={cvUrl}
+            onChange={(event) => setCvUrl(event.target.value)}
+          />
         </label>
+        <small className="muted" id="cv-url-help">
+          Paste a private storage link. DevHire stores the URL metadata and enforces duplicate application protection.
+        </small>
         <label>
           Cover letter
           <textarea value={coverLetter} onChange={(event) => setCoverLetter(event.target.value)} />
         </label>
-        <button className="button primary" type="button" onClick={apply}>
+        {!hasSession ? <p className="error">Sign in with the demo Candidate account to submit through the live API.</p> : null}
+        <button className="button primary" type="button" disabled={submitting} onClick={apply}>
           <SendHorizonal size={16} />
-          Submit application
+          {submitting ? "Submitting..." : "Submit application"}
         </button>
-        {message ? <p className={message.includes("submitted") ? "success" : "error"}>{message}</p> : null}
+        {message ? <p className={messageTone}>{message}</p> : null}
         <div className="insight-list">
           <div className="insight-line">
             <span>
@@ -154,4 +185,18 @@ function previewMessage(ex: unknown) {
     return "Live API Gateway is offline; showing portfolio preview job.";
   }
   return `${message}. Showing portfolio preview job.`;
+}
+
+function applicationMessage(ex: unknown) {
+  const message = ex instanceof Error ? ex.message : "";
+  if (!message || message === "Failed to fetch") {
+    return "Live API Gateway is offline. The application form is ready, but runtime submission needs the Docker stack.";
+  }
+  if (message.toLowerCase().includes("already")) {
+    return "This candidate has already applied for the job. Duplicate prevention is working.";
+  }
+  if (message.toLowerCase().includes("unauthorized") || message.toLowerCase().includes("forbidden")) {
+    return "Your session is missing or does not have Candidate access. Sign in again and retry.";
+  }
+  return message;
 }

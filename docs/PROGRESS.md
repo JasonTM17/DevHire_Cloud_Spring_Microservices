@@ -2301,3 +2301,21 @@ Verification:
 Note:
 
 - `helm` is not installed in the current local shell, so Helm render/lint will be verified in the final pass only if the CLI becomes available or through CI/container tooling.
+
+## Phase 108 - Frontend application form demo polish
+
+- Removed the hardcoded `https://example.com/candidate-cv.pdf` value from the job detail apply panel.
+- Made CV URL empty by default, added URL placeholder/help text, trimmed the submitted value, and added validation for missing Candidate session and missing CV URL.
+- Improved runtime copy for submitted, duplicate, unauthorized, and API-offline application states.
+- Added Playwright assertions that the job detail apply form starts empty and does not leak `example.com`.
+
+Verification:
+
+- Passed:
+  - `cd frontend && npm run typecheck`
+  - `cd frontend && npm run build`
+  - `cd frontend && npx playwright test e2e/devhire-smoke.spec.ts -g "published jobs can be searched and opened" --project=chromium`
+
+Note:
+
+- The full `npm run e2e` suite still depends on the live Gateway login flow and will be part of the final runtime/full-stack verification.
