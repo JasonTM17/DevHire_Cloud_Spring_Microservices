@@ -1,4 +1,4 @@
-FROM maven:3.9.12-eclipse-temurin-21 AS build
+FROM maven:3.9.14-eclipse-temurin-25 AS build
 WORKDIR /workspace
 ARG SERVICE_NAME=job-service
 COPY pom.xml .
@@ -17,7 +17,7 @@ COPY common-lib/src common-lib/src
 COPY ${SERVICE_NAME}/src ${SERVICE_NAME}/src
 RUN mvn -B -T1 -pl ${SERVICE_NAME} -am package -DskipTests
 
-FROM eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:25-jre-alpine
 ARG SERVICE_NAME=job-service
 ARG BUILD_VERSION=0.4.0-SNAPSHOT
 ARG VCS_REF=local
