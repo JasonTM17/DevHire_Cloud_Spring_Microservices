@@ -15,6 +15,18 @@ This page maps DevHire Cloud security controls to concrete repository evidence. 
 | OpenSSF posture | `.github/workflows/scorecard.yml` | manual, schedule, targeted pull request | Scorecard SARIF is uploaded as an artifact first, then can become a harder gate later. |
 | Dependabot triage | `.github/workflows/dependency-maintenance.yml` | manual, weekly | Open Dependabot PRs are grouped into low-risk, medium-risk, and deferred major batches. |
 
+## Image Metadata And Provenance
+
+Every backend service image and the Next.js frontend image now carries Open Container Initiative labels from the Dockerfile itself, not only from the GitHub workflow wrapper:
+
+- `org.opencontainers.image.source` points to the public repository;
+- `org.opencontainers.image.revision` records the exact Git commit SHA;
+- `org.opencontainers.image.version` records the branch, release tag, or manual release image tag;
+- `org.opencontainers.image.created` records the UTC build timestamp;
+- `org.opencontainers.image.title`, `description`, and `licenses` make image inventory output readable for reviewers and scanners.
+
+The `Docker Images` workflow passes these values during pull request and branch builds. The `Release Images` workflow publishes the same metadata to GHCR and tags every image by both release version and commit SHA. SBOM generation and Trivy scanning then attach to images that can be traced back to repository source, commit, and release evidence.
+
 ## Runtime Security Controls
 
 - Gateway JWT validation strips spoofed identity headers before forwarding to services.

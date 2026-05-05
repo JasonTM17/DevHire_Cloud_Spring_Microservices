@@ -19,6 +19,17 @@ RUN mvn -B -T1 -pl ${SERVICE_NAME} -am package -DskipTests
 
 FROM eclipse-temurin:21-jre-alpine
 ARG SERVICE_NAME=user-service
+ARG BUILD_VERSION=0.4.0-SNAPSHOT
+ARG VCS_REF=local
+ARG VCS_URL=https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices
+ARG BUILD_CREATED=unknown
+LABEL org.opencontainers.image.title="DevHire Cloud user-service" \
+      org.opencontainers.image.description="Candidate and employer profile service for DevHire Cloud" \
+      org.opencontainers.image.source="${VCS_URL}" \
+      org.opencontainers.image.revision="${VCS_REF}" \
+      org.opencontainers.image.version="${BUILD_VERSION}" \
+      org.opencontainers.image.created="${BUILD_CREATED}" \
+      org.opencontainers.image.licenses="MIT"
 ENV APP_HOME=/app
 WORKDIR ${APP_HOME}
 RUN addgroup -S devhire && adduser -S devhire -G devhire

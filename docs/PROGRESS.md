@@ -2355,3 +2355,19 @@ Coverage gate after ratchet:
 Note:
 
 - Testcontainers-based repository integration tests were skipped by their existing Docker availability guard when no valid Docker environment was available to Testcontainers during Maven verify.
+
+## Phase 110 - Docker image metadata and provenance labels
+
+- Added OCI label build arguments to every Java service Dockerfile and the Next.js frontend Dockerfile.
+- Added source, revision, version, created timestamp, title, description, and license labels at the image level so scanner output can be traced back to repository evidence.
+- Updated Docker Compose local builds to pass the same label arguments with safe local defaults.
+- Updated `Docker Images` and `Release Images` workflows to compute build metadata and pass it to Dockerfiles and workflow-level image labels.
+- Documented the image metadata and provenance model in `docs/security-evidence.md`.
+
+Verification:
+
+- Passed:
+  - `docker compose config --quiet`
+  - `.\scripts\docs-quality.ps1`
+  - `.\scripts\evidence-audit.ps1`
+  - `git diff --check`

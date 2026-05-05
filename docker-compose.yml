@@ -1,5 +1,11 @@
 name: devhire-cloud
 
+x-image-label-args: &image-label-args
+  BUILD_VERSION: ${BUILD_VERSION:-0.4.0-SNAPSHOT}
+  VCS_REF: ${VCS_REF:-local}
+  VCS_URL: ${VCS_URL:-https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices}
+  BUILD_CREATED: ${BUILD_CREATED:-local}
+
 services:
   postgres:
     image: postgres:17-alpine
@@ -225,6 +231,7 @@ services:
       context: .
       dockerfile: api-gateway/Dockerfile
       args:
+        <<: *image-label-args
         SERVICE_NAME: api-gateway
     image: devhire/api-gateway:local
     environment:
@@ -260,6 +267,8 @@ services:
       context: .
       dockerfile: frontend/Dockerfile
       args:
+        <<: *image-label-args
+        SERVICE_NAME: frontend
         NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://localhost:${GATEWAY_HOST_PORT:-8080}}
     image: devhire/frontend:local
     environment:
@@ -277,6 +286,7 @@ services:
       context: .
       dockerfile: auth-service/Dockerfile
       args:
+        <<: *image-label-args
         SERVICE_NAME: auth-service
     image: devhire/auth-service:local
     environment: &service-env
@@ -312,6 +322,7 @@ services:
       context: .
       dockerfile: user-service/Dockerfile
       args:
+        <<: *image-label-args
         SERVICE_NAME: user-service
     image: devhire/user-service:local
     environment:
@@ -333,6 +344,7 @@ services:
       context: .
       dockerfile: company-service/Dockerfile
       args:
+        <<: *image-label-args
         SERVICE_NAME: company-service
     image: devhire/company-service:local
     environment:
@@ -354,6 +366,7 @@ services:
       context: .
       dockerfile: job-service/Dockerfile
       args:
+        <<: *image-label-args
         SERVICE_NAME: job-service
     image: devhire/job-service:local
     environment:
@@ -389,6 +402,7 @@ services:
       context: .
       dockerfile: application-service/Dockerfile
       args:
+        <<: *image-label-args
         SERVICE_NAME: application-service
     image: devhire/application-service:local
     environment:
@@ -411,6 +425,7 @@ services:
       context: .
       dockerfile: notification-service/Dockerfile
       args:
+        <<: *image-label-args
         SERVICE_NAME: notification-service
     image: devhire/notification-service:local
     environment:
@@ -458,6 +473,7 @@ services:
       context: .
       dockerfile: audit-service/Dockerfile
       args:
+        <<: *image-label-args
         SERVICE_NAME: audit-service
     image: devhire/audit-service:local
     environment:
@@ -479,6 +495,7 @@ services:
       context: .
       dockerfile: ai-service/Dockerfile
       args:
+        <<: *image-label-args
         SERVICE_NAME: ai-service
     image: devhire/ai-service:local
     environment:

@@ -60,6 +60,8 @@ jobs:
           fi
           echo "IMAGE_NAME=ghcr.io/${owner}/devhire/${{ matrix.service }}" >> "${GITHUB_ENV}"
           echo "VERSION_TAG=${version}" >> "${GITHUB_ENV}"
+          echo "BUILD_CREATED=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> "${GITHUB_ENV}"
+          echo "VCS_URL=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" >> "${GITHUB_ENV}"
 
       - name: Build and push image
         uses: docker/build-push-action@v6
@@ -68,6 +70,10 @@ jobs:
           file: ${{ matrix.service }}/Dockerfile
           build-args: |
             SERVICE_NAME=${{ matrix.service }}
+            BUILD_VERSION=${{ env.VERSION_TAG }}
+            VCS_REF=${{ github.sha }}
+            VCS_URL=${{ env.VCS_URL }}
+            BUILD_CREATED=${{ env.BUILD_CREATED }}
             NEXT_PUBLIC_API_BASE_URL=${{ vars.NEXT_PUBLIC_API_BASE_URL || 'https://devhire.invalid' }}
           tags: |
             ${{ env.IMAGE_NAME }}:${{ env.VERSION_TAG }}
@@ -75,9 +81,10 @@ jobs:
           labels: |
             org.opencontainers.image.title=devhire-${{ matrix.service }}
             org.opencontainers.image.description=DevHire Cloud ${{ matrix.service }} image
-            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.source=${{ env.VCS_URL }}
             org.opencontainers.image.revision=${{ github.sha }}
             org.opencontainers.image.version=${{ env.VERSION_TAG }}
+            org.opencontainers.image.created=${{ env.BUILD_CREATED }}
             org.opencontainers.image.licenses=MIT
           push: true
 
