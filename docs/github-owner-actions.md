@@ -7,7 +7,7 @@ Current verification on 2026-05-05:
 - `scripts/github-governance.ps1 -DryRun` produces the metadata payload below and checks the public release/branch state.
 - Owner-authenticated GitHub API reports repository metadata applied and `master protected=true`.
 - Public facade assertion now treats `master protected=true` from the public branch endpoint as pass even when detailed `/protection` reads require owner permissions.
-- GitHub API reported release `v0.3.0` is visible.
+- GitHub API reported release `v0.4.6` is visible.
 - The older `scripts/github-repo-polish.ps1` remains for compatibility; `scripts/github-governance.ps1` is now the preferred owner-facing automation.
 
 ## About Section
@@ -21,7 +21,7 @@ Production-grade Java 21 Spring Boot microservices recruitment platform with JWT
 Homepage:
 
 ```text
-https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.3.0
+https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.4.6
 ```
 
 Topics:
@@ -130,12 +130,13 @@ The latest v0.4.7 target state is:
 description current : set
 homepage current    : set
 topics current      : 20
-release v0.3.0      : visible
+release v0.4.6      : visible
 branch protected    : true
-dependabot PRs      : 12 before zero-noise cleanup
+enforce admins      : true
+dependabot PRs      : 0
 ```
 
-The remaining public cleanup item is dependency queue noise. The v0.4.7 zero-noise pass can merge clean safe PRs and close/defer the rest through audited comments.
+The public facade cleanup is complete. Future dependency work should run through scheduled curated batches instead of leaving unmanaged Dependabot noise on the repository front page.
 
 ## API Verification Snapshot
 
@@ -144,7 +145,7 @@ The expected repository metadata payload is:
 ```json
 {
   "description": "Production-grade Java 21 Spring Boot microservices recruitment platform with JWT, Kafka, OpenSearch, Docker, Kubernetes, Terraform, observability, CI/CD, and Claude Haiku AI RAG assistant.",
-  "homepage": "https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.3.0",
+  "homepage": "https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.4.6",
   "has_issues": true,
   "has_projects": true,
   "has_wiki": true
@@ -182,7 +183,7 @@ The expected topics payload is:
 
 ## Releases And Packages
 
-- Keep `v0.3.0` visible as the current production portfolio release.
+- Keep `v0.4.6` visible as the current production portfolio release.
 - Keep GHCR packages public if available for the account.
 - Future releases should be created by pushing `vX.Y.Z` tags from a green `master` commit.
 - Release notes should point to `docs/release-evidence/<version>.md`.
@@ -194,5 +195,5 @@ The expected topics payload is:
 - [x] Enable branch protection on `master`.
 - [x] Verify facade state with owner-authenticated GitHub API.
 - [ ] Add or keep repository secret `REPO_GOVERNANCE_TOKEN` if you want future browser-free governance workflow runs.
-- [x] Confirm release `v0.3.0` is public.
+- [x] Confirm release `v0.4.6` is public.
 - [ ] Confirm GHCR images are visible or document account limitation.

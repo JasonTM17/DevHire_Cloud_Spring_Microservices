@@ -12,10 +12,10 @@ The owner-authenticated GitHub API snapshot taken during the v0.4.7 governance p
 | About description | Applied |
 | Homepage | Applied |
 | Topics | 20 topics applied |
-| Latest release | `v0.3.0` public |
+| Latest release | `v0.4.6` public |
 | Default branch | `master` |
 | Branch protection | Public branch API reports `master protected=true` |
-| Dependabot PRs | 12 before the zero-noise pass, tracked by the curated Dependabot cleanup playbook |
+| Dependabot PRs | 0 after the zero-noise pass; future updates are handled by curated scheduled batches |
 
 The repository content includes automation and exact owner fallback steps. If a short-lived owner token is available, the GitHub metadata and branch protection can be re-applied from the local shell without pasting the token into chat or committing it.
 
@@ -106,7 +106,7 @@ Production-grade Java 21 Spring Boot microservices recruitment platform with JWT
 Homepage:
 
 ```text
-https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.3.0
+https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.4.6
 ```
 
 Topics:

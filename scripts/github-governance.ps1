@@ -8,9 +8,9 @@ param(
     [string]$Owner = "JasonTM17",
     [string]$Repo = "DevHire_Cloud_Spring_Microservices",
     [string]$DefaultBranch = "master",
-    [string]$LatestRelease = "v0.3.0",
+    [string]$LatestRelease = "v0.4.6",
     [string]$OutputDir = "reports/github-governance",
-    [string]$Homepage = "https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.3.0",
+    [string]$Homepage = "https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.4.6",
     [string]$Description = "Production-grade Java 21 Spring Boot microservices recruitment platform with JWT, Kafka, OpenSearch, Docker, Kubernetes, Terraform, observability, CI/CD, and Claude Haiku AI RAG assistant.",
     [string[]]$RequiredChecks = @(
         "Maven Verify",

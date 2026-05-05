@@ -6,7 +6,7 @@ This is the short reviewer-facing evidence path. `docs/PROGRESS.md` remains an i
 
 | Evidence | Status |
 |---|---|
-| Latest public release | `v0.3.0` is visible on GitHub |
+| Latest public release | `v0.4.6` is visible on GitHub |
 | Current development evidence | `v0.4.6` public credibility, self-starting E2E, and repository-facade gates are committed on `master` |
 | GitHub About/Homepage/Topics | Applied through owner-authenticated GitHub API; 20 topics are set |
 | Branch protection | Applied on `master`; public branch API confirms `protected=true`, and detailed protection reads are owner-token only |
@@ -69,7 +69,7 @@ Runtime proof when Docker is already running:
 The public facade owner actions have been applied through the local Git credential-backed owner token path:
 
 - GitHub About description is set.
-- Homepage points to the `v0.3.0` release.
+- Homepage points to the `v0.4.6` release.
 - 20 topics are set.
 - `master` branch protection is enabled after required check context audit passed.
 - Deferred-major Dependabot PRs were closed with curation comments; the zero-noise pass closed/deferred the remaining queue without merging unreadable or risky updates.
