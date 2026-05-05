@@ -12,6 +12,7 @@ This is the short reviewer-facing evidence path. `docs/PROGRESS.md` remains an i
 | Branch protection | Owner action required until the required check context audit and apply mode run |
 | Dependabot posture | 20 open PRs are categorized by `scripts/dependabot-curate.ps1`; config now limits new PR fan-out |
 | E2E posture | PR-safe frontend preview smoke is wired; full Docker browser smoke remains manual/scheduled |
+| Coverage posture | Parent JaCoCo baseline raised to 35%; per-module script thresholds ratchet current measured modules |
 
 ## What To Review First
 

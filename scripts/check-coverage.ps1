@@ -5,16 +5,16 @@ param(
 $ErrorActionPreference = "Stop"
 
 $thresholds = @{
-    "ai-service"           = 0.40
-    "api-gateway"          = 0.35
-    "application-service"  = 0.60
-    "audit-service"        = 0.60
-    "auth-service"         = 0.40
-    "common-lib"           = 0.35
-    "company-service"      = 0.60
-    "job-service"          = 0.50
-    "notification-service" = 0.65
-    "user-service"         = 0.72
+    "ai-service"           = 0.44
+    "api-gateway"          = 0.36
+    "application-service"  = 0.63
+    "audit-service"        = 0.63
+    "auth-service"         = 0.43
+    "common-lib"           = 0.40
+    "company-service"      = 0.62
+    "job-service"          = 0.52
+    "notification-service" = 0.75
+    "user-service"         = 0.75
 }
 
 $rootPath = (Resolve-Path $Root).Path
@@ -26,10 +26,18 @@ if (-not $reports) {
     throw "No JaCoCo XML reports found. Run mvn clean verify before coverage check."
 }
 
+$results = [System.Collections.Generic.List[object]]::new()
+
 foreach ($module in $thresholds.Keys | Sort-Object) {
     $report = $reports | Where-Object { ($_.FullName -replace "\\", "/") -like "*/$module/target/site/jacoco/jacoco.xml" } | Select-Object -First 1
     if (-not $report) {
-        Write-Error "Missing JaCoCo report for $module"
+        $results.Add([pscustomobject]@{
+            Module = $module
+            Coverage = "missing"
+            Threshold = "{0:P1}" -f [double]$thresholds[$module]
+            Status = "FAIL"
+            Gap = "report missing"
+        })
         $failed = $true
         continue
     }
@@ -42,13 +50,23 @@ foreach ($module in $thresholds.Keys | Sort-Object) {
     $threshold = [double]$thresholds[$module]
     $status = if ($ratio -ge $threshold) { "PASS" } else { "FAIL" }
 
-    Write-Host ("{0,-22} {1,6:P1} / {2,6:P1} {3}" -f $module, $ratio, $threshold, $status)
+    $gap = $ratio - $threshold
+    $results.Add([pscustomobject]@{
+        Module = $module
+        Coverage = "{0:P1}" -f $ratio
+        Threshold = "{0:P1}" -f $threshold
+        Status = $status
+        Gap = "{0:P1}" -f $gap
+    })
 
     if ($ratio -lt $threshold) {
         $failed = $true
     }
 }
 
+$results | Format-Table -AutoSize | Out-String | Write-Host
+
 if ($failed) {
-    throw "Coverage gate failed. Add tests or intentionally update thresholds with justification."
+    $failedModules = @($results | Where-Object { $_.Status -ne "PASS" } | Select-Object -ExpandProperty Module)
+    throw "Coverage gate failed for: $($failedModules -join ', '). Add focused tests or lower a threshold only with documented justification."
 }

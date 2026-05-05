@@ -10,7 +10,7 @@ This scorecard gives reviewers a fast, evidence-backed view of DevHire Cloud as 
 | Security and identity | 8/10 | JWT access tokens, refresh rotation, logout blacklist, BCrypt, role checks, security headers, Gitleaks, Trivy, CodeQL |
 | Reliability and event delivery | 8/10 | Kafka, transactional outbox, retry/dead-letter states, idempotent notification/audit consumers, chaos smoke scripts |
 | Observability and SLOs | 8/10 | Actuator, Prometheus rules, Grafana SLO dashboard, Loki, Tempo, OpenTelemetry, runtime evidence docs |
-| CI/CD and release governance | 8/10 | Maven verify, frontend build, Docker matrix, docs/security/terraform workflows, release notes, release evidence |
+| CI/CD and release governance | 8/10 | Maven verify, frontend build, ratcheted coverage gate, Docker matrix, docs/security/terraform workflows, release notes, release evidence |
 | Cloud readiness | 8/10 | Docker Compose, Kubernetes manifests, Helm chart, Argo CD samples, AWS Terraform blueprint, External Secrets wiring |
 | Runtime reviewer proof | 8/10 | PR-safe frontend E2E smoke, portfolio verification scripts, API smoke, AI eval, Mailpit smoke, OpenAPI verify, performance and chaos smoke wrappers |
 | AI portfolio layer | 8/10 | Claude Haiku assistant, RAG citations, fallback mode, tool traces, AI safety docs, eval dataset |

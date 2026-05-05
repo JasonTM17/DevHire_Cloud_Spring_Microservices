@@ -2541,3 +2541,31 @@ Verification:
   - `git diff --check`
   - local `cd frontend && npm run e2e`
   - local `cd frontend && npm run e2e:mobile`
+
+## v0.4.4 Phase 117 - Coverage ratchet and backend verification
+
+- Raised parent JaCoCo instruction coverage baseline from `0.10` to `0.35`.
+- Ratcheted per-module coverage thresholds in `scripts/check-coverage.ps1` to current measured module posture instead of broad low defaults.
+- Improved `scripts/check-coverage.ps1` output with a readable module/coverage/threshold/status/gap table and targeted failure message.
+- Confirmed existing production workflow tests already cover auth refresh/logout rotation, application duplicate prevention/status history, notification idempotency, OpenSearch fallback, and entity `@Version` architecture rules.
+
+Verification:
+
+- Passed:
+  - `mvn -T1 clean verify`
+  - `.\scripts\check-coverage.ps1`
+
+Coverage gate snapshot:
+
+| Module | Coverage | Threshold |
+|---|---:|---:|
+| ai-service | 45.1% | 44.0% |
+| api-gateway | 36.9% | 36.0% |
+| application-service | 63.6% | 63.0% |
+| audit-service | 64.0% | 63.0% |
+| auth-service | 44.3% | 43.0% |
+| common-lib | 41.2% | 40.0% |
+| company-service | 62.7% | 62.0% |
+| job-service | 52.7% | 52.0% |
+| notification-service | 76.1% | 75.0% |
+| user-service | 76.0% | 75.0% |
