@@ -1,5 +1,7 @@
 import { spawn } from "node:child_process";
+import { cp, rm, stat } from "node:fs/promises";
 import net from "node:net";
+import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { setTimeout as delay } from "node:timers/promises";
 
@@ -11,6 +13,8 @@ const baseUrl = `http://${host}:${port}`;
 const isWindows = process.platform === "win32";
 const npm = "npm";
 const npx = "npx";
+const standaloneDir = path.join(cwd, ".next", "standalone");
+const standaloneServer = path.join(standaloneDir, "server.js");
 
 const previewEnv = {
   ...process.env,
@@ -37,6 +41,33 @@ async function findAvailablePort(start) {
   }
 
   throw new Error(`No free preview port found from ${start} to ${start + 98}`);
+}
+
+async function pathExists(filePath) {
+  try {
+    await stat(filePath);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function copyIfExists(source, destination) {
+  if (!(await pathExists(source))) {
+    return;
+  }
+
+  await rm(destination, { recursive: true, force: true });
+  await cp(source, destination, { recursive: true });
+}
+
+async function prepareStandalonePreview() {
+  if (!(await pathExists(standaloneServer))) {
+    throw new Error(`Next standalone server was not generated: ${standaloneServer}`);
+  }
+
+  await copyIfExists(path.join(cwd, ".next", "static"), path.join(standaloneDir, ".next", "static"));
+  await copyIfExists(path.join(cwd, "public"), path.join(standaloneDir, "public"));
 }
 
 function quoteForCmd(value) {
@@ -131,11 +162,16 @@ if (!["desktop", "mobile", "all"].includes(mode)) {
 
 console.log(`[e2e-preview] Building frontend for ${baseUrl}`);
 await run(npm, ["run", "build"]);
+await prepareStandalonePreview();
 
-console.log("[e2e-preview] Starting Next.js preview server");
-const server = spawnCommand(npx, ["next", "start", "--hostname", host, "--port", port], {
-  cwd,
-  env: previewEnv,
+console.log("[e2e-preview] Starting Next.js standalone preview server");
+const server = spawnCommand("node", ["server.js"], {
+  cwd: standaloneDir,
+  env: {
+    ...previewEnv,
+    HOSTNAME: host,
+    PORT: port
+  },
   stdio: ["ignore", "pipe", "pipe"]
 });
 server.stdout.on("data", (chunk) => process.stdout.write(`[next] ${chunk}`));

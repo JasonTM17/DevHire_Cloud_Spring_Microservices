@@ -1916,6 +1916,17 @@ Notes:
 - `mvn -T1 clean verify` was not rerun in this final evidence-only phase because no Java sources or Maven build files changed.
 - The project was not tagged as `v0.4.6` because public GitHub About/Homepage/Topics and branch protection still require owner-token apply and verification.
 
+## v0.4.6 Follow-up - Standalone frontend preview parity
+
+- Updated `frontend/scripts/e2e-preview.mjs` to run `node .next/standalone/server.js` instead of `next start`, matching the repository's `output: "standalone"` Next.js configuration.
+- The script now copies `.next/static` and `public` into `.next/standalone` before starting the preview server, mirroring the Docker standalone runtime path.
+- Removed the Next.js warning that `next start` should not be used with standalone output.
+
+Verification:
+
+- Passed:
+  - `cd frontend && npm run e2e:all`
+
 ## Phase 99 - Public repository health dashboard
 
 - Added `scripts/repository-health.ps1` to read public GitHub metadata, release state, branch protection summary, latest workflow runs, Dependabot PR categories, and local evidence file status.
