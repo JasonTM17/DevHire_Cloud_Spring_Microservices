@@ -60,15 +60,23 @@ Preview the exact GitHub metadata payload and public governance status:
 .\scripts\github-governance.ps1 -DryRun
 ```
 
-Apply it only from an owner shell with a short-lived `GITHUB_TOKEN`:
+Apply the visible GitHub About sidebar first from an owner shell with a short-lived token:
 
 ```powershell
 $env:GITHUB_TOKEN = "<owner-token>"
-.\scripts\github-governance.ps1 -Apply
+.\scripts\github-governance.ps1 -Apply -MetadataOnly
 Remove-Item Env:\GITHUB_TOKEN
 ```
 
-Branch protection is also included in `scripts/github-governance.ps1 -Apply`. If the token lacks repository administration permission, use the UI fallback in `docs/branch-protection.md`.
+Then apply branch protection:
+
+```powershell
+$env:GITHUB_TOKEN = "<owner-token>"
+.\scripts\github-governance.ps1 -Apply -BranchProtectionOnly
+Remove-Item Env:\GITHUB_TOKEN
+```
+
+The script also accepts `REPO_GOVERNANCE_TOKEN` for local owner shells. If the token lacks repository administration permission, use the UI fallback in `docs/branch-protection.md`.
 
 ## GitHub Actions Apply Route
 
@@ -78,7 +86,9 @@ Use this route when local browser automation is unavailable or you do not want t
 2. Open `Actions -> Repository Governance`.
 3. Run `mode=dry-run`.
 4. Review the uploaded governance report artifact.
-5. Run `mode=apply`.
+5. Run `mode=apply-metadata` to fix the GitHub About/Homepage/Topics sidebar.
+6. Run `mode=apply-branch-protection` after confirming the required checks are green.
+7. Use `mode=apply-all` only when you intentionally want both operations in one run.
 
 The workflow uses the same target metadata as the local script and verifies repository health after the apply step.
 
@@ -149,9 +159,9 @@ The expected topics payload is:
 
 ## Owner Checklist
 
-- [ ] Fill About description.
-- [ ] Fill homepage.
-- [ ] Add topics.
-- [ ] Enable branch protection.
+- [ ] Fill About description with `Repository Governance -> apply-metadata`.
+- [ ] Fill homepage with `Repository Governance -> apply-metadata`.
+- [ ] Add topics with `Repository Governance -> apply-metadata`.
+- [ ] Enable branch protection with `Repository Governance -> apply-branch-protection`.
 - [x] Confirm release `v0.3.0` is public.
 - [ ] Confirm GHCR images are visible or document account limitation.

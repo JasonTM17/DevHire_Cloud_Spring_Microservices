@@ -4,13 +4,15 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: "Run a safe preview or apply repository About/Homepage/Topics/branch protection."
+        description: "Run a preview or apply repository metadata and branch protection."
         required: true
         type: choice
         default: dry-run
         options:
           - dry-run
-          - apply
+          - apply-metadata
+          - apply-branch-protection
+          - apply-all
 
 permissions:
   contents: read
@@ -30,8 +32,30 @@ jobs:
         shell: pwsh
         run: ./scripts/github-governance.ps1 -DryRun
 
-      - name: Apply repository governance
-        if: ${{ inputs.mode == 'apply' }}
+      - name: Apply repository metadata
+        if: ${{ inputs.mode == 'apply-metadata' }}
+        shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ secrets.REPO_GOVERNANCE_TOKEN }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:GITHUB_TOKEN)) {
+            throw "REPO_GOVERNANCE_TOKEN repository secret is required for apply mode."
+          }
+          ./scripts/github-governance.ps1 -Apply -MetadataOnly
+
+      - name: Apply branch protection
+        if: ${{ inputs.mode == 'apply-branch-protection' }}
+        shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ secrets.REPO_GOVERNANCE_TOKEN }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:GITHUB_TOKEN)) {
+            throw "REPO_GOVERNANCE_TOKEN repository secret is required for apply mode."
+          }
+          ./scripts/github-governance.ps1 -Apply -BranchProtectionOnly
+
+      - name: Apply all repository governance
+        if: ${{ inputs.mode == 'apply-all' }}
         shell: pwsh
         env:
           GITHUB_TOKEN: ${{ secrets.REPO_GOVERNANCE_TOKEN }}

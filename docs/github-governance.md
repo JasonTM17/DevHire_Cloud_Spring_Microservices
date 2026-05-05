@@ -36,11 +36,19 @@ Preview the target state:
 .\scripts\github-governance.ps1 -DryRun
 ```
 
-Apply About, homepage, and topics from an owner shell:
+Apply the visible GitHub About sidebar first:
 
 ```powershell
 $env:GITHUB_TOKEN = "<short-lived-owner-token>"
-.\scripts\github-governance.ps1 -Apply
+.\scripts\github-governance.ps1 -Apply -MetadataOnly
+Remove-Item Env:\GITHUB_TOKEN
+```
+
+Apply branch protection separately after the visible metadata is fixed:
+
+```powershell
+$env:GITHUB_TOKEN = "<short-lived-owner-token>"
+.\scripts\github-governance.ps1 -Apply -BranchProtectionOnly
 Remove-Item Env:\GITHUB_TOKEN
 ```
 
@@ -54,7 +62,9 @@ If local Browser automation or local tokens are unavailable, use the audited wor
 2. The token must have repository administration permission for `JasonTM17/DevHire_Cloud_Spring_Microservices`.
 3. Open `Actions -> Repository Governance`.
 4. Run with `mode=dry-run` first.
-5. Run with `mode=apply` to update About, homepage, topics, and `master` branch protection.
+5. Run with `mode=apply-metadata` to update the About description, homepage, and topics that appear in the right sidebar.
+6. Run with `mode=apply-branch-protection` after the main workflows are green and you are ready to protect `master`.
+7. Use `mode=apply-all` only when you want to update metadata and branch protection in one owner-approved run.
 
 The workflow is defined in `.github/workflows/repository-governance.yml` and uploads sanitized governance reports as workflow artifacts. It does not print the token.
 
@@ -82,7 +92,7 @@ java, spring-boot, microservices, spring-cloud, postgresql, kafka, opensearch, r
 
 ## Target Branch Protection
 
-`scripts/github-governance.ps1 -Apply` also applies the default `master` branch protection payload when the token has administration permission:
+`scripts/github-governance.ps1 -Apply -BranchProtectionOnly` applies the default `master` branch protection payload when the token has administration permission:
 
 - require pull requests before merge through protected-branch flow,
 - require 1 approving review,
@@ -97,10 +107,10 @@ Required checks are intentionally limited to stable portfolio gates: `CI`, `Dock
 
 ## Token Safety
 
-- The token is read only from `GITHUB_TOKEN` in the current shell.
+- The token is read only from `GITHUB_TOKEN` or `REPO_GOVERNANCE_TOKEN` in the current shell.
 - The token is never printed, persisted, or written into generated reports.
 - Generated reports store only sanitized status, target metadata, current public metadata, and owner action summaries.
-- If `GITHUB_TOKEN` is not set, `-Apply` fails fast and `-DryRun` remains fully useful for evidence.
+- If no token is set, `-Apply` fails fast and `-DryRun` remains fully useful for evidence.
 
 ## Owner Action Status
 

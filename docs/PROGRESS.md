@@ -2392,3 +2392,26 @@ Professionalism audit result:
 - Status: `passed_with_owner_actions`
 - Owner actions still required: repository About description, homepage, topics, and `master` branch protection.
 - Open Dependabot PRs reported by GitHub public API: 20.
+
+## Phase 112 - GitHub sidebar apply path hardening
+
+- Confirmed through the public GitHub API that the visible repository sidebar still has empty About description, homepage, and topics, and `master protected=false`.
+- Updated `scripts/github-governance.ps1` so owner apply can be split into `-Apply -MetadataOnly` for the visible About/Homepage/Topics sidebar and `-Apply -BranchProtectionOnly` for the protected branch rollout.
+- Added support for either `GITHUB_TOKEN` or `REPO_GOVERNANCE_TOKEN` in the local owner shell path.
+- Updated the `Repository Governance` workflow with explicit `apply-metadata`, `apply-branch-protection`, and `apply-all` modes.
+- Updated GitHub governance, owner action, branch protection, and repository health docs so the first owner action is the visible sidebar fix.
+
+Verification:
+
+- Passed:
+  - `.\scripts\github-governance.ps1 -DryRun`
+  - `.\scripts\repository-health.ps1`
+  - `.\scripts\docs-quality.ps1`
+  - `git diff --check`
+
+Remote state remains unchanged until an owner token is used:
+
+- About description: empty
+- Homepage: empty
+- Topics: 0
+- `master` protected: false

@@ -61,7 +61,8 @@ If the script reports missing public metadata or unprotected `master`, run:
 
 ```powershell
 $env:GITHUB_TOKEN = "<short-lived-owner-token>"
-.\scripts\github-governance.ps1 -Apply
+.\scripts\github-governance.ps1 -Apply -MetadataOnly
+.\scripts\github-governance.ps1 -Apply -BranchProtectionOnly
 Remove-Item Env:\GITHUB_TOKEN
 ```
 
@@ -71,7 +72,8 @@ Alternative audited route:
 
 - add repository secret `REPO_GOVERNANCE_TOKEN`,
 - run `Actions -> Repository Governance -> mode=dry-run`,
-- run `mode=apply` after reviewing the artifact.
+- run `mode=apply-metadata` after reviewing the artifact,
+- run `mode=apply-branch-protection` after confirming the required checks are green.
 
 ## Related Evidence
 

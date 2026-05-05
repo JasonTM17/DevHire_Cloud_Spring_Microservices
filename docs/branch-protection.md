@@ -39,11 +39,11 @@ Apply protection from an owner shell:
 
 ```powershell
 $env:GITHUB_TOKEN = "<short-lived-owner-token>"
-.\scripts\github-governance.ps1 -Apply
+.\scripts\github-governance.ps1 -Apply -BranchProtectionOnly
 Remove-Item Env:\GITHUB_TOKEN
 ```
 
-The token needs repository administration permission. If the token can update About/Homepage/Topics but cannot apply branch protection, keep the metadata update and apply this section manually in the GitHub UI.
+The token needs repository administration permission. Apply GitHub About/Homepage/Topics separately with `.\scripts\github-governance.ps1 -Apply -MetadataOnly`; that keeps the visible repository sidebar fix independent from the branch-protection rollout.
 
 ## GitHub UI Fallback
 

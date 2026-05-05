@@ -2,6 +2,8 @@
 param(
     [switch]$DryRun,
     [switch]$Apply,
+    [switch]$MetadataOnly,
+    [switch]$BranchProtectionOnly,
 
     [string]$Owner = "JasonTM17",
     [string]$Repo = "DevHire_Cloud_Spring_Microservices",
@@ -44,6 +46,10 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
+if ($MetadataOnly -and $BranchProtectionOnly) {
+    throw "Use either -MetadataOnly or -BranchProtectionOnly, not both."
+}
+
 if (-not $DryRun -and -not $Apply) {
     $DryRun = $true
 }
@@ -67,9 +73,17 @@ $headers = @{
     "User-Agent" = "DevHire-GitHub-Governance"
 }
 
-$hasToken = -not [string]::IsNullOrWhiteSpace($env:GITHUB_TOKEN)
+$token = if (-not [string]::IsNullOrWhiteSpace($env:GITHUB_TOKEN)) {
+    $env:GITHUB_TOKEN
+} elseif (-not [string]::IsNullOrWhiteSpace($env:REPO_GOVERNANCE_TOKEN)) {
+    $env:REPO_GOVERNANCE_TOKEN
+} else {
+    $null
+}
+
+$hasToken = -not [string]::IsNullOrWhiteSpace($token)
 if ($hasToken) {
-    $headers["Authorization"] = "Bearer $env:GITHUB_TOKEN"
+    $headers["Authorization"] = "Bearer $token"
 }
 
 $repoPayload = [ordered]@{
@@ -162,22 +176,26 @@ $protectionResult = Invoke-GitHubJson -Method Get -Uri "$apiRoot/branches/$Defau
 
 if ($Apply) {
     if (-not $hasToken) {
-        throw "GITHUB_TOKEN is required for -Apply. Set a short-lived owner token in the current shell; never commit it."
+        throw "GITHUB_TOKEN or REPO_GOVERNANCE_TOKEN is required for -Apply. Set a short-lived owner token in the current shell; never commit it."
     }
 
-    $metadataApply = Invoke-GitHubJson -Method Patch -Uri $apiRoot -Body $repoPayload
-    if (-not $metadataApply.ok) {
-        throw "Repository metadata update failed: $($metadataApply.error)"
+    if (-not $BranchProtectionOnly) {
+        $metadataApply = Invoke-GitHubJson -Method Patch -Uri $apiRoot -Body $repoPayload
+        if (-not $metadataApply.ok) {
+            throw "Repository metadata update failed: $($metadataApply.error)"
+        }
+
+        $topicsApply = Invoke-GitHubJson -Method Put -Uri "$apiRoot/topics" -Body $topicsPayload
+        if (-not $topicsApply.ok) {
+            throw "Repository topics update failed: $($topicsApply.error)"
+        }
     }
 
-    $topicsApply = Invoke-GitHubJson -Method Put -Uri "$apiRoot/topics" -Body $topicsPayload
-    if (-not $topicsApply.ok) {
-        throw "Repository topics update failed: $($topicsApply.error)"
-    }
-
-    $branchProtectionApply = Invoke-GitHubJson -Method Put -Uri "$apiRoot/branches/$DefaultBranch/protection" -Body $branchProtectionPayload
-    if (-not $branchProtectionApply.ok) {
-        throw "Branch protection update failed. Confirm the token has repository administration permission. Error: $($branchProtectionApply.error)"
+    if (-not $MetadataOnly) {
+        $branchProtectionApply = Invoke-GitHubJson -Method Put -Uri "$apiRoot/branches/$DefaultBranch/protection" -Body $branchProtectionPayload
+        if (-not $branchProtectionApply.ok) {
+            throw "Branch protection update failed. Confirm the token has repository administration permission. Error: $($branchProtectionApply.error)"
+        }
     }
 
     $repoResult = Invoke-GitHubJson -Method Get -Uri $apiRoot
@@ -199,7 +217,11 @@ $current = [ordered]@{
 $summary = [ordered]@{
     generatedAt = (Get-Date).ToString("o")
     repository = "$Owner/$Repo"
-    mode = if ($Apply) { "apply" } else { "dry-run" }
+    mode = if ($Apply) {
+        if ($MetadataOnly) { "apply-metadata" } elseif ($BranchProtectionOnly) { "apply-branch-protection" } else { "apply-all" }
+    } else {
+        "dry-run"
+    }
     hasToken = $hasToken
     target = [ordered]@{
         description = $Description
@@ -283,5 +305,6 @@ Write-Host "  $mdPath"
 
 if ($DryRun) {
     Write-Host ""
-    Write-Host "Dry run only. Re-run with -Apply and GITHUB_TOKEN to update repository About/Homepage/Topics and branch protection."
+    Write-Host "Dry run only. Re-run with -Apply -MetadataOnly and GITHUB_TOKEN or REPO_GOVERNANCE_TOKEN to fix the GitHub About/Homepage/Topics sidebar first."
+    Write-Host "Then run -Apply -BranchProtectionOnly when you are ready to enforce required checks on $DefaultBranch."
 }
