@@ -22,6 +22,14 @@ $env:GITHUB_TOKEN = "<short-lived-owner-token>"
 Remove-Item Env:\GITHUB_TOKEN
 ```
 
+Label only safe-batch PRs when you want a conservative first pass:
+
+```powershell
+$env:GITHUB_TOKEN = "<short-lived-owner-token>"
+.\scripts\dependabot-curate.ps1 -Apply -SafeOnly
+Remove-Item Env:\GITHUB_TOKEN
+```
+
 Close deferred major PRs only when the owner intentionally chooses that behavior:
 
 ```powershell
@@ -39,6 +47,18 @@ Remove-Item Env:\GITHUB_TOKEN
 ```
 
 The script never merges pull requests automatically.
+
+## GitHub Actions Route
+
+Use `Actions -> Dependabot Curation` after adding the `REPO_GOVERNANCE_TOKEN` repository secret:
+
+| Mode | Behavior |
+|---|---|
+| `dry-run` | Uploads a sanitized preview report; no PRs are changed |
+| `label-safe` | Labels and comments only safe-batch PRs |
+| `close-deferred` | Labels/comments all current Dependabot PRs and closes deferred-major PRs with a migration rationale |
+
+`close-deferred` is the intended v0.4.6 public-noise burn-down step. It keeps safe maintenance PRs visible while closing risky majors that require dedicated runtime migration work.
 
 ## Labels
 
@@ -81,3 +101,15 @@ Open Dependabot PRs are not ignored. They are categorized as portfolio maintenan
 - or deferred as major migration work.
 
 Generated reports are written under `reports/dependabot-curate/` and are intentionally ignored.
+
+## Expected v0.4.6 Result
+
+Current dry-run evidence categorizes the public Dependabot queue as:
+
+| Category | Count | Expected Owner Action |
+|---|---:|---|
+| Safe batch | 11 | Keep open, label, require CI plus runtime smoke before merge |
+| Deferred major | 8 | Close with comment explaining dedicated migration/runtime-smoke requirement |
+| Manual review | 1 | Keep open until scoped review |
+
+After `Dependabot Curation -> close-deferred`, the visible PR count should drop while the remaining PRs show intentional maintenance labels.

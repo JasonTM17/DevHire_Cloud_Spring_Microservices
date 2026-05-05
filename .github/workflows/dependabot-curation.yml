@@ -1,0 +1,59 @@
+name: Dependabot Curation
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Preview, label safe batches, or close deferred major Dependabot PRs."
+        required: true
+        type: choice
+        default: dry-run
+        options:
+          - dry-run
+          - label-safe
+          - close-deferred
+
+permissions:
+  contents: read
+
+jobs:
+  dependabot-curation:
+    name: Dependabot Curation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Run curation
+        shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ secrets.REPO_GOVERNANCE_TOKEN }}
+        run: |
+          $mode = "${{ inputs.mode }}"
+
+          if ($mode -eq "dry-run") {
+            ./scripts/dependabot-curate.ps1 -DryRun
+            return
+          }
+
+          if ([string]::IsNullOrWhiteSpace($env:GITHUB_TOKEN)) {
+            throw "REPO_GOVERNANCE_TOKEN repository secret is required for Dependabot curation apply modes."
+          }
+
+          if ($mode -eq "label-safe") {
+            ./scripts/dependabot-curate.ps1 -Apply -SafeOnly
+          } elseif ($mode -eq "close-deferred") {
+            ./scripts/dependabot-curate.ps1 -Apply -CloseDeferred
+          } else {
+            throw "Unsupported Dependabot curation mode: $mode"
+          }
+
+      - name: Upload curation reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependabot-curation-reports
+          path: reports/dependabot-curate/
+          if-no-files-found: ignore

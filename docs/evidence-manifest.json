@@ -79,6 +79,7 @@
         ".github/workflows/e2e.yml",
         ".github/workflows/performance.yml",
         ".github/workflows/repository-governance.yml",
+        ".github/workflows/dependabot-curation.yml",
         ".github/settings.yml",
         ".github/dependabot.yml",
         ".editorconfig",

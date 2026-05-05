@@ -2667,3 +2667,22 @@ Notes:
 
 - `github-facade-assert.ps1` correctly reports `owner_action_required` because the public repository still has empty About/Homepage/Topics and `master protected=false`.
 - `github-check-contexts.ps1` now records `unavailable` instead of failing local unauthenticated runs when GitHub returns 401/403/429; the governance workflow uses `-RequireAvailable` so owner-token apply remains strict.
+
+## v0.4.6 Phase 122 - Dependabot public noise burn-down path
+
+- Added the manual `Dependabot Curation` workflow with `dry-run`, `label-safe`, and `close-deferred` modes.
+- Extended `scripts/dependabot-curate.ps1` with `-SafeOnly` so safe maintenance batches can be labelled without touching deferred major PRs.
+- Updated curation comments to v0.4.6 and kept duplicate-comment detection broad enough to avoid spamming existing PRs.
+- Updated Dependabot cleanup docs with the owner workflow route and expected v0.4.6 result: keep 11 safe-batch PRs, close 8 deferred-major PRs, and keep 1 manual-review PR scoped.
+
+Verification:
+
+- Passed:
+  - `.\scripts\dependabot-curate.ps1 -DryRun`
+  - `.\scripts\docs-quality.ps1`
+  - `.\scripts\evidence-manifest-verify.ps1`
+  - `git diff --check`
+
+Notes:
+
+- Dry-run evidence still shows 20 open Dependabot PRs: 11 safe-batch, 8 deferred-major, and 1 manual-review. Actual close/label operations require `REPO_GOVERNANCE_TOKEN` through the manual workflow or an owner shell.

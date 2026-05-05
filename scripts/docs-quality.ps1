@@ -77,7 +77,8 @@ $requiredPaths = @(
     "CHANGELOG.md",
     ".github/settings.yml",
     ".github/PULL_REQUEST_TEMPLATE.md",
-    ".github/workflows/repository-governance.yml"
+    ".github/workflows/repository-governance.yml",
+    ".github/workflows/dependabot-curation.yml"
 )
 
 Push-Location $repoRoot

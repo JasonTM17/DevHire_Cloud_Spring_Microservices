@@ -2,6 +2,7 @@
 param(
     [switch]$DryRun,
     [switch]$Apply,
+    [switch]$SafeOnly,
     [switch]$CloseDeferred,
     [switch]$DeleteClosedBranches,
 
@@ -15,6 +16,10 @@ $ErrorActionPreference = "Stop"
 
 if (-not $DryRun -and -not $Apply) {
     $DryRun = $true
+}
+
+if ($SafeOnly -and $CloseDeferred) {
+    throw "Use either -SafeOnly or -CloseDeferred, not both."
 }
 
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
@@ -183,7 +188,7 @@ function Add-CurationComment {
     param([Parameter(Mandatory = $true)][object]$Plan)
 
     $body = @"
-DevHire dependency curation v0.4.4
+DevHire dependency curation v0.4.6
 
 Decision: $($Plan.decision)
 Action: $($Plan.action)
@@ -194,7 +199,7 @@ This repository does not auto-merge Dependabot updates. Safe batches still need 
 
     $comments = Invoke-GitHubJson -Method Get -Uri "$apiRoot/issues/$($Plan.number)/comments?per_page=100"
     if ($comments.ok) {
-        $alreadyCommented = @($comments.value | Where-Object { $_.body -match "DevHire dependency curation v0\.4\.4" }).Count -gt 0
+        $alreadyCommented = @($comments.value | Where-Object { $_.body -match "DevHire dependency curation v0\.4\." }).Count -gt 0
         if ($alreadyCommented) {
             return
         }
@@ -222,6 +227,10 @@ if ($Apply) {
     }
 
     foreach ($plan in $plans) {
+        if ($SafeOnly -and $plan.decision -ne "safe-batch") {
+            continue
+        }
+
         $labelResult = Invoke-GitHubJson -Method Post -Uri "$apiRoot/issues/$($plan.number)/labels" -Body @{ labels = @($plan.labels) }
         if (-not $labelResult.ok) {
             throw "Failed to label PR #$($plan.number): $($labelResult.error)"
@@ -264,6 +273,7 @@ $summary = [ordered]@{
     repository = "$Owner/$Repo"
     mode = if ($Apply) { "apply" } else { "dry-run" }
     hasToken = $hasToken
+    safeOnly = [bool]$SafeOnly
     closeDeferred = [bool]$CloseDeferred
     deleteClosedBranches = [bool]$DeleteClosedBranches
     openDependabotPullRequests = $plans.Count
@@ -280,6 +290,7 @@ $lines.Add("- Repository: $Owner/$Repo")
 $lines.Add("- Mode: $($summary.mode)")
 $lines.Add("- Token present: $hasToken")
 $lines.Add("- Open Dependabot PRs: $($plans.Count)")
+$lines.Add("- Safe-only apply: $SafeOnly")
 $lines.Add("- Close deferred enabled: $CloseDeferred")
 $lines.Add("- Delete closed branches enabled: $DeleteClosedBranches")
 $lines.Add("")
@@ -293,6 +304,7 @@ $lines.Add("")
 $lines.Add("## Policy")
 $lines.Add("")
 $lines.Add("- No automatic merge is performed by this script.")
+$lines.Add("- `-Apply -SafeOnly` labels/comments only safe-batch PRs.")
 $lines.Add("- Safe batches still require green CI and runtime smoke.")
 $lines.Add("- Deferred major updates are closed only when `-Apply -CloseDeferred` is explicitly used with an owner token.")
 $lines.Add("- Dependabot branches are deleted only when `-Apply -CloseDeferred -DeleteClosedBranches` is explicitly used and the branch belongs to this repository.")
@@ -313,5 +325,5 @@ Write-Host "  $mdPath"
 
 if ($DryRun) {
     Write-Host ""
-    Write-Host "Dry run only. Re-run with -Apply to label/comment, -Apply -CloseDeferred to close deferred major PRs, or -Apply -CloseDeferred -DeleteClosedBranches to delete those Dependabot branches."
+    Write-Host "Dry run only. Re-run with -Apply -SafeOnly to label safe batches, -Apply -CloseDeferred to close deferred major PRs, or -Apply -CloseDeferred -DeleteClosedBranches to delete those Dependabot branches."
 }
