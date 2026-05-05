@@ -6,6 +6,8 @@ param(
     [switch]$Runtime,
     [switch]$Security,
     [switch]$Docs,
+    [switch]$PublicFacade,
+    [switch]$E2EPreview,
     [switch]$All,
     [switch]$StartStack,
     [string]$GatewayUrl = "http://localhost:8080",
@@ -57,7 +59,7 @@ $scopedEnvNames = @(
 )
 
 function Enable-DefaultScopes {
-    if (-not ($Backend -or $Frontend -or $Docker -or $Runtime -or $Security -or $Docs -or $All)) {
+    if (-not ($Backend -or $Frontend -or $Docker -or $Runtime -or $Security -or $Docs -or $PublicFacade -or $E2EPreview -or $All)) {
         $script:Docs = $true
         $script:Docker = $true
     }
@@ -69,6 +71,8 @@ function Enable-DefaultScopes {
         $script:Runtime = $true
         $script:Security = $true
         $script:Docs = $true
+        $script:PublicFacade = $true
+        $script:E2EPreview = $true
     }
 }
 
@@ -160,6 +164,8 @@ function Write-PortfolioReport {
             runtime = [bool]$Runtime
             security = [bool]$Security
             docs = [bool]$Docs
+            publicFacade = [bool]$PublicFacade
+            e2ePreview = [bool]$E2EPreview
         }
         steps = @($steps)
     }
@@ -221,6 +227,12 @@ try {
         }
     }
 
+    if ($PublicFacade) {
+        Invoke-PortfolioStep "public GitHub facade assertion" ".\scripts\github-facade-assert.ps1 -AllowOwnerActions" {
+            & "$PSScriptRoot\github-facade-assert.ps1" -AllowOwnerActions
+        }
+    }
+
     if ($Backend) {
         Invoke-PortfolioStep "backend maven verify" "mvn -T1 clean verify" {
             mvn -T1 clean verify
@@ -246,6 +258,18 @@ try {
             try {
                 npm run build
                 Assert-LastExitCode "npm run build"
+            } finally {
+                Pop-Location
+            }
+        }
+    }
+
+    if ($E2EPreview) {
+        Invoke-PortfolioStep "frontend self-starting e2e preview" "cd frontend; npm run e2e:all" {
+            Push-Location (Join-Path $repoRoot "frontend")
+            try {
+                npm run e2e:all
+                Assert-LastExitCode "npm run e2e:all"
             } finally {
                 Pop-Location
             }

@@ -7,15 +7,15 @@ This is the short reviewer-facing evidence path. `docs/PROGRESS.md` remains an i
 | Evidence | Status |
 |---|---|
 | Latest public release | `v0.3.0` is visible on GitHub |
-| Current development evidence | `v0.4.4` public facade, evidence, frontend, E2E, coverage, and deployment hardening is committed on `master` |
-| GitHub About/Homepage/Topics | Owner action required; target state is available through `Repository Governance` and `.github/settings.yml` |
-| Branch protection | Owner action required; required contexts are audited and mirrored in `.github/settings.yml` |
-| Dependabot posture | 20 open PRs are categorized by `scripts/dependabot-curate.ps1`; config now limits new PR fan-out |
-| E2E posture | PR-safe frontend preview smoke is wired; full Docker browser smoke remains manual/scheduled |
+| Current development evidence | `v0.4.6` public credibility, self-starting E2E, and repository-facade gates are committed on `master` |
+| GitHub About/Homepage/Topics | Owner action required until `Repository Governance -> apply-metadata` and `verify-only` pass |
+| Branch protection | Owner action required until `Repository Governance -> apply-branch-protection` and `verify-only` pass |
+| Dependabot posture | 20 open PRs are categorized: 11 safe-batch, 8 deferred-major, 1 manual-review; curation workflow can close deferred majors |
+| E2E posture | `cd frontend && npm run e2e:all` is self-starting and passed locally with 5 desktop + 2 mobile smoke tests |
 | Coverage posture | Parent JaCoCo baseline raised to 35%; per-module script thresholds ratchet current measured modules |
 | Deployment posture | Prod Helm avoids `latest`, requires secret refs, and security image scans fail actionable HIGH/CRITICAL findings |
 
-Latest hardening evidence: [v0.4.4 professionalization evidence](release-evidence/v0.4.4.md).
+Latest hardening evidence: [v0.4.6 public credibility evidence](release-evidence/v0.4.6.md).
 
 ## What To Review First
 
@@ -32,7 +32,16 @@ Latest hardening evidence: [v0.4.4 professionalization evidence](release-evidenc
 .\scripts\evidence-manifest-verify.ps1
 .\scripts\github-governance.ps1 -DryRun
 .\scripts\github-check-contexts.ps1
+.\scripts\github-facade-assert.ps1 -AllowOwnerActions
 .\scripts\dependabot-curate.ps1 -DryRun
+.\scripts\public-portfolio-audit.ps1
+```
+
+Reviewer-friendly frontend browser proof:
+
+```powershell
+cd frontend
+npm run e2e:all
 ```
 
 Runtime proof when Docker is already running:

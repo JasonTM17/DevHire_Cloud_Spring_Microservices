@@ -4,7 +4,7 @@ This page summarizes the public GitHub presentation state for DevHire Cloud. It 
 
 ## Snapshot
 
-Latest v0.4.5 health scan focus:
+Latest v0.4.6 health scan focus:
 
 | Area | Status |
 |---|---|
@@ -15,17 +15,19 @@ Latest v0.4.5 health scan focus:
 | Topics | Empty on public GitHub API; owner apply still required |
 | Default branch | `master` |
 | Branch protection | Public branch API reports `master protected=false`; owner apply still required |
-| Dependabot PRs | 20 open PRs; curated through `scripts/dependabot-curate.ps1` |
+| Dependabot PRs | 20 open PRs; dry-run categorizes 11 safe-batch, 8 deferred-major, 1 manual-review |
 | Runtime evidence | `docs/runtime-evidence-v0.4.md` |
-| E2E posture | PR-safe frontend preview smoke is wired; full Docker browser smoke stays manual/scheduled |
+| E2E posture | `cd frontend && npm run e2e:all` is self-starting; desktop + mobile smoke passed locally |
 
-v0.4.5 verification result: `GITHUB_TOKEN` was not set locally, so owner-only remote updates were skipped by design. Public API still reports empty About/Homepage/Topics and `master protected=false`; release `v0.3.0` remains visible. The desired public state is now also captured in [`.github/settings.yml`](../.github/settings.yml).
+v0.4.6 verification result: `GITHUB_TOKEN` was not set locally, so owner-only remote updates were skipped by design. Public API still reports empty About/Homepage/Topics and `master protected=false`; release `v0.3.0` remains visible. The desired public state is captured in [`.github/settings.yml`](../.github/settings.yml), `Repository Governance`, and `github-facade-assert.ps1`.
 
 Commands executed for this snapshot:
 
 ```powershell
 .\scripts\github-governance.ps1 -DryRun
 .\scripts\repository-health.ps1
+.\scripts\github-facade-assert.ps1 -AllowOwnerActions
+.\scripts\public-portfolio-audit.ps1
 ```
 
 ## Generate A Fresh Report
@@ -75,6 +77,7 @@ Alternative audited route:
 - run `Actions -> Repository Governance -> mode=dry-run`,
 - run `mode=apply-metadata` after reviewing the artifact,
 - run `mode=apply-branch-protection` after confirming the required checks are green.
+- run `mode=verify-only` to prove About/Homepage/Topics and `master protected=true` are visible after apply.
 
 Alternative declarative route:
 
@@ -91,6 +94,13 @@ Alternative declarative route:
 - `Docker Compose Browser Smoke` remains manual/scheduled because it starts the full stack and is intentionally heavier.
 
 The public branch protection target should use stable required contexts first; the heavy Docker E2E lane stays evidence-oriented until it is consistently green in the hosted environment.
+
+For local reviewer proof without Docker:
+
+```powershell
+cd frontend
+npm run e2e:all
+```
 
 ## Related Evidence
 

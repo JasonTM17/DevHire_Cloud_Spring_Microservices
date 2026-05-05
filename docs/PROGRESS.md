@@ -2709,3 +2709,22 @@ Notes:
 
 - The first local attempt exposed a stale server on port `3001`; the script was then hardened to select an available preview port automatically.
 - The passing run used `http://127.0.0.1:3002`, with 5 desktop smoke tests and 2 mobile smoke tests passing.
+
+## v0.4.6 Phase 124 - Public facade and E2E evidence gates
+
+- Added `-PublicFacade` and `-E2EPreview` scopes to `scripts/portfolio-verify.ps1`.
+- Added `scripts/public-portfolio-audit.ps1` to collect GitHub facade status, repository health, Dependabot categories, screenshot manifest status, docs quality, and optional E2E preview evidence.
+- Updated review evidence and repository health docs with a clear pass/fail matrix instead of vague owner-action language.
+- Added the new audit script to docs quality and evidence manifest checks.
+
+Verification:
+
+- Passed:
+  - `.\scripts\public-portfolio-audit.ps1`
+  - `.\scripts\portfolio-verify.ps1 -Docs -Docker -PublicFacade`
+  - `.\scripts\docs-quality.ps1`
+  - `git diff --check`
+
+Notes:
+
+- Public portfolio audit passes while still reporting the true owner-only blocker: GitHub About/Homepage/Topics are empty and `master protected=false` until governance apply runs with `REPO_GOVERNANCE_TOKEN`.
