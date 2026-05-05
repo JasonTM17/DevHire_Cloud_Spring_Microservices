@@ -33,10 +33,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Compute image metadata
         id: image-metadata
@@ -47,7 +47,7 @@ jobs:
           echo "source=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" >> "$GITHUB_OUTPUT"
 
       - name: Build image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: ${{ matrix.service }}/Dockerfile

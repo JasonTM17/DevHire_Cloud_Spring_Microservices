@@ -17,7 +17,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Generate inventory
         shell: pwsh
@@ -26,7 +26,7 @@ jobs:
         run: ./scripts/dependabot-inventory.ps1
 
       - name: Upload inventory
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: dependabot-inventory
           path: reports/dependabot/
