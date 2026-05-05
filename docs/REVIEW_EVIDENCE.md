@@ -8,9 +8,9 @@ This is the short reviewer-facing evidence path. `docs/PROGRESS.md` remains an i
 |---|---|
 | Latest public release | `v0.3.0` is visible on GitHub |
 | Current development evidence | `v0.4.6` public credibility, self-starting E2E, and repository-facade gates are committed on `master` |
-| GitHub About/Homepage/Topics | Owner action required until `Repository Governance -> apply-metadata` and `verify-only` pass |
-| Branch protection | Owner action required until `Repository Governance -> apply-branch-protection` and `verify-only` pass |
-| Dependabot posture | 20 open PRs are categorized: 11 safe-batch, 8 deferred-major, 1 manual-review; curation workflow can close deferred majors |
+| GitHub About/Homepage/Topics | Applied through owner-authenticated GitHub API; 20 topics are set |
+| Branch protection | Applied on `master` after required check context audit passed |
+| Dependabot posture | 12 PRs remain: 11 safe-batch and 1 manual-review; 8 deferred-major PRs were closed with curation comments |
 | E2E posture | `cd frontend && npm run e2e:all` is self-starting and passed locally with 5 desktop + 2 mobile smoke tests |
 | Coverage posture | Parent JaCoCo baseline raised to 35%; per-module script thresholds ratchet current measured modules |
 | Deployment posture | Prod Helm avoids `latest`, requires secret refs, and security image scans fail actionable HIGH/CRITICAL findings |
@@ -62,12 +62,14 @@ Runtime proof when Docker is already running:
 | AI is controlled | Claude Haiku provider config, fallback mode, citations, tool traces, [AI safety](ai-safety.md) |
 | Cloud is blueprint-safe | Helm, Argo CD, AWS Terraform blueprint, External Secrets, [cloud readiness review](cloud-readiness-review.md) |
 
-## Known Owner-Only Gaps
+## Owner-Applied State
 
-The following cannot be completed from repository code alone:
+The public facade owner actions have been applied through the local Git credential-backed owner token path:
 
-- GitHub About/Homepage/Topics require owner token or UI permission.
-- `master` branch protection requires repository administration permission.
-- GHCR public package visibility may require owner account settings.
+- GitHub About description is set.
+- Homepage points to the `v0.3.0` release.
+- 20 topics are set.
+- `master` branch protection is enabled after required check context audit passed.
+- Deferred-major Dependabot PRs were closed with curation comments; safe-batch PRs remain visible for CI/runtime smoke.
 
-The apply path is documented in [GitHub governance](github-governance.md) and [GitHub owner actions](github-owner-actions.md). The project does not claim these are applied until public API verification confirms them.
+Remaining owner/account-level item: GHCR public package visibility may still require account settings.

@@ -14,9 +14,9 @@ This scorecard gives reviewers a fast, evidence-backed view of DevHire Cloud as 
 | Cloud readiness | 8/10 | Docker Compose, Kubernetes manifests, Helm chart with immutable prod image defaults, Argo CD samples, AWS Terraform blueprint, External Secrets wiring |
 | Runtime reviewer proof | 8.5/10 | Self-starting frontend E2E smoke, portfolio verification scripts, API smoke, AI eval, Mailpit smoke, OpenAPI verify, performance and chaos smoke wrappers |
 | AI portfolio layer | 8/10 | Claude Haiku assistant, RAG citations, fallback mode, tool traces, AI safety docs, eval dataset |
-| Public GitHub facade | 7/10 | Governance workflow, facade assertion, settings-as-code, and owner checklist exist; About/Topics/branch protection still require owner token to apply remotely |
+| Public GitHub facade | 9/10 | About/Homepage/Topics and `master` branch protection are applied; governance workflow, facade assertion, and settings-as-code keep the route repeatable |
 
-Overall portfolio posture: **8.1/10 production engineering evidence**, with the main remaining gap being owner-applied GitHub metadata and protected branch state.
+Overall portfolio posture: **8.4/10 production engineering evidence**, with the main remaining gap being hosted CI confirmation for the latest post-apply documentation commit and any account-level GHCR visibility settings.
 
 ## Architecture
 
@@ -105,12 +105,11 @@ Evidence:
 
 ## Remaining Owner Actions
 
-These are not code gaps. They require GitHub owner permission:
+These are not code gaps. They are account or release-operation follow-ups:
 
-- apply repository About description;
-- apply repository homepage and topics;
-- protect `master` with required checks;
-- curate or close deferred Dependabot major PRs after owner review.
+- confirm latest post-apply GitHub Actions are green;
+- optionally tag `v0.4.6` after hosted CI/E2E are green;
+- confirm GHCR package visibility if public package browsing is part of the demo.
 
 Evidence:
 

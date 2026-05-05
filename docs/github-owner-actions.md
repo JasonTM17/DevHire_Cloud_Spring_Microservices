@@ -7,7 +7,7 @@ Current local verification on 2026-05-05:
 - `scripts/github-governance.ps1 -DryRun` produced the metadata payload below and checked the public release/branch state.
 - v0.4.3 verification also found `GITHUB_TOKEN` was not set in the local shell, so `-Apply` was intentionally skipped.
 - GitHub API reported the repository is public, with empty About description, homepage, and topics. These remain owner actions until a short-lived owner token is available.
-- GitHub API reported `master protected=false`. Branch protection remains an owner action until `Repository Governance` apply mode or the UI fallback is completed.
+- Owner-authenticated GitHub API now reports repository metadata applied and `master protected=true`.
 - GitHub API reported release `v0.3.0` is visible.
 - The older `scripts/github-repo-polish.ps1` remains for compatibility; `scripts/github-governance.ps1` is now the preferred owner-facing automation.
 
@@ -189,10 +189,10 @@ The expected topics payload is:
 
 ## Owner Checklist
 
-- [ ] Add repository secret `REPO_GOVERNANCE_TOKEN` with administration permission.
-- [ ] Run `Repository Governance -> dry-run`.
-- [ ] Fill About description, homepage, and topics with `Repository Governance -> apply-metadata`.
-- [ ] Enable branch protection with `Repository Governance -> apply-branch-protection`.
-- [ ] Run `Repository Governance -> verify-only`.
+- [x] Fill About description, homepage, and topics through owner-authenticated apply.
+- [x] Audit required check contexts before branch protection.
+- [x] Enable branch protection on `master`.
+- [x] Verify facade state with owner-authenticated GitHub API.
+- [ ] Add repository secret `REPO_GOVERNANCE_TOKEN` later if you want future browser-free governance workflow runs.
 - [x] Confirm release `v0.3.0` is public.
 - [ ] Confirm GHCR images are visible or document account limitation.

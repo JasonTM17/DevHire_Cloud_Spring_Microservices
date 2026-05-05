@@ -1939,6 +1939,40 @@ Verification:
   - `.\scripts\docs-quality.ps1`
   - `git diff --check`
 
+## v0.4.6 Follow-up - Owner-applied GitHub facade and Dependabot cleanup
+
+- Used the local Git Credential Manager token only inside the current PowerShell process; the token was not printed, saved, or committed.
+- Applied GitHub About description, homepage, and 20 topics through `scripts/github-governance.ps1 -Apply -MetadataOnly`.
+- Verified metadata with `scripts/github-facade-assert.ps1 -MetadataOnly`.
+- Audited required check contexts with `scripts/github-check-contexts.ps1 -RequireAvailable`.
+- Applied `master` branch protection with `scripts/github-governance.ps1 -Apply -BranchProtectionOnly`.
+- Verified `master protected=true` with `scripts/github-facade-assert.ps1 -BranchProtectionOnly` and `scripts/repository-health.ps1`.
+- Ran `scripts/dependabot-curate.ps1 -Apply -CloseDeferred`, closing 8 deferred-major PRs with curation comments and leaving 12 PRs open.
+- Updated reviewer-facing documentation from "owner action required" to the applied public facade state.
+
+Verification:
+
+- Passed:
+  - `.\scripts\github-governance.ps1 -Apply -MetadataOnly` with token sourced from Git Credential Manager inside the process only
+  - `.\scripts\github-facade-assert.ps1 -MetadataOnly`
+  - `.\scripts\github-check-contexts.ps1 -RequireAvailable`
+  - `.\scripts\github-governance.ps1 -Apply -BranchProtectionOnly` with token sourced from Git Credential Manager inside the process only
+  - `.\scripts\github-facade-assert.ps1 -BranchProtectionOnly`
+  - `.\scripts\dependabot-curate.ps1 -Apply -CloseDeferred` with token sourced from Git Credential Manager inside the process only
+  - `.\scripts\github-facade-assert.ps1`
+  - `.\scripts\repository-health.ps1` with token present
+  - `.\scripts\dependabot-curate.ps1 -DryRun`
+  - `.\scripts\docs-quality.ps1`
+  - `git diff --check`
+
+Results:
+
+- Repository description is set.
+- Repository homepage points to the `v0.3.0` release.
+- 20 repository topics are set.
+- `master protected=true`.
+- Dependabot PR count is now 12: 11 `safe-batch`, 1 `manual-review`, and no remaining `defer-major` PRs.
+
 ## Phase 99 - Public repository health dashboard
 
 - Added `scripts/repository-health.ps1` to read public GitHub metadata, release state, branch protection summary, latest workflow runs, Dependabot PR categories, and local evidence file status.

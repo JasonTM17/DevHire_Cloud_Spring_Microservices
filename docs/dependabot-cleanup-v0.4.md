@@ -4,7 +4,7 @@ DevHire Cloud keeps Dependabot PRs visible, triaged, and intentionally batched. 
 
 ## Current Issue
 
-The public GitHub repo has around 20 open Dependabot PRs across Docker, GitHub Actions, Maven, npm/frontend, and Terraform. That number looks unmanaged unless it is backed by a clear curation policy.
+The public GitHub repo previously had 20 open Dependabot PRs across Docker, GitHub Actions, Maven, npm/frontend, and Terraform. v0.4.6 curation closed the deferred-major PRs with comments, leaving the safe maintenance batch visible.
 
 ## Automation
 
@@ -104,7 +104,7 @@ Generated reports are written under `reports/dependabot-curate/` and are intenti
 
 ## Expected v0.4.6 Result
 
-Current dry-run evidence categorizes the public Dependabot queue as:
+Initial v0.4.6 dry-run evidence categorized the public Dependabot queue as:
 
 | Category | Count | Expected Owner Action |
 |---|---:|---|
@@ -112,4 +112,4 @@ Current dry-run evidence categorizes the public Dependabot queue as:
 | Deferred major | 8 | Close with comment explaining dedicated migration/runtime-smoke requirement |
 | Manual review | 1 | Keep open until scoped review |
 
-After `Dependabot Curation -> close-deferred`, the visible PR count should drop while the remaining PRs show intentional maintenance labels.
+After `Dependabot Curation -> close-deferred`, the visible PR count dropped to 12: 11 safe-batch PRs and 1 manual-review PR.

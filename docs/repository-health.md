@@ -10,16 +10,16 @@ Latest v0.4.6 health scan focus:
 |---|---|
 | Repository visibility | Public |
 | Latest release | `v0.3.0` is visible |
-| About description | Empty on public GitHub API; owner apply still required |
-| Homepage | Empty on public GitHub API; owner apply still required |
-| Topics | Empty on public GitHub API; owner apply still required |
+| About description | Applied and verified with owner-authenticated GitHub API |
+| Homepage | Applied and verified with owner-authenticated GitHub API |
+| Topics | 20 topics applied and verified with owner-authenticated GitHub API |
 | Default branch | `master` |
-| Branch protection | Public branch API reports `master protected=false`; owner apply still required |
-| Dependabot PRs | 20 open PRs; dry-run categorizes 11 safe-batch, 8 deferred-major, 1 manual-review |
+| Branch protection | Applied; owner-authenticated branch API reports `master protected=true` |
+| Dependabot PRs | 12 open PRs remain: 11 safe-batch, 1 manual-review |
 | Runtime evidence | `docs/runtime-evidence-v0.4.md` |
 | E2E posture | `cd frontend && npm run e2e:all` is self-starting; desktop + mobile smoke passed locally |
 
-v0.4.6 verification result: `GITHUB_TOKEN` was not set locally, so owner-only remote updates were skipped by design. Public API still reports empty About/Homepage/Topics and `master protected=false`; release `v0.3.0` remains visible. The desired public state is captured in [`.github/settings.yml`](../.github/settings.yml), `Repository Governance`, and `github-facade-assert.ps1`.
+v0.4.6 verification result: owner-authenticated GitHub API confirmed the repository description, homepage, 20 topics, and `master protected=true`. Deferred-major Dependabot PRs were closed through the curation script, leaving safe maintenance PRs visible.
 
 Commands executed for this snapshot:
 
@@ -36,7 +36,7 @@ Commands executed for this snapshot:
 .\scripts\repository-health.ps1
 ```
 
-The script reads public GitHub API data without a token. If `GITHUB_TOKEN` is present, it can also read detailed branch protection state when the token has permission.
+The script reads GitHub API data. If unauthenticated GitHub API calls are rate-limited or blocked, set `GITHUB_TOKEN` from an owner shell for authoritative facade and branch-protection verification.
 
 Generated reports are written under `reports/repository-health/` and are ignored.
 
@@ -60,7 +60,7 @@ The root should show engineering intent, not local tool output:
 
 ## Owner Actions
 
-If the script reports missing public metadata or unprotected `master`, run:
+If the script reports missing public metadata or unprotected `master` after future repository changes, run:
 
 ```powershell
 $env:GITHUB_TOKEN = "<short-lived-owner-token>"

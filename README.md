@@ -16,10 +16,10 @@ DevHire Cloud is a production-grade Java 21/Spring Boot microservices portfolio 
 |---|---|---|
 | Latest release | `v0.3.0` is public | [Release](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.3.0) |
 | Current hardening evidence | `v0.4.6` on `master` | [Review evidence](docs/REVIEW_EVIDENCE.md) |
-| About description | Pending owner apply | `Repository Governance -> apply-metadata` |
-| Topics | Pending owner apply | `Repository Governance -> apply-metadata` |
-| Branch protection | Pending owner apply | `Repository Governance -> apply-branch-protection`, then `verify-only` |
-| Dependabot queue | 20 PRs categorized: 11 safe, 8 deferred major, 1 manual review | [Dependabot cleanup](docs/dependabot-cleanup-v0.4.md) |
+| About description | Applied | Verified through owner-authenticated GitHub API |
+| Topics | Applied: 20 topics | Verified through owner-authenticated GitHub API |
+| Branch protection | Applied on `master` | Required check contexts audited before apply |
+| Dependabot queue | 12 PRs remain: 11 safe, 1 manual review | 8 deferred-major PRs closed with curation comments |
 | E2E preview | Self-starting desktop + mobile smoke passed locally | `cd frontend && npm run e2e:all` |
 
 ## Reviewer Quick Links
