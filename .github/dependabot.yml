@@ -8,7 +8,10 @@ updates:
       day: monday
       time: "06:00"
       timezone: Asia/Bangkok
-    open-pull-requests-limit: 8
+    open-pull-requests-limit: 4
+    labels:
+      - portfolio-maintenance
+      - needs-runtime-smoke
     groups:
       spring-platform:
         patterns:
@@ -29,7 +32,10 @@ updates:
       day: monday
       time: "06:20"
       timezone: Asia/Bangkok
-    open-pull-requests-limit: 8
+    open-pull-requests-limit: 4
+    labels:
+      - portfolio-maintenance
+      - needs-runtime-smoke
     groups:
       frontend-platform:
         patterns:
@@ -48,7 +54,10 @@ updates:
       day: monday
       time: "06:40"
       timezone: Asia/Bangkok
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 2
+    labels:
+      - portfolio-maintenance
+      - safe-batch
     groups:
       actions:
         patterns:
@@ -61,7 +70,10 @@ updates:
       day: monday
       time: "06:50"
       timezone: Asia/Bangkok
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 1
+    labels:
+      - portfolio-maintenance
+      - deferred-major
     groups:
       terraform-aws-providers:
         patterns:
@@ -74,7 +86,10 @@ updates:
       day: monday
       time: "06:55"
       timezone: Asia/Bangkok
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 1
+    labels:
+      - portfolio-maintenance
+      - deferred-major
     groups:
       terraform-aws-providers:
         patterns:
@@ -87,7 +102,10 @@ updates:
       day: monday
       time: "07:00"
       timezone: Asia/Bangkok
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 1
+    labels:
+      - portfolio-maintenance
+      - deferred-major
     groups:
       terraform-aws-providers:
         patterns:
@@ -100,6 +118,11 @@ updates:
       day: monday
       time: "07:05"
       timezone: Asia/Bangkok
+    open-pull-requests-limit: 1
+    labels:
+      - portfolio-maintenance
+      - safe-batch
+      - needs-runtime-smoke
     groups:
       backend-base-images:
         patterns:
@@ -113,6 +136,11 @@ updates:
       day: monday
       time: "07:10"
       timezone: Asia/Bangkok
+    open-pull-requests-limit: 1
+    labels:
+      - portfolio-maintenance
+      - safe-batch
+      - needs-runtime-smoke
     groups:
       backend-base-images:
         patterns:
@@ -126,6 +154,11 @@ updates:
       day: monday
       time: "07:15"
       timezone: Asia/Bangkok
+    open-pull-requests-limit: 1
+    labels:
+      - portfolio-maintenance
+      - safe-batch
+      - needs-runtime-smoke
     groups:
       backend-base-images:
         patterns:
@@ -139,6 +172,11 @@ updates:
       day: monday
       time: "07:20"
       timezone: Asia/Bangkok
+    open-pull-requests-limit: 1
+    labels:
+      - portfolio-maintenance
+      - safe-batch
+      - needs-runtime-smoke
     groups:
       backend-base-images:
         patterns:
@@ -152,6 +190,11 @@ updates:
       day: monday
       time: "07:25"
       timezone: Asia/Bangkok
+    open-pull-requests-limit: 1
+    labels:
+      - portfolio-maintenance
+      - safe-batch
+      - needs-runtime-smoke
     groups:
       backend-base-images:
         patterns:
@@ -165,6 +208,11 @@ updates:
       day: monday
       time: "07:30"
       timezone: Asia/Bangkok
+    open-pull-requests-limit: 1
+    labels:
+      - portfolio-maintenance
+      - safe-batch
+      - needs-runtime-smoke
     groups:
       backend-base-images:
         patterns:
@@ -178,6 +226,11 @@ updates:
       day: monday
       time: "07:35"
       timezone: Asia/Bangkok
+    open-pull-requests-limit: 1
+    labels:
+      - portfolio-maintenance
+      - safe-batch
+      - needs-runtime-smoke
     groups:
       backend-base-images:
         patterns:
@@ -191,6 +244,11 @@ updates:
       day: monday
       time: "07:40"
       timezone: Asia/Bangkok
+    open-pull-requests-limit: 1
+    labels:
+      - portfolio-maintenance
+      - safe-batch
+      - needs-runtime-smoke
     groups:
       backend-base-images:
         patterns:
@@ -204,6 +262,11 @@ updates:
       day: monday
       time: "07:42"
       timezone: Asia/Bangkok
+    open-pull-requests-limit: 1
+    labels:
+      - portfolio-maintenance
+      - safe-batch
+      - needs-runtime-smoke
     groups:
       backend-base-images:
         patterns:
@@ -217,6 +280,11 @@ updates:
       day: monday
       time: "07:45"
       timezone: Asia/Bangkok
+    open-pull-requests-limit: 1
+    labels:
+      - portfolio-maintenance
+      - safe-batch
+      - needs-runtime-smoke
     groups:
       frontend-base-images:
         patterns:

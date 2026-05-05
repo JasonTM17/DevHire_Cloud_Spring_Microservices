@@ -2471,3 +2471,17 @@ Verification:
 Remote state:
 
 - `REPO_GOVERNANCE_TOKEN` / `GITHUB_TOKEN` was not available locally, so About/Homepage/Topics and `master` protection were not applied from this environment. The workflow path remains the owner-approved apply route.
+
+## v0.4.4 Phase 113 - Dependabot noise burn-down controls
+
+- Reduced Dependabot fan-out by adding labels and stricter open PR limits for Maven, npm, GitHub Actions, Terraform, and every Docker service directory.
+- Updated `scripts/dependabot-curate.ps1` so it can read `REPO_GOVERNANCE_TOKEN` as well as `GITHUB_TOKEN`.
+- Added an explicit `-DeleteClosedBranches` switch for owner-approved Dependabot branch cleanup after deferred major PRs are closed.
+- Updated the Dependabot cleanup playbook with safe batch, deferred major, runtime-smoke, and branch deletion guidance.
+
+Verification:
+
+- Passed:
+  - `.\scripts\dependabot-curate.ps1 -DryRun`
+  - `.\scripts\docs-quality.ps1`
+  - `git diff --check`

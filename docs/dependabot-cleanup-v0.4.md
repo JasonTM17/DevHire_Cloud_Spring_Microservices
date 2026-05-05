@@ -30,6 +30,14 @@ $env:GITHUB_TOKEN = "<short-lived-owner-token>"
 Remove-Item Env:\GITHUB_TOKEN
 ```
 
+Delete the closed Dependabot branches only when the owner intentionally wants to reduce branch noise too:
+
+```powershell
+$env:GITHUB_TOKEN = "<short-lived-owner-token>"
+.\scripts\dependabot-curate.ps1 -Apply -CloseDeferred -DeleteClosedBranches
+Remove-Item Env:\GITHUB_TOKEN
+```
+
 The script never merges pull requests automatically.
 
 ## Labels
@@ -52,6 +60,17 @@ The script never merges pull requests automatically.
 | Terraform AWS provider 6.x | Defer | migration review, Terraform validate |
 | Node 25 / runtime majors | Defer | dedicated runtime migration |
 | Spring/JJWT/Testcontainers/Springdoc majors | Defer | dedicated platform migration |
+
+## Noise Reduction Defaults
+
+`.github/dependabot.yml` now limits new PR fan-out:
+
+- Maven and npm are capped at 4 open PRs each.
+- GitHub Actions is capped at 2 open PRs.
+- Terraform environment providers are capped at 1 open PR per environment and labeled as deferred-major candidates.
+- Docker base-image updates are capped at 1 open PR per service and labeled for safe batch plus runtime smoke.
+
+This does not hide dependency risk. It makes the public backlog reviewable and prevents Dependabot from recreating an unmanaged-looking wall of branches after cleanup.
 
 ## Reviewer Signal
 

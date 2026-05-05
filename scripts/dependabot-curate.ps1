@@ -3,6 +3,7 @@ param(
     [switch]$DryRun,
     [switch]$Apply,
     [switch]$CloseDeferred,
+    [switch]$DeleteClosedBranches,
 
     [string]$Owner = "JasonTM17",
     [string]$Repo = "DevHire_Cloud_Spring_Microservices",
@@ -31,9 +32,17 @@ $headers = @{
     "User-Agent" = "DevHire-Dependabot-Curate"
 }
 
-$hasToken = -not [string]::IsNullOrWhiteSpace($env:GITHUB_TOKEN)
+$token = if (-not [string]::IsNullOrWhiteSpace($env:GITHUB_TOKEN)) {
+    $env:GITHUB_TOKEN
+} elseif (-not [string]::IsNullOrWhiteSpace($env:REPO_GOVERNANCE_TOKEN)) {
+    $env:REPO_GOVERNANCE_TOKEN
+} else {
+    $null
+}
+
+$hasToken = -not [string]::IsNullOrWhiteSpace($token)
 if ($hasToken) {
-    $headers["Authorization"] = "Bearer $env:GITHUB_TOKEN"
+    $headers["Authorization"] = "Bearer $token"
 }
 
 if ($Apply -and -not $hasToken) {
@@ -61,7 +70,7 @@ $labelCatalog = @{
 
 function Invoke-GitHubJson {
     param(
-        [Parameter(Mandatory = $true)][ValidateSet("Get", "Patch", "Post")][string]$Method,
+        [Parameter(Mandatory = $true)][ValidateSet("Get", "Patch", "Post", "Delete")][string]$Method,
         [Parameter(Mandatory = $true)][string]$Uri,
         [object]$Body = $null
     )
@@ -174,7 +183,7 @@ function Add-CurationComment {
     param([Parameter(Mandatory = $true)][object]$Plan)
 
     $body = @"
-DevHire dependency curation v0.4.1
+DevHire dependency curation v0.4.4
 
 Decision: $($Plan.decision)
 Action: $($Plan.action)
@@ -185,7 +194,7 @@ This repository does not auto-merge Dependabot updates. Safe batches still need 
 
     $comments = Invoke-GitHubJson -Method Get -Uri "$apiRoot/issues/$($Plan.number)/comments?per_page=100"
     if ($comments.ok) {
-        $alreadyCommented = @($comments.value | Where-Object { $_.body -match "DevHire dependency curation v0\.4\.1" }).Count -gt 0
+        $alreadyCommented = @($comments.value | Where-Object { $_.body -match "DevHire dependency curation v0\.4\.4" }).Count -gt 0
         if ($alreadyCommented) {
             return
         }
@@ -205,6 +214,8 @@ if (-not $searchResult.ok) {
 
 $plans = @($searchResult.value.items | ForEach-Object { Get-CurationPlan -PullRequest $_ })
 
+$closedBranchDeletion = @()
+
 if ($Apply) {
     foreach ($label in $labelCatalog.Keys) {
         Ensure-Label -Name $label
@@ -223,6 +234,23 @@ if ($Apply) {
             if (-not $closeResult.ok) {
                 throw "Failed to close deferred PR #$($plan.number): $($closeResult.error)"
             }
+
+            if ($DeleteClosedBranches) {
+                $pullResult = Invoke-GitHubJson -Method Get -Uri "$apiRoot/pulls/$($plan.number)"
+                if ($pullResult.ok -and $pullResult.value.head.repo.full_name -eq "$Owner/$Repo") {
+                    $encodedRef = [uri]::EscapeDataString("heads/$($pullResult.value.head.ref)")
+                    $deleteResult = Invoke-GitHubJson -Method Delete -Uri "$apiRoot/git/refs/$encodedRef"
+                    $closedBranchDeletion += [pscustomobject]@{
+                        number = $plan.number
+                        branch = $pullResult.value.head.ref
+                        ok = $deleteResult.ok
+                        error = $deleteResult.error
+                    }
+                    if (-not $deleteResult.ok) {
+                        throw "Failed to delete branch for PR #$($plan.number): $($deleteResult.error)"
+                    }
+                }
+            }
         }
     }
 }
@@ -237,8 +265,10 @@ $summary = [ordered]@{
     mode = if ($Apply) { "apply" } else { "dry-run" }
     hasToken = $hasToken
     closeDeferred = [bool]$CloseDeferred
+    deleteClosedBranches = [bool]$DeleteClosedBranches
     openDependabotPullRequests = $plans.Count
     plans = $plans
+    closedBranchDeletion = @($closedBranchDeletion)
 }
 $summary | ConvertTo-Json -Depth 20 | Set-Content -Path $jsonPath -Encoding UTF8
 
@@ -251,6 +281,7 @@ $lines.Add("- Mode: $($summary.mode)")
 $lines.Add("- Token present: $hasToken")
 $lines.Add("- Open Dependabot PRs: $($plans.Count)")
 $lines.Add("- Close deferred enabled: $CloseDeferred")
+$lines.Add("- Delete closed branches enabled: $DeleteClosedBranches")
 $lines.Add("")
 $lines.Add("| PR | Category | Decision | Labels | Action |")
 $lines.Add("|---:|---|---|---|---|")
@@ -264,6 +295,7 @@ $lines.Add("")
 $lines.Add("- No automatic merge is performed by this script.")
 $lines.Add("- Safe batches still require green CI and runtime smoke.")
 $lines.Add("- Deferred major updates are closed only when `-Apply -CloseDeferred` is explicitly used with an owner token.")
+$lines.Add("- Dependabot branches are deleted only when `-Apply -CloseDeferred -DeleteClosedBranches` is explicitly used and the branch belongs to this repository.")
 $lines | Set-Content -Path $mdPath -Encoding UTF8
 
 Write-Host "Dependabot curation summary:"
@@ -281,5 +313,5 @@ Write-Host "  $mdPath"
 
 if ($DryRun) {
     Write-Host ""
-    Write-Host "Dry run only. Re-run with -Apply to label/comment, or -Apply -CloseDeferred to close deferred major PRs."
+    Write-Host "Dry run only. Re-run with -Apply to label/comment, -Apply -CloseDeferred to close deferred major PRs, or -Apply -CloseDeferred -DeleteClosedBranches to delete those Dependabot branches."
 }
