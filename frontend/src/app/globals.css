@@ -207,10 +207,25 @@ button {
 
 .identity {
   gap: 10px;
+  min-width: 0;
   padding: 10px;
   border: 1px solid rgba(216, 225, 236, 0.14);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.04);
+}
+
+.identity-copy {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.identity-copy span,
+.identity-copy small {
+  max-width: 156px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .identity-mark {
@@ -272,6 +287,7 @@ button {
 }
 
 .top-search input {
+  width: 100%;
   min-height: auto;
   padding: 0;
   border: 0;
@@ -450,6 +466,7 @@ h3 {
   border: 1px solid var(--line);
   background: var(--panel);
   color: var(--muted);
+  cursor: pointer;
 }
 
 .tab.active {
@@ -1097,6 +1114,10 @@ textarea {
   place-items: center;
   grid-column: 1 / -1;
   text-align: center;
+}
+
+.empty-state.compact {
+  min-height: 84px;
 }
 
 .assistant-login {

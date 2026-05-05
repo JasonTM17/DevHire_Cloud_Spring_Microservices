@@ -1,4 +1,4 @@
-import type { Job, PageResponse } from "@/types/domain";
+import type { AiProviderStatus, Application, AuditLog, Company, Job, Notification, PageResponse } from "@/types/domain";
 
 export const previewJobs: PageResponse<Job> = {
   content: [
@@ -10,6 +10,129 @@ export const previewJobs: PageResponse<Job> = {
   totalPages: 1,
   number: 0,
   size: 3
+};
+
+export const previewApplications: PageResponse<Application> = {
+  content: [
+    {
+      id: "preview-application-java",
+      jobId: "preview-java-platform",
+      candidateId: "preview-candidate",
+      employerId: "preview-employer",
+      status: "INTERVIEW",
+      cvUrl: "https://storage.devhire.local/cv/candidate-profile.pdf",
+      coverLetter: "I can lead Spring Boot, Kafka, and observability work across the hiring platform.",
+      createdAt: daysAgo(3),
+      updatedAt: daysAgo(1)
+    },
+    {
+      id: "preview-application-search",
+      jobId: "preview-cloud-search",
+      candidateId: "preview-candidate",
+      employerId: "preview-employer",
+      status: "REVIEWING",
+      cvUrl: "https://storage.devhire.local/cv/candidate-profile.pdf",
+      coverLetter: "OpenSearch and latency ownership are a strong fit for my platform background.",
+      createdAt: daysAgo(6),
+      updatedAt: daysAgo(2)
+    }
+  ],
+  totalElements: 2,
+  totalPages: 1,
+  number: 0,
+  size: 2
+};
+
+export const previewNotifications: PageResponse<Notification> = {
+  content: [
+    {
+      id: "preview-notification-interview",
+      recipientId: "preview-candidate",
+      type: "APPLICATION_STATUS_CHANGED",
+      title: "Interview stage scheduled",
+      message: "Portfolio Labs moved your Senior Java Platform Engineer application to interview.",
+      read: false,
+      emailStatus: "SENT",
+      emailRecipient: "candidate@devhire.local",
+      emailSentAt: daysAgo(1),
+      createdAt: daysAgo(1)
+    },
+    {
+      id: "preview-notification-submitted",
+      recipientId: "preview-candidate",
+      type: "APPLICATION_SUBMITTED",
+      title: "Application submitted",
+      message: "Your application was persisted and emitted through notification and audit events.",
+      read: true,
+      readAt: daysAgo(2),
+      emailStatus: "SENT",
+      emailRecipient: "candidate@devhire.local",
+      emailSentAt: daysAgo(2),
+      createdAt: daysAgo(2)
+    }
+  ],
+  totalElements: 2,
+  totalPages: 1,
+  number: 0,
+  size: 2
+};
+
+export const previewCompanies: PageResponse<Company> = {
+  content: [
+    {
+      id: "preview-company-portfolio-labs",
+      employerId: "preview-employer",
+      name: "Portfolio Labs",
+      slug: "portfolio-labs",
+      website: "https://careers.devhire.local/portfolio-labs",
+      size: "51-200",
+      industry: "Developer Platforms",
+      description: "Builds platform tooling for recruitment operations.",
+      status: "APPROVED"
+    },
+    {
+      id: "preview-company-cloudway",
+      employerId: "preview-employer",
+      name: "Cloudway Systems",
+      slug: "cloudway-systems",
+      website: "https://careers.devhire.local/cloudway-systems",
+      size: "201-500",
+      industry: "Cloud Infrastructure",
+      description: "Runs cloud-native hiring and search infrastructure.",
+      status: "PENDING"
+    }
+  ],
+  totalElements: 2,
+  totalPages: 1,
+  number: 0,
+  size: 2
+};
+
+export const previewAuditLogs: PageResponse<AuditLog> = {
+  content: [
+    previewAudit("AI_TOOL_EXECUTED", "AI_ASSISTANT", "preview-ai"),
+    previewAudit("APPROVE_JOB", "JOB", "preview-java-platform"),
+    previewAudit("CHANGE_APPLICATION_STATUS", "APPLICATION", "preview-application-java"),
+    previewAudit("APPROVE_COMPANY", "COMPANY", "preview-company-portfolio-labs")
+  ],
+  totalElements: 4,
+  totalPages: 1,
+  number: 0,
+  size: 4
+};
+
+export const previewAiProviderStatus: AiProviderStatus = {
+  provider: "anthropic",
+  model: "claude-haiku-4-5-20251001",
+  baseUrlHost: "api.anthropic.com",
+  anthropicVersion: "2023-06-01",
+  maxTokens: 900,
+  apiKeyConfigured: false,
+  demoFallbackEnabled: true,
+  mode: "FALLBACK",
+  circuitBreakerState: "CLOSED",
+  consecutiveFailures: 0,
+  checkedAt: new Date().toISOString()
 };
 
 function previewJob(id: string, title: string, description: string, location: string, level: string, skills: string[]): Job {
@@ -32,4 +155,24 @@ function previewJob(id: string, title: string, description: string, location: st
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
   };
+}
+
+function previewAudit(action: string, targetType: string, targetId: string): AuditLog {
+  return {
+    id: `preview-audit-${action.toLowerCase()}`,
+    actorId: "preview-admin",
+    actorEmail: "admin@devhire.local",
+    actorRole: "ADMIN",
+    action,
+    targetType,
+    targetId,
+    metadata: { source: "portfolio-preview" },
+    createdAt: daysAgo(1)
+  };
+}
+
+function daysAgo(days: number) {
+  const value = new Date();
+  value.setDate(value.getDate() - days);
+  return value.toISOString();
 }

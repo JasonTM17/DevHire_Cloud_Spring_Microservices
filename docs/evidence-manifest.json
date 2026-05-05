@@ -60,6 +60,7 @@
         "scripts/professionalism-audit.ps1",
         "scripts/visual-evidence-audit.ps1",
         "scripts/evidence-manifest-verify.ps1",
+        "scripts/screenshot-promote.ps1",
         "scripts/terraform-validate.ps1",
         "scripts/check-coverage.ps1"
       ]

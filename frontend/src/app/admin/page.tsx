@@ -7,6 +7,7 @@ import { MetricCard } from "@/components/MetricCard";
 import { StatusPill } from "@/components/StatusPill";
 import { api } from "@/lib/api";
 import { brandForCompany } from "@/lib/demoCompanies";
+import { previewAiProviderStatus, previewAuditLogs, previewCompanies } from "@/lib/previewData";
 import type { AiProviderStatus, AuditLog, Company, PageResponse } from "@/types/domain";
 
 export default function AdminPage() {
@@ -16,15 +17,24 @@ export default function AdminPage() {
   const [jobId, setJobId] = useState("");
   const [message, setMessage] = useState("");
   const [reindexing, setReindexing] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   function load() {
+    setLoading(true);
     Promise.all([api.companies(), api.auditLogs(), api.aiProviderStatus()])
       .then(([companyPage, auditPage, providerStatus]) => {
         setCompanies(companyPage);
         setAudit(auditPage);
         setAiProvider(providerStatus);
+        setMessage("");
       })
-      .catch((ex) => setMessage(ex instanceof Error ? ex.message : "Cannot load admin dashboard"));
+      .catch((ex) => {
+        setCompanies(previewCompanies);
+        setAudit(previewAuditLogs);
+        setAiProvider(previewAiProviderStatus);
+        setMessage(previewDashboardMessage(ex));
+      })
+      .finally(() => setLoading(false));
   }
 
   useEffect(load, []);
@@ -81,7 +91,7 @@ export default function AdminPage() {
         <MetricCard icon={ShieldCheck} label="Pending" value={companies?.content.filter((item) => item.status === "PENDING").length ?? 0} helper="Needs admin action" />
         <MetricCard icon={Bot} label="AI mode" value={aiProvider?.mode ?? "UNKNOWN"} helper={aiProvider?.apiKeyConfigured ? "Claude API" : "Fallback safe"} />
       </div>
-      {message ? <p className={positiveMessage ? "success" : "error"}>{message}</p> : null}
+      {message ? <p className={positiveMessage ? "success" : "error preview-note"}>{message}</p> : null}
       <div className="split-grid">
         <div className="panel">
           <div className="section-title">
@@ -89,7 +99,11 @@ export default function AdminPage() {
             <h2>Company reviews</h2>
           </div>
           <div className="table-list">
-            {companies?.content.map((company) => (
+            {loading ? <div className="empty-state compact">Loading admin review queue...</div> : null}
+            {!loading && companies?.content.length === 0 ? (
+              <div className="empty-state compact">No companies waiting for review.</div>
+            ) : null}
+            {!loading && companies?.content.map((company) => (
               <div className="table-row" key={company.id}>
                 <div className="company-line">
                   <CompanyLogo brand={brandForCompany(company)} size="sm" />
@@ -120,7 +134,9 @@ export default function AdminPage() {
             <h2>Audit log</h2>
           </div>
           <div className="stack">
-            {audit?.content.slice(0, 12).map((item) => (
+            {loading ? <div className="empty-state compact">Loading audit stream...</div> : null}
+            {!loading && audit?.content.length === 0 ? <div className="empty-state compact">No audit events yet.</div> : null}
+            {!loading && audit?.content.slice(0, 12).map((item) => (
               <div className="audit-item" key={item.id}>
                 <div className="status-line">
                   <strong>{item.action}</strong>
@@ -175,4 +191,12 @@ export default function AdminPage() {
       </div>
     </section>
   );
+}
+
+function previewDashboardMessage(ex: unknown) {
+  const message = ex instanceof Error ? ex.message : "";
+  if (!message || message === "Failed to fetch") {
+    return "Live API Gateway is offline; showing curated admin control-plane preview data.";
+  }
+  return `${message}. Showing curated admin control-plane preview data.`;
 }

@@ -28,7 +28,13 @@ export default function LoginPage() {
       saveSession(auth);
       router.push(auth.role === "ADMIN" ? "/admin" : auth.role === "EMPLOYER" ? "/employer" : "/candidate");
     } catch (ex) {
-      setError(ex instanceof Error ? ex.message : "Login failed");
+      const fallback = demoFallbackLogin(email, password);
+      if (fallback) {
+        saveSession(fallback);
+        router.push(fallback.role === "ADMIN" ? "/admin" : fallback.role === "EMPLOYER" ? "/employer" : "/candidate");
+      } else {
+        setError(ex instanceof Error ? ex.message : "Login failed");
+      }
     } finally {
       setLoading(false);
     }
@@ -61,8 +67,8 @@ export default function LoginPage() {
         <p className="eyebrow">Portfolio access</p>
         <h2>Demo accounts</h2>
         <p>
-          Pick a role to inspect the real API flow through Gateway, JWT authentication, RBAC, and service-owned
-          dashboards.
+          Pick a role to inspect the API flow through Gateway, JWT authentication, RBAC, and service-owned dashboards.
+          If the Docker stack is offline, the same demo accounts open a clearly marked local preview state.
         </p>
         <div className="stack">
           {demos.map(([role, demoEmail, demoPassword]) => (
@@ -112,4 +118,22 @@ export default function LoginPage() {
       </div>
     </section>
   );
+}
+
+function demoFallbackLogin(email: string, password: string) {
+  const match = demos.find(([, demoEmail, demoPassword]) => demoEmail === email && demoPassword === password);
+  if (!match) return null;
+  const [role] = match;
+  const now = new Date();
+  const accessTokenExpiresAt = new Date(now.getTime() + 15 * 60 * 1000).toISOString();
+  const refreshTokenExpiresAt = new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString();
+  return {
+    userId: `preview-${role.toLowerCase()}`,
+    email,
+    role,
+    accessToken: `preview-access-${role.toLowerCase()}`,
+    refreshToken: `preview-refresh-${role.toLowerCase()}`,
+    accessTokenExpiresAt,
+    refreshTokenExpiresAt
+  };
 }

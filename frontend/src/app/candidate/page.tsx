@@ -5,20 +5,29 @@ import { Bell, ClipboardList, MailCheck, TimerReset, TrendingUp } from "lucide-r
 import { MetricCard } from "@/components/MetricCard";
 import { StatusPill } from "@/components/StatusPill";
 import { api } from "@/lib/api";
+import { previewApplications, previewNotifications } from "@/lib/previewData";
 import type { Application, Notification, PageResponse } from "@/types/domain";
 
 export default function CandidatePage() {
   const [applications, setApplications] = useState<PageResponse<Application> | null>(null);
   const [notifications, setNotifications] = useState<PageResponse<Notification> | null>(null);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
 
   function load() {
+    setLoading(true);
     Promise.all([api.myApplications(), api.notifications()])
       .then(([apps, notis]) => {
         setApplications(apps);
         setNotifications(notis);
+        setError("");
       })
-      .catch((ex) => setError(ex instanceof Error ? ex.message : "Cannot load candidate dashboard"));
+      .catch((ex) => {
+        setApplications(previewApplications);
+        setNotifications(previewNotifications);
+        setError(previewDashboardMessage(ex));
+      })
+      .finally(() => setLoading(false));
   }
 
   useEffect(load, []);
@@ -54,7 +63,7 @@ export default function CandidatePage() {
         <MetricCard icon={Bell} label="Unread" value={unread} helper="Internal notifications" />
         <MetricCard icon={TrendingUp} label="Pipeline" value="Live" helper="Kafka status events" />
       </div>
-      {error ? <p className="error">{error}</p> : null}
+      {error ? <p className="error preview-note">{error}</p> : null}
       <div className="split-grid">
         <div className="panel">
           <div className="section-title">
@@ -62,10 +71,14 @@ export default function CandidatePage() {
             <h2>Application tracker</h2>
           </div>
           <div className="table-list">
-            {applications?.content.map((item) => (
+            {loading ? <div className="empty-state compact">Loading candidate applications...</div> : null}
+            {!loading && applications?.content.length === 0 ? (
+              <div className="empty-state compact">No applications yet. Apply to a published job to start the pipeline.</div>
+            ) : null}
+            {!loading && applications?.content.map((item) => (
               <div className="table-row" key={item.id}>
                 <span>
-                  <strong>Job {item.jobId.slice(0, 8)}</strong>
+                  <strong>{applicationTitle(item.jobId)}</strong>
                   <small>Submitted {new Date(item.createdAt).toLocaleDateString()}</small>
                 </span>
                 <StatusPill value={item.status} />
@@ -76,14 +89,18 @@ export default function CandidatePage() {
         <div className="panel">
           <h2>Notifications</h2>
           <div className="stack">
-            {notifications?.content.map((item) => (
+            {loading ? <div className="empty-state compact">Loading notification inbox...</div> : null}
+            {!loading && notifications?.content.length === 0 ? (
+              <div className="empty-state compact">No notifications yet. Status updates will appear here.</div>
+            ) : null}
+            {!loading && notifications?.content.map((item) => (
               <div className={item.read ? "notification" : "notification unread"} key={item.id}>
                 <div className="status-line">
                   <strong>{item.title}</strong>
                   <StatusPill value={item.read ? "READ" : "UNREAD"} />
                 </div>
                 <p>{item.message}</p>
-                {item.emailStatus ? <span className="muted">Email: {item.emailStatus}</span> : null}
+                {item.emailStatus ? <span className="muted">Email delivery: {emailStatusLabel(item.emailStatus)}</span> : null}
               </div>
             ))}
           </div>
@@ -91,4 +108,27 @@ export default function CandidatePage() {
       </div>
     </section>
   );
+}
+
+function previewDashboardMessage(ex: unknown) {
+  const message = ex instanceof Error ? ex.message : "";
+  if (!message || message === "Failed to fetch") {
+    return "Live API Gateway is offline; showing curated candidate preview data.";
+  }
+  return `${message}. Showing curated candidate preview data.`;
+}
+
+function applicationTitle(jobId: string) {
+  const titles: Record<string, string> = {
+    "preview-java-platform": "Senior Java Platform Engineer",
+    "preview-cloud-search": "Search Platform Engineer",
+    "preview-sre": "Backend SRE Engineer"
+  };
+  return titles[jobId] ?? `Job ${jobId.slice(0, 8)}`;
+}
+
+function emailStatusLabel(status: string) {
+  if (status === "DISABLED") return "internal notification fallback";
+  if (status === "FAILED_RETRYABLE") return "queued for retry";
+  return status.toLowerCase().replaceAll("_", " ");
 }

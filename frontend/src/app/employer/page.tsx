@@ -7,6 +7,7 @@ import { MetricCard } from "@/components/MetricCard";
 import { StatusPill } from "@/components/StatusPill";
 import { api } from "@/lib/api";
 import { brandForCompany } from "@/lib/demoCompanies";
+import { previewApplications, previewCompanies } from "@/lib/previewData";
 import type { Application, Company, PageResponse } from "@/types/domain";
 
 export default function EmployerPage() {
@@ -16,6 +17,7 @@ export default function EmployerPage() {
   const [jobId, setJobId] = useState("");
   const [applications, setApplications] = useState<PageResponse<Application> | null>(null);
   const [message, setMessage] = useState("");
+  const [loadingCompanies, setLoadingCompanies] = useState(true);
 
   const approvedCompany = useMemo(
     () => companies?.content.find((company) => company.status === "APPROVED"),
@@ -23,7 +25,17 @@ export default function EmployerPage() {
   );
 
   function loadCompanies() {
-    api.companies().then(setCompanies).catch((ex) => setMessage(ex instanceof Error ? ex.message : "Cannot load companies"));
+    setLoadingCompanies(true);
+    api.companies()
+      .then((page) => {
+        setCompanies(page);
+        setMessage("");
+      })
+      .catch((ex) => {
+        setCompanies(previewCompanies);
+        setMessage(previewDashboardMessage(ex));
+      })
+      .finally(() => setLoadingCompanies(false));
   }
 
   useEffect(loadCompanies, []);
@@ -73,8 +85,18 @@ export default function EmployerPage() {
   }
 
   async function loadApplications() {
-    if (!jobId) return;
-    setApplications(await api.applicationsForJob(jobId));
+    if (!jobId) {
+      setApplications(previewApplications);
+      setMessage("Showing curated applicant preview for the selected portfolio job.");
+      return;
+    }
+    try {
+      setApplications(await api.applicationsForJob(jobId));
+      setMessage("");
+    } catch (ex) {
+      setApplications(previewApplications);
+      setMessage(previewDashboardMessage(ex));
+    }
   }
 
   async function moveApplication(id: string) {
@@ -103,7 +125,7 @@ export default function EmployerPage() {
         <MetricCard icon={ClipboardList} label="Applications" value={applications?.totalElements ?? 0} helper="For selected job" />
         <MetricCard icon={UsersRound} label="Pipeline" value="Interview" helper="Status mutation ready" />
       </div>
-      {message ? <p className={message.includes("Cannot") || message.includes("No approved") ? "error" : "success"}>{message}</p> : null}
+      {message ? <p className={message.includes("Cannot") || message.includes("No approved") || message.includes("offline") ? "error preview-note" : "success"}>{message}</p> : null}
       <div className="split-grid">
         <div className="panel">
           <div className="section-title">
@@ -118,7 +140,11 @@ export default function EmployerPage() {
             </button>
           </div>
           <div className="table-list">
-            {companies?.content.map((company) => (
+            {loadingCompanies ? <div className="empty-state compact">Loading employer companies...</div> : null}
+            {!loadingCompanies && companies?.content.length === 0 ? (
+              <div className="empty-state compact">No companies yet. Create one to enter the admin approval workflow.</div>
+            ) : null}
+            {!loadingCompanies && companies?.content.map((company) => (
               <div className="table-row" key={company.id}>
                 <div className="company-line">
                   <CompanyLogo brand={brandForCompany(company)} size="sm" />
@@ -154,7 +180,7 @@ export default function EmployerPage() {
             {applications?.content.map((item) => (
               <div className="table-row" key={item.id}>
                 <span>
-                  <strong>Candidate {item.candidateId.slice(0, 8)}</strong>
+                  <strong>{item.candidateId.startsWith("preview") ? "Candidate Linh Nguyen" : `Candidate ${item.candidateId.slice(0, 8)}`}</strong>
                   <small>CV metadata captured</small>
                 </span>
                 <button className="button ghost" type="button" onClick={() => moveApplication(item.id)}>
@@ -167,4 +193,12 @@ export default function EmployerPage() {
       </div>
     </section>
   );
+}
+
+function previewDashboardMessage(ex: unknown) {
+  const message = ex instanceof Error ? ex.message : "";
+  if (!message || message === "Failed to fetch") {
+    return "Live API Gateway is offline; showing curated employer preview data.";
+  }
+  return `${message}. Showing curated employer preview data.`;
 }

@@ -55,6 +55,7 @@ $requiredPaths = @(
     "scripts/professionalism-audit.ps1",
     "scripts/visual-evidence-audit.ps1",
     "scripts/evidence-manifest-verify.ps1",
+    "scripts/screenshot-promote.ps1",
     "deploy/terraform/aws/TERRAFORM_DOCS.md",
     "docs/runbooks/alert-response.md",
     "docs/runbooks/kafka-outbox-incident.md",

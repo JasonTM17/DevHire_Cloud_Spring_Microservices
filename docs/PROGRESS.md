@@ -2501,3 +2501,27 @@ Verification:
   - `.\scripts\docs-quality.ps1`
   - `.\scripts\evidence-audit.ps1`
   - `git diff --check`
+
+## v0.4.4 Phase 115 - Frontend product evidence polish
+
+- Fixed sidebar identity overflow with truncation and tooltip-friendly identity copy.
+- Added local preview fallback data for Candidate, Employer, Admin, audit, notification, and AI provider states so screenshots no longer expose smoke-test records such as raw job ids or disabled email statuses.
+- Added demo-account login fallback for local frontend review when the Docker/API stack is offline.
+- Made global search route to `/jobs`, wired job filters/sort to state, and kept the CV URL field empty with validation.
+- Added `scripts/screenshot-promote.ps1` and moved portfolio screenshot capture to `frontend/test-results/portfolio-screenshots` before deliberate promotion into `docs/screenshots`.
+- Added mobile screenshot output in the mobile smoke spec and refreshed curated dashboard screenshots.
+
+Verification:
+
+- Passed:
+  - `cd frontend && npm run typecheck`
+  - `cd frontend && npm run build`
+  - `cd frontend && npm run e2e`
+  - `cd frontend && npm run e2e:mobile`
+  - `cd frontend && npx playwright test e2e/portfolio-screenshots.spec.ts --project=chromium`
+  - `.\scripts\screenshot-promote.ps1`
+  - `.\scripts\docs-quality.ps1`
+
+Note:
+
+- A root-level `npx playwright` invocation was accidentally attempted first and failed because it did not load `frontend/playwright.config.ts`; the screenshot capture was rerun correctly from `frontend` before promotion.

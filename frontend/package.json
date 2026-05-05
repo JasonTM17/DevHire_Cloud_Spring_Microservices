@@ -11,6 +11,7 @@
     "e2e:mobile": "playwright test e2e/mobile-smoke.spec.ts --project=mobile-chrome",
     "e2e:report": "playwright show-report",
     "screenshots": "playwright test e2e/portfolio-screenshots.spec.ts e2e/ops-screenshots.spec.ts e2e/ops-evidence-render.spec.ts --project=chromium",
+    "screenshots:promote": "powershell -NoProfile -ExecutionPolicy Bypass -File ../scripts/screenshot-promote.ps1",
     "screenshots:ops": "playwright test e2e/ops-screenshots.spec.ts e2e/ops-evidence-render.spec.ts --project=chromium",
     "screenshots:ops-evidence": "playwright test e2e/ops-evidence-render.spec.ts --project=chromium"
   },

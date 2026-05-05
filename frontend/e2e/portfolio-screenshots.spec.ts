@@ -1,7 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import path from "node:path";
 
-const screenshotsDir = path.resolve(__dirname, "..", "..", "docs", "screenshots");
+const screenshotsDir = path.resolve(__dirname, "..", "test-results", "portfolio-screenshots");
 
 const accounts = {
   admin: {

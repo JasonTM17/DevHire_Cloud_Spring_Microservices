@@ -15,17 +15,23 @@ export default function JobsPage() {
   const [keyword, setKeyword] = useState("");
   const [skill, setSkill] = useState("");
   const [location, setLocation] = useState("");
+  const [sortOrder, setSortOrder] = useState<"publishedAt,desc" | "salaryMax,desc">("publishedAt,desc");
   const [jobs, setJobs] = useState<PageResponse<Job> | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
 
   const params = useMemo(() => {
-    const value = new URLSearchParams({ page: "0", size: "12", sort: "publishedAt,desc" });
+    const value = new URLSearchParams({ page: "0", size: "12", sort: sortOrder });
     if (keyword) value.set("keyword", keyword);
     if (skill) value.set("skill", skill);
     if (location) value.set("location", location);
     return value;
-  }, [keyword, skill, location]);
+  }, [keyword, skill, location, sortOrder]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setKeyword(params.get("keyword") ?? "");
+  }, []);
 
   useEffect(() => {
     setLoading(true);
@@ -86,14 +92,25 @@ export default function JobsPage() {
 
       <div className="toolbar">
         <div className="filter-tabs" aria-label="Job filters">
-          <span className="tab active">Published</span>
-          <span className="tab">Remote</span>
-          <span className="tab">Senior</span>
-          <span className="tab">Java</span>
+          <button className="tab active" type="button" onClick={() => {
+            setKeyword("");
+            setSkill("");
+            setLocation("");
+          }}>Published</button>
+          <button className={location.toLowerCase().includes("remote") ? "tab active" : "tab"} type="button" onClick={() => setLocation("Remote")}>Remote</button>
+          <button className={skill === "Senior" ? "tab active" : "tab"} type="button" onClick={() => {
+            setSkill("Senior");
+            setLocation("");
+          }}>Senior</button>
+          <button className={skill === "Java" ? "tab active" : "tab"} type="button" onClick={() => setSkill("Java")}>Java</button>
         </div>
-        <button className="button outline" type="button">
+        <button
+          className="button outline"
+          type="button"
+          onClick={() => setSortOrder((value) => value === "publishedAt,desc" ? "salaryMax,desc" : "publishedAt,desc")}
+        >
           <SlidersHorizontal size={16} />
-          Sort: newest
+          Sort: {sortOrder === "publishedAt,desc" ? "newest" : "salary"}
         </button>
       </div>
 

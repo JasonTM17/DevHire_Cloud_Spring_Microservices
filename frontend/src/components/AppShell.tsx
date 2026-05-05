@@ -18,6 +18,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { FormEvent, useState } from "react";
 import { clearSession, getSession } from "@/lib/session";
 
 const navItems = [
@@ -62,8 +63,19 @@ const pageMeta: Record<string, { title: string; subtitle: string }> = {
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
+  const [globalSearch, setGlobalSearch] = useState("");
   const session = typeof window === "undefined" ? null : getSession();
   const meta = pageMeta[pathname] ?? pageMeta["/jobs"];
+
+  function submitGlobalSearch(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const keyword = globalSearch.trim();
+    if (!keyword) {
+      router.push("/jobs");
+      return;
+    }
+    router.push(`/jobs?keyword=${encodeURIComponent(keyword)}`);
+  }
 
   return (
     <div className="app-shell">
@@ -117,7 +129,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <span className="identity-mark">
                   <LayoutDashboard size={16} />
                 </span>
-                <span>
+                <span className="identity-copy" title={`${session.user.role} - ${session.user.email}`}>
                   <span>{session.user.role}</span>
                   <small>{session.user.email}</small>
                 </span>
@@ -159,10 +171,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <p>{meta.subtitle}</p>
           </div>
           <div className="topbar-actions">
-            <label className="top-search" aria-label="Global search">
+            <form className="top-search" aria-label="Global job search" onSubmit={submitGlobalSearch}>
               <Search size={16} />
-              <input placeholder="Search jobs, companies, audit logs" />
-            </label>
+              <input
+                value={globalSearch}
+                onChange={(event) => setGlobalSearch(event.target.value)}
+                placeholder="Search published jobs"
+              />
+            </form>
             <Link className="button outline" href="/candidate" aria-label="Notifications">
               <Bell size={16} />
             </Link>
