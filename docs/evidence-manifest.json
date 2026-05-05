@@ -80,6 +80,9 @@
         ".github/workflows/repository-governance.yml",
         ".github/settings.yml",
         ".github/dependabot.yml",
+        ".editorconfig",
+        ".java-version",
+        ".nvmrc",
         ".gitleaks.toml"
       ]
     },

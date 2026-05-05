@@ -2626,6 +2626,8 @@ Notes:
 - Updated GitHub governance, owner-action, repository-health, and review evidence docs so reviewers can see both apply paths: owner token workflow and settings-as-code.
 - Added `.github/settings.yml` to docs quality and evidence manifest checks.
 - Aligned `.github/settings.yml` with Probot Settings conventions: comma-separated topics plus explicit branch-protection top-level keys.
+- Added `.editorconfig` so local editors share UTF-8, newline, indentation, Markdown, PowerShell, and Java formatting rules.
+- Added `.java-version` and `.nvmrc` to pin reviewer/dev workstations to Java 21 and Node 24, matching the Maven release target and frontend Docker base image.
 - Hardened `scripts/clean-local-artifacts.ps1` so locked generated artifacts are reported as skipped instead of failing the cleanup run.
 - Cleaned local generated artifacts after stopping stale Next.js screenshot server processes; `.env`, `frontend/node_modules`, and ignored `reports/` are intentionally retained.
 

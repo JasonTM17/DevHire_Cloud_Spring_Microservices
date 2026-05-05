@@ -8,6 +8,9 @@ $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 
 $requiredPaths = @(
     "README.md",
+    ".editorconfig",
+    ".java-version",
+    ".nvmrc",
     "docs/README_EN.md",
     "docs/README_JA.md",
     "LICENSE",
