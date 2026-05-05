@@ -1,0 +1,60 @@
+# Repository settings as code for the Probot Settings app.
+# This file is an owner-approved alternative to scripts/github-governance.ps1
+# when a PAT-based apply flow is not desirable.
+
+repository:
+  name: DevHire_Cloud_Spring_Microservices
+  description: Production-grade Java 21 Spring Boot microservices recruitment platform with JWT, Kafka, OpenSearch, Docker, Kubernetes, Terraform, observability, CI/CD, and Claude Haiku AI RAG assistant.
+  homepage: https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.3.0
+  private: false
+  has_issues: true
+  has_projects: true
+  has_wiki: false
+  has_downloads: true
+  default_branch: master
+  allow_squash_merge: true
+  allow_merge_commit: false
+  allow_rebase_merge: true
+  delete_branch_on_merge: true
+  enable_automated_security_fixes: true
+  enable_vulnerability_alerts: true
+  topics: java, spring-boot, microservices, spring-cloud, postgresql, kafka, opensearch, redis, docker, kubernetes, terraform, aws, prometheus, grafana, nextjs, anthropic, claude, rag, devops, portfolio
+
+branches:
+  - name: master
+    protection:
+      required_pull_request_reviews:
+        required_approving_review_count: 1
+        require_code_owner_reviews: true
+        dismiss_stale_reviews: true
+      required_status_checks:
+        strict: true
+        contexts:
+          - Maven Verify
+          - Portfolio docs quality
+          - Gitleaks Secret Scan
+          - Trivy Filesystem Scan
+          - Generate SBOM
+          - Maven Dependency Tree
+          - Build api-gateway
+          - Build frontend
+          - Analyze java-kotlin
+          - Analyze javascript-typescript
+      enforce_admins: false
+      required_linear_history: false
+      required_conversation_resolution: true
+      restrictions: null
+
+labels:
+  - name: safe-batch
+    color: 0E8A16
+    description: Low-risk dependency maintenance batch after green CI.
+  - name: deferred-major
+    color: B60205
+    description: Major upgrade deferred until migration notes and runtime smoke are ready.
+  - name: needs-runtime-smoke
+    color: D93F0B
+    description: Requires Docker/runtime smoke before merge.
+  - name: portfolio-maintenance
+    color: 5319E7
+    description: Portfolio quality, governance, documentation, or dependency maintenance.

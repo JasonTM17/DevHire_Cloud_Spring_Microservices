@@ -2617,3 +2617,30 @@ Notes:
 - `.\scripts\professionalism-audit.ps1` still reports owner-only public facade actions as pending because no local `REPO_GOVERNANCE_TOKEN` / `GITHUB_TOKEN` was available.
 - Full Docker runtime smoke was not rerun in this phase; v0.4.4 evidence distinguishes static evidence from runtime evidence instead of marking runtime as passed without execution.
 - Post-push repository governance and health reports were adjusted to show release API access as `unavailable` when unauthenticated GitHub API calls return 401/403/429, instead of reporting a false missing release.
+
+## v0.4.5 Phase 120 - Public facade settings-as-code and README polish
+
+- Added `.github/settings.yml` as a Probot Settings route for repository description, homepage, topics, merge strategy, vulnerability alerts, labels, and `master` branch protection.
+- Added CodeQL and E2E badges to the README first viewport.
+- Updated README screenshot references to use the latest curated `jobs-page.png` and `job-detail.png` evidence instead of older redesign captures.
+- Updated GitHub governance, owner-action, repository-health, and review evidence docs so reviewers can see both apply paths: owner token workflow and settings-as-code.
+- Added `.github/settings.yml` to docs quality and evidence manifest checks.
+- Aligned `.github/settings.yml` with Probot Settings conventions: comma-separated topics plus explicit branch-protection top-level keys.
+- Hardened `scripts/clean-local-artifacts.ps1` so locked generated artifacts are reported as skipped instead of failing the cleanup run.
+- Cleaned local generated artifacts after stopping stale Next.js screenshot server processes; `.env`, `frontend/node_modules`, and ignored `reports/` are intentionally retained.
+
+Verification:
+
+- Passed:
+  - `.\scripts\docs-quality.ps1`
+  - `.\scripts\evidence-manifest-verify.ps1`
+  - `.\scripts\repo-hygiene.ps1`
+  - `.\scripts\professionalism-audit.ps1`
+  - `.\scripts\portfolio-verify.ps1 -Docs -Docker`
+  - `docker compose config --quiet`
+  - `git diff --check`
+
+Notes:
+
+- Browser Use was attempted first, but the in-app browser backend could not start the Codex app-server in this environment. Verification fell back to committed Playwright screenshots and GitHub public API scripts.
+- GitHub About/Homepage/Topics and `master` protection still require owner action through `REPO_GOVERNANCE_TOKEN`, local owner token, or the GitHub Settings app.

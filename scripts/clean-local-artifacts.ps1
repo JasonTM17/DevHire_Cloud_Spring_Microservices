@@ -67,9 +67,11 @@ $candidates = [System.Collections.Generic.List[object]]::new()
 
 foreach ($path in @(
     "reports",
+    ".stitch",
     ".github/java-upgrade",
     "frontend/.next",
     "frontend/playwright-report",
+    "frontend/reports",
     "frontend/test-results",
     "frontend/tsconfig.tsbuildinfo"
 )) {
@@ -107,10 +109,19 @@ $uniqueCandidates = @(
 )
 
 $deleted = [System.Collections.Generic.List[object]]::new()
+$skipped = [System.Collections.Generic.List[object]]::new()
 if ($Apply) {
     foreach ($candidate in $uniqueCandidates | Where-Object { $_.delete }) {
-        Remove-Item -LiteralPath $candidate.fullPath -Recurse -Force
-        $deleted.Add($candidate)
+        try {
+            Remove-Item -LiteralPath $candidate.fullPath -Recurse -Force -ErrorAction Stop
+            $deleted.Add($candidate)
+        } catch {
+            $skipped.Add([pscustomobject]@{
+                path = $candidate.path
+                kind = $candidate.kind
+                reason = "Skipped because the artifact is locked or unavailable: $($_.Exception.Message)"
+            })
+        }
     }
 }
 
@@ -129,7 +140,9 @@ $summary = [pscustomobject]@{
     candidateCount = $uniqueCandidates.Count
     deleteCandidateCount = @($uniqueCandidates | Where-Object { $_.delete }).Count
     deletedCount = $deleted.Count
+    skippedCount = $skipped.Count
     candidates = @($uniqueCandidates | Select-Object path, kind, reason, delete)
+    skipped = @($skipped)
 }
 $summary | ConvertTo-Json -Depth 8 | Set-Content -Path $jsonPath -Encoding UTF8
 
@@ -142,11 +155,20 @@ $lines.Add("- Generated: $($summary.generatedAt)")
 $lines.Add("- Candidates: $($summary.candidateCount)")
 $lines.Add("- Delete candidates: $($summary.deleteCandidateCount)")
 $lines.Add("- Deleted: $($summary.deletedCount)")
+$lines.Add("- Skipped: $($summary.skippedCount)")
 $lines.Add("")
 $lines.Add("| Path | Kind | Delete | Reason |")
 $lines.Add("|---|---|---|---|")
 foreach ($candidate in $uniqueCandidates) {
     $lines.Add("| `$($candidate.path)` | $($candidate.kind) | $($candidate.delete) | $($candidate.reason) |")
+}
+if ($skipped.Count -gt 0) {
+    $lines.Add("")
+    $lines.Add("## Skipped")
+    $lines.Add("")
+    foreach ($item in $skipped) {
+        $lines.Add("- `$($item.path)`: $($item.reason)")
+    }
 }
 $lines | Set-Content -Path $mdPath -Encoding UTF8
 
@@ -155,6 +177,7 @@ Write-Host ("  mode              : {0}" -f $summary.mode)
 Write-Host ("  candidates        : {0}" -f $summary.candidateCount)
 Write-Host ("  delete candidates : {0}" -f $summary.deleteCandidateCount)
 Write-Host ("  deleted           : {0}" -f $summary.deletedCount)
+Write-Host ("  skipped           : {0}" -f $summary.skippedCount)
 Write-Host ("  include .env      : {0}" -f $summary.includeLocalEnv)
 Write-Host ("  include node_modules : {0}" -f $summary.includeNodeModules)
 Write-Host ""

@@ -78,6 +78,7 @@
         ".github/workflows/e2e.yml",
         ".github/workflows/performance.yml",
         ".github/workflows/repository-governance.yml",
+        ".github/settings.yml",
         ".github/dependabot.yml",
         ".gitleaks.toml"
       ]
@@ -127,8 +128,6 @@
       "requiredPaths": [
         "docs/screenshots/jobs-page.png",
         "docs/screenshots/job-detail.png",
-        "docs/screenshots/frontend-redesign-jobs.png",
-        "docs/screenshots/frontend-redesign-job-detail.png",
         "docs/screenshots/docker-runtime-jobs.png",
         "docs/screenshots/candidate-dashboard.png",
         "docs/screenshots/employer-dashboard.png",

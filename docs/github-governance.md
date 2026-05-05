@@ -76,6 +76,25 @@ The workflow is defined in `.github/workflows/repository-governance.yml` and upl
 
 This is the recommended fallback when the in-app browser cannot control GitHub settings and `GITHUB_TOKEN` is not set locally.
 
+## Settings As Code Route
+
+The repo also includes [`.github/settings.yml`](../.github/settings.yml) for the [Probot Settings](https://github.com/probot/settings) app. This is a second owner-approved path when a PAT or workflow secret is not desirable.
+
+The file defines:
+
+- repository description, homepage, topics, merge strategy, and vulnerability alert posture,
+- `master` branch protection with the same stable required check contexts used by `scripts/github-governance.ps1`,
+- public maintenance labels for Dependabot triage and runtime-smoke review.
+
+Owner flow:
+
+1. Install the GitHub Settings app for this repository.
+2. Review [`.github/settings.yml`](../.github/settings.yml) in the pull request or on `master`.
+3. Let the app reconcile repository metadata and branch protection.
+4. Run `.\scripts\repository-health.ps1` to confirm About/Homepage/Topics and `master protected=true`.
+
+This route keeps the public facade declarative and reviewable, but it still requires owner installation/approval. It does not bypass GitHub administration permission.
+
 ## Target Repository Metadata
 
 Description:

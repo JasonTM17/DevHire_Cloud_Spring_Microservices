@@ -98,9 +98,20 @@ Use this route when local browser automation is unavailable or you do not want t
 
 The workflow uses the same target metadata as the local script and verifies repository health after the apply step.
 
+## Settings-As-Code Apply Route
+
+Use this route when you prefer a declarative repository policy instead of a local owner token or workflow secret:
+
+1. Install the GitHub Settings app for this repository.
+2. Review [`.github/settings.yml`](../.github/settings.yml).
+3. Let the app reconcile repository description, homepage, topics, merge strategy, branch protection, vulnerability alerts, and maintenance labels.
+4. Run `.\scripts\repository-health.ps1` to confirm the public facade changed.
+
+This route is still owner-controlled. It makes the desired GitHub state reviewable in source control, but it cannot apply without repository administration permission.
+
 ## Latest Verification Output
 
-The latest v0.4.3 local dry-run reported:
+The latest v0.4.5 local dry-run reported:
 
 ```text
 description current : empty
@@ -111,7 +122,7 @@ branch protected    : false
 dependabot PRs      : 20
 ```
 
-This means the source repository now contains the audited automation, but the public GitHub facade still needs owner execution.
+This means the source repository now contains audited automation plus `.github/settings.yml`, but the public GitHub facade still needs owner execution or GitHub Settings app reconciliation.
 
 ## API Verification Snapshot
 

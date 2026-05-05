@@ -4,7 +4,7 @@ This page summarizes the public GitHub presentation state for DevHire Cloud. It 
 
 ## Snapshot
 
-Latest v0.4.3 health scan focus:
+Latest v0.4.5 health scan focus:
 
 | Area | Status |
 |---|---|
@@ -19,7 +19,7 @@ Latest v0.4.3 health scan focus:
 | Runtime evidence | `docs/runtime-evidence-v0.4.md` |
 | E2E posture | PR-safe frontend preview smoke is wired; full Docker browser smoke stays manual/scheduled |
 
-v0.4.3 verification result: `GITHUB_TOKEN` was not set locally, so owner-only remote updates were skipped by design. Public API still reports empty About/Homepage/Topics and `master protected=false`; release `v0.3.0` remains visible.
+v0.4.5 verification result: `GITHUB_TOKEN` was not set locally, so owner-only remote updates were skipped by design. Public API still reports empty About/Homepage/Topics and `master protected=false`; release `v0.3.0` remains visible. The desired public state is now also captured in [`.github/settings.yml`](../.github/settings.yml).
 
 Commands executed for this snapshot:
 
@@ -75,6 +75,13 @@ Alternative audited route:
 - run `Actions -> Repository Governance -> mode=dry-run`,
 - run `mode=apply-metadata` after reviewing the artifact,
 - run `mode=apply-branch-protection` after confirming the required checks are green.
+
+Alternative declarative route:
+
+- install the GitHub Settings app,
+- review [`.github/settings.yml`](../.github/settings.yml),
+- let the app reconcile About/Homepage/Topics, branch protection, merge strategy, vulnerability alerts, and maintenance labels,
+- rerun `.\scripts\repository-health.ps1`.
 
 ## E2E Evidence Posture
 

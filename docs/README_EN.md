@@ -8,7 +8,7 @@ Screenshots are generated from the real frontend through Playwright and Docker r
 
 | Jobs | Job Detail |
 |---|---|
-| ![Jobs page](screenshots/frontend-redesign-jobs.png) | ![Job detail](screenshots/frontend-redesign-job-detail.png) |
+| ![Jobs page](screenshots/jobs-page.png) | ![Job detail](screenshots/job-detail.png) |
 
 Docker runtime through the real API Gateway:
 

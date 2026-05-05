@@ -4,6 +4,8 @@
 [![Docker](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/docker.yml/badge.svg)](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/docker.yml)
 [![Security](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/security.yml/badge.svg)](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/security.yml)
 [![Docs](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/docs.yml/badge.svg)](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/docs.yml)
+[![CodeQL](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/codeql.yml/badge.svg)](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/codeql.yml)
+[![E2E](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/e2e.yml/badge.svg)](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/e2e.yml)
 [![Terraform](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/terraform.yml/badge.svg)](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/terraform.yml)
 
 DevHire Cloud is a production-grade Java 21/Spring Boot microservices portfolio for a recruitment platform: API Gateway, JWT/refresh security, service-owned PostgreSQL databases, Kafka/outbox reliability, OpenSearch search, Next.js frontend, Claude Haiku RAG assistant, Docker runtime, Kubernetes/Helm/GitOps, AWS Terraform blueprint, observability, CI/CD, security scanning, and reviewer-friendly evidence.
@@ -24,7 +26,7 @@ DevHire Cloud is a production-grade Java 21/Spring Boot microservices portfolio 
 | Cloud deployment blueprint | [Cloud readiness review](docs/cloud-readiness-review.md) |
 | Production engineering scorecard | [Scorecard](docs/production-engineering-scorecard.md) |
 | Public repo governance | [Repository health](docs/repository-health.md) |
-| About/Topics apply path | [GitHub governance](docs/github-governance.md) |
+| About/Topics apply paths | [GitHub governance](docs/github-governance.md), [settings as code](.github/settings.yml) |
 
 Fast reviewer gate:
 
@@ -73,7 +75,7 @@ Best reviewer path:
 
 | Jobs | Job Detail |
 |---|---|
-| ![Jobs page](docs/screenshots/frontend-redesign-jobs.png) | ![Job detail](docs/screenshots/frontend-redesign-job-detail.png) |
+| ![Jobs page](docs/screenshots/jobs-page.png) | ![Job detail](docs/screenshots/job-detail.png) |
 
 Docker runtime qua API Gateway thật:
 
