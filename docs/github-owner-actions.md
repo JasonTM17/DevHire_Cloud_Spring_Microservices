@@ -2,11 +2,13 @@
 
 These actions require repository owner permissions and are intentionally not forced by CI. Use `scripts/github-governance.ps1 -DryRun` to preview the repository metadata, release, and branch-protection state.
 
-Current local verification on 2026-05-04:
+Current local verification on 2026-05-05:
 
 - `scripts/github-governance.ps1 -DryRun` produced the metadata payload below and checked the public release/branch state.
-- v0.4.2 verification also found `GITHUB_TOKEN` was not set in the local shell, so `-Apply` was intentionally skipped.
+- v0.4.3 verification also found `GITHUB_TOKEN` was not set in the local shell, so `-Apply` was intentionally skipped.
 - GitHub API reported the repository is public, with empty About description, homepage, and topics. These remain owner actions until a short-lived owner token is available.
+- GitHub API reported `master protected=false`. Branch protection remains an owner action until `Repository Governance` apply mode or the UI fallback is completed.
+- GitHub API reported release `v0.3.0` is visible.
 - The older `scripts/github-repo-polish.ps1` remains for compatibility; `scripts/github-governance.ps1` is now the preferred owner-facing automation.
 
 ## About Section
@@ -80,6 +82,21 @@ Use this route when local browser automation is unavailable or you do not want t
 
 The workflow uses the same target metadata as the local script and verifies repository health after the apply step.
 
+## Latest Verification Output
+
+The latest v0.4.3 local dry-run reported:
+
+```text
+description current : empty
+homepage current    : empty
+topics current      : 0
+release v0.3.0      : visible
+branch protected    : false
+dependabot PRs      : 20
+```
+
+This means the source repository now contains the audited automation, but the public GitHub facade still needs owner execution.
+
 ## API Verification Snapshot
 
 The expected repository metadata payload is:
@@ -136,5 +153,5 @@ The expected topics payload is:
 - [ ] Fill homepage.
 - [ ] Add topics.
 - [ ] Enable branch protection.
-- [ ] Confirm release `v0.3.0` is public.
+- [x] Confirm release `v0.3.0` is public.
 - [ ] Confirm GHCR images are visible or document account limitation.

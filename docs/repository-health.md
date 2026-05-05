@@ -4,21 +4,28 @@ This page summarizes the public GitHub presentation state for DevHire Cloud. It 
 
 ## Snapshot
 
-Latest v0.4.1 health scan focus:
+Latest v0.4.3 health scan focus:
 
 | Area | Status |
 |---|---|
 | Repository visibility | Public |
 | Latest release | `v0.3.0` is visible |
-| About description | Owner action needed until `scripts/github-governance.ps1 -Apply` is run |
-| Homepage | Owner action needed until `scripts/github-governance.ps1 -Apply` is run |
-| Topics | Owner action needed until `scripts/github-governance.ps1 -Apply` is run |
+| About description | Empty on public GitHub API; owner apply still required |
+| Homepage | Empty on public GitHub API; owner apply still required |
+| Topics | Empty on public GitHub API; owner apply still required |
 | Default branch | `master` |
-| Branch protection | Owner action needed; automation and UI fallback documented |
-| Dependabot PRs | Curated through `scripts/dependabot-curate.ps1` |
+| Branch protection | Public branch API reports `master protected=false`; owner apply still required |
+| Dependabot PRs | 20 open PRs; curated through `scripts/dependabot-curate.ps1` |
 | Runtime evidence | `docs/runtime-evidence-v0.4.md` |
 
-v0.4.2 verification result: `GITHUB_TOKEN` was not set locally, so owner-only remote updates were skipped by design. Public API still reports empty About/Homepage/Topics and `master protected=false`.
+v0.4.3 verification result: `GITHUB_TOKEN` was not set locally, so owner-only remote updates were skipped by design. Public API still reports empty About/Homepage/Topics and `master protected=false`; release `v0.3.0` remains visible.
+
+Commands executed for this snapshot:
+
+```powershell
+.\scripts\github-governance.ps1 -DryRun
+.\scripts\repository-health.ps1
+```
 
 ## Generate A Fresh Report
 

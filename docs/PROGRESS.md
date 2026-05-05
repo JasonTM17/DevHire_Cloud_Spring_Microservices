@@ -2264,3 +2264,20 @@ Verification:
 - Passed:
   - `.\scripts\docs-quality.ps1`
   - `git diff --check`
+
+## Phase 106 - GitHub public facade evidence
+
+- Ran the repository governance dry-run and repository health scripts for the v0.4.3 professionalization pass.
+- Verified the public GitHub API still reports empty About description, empty homepage, no topics, and `master protected=false`.
+- Verified release `v0.3.0` is public and the current Dependabot PR count is 20.
+- Updated owner-facing governance docs to keep the apply path explicit: add `REPO_GOVERNANCE_TOKEN`, run `Repository Governance` in `dry-run`, then run `apply`.
+
+Verification:
+
+- Passed:
+  - `.\scripts\github-governance.ps1 -DryRun`
+  - `.\scripts\repository-health.ps1`
+
+Note:
+
+- `GITHUB_TOKEN` was not set locally, so remote GitHub About/Homepage/Topics and branch protection were not applied. This remains an owner action and is tracked honestly in the repository health docs.

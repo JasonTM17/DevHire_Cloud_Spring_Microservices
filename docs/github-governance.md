@@ -4,7 +4,7 @@ DevHire Cloud keeps repository presentation as a first-class portfolio artifact.
 
 ## Current Public State
 
-The public GitHub API snapshot taken during the v0.4.1 governance pass showed:
+The public GitHub API snapshot taken during the v0.4.3 governance pass showed:
 
 | Area | Status |
 |---|---|
@@ -15,8 +15,18 @@ The public GitHub API snapshot taken during the v0.4.1 governance pass showed:
 | Latest release | `v0.3.0` public |
 | Default branch | `master` |
 | Branch protection | Not enabled in the public branch list |
+| Dependabot PRs | 20 open PRs, tracked by the curated Dependabot cleanup playbook |
 
 The repository content now includes automation and exact owner fallback steps. If a short-lived owner token is available, the GitHub metadata can be applied from the local shell without pasting the token into chat or committing it.
+
+Latest local verification:
+
+```powershell
+.\scripts\github-governance.ps1 -DryRun
+.\scripts\repository-health.ps1
+```
+
+`GITHUB_TOKEN` was not set, so no remote setting was changed. This is intentional: owner-only GitHub settings must be applied through a short-lived owner token or the audited `Repository Governance` workflow using `REPO_GOVERNANCE_TOKEN`.
 
 ## Automation
 
