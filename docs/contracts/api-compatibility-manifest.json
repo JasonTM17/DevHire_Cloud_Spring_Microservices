@@ -1,5 +1,5 @@
 {
-  "version": "0.3.0",
+  "version": "0.6.0",
   "generatedReportsDirectory": "reports/api-compatibility",
   "policy": {
     "breakingChangesRequire": [
@@ -59,6 +59,7 @@
         { "method": "PATCH", "localPath": "/admin/jobs/{id}/approve", "gatewayPath": "/api/admin/jobs/{id}/approve", "surface": "admin" },
         { "method": "PATCH", "localPath": "/admin/jobs/{id}/reject", "gatewayPath": "/api/admin/jobs/{id}/reject", "surface": "admin" },
         { "method": "PATCH", "localPath": "/jobs/{id}/close", "gatewayPath": "/api/jobs/{id}/close", "surface": "employer" },
+        { "method": "GET", "localPath": "/candidate/skill-analytics", "gatewayPath": "/api/candidate/skill-analytics", "surface": "candidate" },
         { "method": "GET", "localPath": "/internal/jobs/{id}", "gatewayPath": null, "surface": "internal" }
       ]
     },
@@ -71,7 +72,12 @@
         { "method": "GET", "localPath": "/applications/me", "gatewayPath": "/api/applications/me", "surface": "candidate" },
         { "method": "GET", "localPath": "/employer/jobs/{jobId}/applications", "gatewayPath": "/api/employer/jobs/{jobId}/applications", "surface": "employer" },
         { "method": "PATCH", "localPath": "/applications/{id}/status", "gatewayPath": "/api/applications/{id}/status", "surface": "employer" },
-        { "method": "PATCH", "localPath": "/applications/{id}/withdraw", "gatewayPath": "/api/applications/{id}/withdraw", "surface": "candidate" }
+        { "method": "PATCH", "localPath": "/applications/{id}/withdraw", "gatewayPath": "/api/applications/{id}/withdraw", "surface": "candidate" },
+        { "method": "GET", "localPath": "/candidate/dashboard/summary", "gatewayPath": "/api/candidate/dashboard/summary", "surface": "candidate" },
+        { "method": "GET", "localPath": "/candidate/applications/summary", "gatewayPath": "/api/candidate/applications/summary", "surface": "candidate" },
+        { "method": "GET", "localPath": "/candidate/offers", "gatewayPath": "/api/candidate/offers", "surface": "candidate" },
+        { "method": "GET", "localPath": "/candidate/assessments", "gatewayPath": "/api/candidate/assessments", "surface": "candidate" },
+        { "method": "GET", "localPath": "/employer/pipeline/summary", "gatewayPath": "/api/employer/pipeline/summary", "surface": "employer" }
       ]
     },
     {
@@ -89,7 +95,8 @@
       "localPort": 8087,
       "gatewayPrefix": "/api",
       "endpoints": [
-        { "method": "GET", "localPath": "/admin/audit-logs", "gatewayPath": "/api/admin/audit-logs", "surface": "admin" }
+        { "method": "GET", "localPath": "/admin/audit-logs", "gatewayPath": "/api/admin/audit-logs", "surface": "admin" },
+        { "method": "GET", "localPath": "/admin/operations/summary", "gatewayPath": "/api/admin/operations/summary", "surface": "admin" }
       ]
     },
     {
@@ -103,7 +110,9 @@
         { "method": "GET", "localPath": "/ai/conversations/{id}", "gatewayPath": "/api/ai/conversations/{id}", "surface": "authenticated" },
         { "method": "DELETE", "localPath": "/ai/conversations/{id}", "gatewayPath": "/api/ai/conversations/{id}", "surface": "authenticated" },
         { "method": "POST", "localPath": "/admin/ai/knowledge/reindex", "gatewayPath": "/api/admin/ai/knowledge/reindex", "surface": "admin" },
-        { "method": "GET", "localPath": "/admin/ai/provider/status", "gatewayPath": "/api/admin/ai/provider/status", "surface": "admin" }
+        { "method": "GET", "localPath": "/admin/ai/provider/status", "gatewayPath": "/api/admin/ai/provider/status", "surface": "admin" },
+        { "method": "GET", "localPath": "/candidate/roadmap", "gatewayPath": "/api/candidate/roadmap", "surface": "candidate" },
+        { "method": "GET", "localPath": "/candidate/interview-prep", "gatewayPath": "/api/candidate/interview-prep", "surface": "candidate" }
       ]
     }
   ],
