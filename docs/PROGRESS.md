@@ -2922,3 +2922,288 @@ Verification:
 - Passed `.\scripts\domain-placeholder-audit.ps1`.
 - Passed `.\scripts\professionalism-audit.ps1`.
 - Passed `git diff --check`.
+
+## Phase 140 - Terraform validation race hardening
+
+- Fixed the Terraform validation cleanup race that appeared when `terraform-validate.ps1` and `cloud-verify.ps1` ran concurrently.
+- Added a cross-process validation lock under ignored `reports/.locks/` so Terraform init/validate/cache cleanup is serialized while still allowing reviewers to launch cloud checks from multiple shells.
+- Made Terraform cache cleanup tolerant of paths that disappear between enumeration and deletion.
+- Added `scripts/terraform-race-smoke.ps1` to prove concurrent validation no longer breaks `.terraform` cleanup.
+- Switched the Trivy config scan to `--skip-check-update` to avoid noisy remote policy bundle updates during local portfolio verification.
+
+Verification:
+
+- `.\scripts\terraform-validate.ps1 -Environments dev -SkipTflint -SkipTrivy` passed on 2026-05-06.
+- `.\scripts\terraform-race-smoke.ps1` passed on 2026-05-06 with two concurrent validation runs.
+- `.\scripts\terraform-validate.ps1` passed on 2026-05-06 for dev, staging, and prod.
+
+Committed as `fix(terraform): serialize cloud validation cleanup`.
+
+## Phase 141 - AWS blueprint guardrail hardening
+
+- Added `scripts/cloud-policy-audit.ps1` as a reviewer-facing cloud posture gate for Helm, raw Kubernetes, GitOps, Terraform data-plane security, ECR immutability, and cost guardrails.
+- Wired `cloud-verify.ps1` to call the policy audit before Terraform/Helm/Kustomize rendering.
+- Replaced broad kubeconform missing-schema ignores with an explicit External Secrets skip list so unrelated schema gaps are still caught.
+- Added `scripts/cloud-evidence-summary.ps1` to summarize the latest cloud verification and policy audit reports without committing generated report output.
+- Hardened Terraform modules with restricted EKS public endpoint CIDRs and configurable RDS backup, deletion protection, log export, snapshot-tagging, auto-minor-upgrade, performance insights, and Multi-AZ posture.
+- Wired `portfolio-verify.ps1 -Cloud` to emit a cloud evidence summary after verification.
+
+Verification:
+
+- `.\scripts\cloud-policy-audit.ps1` passed on 2026-05-06 with 72 checks.
+- `.\scripts\terraform-validate.ps1` passed on 2026-05-06 for dev, staging, and prod after module changes.
+- `.\scripts\cloud-verify.ps1` passed on 2026-05-06 with policy audit, Terraform validate, Helm lint/template, Kustomize, and kubeconform.
+- `.\scripts\cloud-evidence-summary.ps1` passed on 2026-05-06.
+
+Committed as `chore(cloud): harden aws blueprint guardrails`.
+
+## Phase 142 - Cloud apply-ready documentation and evidence
+
+- Added AWS account bootstrap guidance for IAM, remote state, budgets, domains, secrets, and image publishing.
+- Added a cloud apply runbook that keeps `terraform apply` manual, reviewed, and out of CI.
+- Added a cloud completion scorecard that separates Docker/Helm/K8s/Terraform verification from real AWS deployment.
+- Added cloud visual evidence with source-controlled Mermaid diagrams for the AWS blueprint, GitOps flow, and verification flow.
+- Updated Vietnamese, English, and Japanese reviewer documentation with the cloud state matrix, new cloud commands, and v0.4.9 evidence links.
+- Updated repository health, review evidence, production scorecard, GitHub profile notes, and evidence manifest to remove stale current-release drift and include v0.4.9 cloud evidence.
+
+Verification:
+
+- `.\scripts\cloud-verify.ps1` passed on 2026-05-06.
+- `.\scripts\cloud-evidence-summary.ps1` passed on 2026-05-06.
+- Documentation/static gates will be rerun before commit.
+
+Committed as `docs(cloud): add apply-ready runbooks and scorecard`.
+
+## Phase 143 - Strict cloud render and policy CI gate
+
+- Updated the Terraform GitHub Actions workflow to run the new cloud guardrails:
+  - Terraform validation race smoke.
+  - Cloud policy audit.
+  - Helm/Kustomize/kubeconform cloud verification without re-running Terraform twice.
+  - Cloud evidence summary generation.
+- Expanded workflow path filters so cloud docs and verification scripts trigger the Terraform/cloud gate.
+- Made `cloud-verify.ps1` use `Join-Path` for internal script calls so it remains portable across Windows and Linux PowerShell runners.
+
+Verification:
+
+- `.\scripts\cloud-verify.ps1` passed locally after the script path update.
+- Documentation/static gates passed before this phase and will be rerun before final push.
+
+Committed as `test(cloud): add strict render and policy verification`.
+
+## Phase 144 - v0.4.9 cloud evidence refresh and final verification
+
+- Updated the v0.4.9 release evidence with the concrete cloud-hardening commit trail and final verification results.
+- Confirmed the cloud verification path is now reviewer-friendly and does not require AWS credentials or `terraform apply`.
+
+Verification:
+
+- `.\scripts\portfolio-verify.ps1 -Docs -Docker -Cloud` passed on 2026-05-06.
+- `mvn -T1 clean verify` passed on 2026-05-06.
+- `.\scripts\check-coverage.ps1` passed on 2026-05-06.
+- `cd frontend; npm run typecheck; npm run build` passed on 2026-05-06.
+
+Committed as `docs(evidence): refresh cloud and reviewer proof pack`.
+
+## Phase 145 - Release branch workflow trigger polish
+
+- Renamed the pushed implementation branch from `codex/v0.4.9-cloud-completion` to `v0.4.9-cloud-completion` for a cleaner public repository facade.
+- Deleted the old remote `codex/` branch after the new branch was pushed.
+- Added `v*` push triggers to the primary CI, Docker, Documentation, Security, CodeQL, E2E, and Terraform workflows so release/hardening branches without the `codex/` prefix still receive hosted checks before opening or merging a PR.
+
+Verification:
+
+- `git push -u origin v0.4.9-cloud-completion` passed on 2026-05-06.
+- `git push origin --delete codex/v0.4.9-cloud-completion` passed on 2026-05-06.
+- Static workflow validation will be rerun before the workflow trigger polish commit.
+
+Committed as `ci(github): support release hardening branch checks`.
+
+## Phase 146 - Terraform CI file ownership fix
+
+- Fixed the hosted Terraform workflow failure where Dockerized Terraform created `.terraform` provider files as root on Linux runners and PowerShell cleanup could not remove them.
+- Updated `terraform-validate.ps1` so Docker tools run as the host UID/GID on non-Windows runners while keeping Windows behavior unchanged.
+- Kept `HOME=/tmp` inside Dockerized tools so non-root container users have a writable home for tool caches.
+
+Verification:
+
+- Local `.\scripts\terraform-validate.ps1 -Environments dev -SkipTflint -SkipTrivy` will be rerun before commit.
+- Hosted Terraform workflow will be rechecked after push.
+
+Committed as `fix(terraform): avoid root-owned ci cache files`.
+
+## Phase 147 - Terraform CI PowerShell compatibility fix
+
+- Fixed a Linux PowerShell compatibility issue in `terraform-validate.ps1`; the local variable `$isWindows` conflicted with the built-in read-only `$IsWindows` variable because PowerShell variable names are case-insensitive.
+- Renamed it to `$runningOnWindows` while preserving the non-Windows Docker UID/GID behavior.
+
+Verification:
+
+- `.\scripts\terraform-validate.ps1 -Environments dev -SkipTflint -SkipTrivy` will be rerun before commit.
+- Hosted Terraform workflow will be rechecked after push.
+
+Committed as `fix(terraform): avoid powershell builtin variable collision`.
+## v0.5.0 Reviewer-grade product and evidence pass
+
+- Created clean branch `v0.5-product-runtime-polish` from the green `v0.4.9-cloud-completion` baseline.
+- Verified PR #29 is mergeable and green for CI, Docker Images, Documentation, Security, CodeQL, E2E Smoke, and Terraform.
+- Did not merge or tag `v0.4.9` from this session because protected-branch release finalization must use an owner-approved GitHub path.
+- Polished frontend reviewer workflows:
+  - replaced raw admin/employer Job ID inputs with selectable job review and applicant pipeline controls,
+  - added reviewer demo mode notices instead of broken-looking offline warnings,
+  - prevented primary dashboard screenshots from landing on `UNKNOWN`/loading-only states.
+- Added backend contract tests for common response envelopes and Gateway error responses.
+- Raised the `common-lib` coverage gate from 41% to 48% after the new contract tests lifted measured coverage to 49.1%.
+- Added curated runtime evidence tooling:
+  - `scripts/portfolio-demo-evidence.ps1`,
+  - expanded `scripts/visual-evidence-audit.ps1`,
+  - `scripts/docs-parity.ps1` wired into `portfolio-verify`.
+- Added release provenance hardening in the GHCR release workflow with BuildKit provenance/SBOM output.
+- Updated trilingual docs, review evidence, release evidence, scorecards, and recruiter guide for v0.5.0.
+- Verification run during this pass:
+  - `cd frontend; npm run typecheck`
+  - `cd frontend; npm run build`
+  - `cd frontend; npm run e2e:all`
+  - `mvn -pl common-lib,api-gateway -am test`
+  - `.\scripts\docs-parity.ps1`
+  - `.\scripts\visual-evidence-audit.ps1`
+  - `.\scripts\docs-quality.ps1`
+  - `.\scripts\evidence-manifest-verify.ps1`
+  - `docker compose config --quiet`
+  - `.\scripts\check-coverage.ps1`
+  - `.\scripts\portfolio-verify.ps1 -Docs -Docker -Cloud`
+  - `git diff --check`
+
+## v0.5.0 Portfolio volume demo data
+
+- Added a second, high-volume synthetic seed layer on top of the original compact demo data.
+- Kept service-owned Flyway migrations instead of a shared fixture so each microservice still owns its own database and seed lifecycle.
+- Added deterministic portfolio data:
+  - 72 generated auth accounts and matching user profiles,
+  - 24 fictional companies across approved, pending, and rejected states,
+  - 180 jobs across published, review, closed, draft, and rejected states,
+  - 240 applications with status history,
+  - 220 notifications with SMTP delivery/retry states,
+  - 280 audit logs,
+  - 20 AI conversations with assistant messages, citations, tool traces, and usage events.
+- Expanded frontend preview data so reviewer screenshots and offline preview mode show realistic volume counts instead of tiny demo lists.
+- Added `docs/demo-data.md` and `scripts/demo-data-summary.ps1` for reviewer-facing dataset inspection.
+
+Verification:
+
+- `mvn -T1 clean verify`
+- `cd frontend; npm run typecheck; npm run build; npm run e2e:all`
+- `.\scripts\docs-quality.ps1`
+- `.\scripts\docs-parity.ps1`
+- `.\scripts\demo-data-summary.ps1`
+- PostgreSQL seed migration smoke across auth, user, company, job, application, notification, audit, and ai temporary databases
+- `.\scripts\portfolio-verify.ps1 -Docs -Docker`
+- `git diff --check`
+
+## v0.5.1 Production runtime depth and observability pass
+
+- Added Testcontainers repository/integration coverage for auth, company, application, notification, audit, and AI persistence paths.
+- Added a reusable `scripts/migration-smoke.ps1` gate that applies each service-owned Flyway migration set to temporary PostgreSQL databases and validates expected seed row counts.
+- Added domain runtime metrics and tests:
+  - application status totals and transition gauges,
+  - notification/read and email delivery gauges,
+  - audit action ingestion gauges,
+  - job search request/fallback/latency metrics,
+  - AI conversation and usage gauges,
+  - shared transactional outbox backlog gauges.
+- Added Grafana dashboard evidence for service health, recruitment funnel, event reliability, search/AI, and database/JVM views.
+- Added runtime evidence automation:
+  - `scripts/runtime-observability-smoke.ps1`,
+  - `scripts/portfolio-runtime-report.ps1`,
+  - richer `scripts/demo-data-summary.ps1 -FromDocker -Aggregates`.
+- Updated frontend dashboards to expose richer reviewer-facing totals:
+  - job pagination/page-size evidence,
+  - candidate application status distribution,
+  - employer applicant pipeline summary,
+  - admin audit action distribution.
+- Added `docs/data-model-and-seed-strategy.md` and refreshed runtime acceptance, SLO, scorecard, review evidence, and trilingual README links.
+
+Verification:
+
+- `mvn -T1 clean verify`
+- `.\scripts\check-coverage.ps1`
+- `cd frontend; npm run typecheck; npm run build; npm run e2e:all`
+- `docker compose config --quiet`
+- `.\scripts\docs-quality.ps1`
+- `.\scripts\docs-parity.ps1`
+- `.\scripts\evidence-manifest-verify.ps1`
+- `.\scripts\repo-hygiene.ps1`
+
+## v0.5.1 Professional documentation gap pass
+
+- Added `docs/remaining-gaps-and-roadmap.md` as the canonical truthful gap register for:
+  - protected-branch release state,
+  - AWS apply readiness versus real cloud deployment,
+  - local runtime evidence versus hosted demo evidence,
+  - monitoring limits without long-running traffic,
+  - synthetic data constraints,
+  - uneven module coverage roadmap,
+  - security and supply-chain next steps.
+- Linked the gap register from README, English README, Japanese README, review evidence, production scorecard, production readiness notes, and the evidence manifest.
+- Updated reviewer-facing docs to point from the v0.4.9 cloud-only state to the current v0.5.1 runtime depth evidence.
+
+Verification:
+
+- `.\scripts\docs-quality.ps1`
+- `.\scripts\docs-parity.ps1`
+- `.\scripts\evidence-manifest-verify.ps1`
+- `.\scripts\portfolio-verify.ps1 -Docs -Docker`
+
+## v1.0 Release scaffolding and verification pass
+
+- Added v1 release verification wrappers:
+  - `scripts/v1-release-verify.ps1`,
+  - `scripts/v1-runtime-evidence.ps1`,
+  - `scripts/v1-cloud-evidence.ps1`,
+  - `scripts/v1-demo-data-verify.ps1`.
+- Added v1 reviewer documentation:
+  - `docs/release-notes/v1.0.0.md`,
+  - `docs/release-evidence/v1.0.0.md`,
+  - `docs/v1-reviewer-guide.md`,
+  - `docs/v1-production-gap-register.md`,
+  - `docs/v1-demo-script.md`.
+- Linked the v1 evidence path from README, English README, Japanese README, review evidence, production scorecard, docs quality, and evidence manifest.
+- Kept v1 wording honest: production-grade portfolio, apply-ready cloud blueprint, local runtime verification, not a live customer SaaS claim.
+
+Verification:
+
+- `.\scripts\docs-quality.ps1`
+- `.\scripts\docs-parity.ps1`
+- `.\scripts\evidence-manifest-verify.ps1`
+- `.\scripts\v1-release-verify.ps1 -Cloud`
+- `.\scripts\domain-placeholder-audit.ps1`
+- `.\scripts\professionalism-audit.ps1`
+- `.\scripts\portfolio-verify.ps1 -Docs -Docker`
+- `.\scripts\migration-smoke.ps1`
+- `.\scripts\migration-smoke.ps1 -Services ai-service -SkipStart`
+
+## v0.5.1 Coverage ratchet follow-up
+
+- Added focused Gateway tests for:
+  - correlation ID preservation and generation,
+  - highest-precedence correlation filter ordering,
+  - rate-limit key selection from authenticated user, remote address, and anonymous fallback,
+  - CORS origin parsing from environment configuration.
+- Added user profile mapper tests for skill normalization, blank input behavior, and entity-to-response mapping.
+- Tightened user profile skill normalization so blank-only skill lists persist as `null` instead of an empty CSV value.
+- Added job search service tests for Micrometer search request and latency metrics on both success and adapter failure paths.
+- Ratcheted explicit module coverage gates after tests landed:
+  - `api-gateway`: 36.5% -> 50.0%,
+  - `job-service`: 52.0% -> 54.0%,
+  - `user-service`: 75.0% -> 76.0%.
+
+Verification:
+
+- `mvn -T1 -pl api-gateway,user-service -am verify`
+- `mvn -T1 -pl job-service -am verify`
+- `mvn -T1 -pl user-service -am verify`
+- `.\scripts\check-coverage.ps1`
+- `.\scripts\docs-quality.ps1`
+- `.\scripts\docs-parity.ps1`
+- `.\scripts\evidence-manifest-verify.ps1`
+- `.\scripts\repo-hygiene.ps1`

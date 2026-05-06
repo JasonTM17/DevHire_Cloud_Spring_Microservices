@@ -17,7 +17,7 @@ DevHire Cloud is a production-grade Java 21/Spring Boot microservices portfolio 
 | Signal | Current Public State | Verification / Owner Action |
 |---|---|---|
 | Latest release | `v0.4.6` is public | [Release](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.4.6) |
-| Current hardening evidence | `v0.4.6` on `master` | [Review evidence](docs/REVIEW_EVIDENCE.md) |
+| Current hardening evidence | `v0.5.1` runtime depth and coverage evidence builds on the `v0.4.9` cloud completion baseline; release tag waits for protected-branch review | [Review evidence](docs/REVIEW_EVIDENCE.md), [v0.5.1 evidence](docs/release-evidence/v0.5.1.md) |
 | About description | Applied | Verified through owner-authenticated GitHub API |
 | Topics | Applied: 20 topics | Verified through owner-authenticated GitHub API |
 | Branch protection | Applied on `master` | Required check contexts audited before apply |
@@ -32,6 +32,9 @@ DevHire Cloud is a production-grade Java 21/Spring Boot microservices portfolio 
 | Latest public release | [v0.4.6 release](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.4.6) |
 | Canonical reviewer evidence | [Review evidence pack](docs/REVIEW_EVIDENCE.md) |
 | Runtime proof | [Runtime evidence v0.4](docs/runtime-evidence-v0.4.md) |
+| Portfolio demo data | [Synthetic volume seed](docs/demo-data.md) |
+| Data model and seed strategy | [Service-owned seed strategy](docs/data-model-and-seed-strategy.md) |
+| Runtime observability proof | [SLO and domain metrics](docs/slo.md), `.\scripts\runtime-observability-smoke.ps1` |
 | 5/15/30 minute review route | [Professional review map](docs/professional-review-map.md) |
 | Root layout | [Repository structure](docs/repository-structure.md) |
 | Service boundaries | [Service catalog](docs/service-catalog.md) |
@@ -39,7 +42,13 @@ DevHire Cloud is a production-grade Java 21/Spring Boot microservices portfolio 
 | Product UI system | [Operations design system](docs/design-system.md) |
 | Security and supply chain | [Security evidence](docs/security-evidence.md) |
 | Cloud deployment blueprint | [Cloud readiness review](docs/cloud-readiness-review.md) |
+| Cloud completion scorecard | [Cloud completion scorecard](docs/cloud-completion-scorecard.md) |
+| Cloud visual evidence | [Cloud visual evidence](docs/cloud-visual-evidence.md) |
 | Production engineering scorecard | [Scorecard](docs/production-engineering-scorecard.md) |
+| Remaining gaps and roadmap | [Transparent gaps and next production steps](docs/remaining-gaps-and-roadmap.md) |
+| v1 reviewer guide | [v1 reviewer guide](docs/v1-reviewer-guide.md) |
+| v1 release evidence | [v1.0.0 release evidence](docs/release-evidence/v1.0.0.md) |
+| v1 demo script | [10-minute v1 demo script](docs/v1-demo-script.md) |
 | Public repo governance | [Repository health](docs/repository-health.md) |
 | Governance verification | [GitHub governance](docs/github-governance.md), [workflow status](scripts/github-workflow-status.ps1), [settings as code](.github/settings.yml) |
 
@@ -60,13 +69,30 @@ Runtime gate when the Docker stack is running:
 
 ```powershell
 .\scripts\portfolio-verify.ps1 -Runtime -GatewayUrl http://localhost:8080
+.\scripts\runtime-observability-smoke.ps1 -GatewayUrl http://localhost:8080
+```
+
+Curated runtime evidence pack when Docker is available:
+
+```powershell
+.\scripts\portfolio-demo-evidence.ps1 -StartStack -CaptureScreenshots -PromoteScreenshots
+.\scripts\portfolio-runtime-report.ps1 -GatewayUrl http://localhost:8080
 ```
 
 Cloud blueprint gate without AWS credentials:
 
 ```powershell
 .\scripts\cloud-verify.ps1
+.\scripts\cloud-policy-audit.ps1
+.\scripts\terraform-race-smoke.ps1
 .\scripts\portfolio-verify.ps1 -Cloud
+```
+
+v1 release evidence gate:
+
+```powershell
+.\scripts\v1-release-verify.ps1 -Cloud
+.\scripts\v1-cloud-evidence.ps1
 ```
 
 Clean generated local artifacts before handing the repo to a reviewer:
@@ -87,7 +113,7 @@ Best reviewer path:
 3. Run `.\scripts\portfolio-verify.ps1 -Docs -Docker` for a fast local gate.
 4. Run `.\scripts\portfolio-verify.ps1 -Runtime -GatewayUrl http://localhost:8080` when Docker is already running and you want runtime proof.
 5. Use [Runtime acceptance matrix](docs/runtime-acceptance-matrix.md) to map each production claim to its verification command.
-6. Check [Review evidence pack](docs/REVIEW_EVIDENCE.md), [v0.3.0 release evidence](docs/release-evidence/v0.3.0.md), [v0.4.4 professionalization evidence](docs/release-evidence/v0.4.4.md), and [v0.4.6 public credibility evidence](docs/release-evidence/v0.4.6.md).
+6. Check [Review evidence pack](docs/REVIEW_EVIDENCE.md), [v0.5.1 runtime depth evidence](docs/release-evidence/v0.5.1.md), and [remaining gaps and roadmap](docs/remaining-gaps-and-roadmap.md).
 
 ## Production Proof
 
@@ -98,8 +124,20 @@ Best reviewer path:
 | Event reliability | Kafka events, transactional outbox, retry/dead-letter states, idempotent consumers |
 | Operations | Prometheus, Grafana SLO dashboard, Loki, Tempo, OpenTelemetry, Mailpit, chaos smoke, DR scripts |
 | Delivery | GitHub Actions, Docker matrix builds, GHCR release images, release notes, release evidence |
-| Cloud readiness | Kubernetes raw manifests, Helm, Argo CD, AWS Terraform blueprint, External Secrets wiring, Dockerized cloud verification |
+| Cloud readiness | Kubernetes raw manifests, Helm, Argo CD, AWS Terraform blueprint, External Secrets wiring, policy audit, race-safe Terraform validation |
 | AI portfolio layer | Claude Haiku assistant, RAG-style citations, fallback mode, tool traces, AI evaluation script |
+
+## Cloud State Matrix
+
+| Layer | Current status | Reviewer proof |
+|---|---|---|
+| Docker Compose | Local runtime stack | `docker compose config --quiet` |
+| Raw Kubernetes | Renderable, includes `ai-service`, no `latest` tags | `kubectl kustomize deploy/k8s` |
+| Helm | Local/staging/prod/AWS values render and lint | `.\scripts\cloud-verify.ps1` |
+| GitOps | Argo CD samples target `master` | `deploy/gitops/*.yaml` |
+| Terraform AWS | Apply-ready blueprint, no apply run locally | `.\scripts\terraform-validate.ps1` |
+| Cloud policy | 72 guardrail checks | `.\scripts\cloud-policy-audit.ps1` |
+| Real AWS apply | Not run; requires account, budget, domain, remote state, and secrets | [Apply runbook](docs/cloud-apply-runbook.md) |
 
 ## Portfolio Screenshots
 

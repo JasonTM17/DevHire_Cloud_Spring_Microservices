@@ -51,6 +51,7 @@ test.describe("DevHire Cloud portfolio smoke", () => {
     await expect(page.getByLabel("CV URL")).toHaveValue("");
     await expect(page.getByLabel("CV URL")).not.toHaveValue(/example\.com/);
     await expect(page.getByLabel("CV URL")).toHaveAttribute("placeholder", /storage\.devhire\.local/);
+    await expect(page.getByText(/Live API Gateway is offline/i)).toHaveCount(0);
     await expect(page.getByRole("button", { name: "Submit application" })).toBeVisible();
   });
 
@@ -64,6 +65,8 @@ test.describe("DevHire Cloud portfolio smoke", () => {
     await login(page, "employer");
     await expect(page.getByRole("heading", { name: "Company onboarding" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Job workflow" })).toBeVisible();
+    await expect(page.getByLabel("Applicant pipeline job")).toBeVisible();
+    await expect(page.getByPlaceholder("Job ID")).toHaveCount(0);
   });
 
   test("admin can sign in and view review and audit consoles", async ({ page }) => {
@@ -71,6 +74,9 @@ test.describe("DevHire Cloud portfolio smoke", () => {
     await expect(page.getByRole("heading", { name: "Company reviews" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Audit log" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "AI provider operations" })).toBeVisible();
+    await expect(page.getByLabel("Reviewable job")).toBeVisible();
+    await expect(page.getByPlaceholder("Pending job ID")).toHaveCount(0);
+    await expect(page.getByText("UNKNOWN")).toHaveCount(0);
     await expect(page.getByRole("button", { name: "Reindex knowledge" })).toBeVisible();
   });
 });

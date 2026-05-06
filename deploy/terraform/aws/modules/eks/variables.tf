@@ -25,6 +25,18 @@ variable "cluster_security_group_ids" {
   description = "Security groups for the EKS control plane."
 }
 
+variable "endpoint_public_access" {
+  type        = bool
+  description = "Allow public EKS API endpoint access. Keep restricted with public_access_cidrs when enabled."
+  default     = true
+}
+
+variable "public_access_cidrs" {
+  type        = list(string)
+  description = "CIDR blocks allowed to reach the public EKS API endpoint. Replace the TEST-NET example with a corporate VPN or admin egress range before apply."
+  default     = ["203.0.113.0/24"]
+}
+
 variable "node_instance_types" {
   type        = list(string)
   description = "Managed node group instance types."

@@ -33,7 +33,7 @@ Use this path for a senior-level technical review.
 2. Run `cd frontend && npm run typecheck && npm run build`.
 3. Run `docker compose config --quiet`.
 4. If Docker resources are available, run `docker compose up -d --build`, then `.\scripts\api-smoke.ps1 -GatewayUrl http://localhost:8080`.
-5. Review `deploy/helm/devhire-cloud`, `deploy/terraform/aws`, and `docs/cloud-readiness-review.md` for production blueprint maturity.
+5. Review `deploy/helm/devhire-cloud`, `deploy/terraform/aws`, `docs/cloud-readiness-review.md`, and `docs/cloud-completion-scorecard.md` for production blueprint maturity.
 6. Review Dependabot and security workflow evidence before judging supply-chain maturity.
 
 Expected takeaway: the project can be built, tested, inspected, and operated through repeatable engineering gates.

@@ -7,6 +7,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -31,6 +32,13 @@ public class OutboxConfiguration {
     @ConditionalOnMissingBean
     ProcessedEventRepository processedEventRepository(JdbcTemplate jdbcTemplate) {
         return new ProcessedEventRepository(jdbcTemplate);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    OutboxMetrics outboxMetrics(JdbcTemplate jdbcTemplate, MeterRegistry meterRegistry, Environment environment) {
+        String serviceName = environment.getProperty("spring.application.name", "unknown-service");
+        return new OutboxMetrics(jdbcTemplate, meterRegistry, serviceName);
     }
 
     @Bean

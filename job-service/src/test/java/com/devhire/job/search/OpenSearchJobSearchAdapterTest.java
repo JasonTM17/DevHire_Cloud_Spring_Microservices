@@ -5,6 +5,7 @@ import com.devhire.job.dto.request.JobSearchCriteria;
 import com.devhire.job.entity.Job;
 import com.devhire.job.entity.JobStatus;
 import com.devhire.job.repository.JobRepository;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.boot.DefaultApplicationArguments;
@@ -32,7 +33,8 @@ class OpenSearchJobSearchAdapterTest {
     private final PostgresJobSearchAdapter fallback = mock(PostgresJobSearchAdapter.class);
     private final OpenSearchProperties properties = new OpenSearchProperties(
             "http://localhost:9200", "devhire_jobs", true, true);
-    private final OpenSearchJobSearchAdapter adapter = new OpenSearchJobSearchAdapter(client, properties, repository, fallback);
+    private final OpenSearchJobSearchAdapter adapter = new OpenSearchJobSearchAdapter(client, properties, repository,
+            fallback, new SimpleMeterRegistry());
 
     @Test
     void searchUsesOpenSearchIdsAndPreservesHitOrder() {
@@ -71,7 +73,8 @@ class OpenSearchJobSearchAdapterTest {
     void searchRethrowsOpenSearchFailureWhenFallbackDisabled() {
         var propertiesWithoutFallback = new OpenSearchProperties(
                 "http://localhost:9200", "devhire_jobs", true, false);
-        var strictAdapter = new OpenSearchJobSearchAdapter(client, propertiesWithoutFallback, repository, fallback);
+        var strictAdapter = new OpenSearchJobSearchAdapter(client, propertiesWithoutFallback, repository, fallback,
+                new SimpleMeterRegistry());
         var criteria = new JobSearchCriteria("java", null, null, null, null, null);
         when(client.search(eq("devhire_jobs"), any())).thenThrow(new IllegalStateException("cluster unavailable"));
 

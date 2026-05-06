@@ -14,12 +14,11 @@ Read:
 - `docs/service-catalog.md`
 - `docs/architecture-review-index.md`
 - `docs/design-system.md`
+- `docs/demo-data.md`
 - `docs/evidence-manifest.md`
 - `docs/runtime-acceptance-matrix.md`
-- `docs/release-notes/v0.3.0.md`
-- `docs/release-evidence/v0.3.0.md`
-- `docs/release-notes/v0.4.0.md`
-- `docs/release-evidence/v0.4.0.md`
+- `docs/release-evidence/v0.4.6.md`
+- `docs/release-evidence/v0.4.9.md`
 - `docs/github-owner-actions.md`
 - `docs/repository-health.md`
 - `docs/dependency-triage-v0.4.md`
@@ -60,9 +59,11 @@ For a short static gate:
 
 ```powershell
 .\scripts\portfolio-verify.ps1 -Docs -Docker
+.\scripts\docs-parity.ps1
 .\scripts\evidence-audit.ps1
 .\scripts\repo-hygiene.ps1
 .\scripts\runtime-evidence-summary.ps1
+.\scripts\demo-data-summary.ps1
 ```
 
 For runtime proof after the Docker stack is up:
@@ -70,6 +71,7 @@ For runtime proof after the Docker stack is up:
 ```powershell
 docker compose up -d --build
 .\scripts\portfolio-verify.ps1 -Runtime -GatewayUrl http://localhost:8080
+.\scripts\portfolio-demo-evidence.ps1 -CaptureScreenshots -PromoteScreenshots
 ```
 
 The portfolio verifier writes JSON and Markdown reports under `reports/portfolio-verify/`; the directory is intentionally ignored because it contains generated runtime evidence.
@@ -90,6 +92,8 @@ Open:
 - `docs/email-sandbox.md`
 - `docs/external-secrets.md`
 - `docs/cloud-readiness-review.md`
+- `docs/cloud-completion-scorecard.md`
+- `docs/cloud-apply-runbook.md`
 - `docs/runtime-reliability-review.md`
 - `docs/runtime-acceptance-matrix.md`
 - `docs/runtime-evidence-v0.4.md`
@@ -102,8 +106,8 @@ Open:
 - `docs/runbooks/smtp-provider-outage.md`
 - `docs/runbooks/ai-provider-outage.md`
 - `docs/runbooks/database-restore-drill.md`
-- `docs/release-evidence/v0.3.0.md`
-- `docs/release-evidence/v0.4.0.md`
+- `docs/release-evidence/v0.4.6.md`
+- `docs/release-evidence/v0.4.9.md`
 
 What to look for:
 

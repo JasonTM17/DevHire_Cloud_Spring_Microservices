@@ -206,6 +206,9 @@ try {
         Invoke-PortfolioStep "docs quality" ".\scripts\docs-quality.ps1" {
             & "$PSScriptRoot\docs-quality.ps1"
         }
+        Invoke-PortfolioStep "trilingual docs parity" ".\scripts\docs-parity.ps1" {
+            & "$PSScriptRoot\docs-parity.ps1"
+        }
         Invoke-PortfolioStep "version consistency" ".\scripts\version-consistency.ps1" {
             & "$PSScriptRoot\version-consistency.ps1"
         }
@@ -302,6 +305,9 @@ try {
         Invoke-PortfolioStep "cloud blueprint verification" ".\scripts\cloud-verify.ps1" {
             & "$PSScriptRoot\cloud-verify.ps1"
         }
+        Invoke-PortfolioStep "cloud evidence summary" ".\scripts\cloud-evidence-summary.ps1" {
+            & "$PSScriptRoot\cloud-evidence-summary.ps1"
+        }
     }
 
     if ($Runtime) {
@@ -331,6 +337,9 @@ try {
         }
         Invoke-PortfolioStep "openapi verify" ".\scripts\openapi-verify.ps1 -GatewayUrl $GatewayUrl" {
             & "$PSScriptRoot\openapi-verify.ps1" -GatewayUrl $GatewayUrl
+        }
+        Invoke-PortfolioStep "runtime observability smoke" ".\scripts\runtime-observability-smoke.ps1 -GatewayUrl $GatewayUrl -SkipTraffic" {
+            & "$PSScriptRoot\runtime-observability-smoke.ps1" -GatewayUrl $GatewayUrl -SkipTraffic
         }
         Invoke-PortfolioStep "role based perf smoke" ".\scripts\perf-suite.ps1 -GatewayUrl $GatewayUrl -Scenario all -Vus $PerfVus -Duration $PerfDuration" {
             & "$PSScriptRoot\perf-suite.ps1" -GatewayUrl $GatewayUrl -Scenario all -Vus $PerfVus -Duration $PerfDuration

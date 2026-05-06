@@ -12,8 +12,12 @@ DevHire Cloud uses Prometheus, Grafana, Micrometer, OpenTelemetry, Loki, and Tem
 | AI assistant latency | p95 below 5 seconds over 5 minutes | `devhire_ai_chat_latency_seconds_bucket` |
 | AI assistant provider fallback | Fewer than 5 fallback answers over 15 minutes in non-demo environments | `devhire_ai_fallback_total` |
 | AI provider circuit health | Circuit breaker should remain closed outside provider incidents | `devhire_ai_provider_circuit_open` |
+| Recruitment funnel visibility | Application status metrics should be non-empty in seeded/runtime demos | `devhire_applications_total`, `devhire_application_status_transitions_total` |
+| Notification delivery backlog | Retryable email failures should stay below 25 rows for 30 minutes | `devhire_email_delivery_total{status="FAILED_RETRYABLE"}` |
+| Outbox backlog | Pending/failed/dead-letter backlog should stay below 50 rows per service | `devhire_outbox_backlog` |
 | Service health | All service scrape targets available | Prometheus `up{job="devhire-services"}` |
 | Event reliability | Zero outbox publish failures for 10 minutes | `devhire_outbox_publish_failure_total` |
+| Database pool capacity | Active pool usage should stay below 85% | `hikaricp_connections_active / hikaricp_connections_max` |
 | JVM capacity | Heap pressure below 85% for normal traffic | `jvm_memory_used_bytes / jvm_memory_max_bytes` |
 
 ## Error Budget
@@ -39,6 +43,10 @@ Current alerts:
 - `DevHireJvmHeapPressureHigh`
 - `DevHireJobSearchP95LatencyHigh`
 - `DevHireOutboxPublishFailures`
+- `DevHireOutboxBacklogHigh`
+- `DevHireEmailRetryBacklogHigh`
+- `DevHireSearchFallbackSpike`
+- `DevHireDbPoolSaturation`
 - `DevHireAiP95LatencyHigh`
 - `DevHireAiFallbackSpike`
 - `DevHireAiProviderCircuitOpen`
@@ -52,7 +60,7 @@ docker run --rm -v "${PWD}/infra/prometheus:/etc/prometheus" prom/prometheus:v3.
 
 ## Dashboard
 
-Grafana provisions `infra/grafana/dashboards/devhire-slo-overview.json` automatically under the `DevHire Cloud` folder.
+Grafana provisions all JSON dashboards in `infra/grafana/dashboards/` automatically under the `DevHire Cloud` folder.
 
 Local URLs after `docker compose up --build`:
 
@@ -62,19 +70,21 @@ Local URLs after `docker compose up --build`:
 - Tempo: `http://localhost:3200`
 - Loki: `http://localhost:3100`
 
-The SLO dashboard includes:
+The dashboard pack includes:
 
 - Gateway availability.
 - Gateway p95 latency.
 - Request rate.
 - 5xx error rate.
-- Job search p95 latency.
+- Job search p95 latency, request counts, and fallback status.
 - Service scrape health.
 - JVM heap pressure.
-- Outbox publish failures.
-- AI assistant request rate.
-- AI assistant p95 latency.
-- AI tool calls and Claude fallback count.
+- DB pool pressure.
+- Application status funnel and transition history.
+- Notification read/email delivery state.
+- Outbox backlog and publish failures.
+- Audit action distribution.
+- AI assistant request rate, p95 latency, usage rows, tool calls, and Claude fallback count.
 
 The README operations screenshots for Prometheus and Grafana are rendered from the same repository-owned configuration instead of from a potentially empty live UI page. See [observability evidence](observability-evidence.md) for the screenshot generation and quality-gate policy.
 
@@ -88,6 +98,19 @@ AI assistant metrics are emitted by `ai-service`:
 - `devhire_ai_provider_failures_total`
 - `devhire_ai_provider_circuit_open`
 - `devhire_ai_provider_circuit_opened_total`
+- `devhire_ai_conversations_total`
+- `devhire_ai_usage_events_total`
+
+Recruitment domain metrics are emitted by service-owned modules:
+
+- `devhire_applications_total{status}`
+- `devhire_application_status_transitions_total{from,to}`
+- `devhire_notifications_total{type,read}`
+- `devhire_email_delivery_total{status}`
+- `devhire_outbox_backlog{service,status}`
+- `devhire_audit_ingested_total{action}`
+- `devhire_job_search_requests_total{adapter,status}`
+- `devhire_job_search_latency_seconds_bucket`
 
 Every chat request also emits audit/outbox activity:
 
@@ -120,6 +143,7 @@ Runtime smoke after starting the stack:
 ```powershell
 scripts/api-smoke.ps1 -GatewayUrl http://localhost:8080
 scripts/perf-smoke.ps1 -BaseUrl http://localhost:8080 -Vus 2 -Duration 10s -UseDocker
+scripts/runtime-observability-smoke.ps1 -GatewayUrl http://localhost:8080
 ```
 
 Regenerate and validate operations screenshots:

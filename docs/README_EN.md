@@ -24,7 +24,7 @@ DevHire Cloud models a compact ITviec / LinkedIn Jobs platform with authenticati
 | Item | Current state | Verification |
 |---|---|---|
 | Latest public release | `v0.4.6` | [GitHub release](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.4.6) |
-| Current hardening evidence | `v0.4.6 / v0.4.7` public credibility pass | [Review evidence](REVIEW_EVIDENCE.md), [release evidence](release-evidence/v0.4.6.md) |
+| Current hardening evidence | `v0.5.1` runtime depth and coverage evidence builds on the `v0.4.9` cloud completion baseline; release tag waits for protected-branch review | [Review evidence](REVIEW_EVIDENCE.md), [v0.5.1 evidence](release-evidence/v0.5.1.md) |
 | GitHub About / homepage / topics | Applied through governance automation | [Repository governance](github-governance.md) |
 | Branch protection | `master` protected; strict admin enforcement is part of the v0.4.7 gate | [Branch protection](branch-protection.md) |
 | Dependabot queue | 0 open PRs after zero-noise cleanup | [Dependabot cleanup](dependabot-cleanup-v0.4.md) |
@@ -39,11 +39,20 @@ DevHire Cloud models a compact ITviec / LinkedIn Jobs platform with authenticati
 | 5 / 15 / 30 minute review route | [professional-review-map.md](professional-review-map.md) |
 | Production scorecard | [production-engineering-scorecard.md](production-engineering-scorecard.md) |
 | Runtime proof | [runtime-evidence-v0.4.md](runtime-evidence-v0.4.md) |
+| Portfolio demo data | [demo-data.md](demo-data.md) |
+| Data model and seed strategy | [data-model-and-seed-strategy.md](data-model-and-seed-strategy.md) |
+| Runtime observability proof | [slo.md](slo.md), `.\scripts\runtime-observability-smoke.ps1` |
 | Service catalog | [service-catalog.md](service-catalog.md) |
 | Architecture decisions | [architecture-review-index.md](architecture-review-index.md) |
 | API compatibility | [api-compatibility.md](api-compatibility.md) |
 | Security and supply chain | [security-evidence.md](security-evidence.md) |
 | Cloud blueprint | [cloud-readiness-review.md](cloud-readiness-review.md) |
+| Cloud completion scorecard | [cloud-completion-scorecard.md](cloud-completion-scorecard.md) |
+| Cloud visual evidence | [cloud-visual-evidence.md](cloud-visual-evidence.md) |
+| Remaining gaps and roadmap | [remaining-gaps-and-roadmap.md](remaining-gaps-and-roadmap.md) |
+| v1 reviewer guide | [v1-reviewer-guide.md](v1-reviewer-guide.md) |
+| v1 release evidence | [release-evidence/v1.0.0.md](release-evidence/v1.0.0.md) |
+| v1 demo script | [v1-demo-script.md](v1-demo-script.md) |
 | Demo script | [demo-script.md](demo-script.md) |
 
 Fast local verification:
@@ -64,14 +73,43 @@ Full runtime gate after the Docker stack is running:
 
 ```powershell
 .\scripts\portfolio-verify.ps1 -Runtime -GatewayUrl http://localhost:8080
+.\scripts\runtime-observability-smoke.ps1 -GatewayUrl http://localhost:8080
+```
+
+Curated runtime evidence pack:
+
+```powershell
+.\scripts\portfolio-demo-evidence.ps1 -StartStack -CaptureScreenshots -PromoteScreenshots
+.\scripts\portfolio-runtime-report.ps1 -GatewayUrl http://localhost:8080
 ```
 
 Cloud blueprint verification without AWS credentials:
 
 ```powershell
 .\scripts\cloud-verify.ps1
+.\scripts\cloud-policy-audit.ps1
+.\scripts\terraform-race-smoke.ps1
 .\scripts\portfolio-verify.ps1 -Cloud
 ```
+
+v1 release evidence gate:
+
+```powershell
+.\scripts\v1-release-verify.ps1 -Cloud
+.\scripts\v1-cloud-evidence.ps1
+```
+
+## Cloud State Matrix
+
+| Layer | Current status | Reviewer proof |
+|---|---|---|
+| Docker Compose | Local runtime stack | `docker compose config --quiet` |
+| Raw Kubernetes | Renderable, includes `ai-service`, no `latest` tags | `kubectl kustomize deploy/k8s` |
+| Helm | Local, staging, prod, and AWS values lint/render | `.\scripts\cloud-verify.ps1` |
+| GitOps | Argo CD samples target `master` | `deploy/gitops/*.yaml` |
+| Terraform AWS | Apply-ready blueprint, not applied locally | `.\scripts\terraform-validate.ps1` |
+| Cloud policy | 72 guardrail checks | `.\scripts\cloud-policy-audit.ps1` |
+| Real AWS apply | Requires account, budget, domain, remote state, and secrets | [cloud-apply-runbook.md](cloud-apply-runbook.md) |
 
 Clean generated local artifacts before review:
 

@@ -1,0 +1,39 @@
+{
+  "uid": "devhire-database-and-jvm",
+  "title": "DevHire Database And JVM",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "tags": ["devhire", "database", "jvm"],
+  "time": {"from": "now-6h", "to": "now"},
+  "panels": [
+    {
+      "id": 1,
+      "type": "timeseries",
+      "title": "Hikari Active / Max Connections",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+      "targets": [{"expr": "sum by (application) (hikaricp_connections_active)", "legendFormat": "{{application}} active"}, {"expr": "sum by (application) (hikaricp_connections_max)", "legendFormat": "{{application}} max"}]
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "JVM GC Pause p95",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+      "targets": [{"expr": "histogram_quantile(0.95, sum by (le, application) (rate(jvm_gc_pause_seconds_bucket[5m])))", "legendFormat": "{{application}}"}]
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "Thread Count",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+      "targets": [{"expr": "jvm_threads_live_threads", "legendFormat": "{{application}}"}]
+    },
+    {
+      "id": 4,
+      "type": "timeseries",
+      "title": "Heap Usage Ratio",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+      "targets": [{"expr": "sum by (application) (jvm_memory_used_bytes{area=\"heap\"}) / clamp_min(sum by (application) (jvm_memory_max_bytes{area=\"heap\"}), 1)", "legendFormat": "{{application}}"}]
+    }
+  ]
+}

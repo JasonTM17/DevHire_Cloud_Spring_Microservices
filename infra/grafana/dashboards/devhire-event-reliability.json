@@ -1,0 +1,39 @@
+{
+  "uid": "devhire-event-reliability",
+  "title": "DevHire Event Reliability",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "tags": ["devhire", "events", "outbox"],
+  "time": {"from": "now-24h", "to": "now"},
+  "panels": [
+    {
+      "id": 1,
+      "type": "bargauge",
+      "title": "Outbox Backlog By Service",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+      "targets": [{"expr": "devhire_outbox_backlog", "legendFormat": "{{service}} {{status}}"}]
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "Outbox Publish Failures",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+      "targets": [{"expr": "increase(devhire_outbox_publish_failure_total[10m])", "legendFormat": "{{topic}} dead={{dead_letter}}"}]
+    },
+    {
+      "id": 3,
+      "type": "bargauge",
+      "title": "Email Delivery State",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+      "targets": [{"expr": "devhire_email_delivery_total", "legendFormat": "{{status}}"}]
+    },
+    {
+      "id": 4,
+      "type": "bargauge",
+      "title": "Audit Actions Ingested",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+      "targets": [{"expr": "devhire_audit_ingested_total", "legendFormat": "{{action}}"}]
+    }
+  ]
+}

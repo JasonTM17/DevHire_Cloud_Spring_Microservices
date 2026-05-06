@@ -22,12 +22,16 @@ resource "aws_db_instance" "postgres" {
   manage_master_user_password         = true
   db_subnet_group_name                = aws_db_subnet_group.this[0].name
   vpc_security_group_ids              = var.data_security_group_ids
-  backup_retention_period             = 7
-  deletion_protection                 = true
+  backup_retention_period             = var.postgres_backup_retention_period
+  deletion_protection                 = var.postgres_deletion_protection
   publicly_accessible                 = false
   skip_final_snapshot                 = false
-  performance_insights_enabled        = true
+  performance_insights_enabled        = var.postgres_performance_insights_enabled
   iam_database_authentication_enabled = true
+  auto_minor_version_upgrade          = var.postgres_auto_minor_version_upgrade
+  copy_tags_to_snapshot               = var.postgres_copy_tags_to_snapshot
+  enabled_cloudwatch_logs_exports     = var.postgres_enabled_cloudwatch_logs_exports
+  multi_az                            = var.postgres_multi_az
 
   tags = merge(var.tags, {
     Name = "${var.name_prefix}-postgres"

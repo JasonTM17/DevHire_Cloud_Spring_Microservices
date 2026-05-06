@@ -6,6 +6,7 @@ on:
       - main
       - master
       - "codex/**"
+      - "v*"
   pull_request:
   workflow_dispatch:
 
