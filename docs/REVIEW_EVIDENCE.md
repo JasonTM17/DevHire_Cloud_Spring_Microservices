@@ -7,7 +7,7 @@ This is the short reviewer-facing evidence path. `docs/PROGRESS.md` remains an i
 | Evidence | Status |
 |---|---|
 | Latest public release | `v0.4.6` is visible on GitHub |
-| Current development evidence | `v0.4.9` cloud completion evidence is committed on `master` |
+| Current development evidence | `v0.4.9` cloud completion evidence is green on PR #29; release tag waits for protected-branch merge |
 | GitHub About/Homepage/Topics | Applied through owner-authenticated GitHub API; 20 topics are set |
 | Branch protection | Applied on `master`; public branch API confirms `protected=true`, and detailed protection reads are owner-token only |
 | Dependabot posture | Zero-noise cleanup applied: open Dependabot PR count is 0; future updates are handled through scheduled curated batches |
@@ -29,6 +29,7 @@ Latest hardening evidence: [v0.4.9 cloud completion evidence](release-evidence/v
 
 ```powershell
 .\scripts\portfolio-verify.ps1 -Docs -Docker
+.\scripts\docs-parity.ps1
 .\scripts\evidence-manifest-verify.ps1
 .\scripts\github-governance.ps1 -DryRun
 .\scripts\github-check-contexts.ps1
@@ -54,6 +55,7 @@ Runtime proof when Docker is already running:
 
 ```powershell
 .\scripts\portfolio-verify.ps1 -Runtime -GatewayUrl http://localhost:8080
+.\scripts\portfolio-demo-evidence.ps1 -StartStack -CaptureScreenshots -PromoteScreenshots
 .\scripts\runtime-evidence-summary.ps1
 ```
 

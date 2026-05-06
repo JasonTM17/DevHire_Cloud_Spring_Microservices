@@ -17,7 +17,7 @@ DevHire Cloud is a production-grade Java 21/Spring Boot microservices portfolio 
 | Signal | Current Public State | Verification / Owner Action |
 |---|---|---|
 | Latest release | `v0.4.6` is public | [Release](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.4.6) |
-| Current hardening evidence | `v0.4.9` cloud completion on `master` | [Review evidence](docs/REVIEW_EVIDENCE.md), [cloud evidence](docs/release-evidence/v0.4.9.md) |
+| Current hardening evidence | `v0.4.9` cloud completion PR is green; release tag waits for protected-branch merge | [Review evidence](docs/REVIEW_EVIDENCE.md), [cloud evidence](docs/release-evidence/v0.4.9.md) |
 | About description | Applied | Verified through owner-authenticated GitHub API |
 | Topics | Applied: 20 topics | Verified through owner-authenticated GitHub API |
 | Branch protection | Applied on `master` | Required check contexts audited before apply |
@@ -62,6 +62,12 @@ Runtime gate when the Docker stack is running:
 
 ```powershell
 .\scripts\portfolio-verify.ps1 -Runtime -GatewayUrl http://localhost:8080
+```
+
+Curated runtime evidence pack when Docker is available:
+
+```powershell
+.\scripts\portfolio-demo-evidence.ps1 -StartStack -CaptureScreenshots -PromoteScreenshots
 ```
 
 Cloud blueprint gate without AWS credentials:

@@ -206,6 +206,9 @@ try {
         Invoke-PortfolioStep "docs quality" ".\scripts\docs-quality.ps1" {
             & "$PSScriptRoot\docs-quality.ps1"
         }
+        Invoke-PortfolioStep "trilingual docs parity" ".\scripts\docs-parity.ps1" {
+            & "$PSScriptRoot\docs-parity.ps1"
+        }
         Invoke-PortfolioStep "version consistency" ".\scripts\version-consistency.ps1" {
             & "$PSScriptRoot\version-consistency.ps1"
         }

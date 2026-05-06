@@ -24,7 +24,7 @@ DevHire Cloud models a compact ITviec / LinkedIn Jobs platform with authenticati
 | Item | Current state | Verification |
 |---|---|---|
 | Latest public release | `v0.4.6` | [GitHub release](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.4.6) |
-| Current hardening evidence | `v0.4.9` cloud completion pass | [Review evidence](REVIEW_EVIDENCE.md), [cloud evidence](release-evidence/v0.4.9.md) |
+| Current hardening evidence | `v0.4.9` cloud completion PR is green; release tag waits for protected-branch merge | [Review evidence](REVIEW_EVIDENCE.md), [cloud evidence](release-evidence/v0.4.9.md) |
 | GitHub About / homepage / topics | Applied through governance automation | [Repository governance](github-governance.md) |
 | Branch protection | `master` protected; strict admin enforcement is part of the v0.4.7 gate | [Branch protection](branch-protection.md) |
 | Dependabot queue | 0 open PRs after zero-noise cleanup | [Dependabot cleanup](dependabot-cleanup-v0.4.md) |
@@ -66,6 +66,12 @@ Full runtime gate after the Docker stack is running:
 
 ```powershell
 .\scripts\portfolio-verify.ps1 -Runtime -GatewayUrl http://localhost:8080
+```
+
+Curated runtime evidence pack:
+
+```powershell
+.\scripts\portfolio-demo-evidence.ps1 -StartStack -CaptureScreenshots -PromoteScreenshots
 ```
 
 Cloud blueprint verification without AWS credentials:
