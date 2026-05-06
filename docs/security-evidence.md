@@ -35,7 +35,7 @@ Release images now request BuildKit provenance attestations and SBOM output duri
 
 Future real-cloud releases can add cosign keyless verification as a deployment admission check. The portfolio keeps this optional so normal pull requests do not require cloud or registry secrets.
 
-Trivy filesystem scanning blocks critical repository vulnerabilities. Trivy image scanning now runs for pull requests, manual runs, and schedules, and it fails on actionable HIGH/CRITICAL image vulnerabilities instead of only uploading advisory artifacts. Runtime Docker images run `apk upgrade --no-cache` during image build so fixed Alpine packages, such as security-patched TLS libraries, are pulled into the final non-root image layers. The Maven parent also pins `tomcat.version` when a patched embedded Tomcat line is available before the next Spring Boot service release.
+Trivy filesystem scanning blocks critical repository vulnerabilities. Trivy image scanning now runs for pull requests, manual runs, and schedules, and it fails on actionable HIGH/CRITICAL image vulnerabilities instead of only uploading advisory artifacts. The image scan matrix is intentionally throttled with `max-parallel: 2` and uses per-service GitHub Actions build cache scopes, which prevents Maven Central rate-limit noise from looking like real image security failures while keeping true HIGH/CRITICAL findings blocking. Runtime Docker images run `apk upgrade --no-cache` during image build so fixed Alpine packages, such as security-patched TLS libraries, are pulled into the final non-root image layers. The Maven parent also pins `tomcat.version` when a patched embedded Tomcat line is available before the next Spring Boot service release.
 
 ## Runtime Security Controls
 
@@ -75,6 +75,7 @@ The current portfolio implementation uses an environment-provided symmetric JWT 
 
 1. Run `docker run --rm -v "${PWD}:/repo" -w /repo rhysd/actionlint:latest`.
 2. Run Gitleaks locally or inspect the `Security` workflow artifact.
-3. Review CodeQL and Scorecard workflow files.
-4. Confirm no real provider keys exist in committed docs, workflows, or examples.
-5. Confirm `docs/dependency-maintenance.md` explains how Dependabot PRs are handled.
+3. Review the `Security` workflow image scan matrix for throttling, per-service cache scopes, and blocking HIGH/CRITICAL severity.
+4. Review CodeQL and Scorecard workflow files.
+5. Confirm no real provider keys exist in committed docs, workflows, or examples.
+6. Confirm `docs/dependency-maintenance.md` explains how Dependabot PRs are handled.
