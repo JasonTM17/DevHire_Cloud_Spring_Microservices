@@ -3289,3 +3289,8 @@ Verification:
 - Added `scripts/observability-catalog-verify.ps1` to statically verify that production-domain metrics are represented in Prometheus rules, Grafana dashboard JSON, or runtime observability smoke assertions.
 - Wired the observability catalog gate into `portfolio-verify.ps1 -Docs` so reviewer verification catches missing domain metric evidence before screenshots or dashboards drift.
 - Updated `docs/observability-evidence.md` with a domain metric catalog covering gateway, recruitment funnel, notifications, outbox, audit, search, AI, database pool, and JVM metrics.
+
+## v0.8 Data verification gate
+
+- Wired `demo-data-summary.ps1 -Aggregates -Json` into `portfolio-verify.ps1 -Docs`.
+- Updated review evidence so the deterministic 1,108-row portfolio dataset and domain distributions are part of the default reviewer proof path, not only a standalone optional script.
