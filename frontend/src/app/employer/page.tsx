@@ -8,8 +8,8 @@ import { MetricCard } from "@/components/MetricCard";
 import { StatusPill } from "@/components/StatusPill";
 import { api } from "@/lib/api";
 import { brandForCompany } from "@/lib/demoCompanies";
-import { previewApplications, previewCompanies, previewJobs } from "@/lib/previewData";
-import type { Application, Company, Job, PageResponse } from "@/types/domain";
+import { previewApplications, previewCompanies, previewEmployerPipelineSummary, previewJobs } from "@/lib/previewData";
+import type { Application, Company, EmployerPipelineSummary, Job, PageResponse } from "@/types/domain";
 
 export default function EmployerPage() {
   const [companies, setCompanies] = useState<PageResponse<Company>>(previewCompanies);
@@ -18,6 +18,7 @@ export default function EmployerPage() {
   const [jobs, setJobs] = useState<PageResponse<Job>>(previewJobs);
   const [selectedJobId, setSelectedJobId] = useState(previewJobs.content[0]?.id ?? "");
   const [applications, setApplications] = useState<PageResponse<Application>>(previewApplications);
+  const [pipelineSummary, setPipelineSummary] = useState<EmployerPipelineSummary>(previewEmployerPipelineSummary);
   const [message, setMessage] = useState("");
   const [loadingCompanies, setLoadingCompanies] = useState(false);
 
@@ -25,24 +26,29 @@ export default function EmployerPage() {
     () => companies?.content.find((company) => company.status === "APPROVED"),
     [companies]
   );
-  const pipelineCounts = useMemo(
-    () => countBy(applications.content, (item) => item.status),
-    [applications]
-  );
+  const pipelineCounts = useMemo(() => {
+    const counts = countBy(applications.content, (item) => item.status);
+    for (const item of pipelineSummary.statusDistribution) {
+      counts[item.status] = item.count;
+    }
+    return counts;
+  }, [applications, pipelineSummary]);
 
   function loadCompanies() {
     setLoadingCompanies(true);
     const jobParams = new URLSearchParams({ page: "0", size: "12", sort: "publishedAt,desc" });
-    Promise.all([api.companies(), api.jobs(jobParams)])
-      .then(([page, jobPage]) => {
+    Promise.all([api.companies(), api.jobs(jobParams), api.employerPipelineSummary()])
+      .then(([page, jobPage, summary]) => {
         setCompanies(page);
         setJobs(jobPage.content.length ? jobPage : previewJobs);
+        setPipelineSummary(summary);
         setSelectedJobId((current) => current || jobPage.content[0]?.id || previewJobs.content[0]?.id || "");
         setMessage("");
       })
       .catch((ex) => {
         setCompanies(previewCompanies);
         setJobs(previewJobs);
+        setPipelineSummary(previewEmployerPipelineSummary);
         setSelectedJobId(previewJobs.content[0]?.id ?? "");
         setMessage(previewDashboardMessage(ex));
       })
@@ -134,8 +140,8 @@ export default function EmployerPage() {
       </div>
       <div className="metrics-row">
         <MetricCard icon={Building2} label="Companies" value={companies?.totalElements ?? 0} helper="Owned by employer" />
-        <MetricCard icon={ClipboardList} label="Applications" value={applications?.totalElements ?? 0} helper="For selected job" />
-        <MetricCard icon={UsersRound} label="Pipeline" value="Interview" helper="Status mutation ready" />
+        <MetricCard icon={ClipboardList} label="Applications" value={pipelineSummary.totalApplications} helper="Across employer jobs" />
+        <MetricCard icon={UsersRound} label="Candidates" value={pipelineSummary.activeCandidates} helper="Active hiring pool" />
       </div>
       {message && isPositiveMessage(message) ? <p className="success">{message}</p> : null}
       {message && !isPositiveMessage(message) ? <DemoModeNotice message={message} /> : null}

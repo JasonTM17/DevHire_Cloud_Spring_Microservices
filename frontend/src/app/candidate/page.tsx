@@ -1,31 +1,35 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Bell, ClipboardList, MailCheck, TimerReset, TrendingUp } from "lucide-react";
+import Link from "next/link";
+import { Bell, ClipboardList, FileCheck2, MailCheck, Map, TimerReset, TrendingUp } from "lucide-react";
 import { DemoModeNotice } from "@/components/DemoModeNotice";
 import { MetricCard } from "@/components/MetricCard";
 import { StatusPill } from "@/components/StatusPill";
 import { api } from "@/lib/api";
-import { previewApplications, previewNotifications } from "@/lib/previewData";
-import type { Application, Notification, PageResponse } from "@/types/domain";
+import { previewApplications, previewCandidateDashboardSummary, previewNotifications } from "@/lib/previewData";
+import type { Application, CandidateDashboardSummary, Notification, PageResponse } from "@/types/domain";
 
 export default function CandidatePage() {
   const [applications, setApplications] = useState<PageResponse<Application> | null>(null);
   const [notifications, setNotifications] = useState<PageResponse<Notification> | null>(null);
+  const [summary, setSummary] = useState<CandidateDashboardSummary>(previewCandidateDashboardSummary);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
 
   function load() {
     setLoading(true);
-    Promise.all([api.myApplications(), api.notifications()])
-      .then(([apps, notis]) => {
+    Promise.all([api.myApplications(), api.notifications(), api.candidateDashboardSummary()])
+      .then(([apps, notis, dashboard]) => {
         setApplications(apps);
         setNotifications(notis);
+        setSummary(dashboard);
         setError("");
       })
       .catch((ex) => {
         setApplications(previewApplications);
         setNotifications(previewNotifications);
+        setSummary(previewCandidateDashboardSummary);
         setError(previewDashboardMessage(ex));
       })
       .finally(() => setLoading(false));
@@ -39,8 +43,6 @@ export default function CandidatePage() {
   }
 
   const unread = notifications?.content.filter((item) => !item.read).length ?? 0;
-  const statusCounts = countBy(applications?.content ?? [], (item) => item.status);
-
   return (
     <section className="page-stack" data-testid="candidate-dashboard">
       <div className="hero-strip">
@@ -48,12 +50,19 @@ export default function CandidatePage() {
           <p className="eyebrow">Candidate workspace</p>
           <h1>Applications</h1>
           <p>
-            A focused applicant cockpit for tracking CV submissions, status movement, notification delivery, and email
-            follow-up from the notification-service.
+            A Stitch-aligned client workspace for job discovery, application movement, offers, skill proof, and AI
+            interview preparation.
           </p>
         </div>
         <div className="hero-actions">
-          <span className="badge live">Email queue persisted</span>
+          <Link className="button secondary" href="/candidate/offers">
+            <FileCheck2 size={16} />
+            Review offers
+          </Link>
+          <Link className="button outline" href="/candidate/roadmap">
+            <Map size={16} />
+            Roadmap
+          </Link>
           <button className="button secondary" type="button" onClick={markAllRead}>
             <MailCheck size={16} />
             Mark all read
@@ -61,9 +70,10 @@ export default function CandidatePage() {
         </div>
       </div>
       <div className="metrics-row">
-        <MetricCard icon={ClipboardList} label="Applications" value={applications?.totalElements ?? 0} helper="Submitted jobs" />
+        <MetricCard icon={ClipboardList} label="Applications" value={summary.applications} helper="Submitted jobs" />
         <MetricCard icon={Bell} label="Unread" value={unread} helper="Internal notifications" />
-        <MetricCard icon={TrendingUp} label="Pipeline" value="Live" helper="Kafka status events" />
+        <MetricCard icon={TrendingUp} label="Interviews" value={summary.interviews} helper="Pipeline movement" />
+        <MetricCard icon={FileCheck2} label="Offers" value={summary.offers} helper="Offer review ready" />
       </div>
       <DemoModeNotice message={error} />
       <div className="split-grid">
@@ -73,10 +83,10 @@ export default function CandidatePage() {
             <h2>Application tracker</h2>
           </div>
           <div className="insight-list compact">
-            {["SUBMITTED", "REVIEWING", "INTERVIEW", "OFFER"].map((status) => (
+            {summary.statusDistribution.map(({ status, count }) => (
               <div className="insight-line" key={status}>
                 <span>{status.toLowerCase().replace("_", " ")}</span>
-                <strong>{statusCounts[status] ?? 0}</strong>
+                <strong>{count}</strong>
               </div>
             ))}
           </div>
@@ -116,6 +126,23 @@ export default function CandidatePage() {
           </div>
         </div>
       </div>
+      <div className="dashboard-grid">
+        <Link className="panel action-panel" href="/candidate/assessments">
+          <p className="eyebrow">Skill assessment</p>
+          <h2>Verified backend skills</h2>
+          <span className="muted">Java, Kafka, AWS, observability proof for employer review.</span>
+        </Link>
+        <Link className="panel action-panel" href="/candidate/interview-prep">
+          <p className="eyebrow">AI prep</p>
+          <h2>Interview practice hub</h2>
+          <span className="muted">Claude prompts, citations, and production interview drills.</span>
+        </Link>
+        <Link className="panel action-panel" href="/candidate/skill-analytics">
+          <p className="eyebrow">Market signals</p>
+          <h2>Cloud skill analytics</h2>
+          <span className="muted">Demand, salary bands, locations, and role distribution.</span>
+        </Link>
+      </div>
     </section>
   );
 }
@@ -141,12 +168,4 @@ function emailStatusLabel(status: string) {
   if (status === "DISABLED") return "internal notification only";
   if (status === "FAILED_RETRYABLE") return "queued for retry";
   return status.toLowerCase().replaceAll("_", " ");
-}
-
-function countBy<T>(items: T[], selector: (item: T) => string) {
-  return items.reduce<Record<string, number>>((acc, item) => {
-    const key = selector(item);
-    acc[key] = (acc[key] ?? 0) + 1;
-    return acc;
-  }, {});
 }

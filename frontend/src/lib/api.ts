@@ -6,10 +6,19 @@ import type {
   AiReindexResponse,
   AuditLog,
   AuthResponse,
+  CandidateApplicationsSummary,
+  CandidateAssessment,
+  CandidateDashboardSummary,
+  CandidateOffer,
+  CandidateRoadmap,
   Company,
+  EmployerPipelineSummary,
+  InterviewPrep,
   Job,
   Notification,
+  OperationsSummary,
   PageResponse,
+  SkillAnalytics,
   UserRole
 } from "@/types/domain";
 
@@ -90,6 +99,13 @@ export const api = {
       body: JSON.stringify({ cvUrl, coverLetter })
     }),
   myApplications: () => request<PageResponse<Application>>("/api/applications/me"),
+  candidateDashboardSummary: () => request<CandidateDashboardSummary>("/api/candidate/dashboard/summary"),
+  candidateApplicationsSummary: () => request<CandidateApplicationsSummary>("/api/candidate/applications/summary"),
+  candidateOffers: () => request<CandidateOffer[]>("/api/candidate/offers"),
+  candidateAssessments: () => request<CandidateAssessment[]>("/api/candidate/assessments"),
+  candidateRoadmap: () => request<CandidateRoadmap>("/api/candidate/roadmap"),
+  candidateInterviewPrep: () => request<InterviewPrep[]>("/api/candidate/interview-prep"),
+  candidateSkillAnalytics: () => request<SkillAnalytics>("/api/candidate/skill-analytics"),
   notifications: () => request<PageResponse<Notification>>("/api/notifications"),
   readAllNotifications: () => request<Notification[]>("/api/notifications/read-all", { method: "PATCH" }),
   companies: () => request<PageResponse<Company>>("/api/companies"),
@@ -107,12 +123,14 @@ export const api = {
   approveJob: (id: string) => request<Job>(`/api/admin/jobs/${id}/approve`, { method: "PATCH" }),
   applicationsForJob: (jobId: string) =>
     request<PageResponse<Application>>(`/api/employer/jobs/${jobId}/applications`),
+  employerPipelineSummary: () => request<EmployerPipelineSummary>("/api/employer/pipeline/summary"),
   updateApplicationStatus: (id: string, status: string) =>
     request<Application>(`/api/applications/${id}/status`, {
       method: "PATCH",
       body: JSON.stringify({ status })
     }),
   auditLogs: () => request<PageResponse<AuditLog>>("/api/admin/audit-logs"),
+  operationsSummary: () => request<OperationsSummary>("/api/admin/operations/summary"),
   aiProviderStatus: () => request<AiProviderStatus>("/api/admin/ai/provider/status"),
   reindexAiKnowledge: () =>
     request<AiReindexResponse>("/api/admin/ai/knowledge/reindex", { method: "POST" }),

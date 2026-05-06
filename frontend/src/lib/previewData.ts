@@ -1,4 +1,21 @@
-import type { AiProviderStatus, Application, AuditLog, Company, Job, Notification, PageResponse } from "@/types/domain";
+import type {
+  AiProviderStatus,
+  Application,
+  AuditLog,
+  CandidateApplicationsSummary,
+  CandidateAssessment,
+  CandidateDashboardSummary,
+  CandidateOffer,
+  CandidateRoadmap,
+  Company,
+  EmployerPipelineSummary,
+  InterviewPrep,
+  Job,
+  Notification,
+  OperationsSummary,
+  PageResponse,
+  SkillAnalytics
+} from "@/types/domain";
 
 export const previewJobs: PageResponse<Job> = {
   content: [
@@ -220,6 +237,203 @@ export const previewAiProviderStatus: AiProviderStatus = {
   checkedAt: new Date().toISOString()
 };
 
+export const previewCandidateDashboardSummary: CandidateDashboardSummary = {
+  applications: 42,
+  activeApplications: 31,
+  interviews: 8,
+  offers: 3,
+  statusDistribution: [
+    { status: "SUBMITTED", count: 12 },
+    { status: "REVIEWING", count: 11 },
+    { status: "INTERVIEW", count: 8 },
+    { status: "OFFER", count: 3 },
+    { status: "REJECTED", count: 5 },
+    { status: "WITHDRAWN", count: 3 }
+  ],
+  timeline: [
+    previewTimeline("Senior Java Platform Engineer", "INTERVIEW", "Technical interview scheduled with platform team."),
+    previewTimeline("AI Platform Backend Engineer", "OFFER", "Offer package prepared after architecture review."),
+    previewTimeline("Cloud Infrastructure Engineer", "REVIEWING", "Recruiter screening cloud blueprint experience.")
+  ]
+};
+
+export const previewCandidateApplicationsSummary: CandidateApplicationsSummary = {
+  totalApplications: 42,
+  duplicateProtectedJobs: 42,
+  statusDistribution: previewCandidateDashboardSummary.statusDistribution,
+  recentActivity: previewCandidateDashboardSummary.timeline
+};
+
+export const previewCandidateOffers: CandidateOffer[] = [
+  {
+    id: "preview-offer-ai-platform",
+    applicationId: "preview-application-ai",
+    jobTitle: "AI Platform Backend Engineer",
+    companyName: "SignalForge AI",
+    compensation: "$5,200 - $7,800 / month",
+    status: "SENT",
+    highlights: ["Architecture ownership", "Claude safety work", "Remote APAC", "Learning budget"],
+    expiresAt: daysFromNow(7),
+    createdAt: daysAgo(1)
+  },
+  {
+    id: "preview-offer-java-platform",
+    applicationId: "preview-application-java",
+    jobTitle: "Senior Java Platform Engineer",
+    companyName: "Portfolio Labs",
+    compensation: "$4,800 - $7,200 / month",
+    status: "DRAFT",
+    highlights: ["Kafka workflows", "SLO ownership", "Spring Boot platform", "Mentorship track"],
+    expiresAt: daysFromNow(12),
+    createdAt: daysAgo(2)
+  }
+];
+
+export const previewCandidateAssessments: CandidateAssessment[] = [
+  {
+    id: "preview-assessment-java",
+    title: "Java Microservices Design",
+    provider: "DevHire Labs",
+    score: 91,
+    maxScore: 100,
+    status: "PASSED",
+    skills: ["Java", "Spring Boot", "PostgreSQL", "Kafka"],
+    completedAt: daysAgo(5)
+  },
+  {
+    id: "preview-assessment-cloud",
+    title: "Cloud Infrastructure Review",
+    provider: "Cloud Guild",
+    score: 84,
+    maxScore: 100,
+    status: "PASSED",
+    skills: ["AWS", "Terraform", "EKS", "Helm"],
+    completedAt: daysAgo(9)
+  },
+  {
+    id: "preview-assessment-incident",
+    title: "Production Incident Response",
+    provider: "Platform Review Board",
+    score: 0,
+    maxScore: 100,
+    status: "IN_PROGRESS",
+    skills: ["SLO", "Runbooks", "Observability"],
+    completedAt: undefined
+  }
+];
+
+export const previewEmployerPipelineSummary: EmployerPipelineSummary = {
+  totalApplications: 240,
+  activeCandidates: 84,
+  interviewReady: 34,
+  offers: 18,
+  statusDistribution: [
+    { status: "SUBMITTED", count: 96 },
+    { status: "REVIEWING", count: 48 },
+    { status: "INTERVIEW", count: 34 },
+    { status: "OFFER", count: 18 },
+    { status: "REJECTED", count: 24 },
+    { status: "WITHDRAWN", count: 20 }
+  ],
+  recentActivity: [
+    previewTimeline("Senior Java Platform Engineer", "INTERVIEW", "Linh Nguyen moved to technical interview."),
+    previewTimeline("Cloud Infrastructure Engineer", "REVIEWING", "Aiko Sato entered recruiter review."),
+    previewTimeline("AI Platform Backend Engineer", "OFFER", "Minh Tran offer package created.")
+  ]
+};
+
+export const previewSkillAnalytics: SkillAnalytics = {
+  publishedJobs: 150,
+  averageSalaryMin: 3200,
+  averageSalaryMax: 6100,
+  topSkills: [
+    { skill: "Java", jobs: 88 },
+    { skill: "Spring Boot", jobs: 76 },
+    { skill: "Kafka", jobs: 54 },
+    { skill: "AWS", jobs: 48 },
+    { skill: "OpenSearch", jobs: 32 }
+  ],
+  topLocations: [
+    { location: "Ho Chi Minh City", jobs: 38 },
+    { location: "Remote Vietnam", jobs: 34 },
+    { location: "Hanoi", jobs: 26 },
+    { location: "Singapore / Hybrid", jobs: 18 }
+  ],
+  levelDistribution: [
+    { level: "Senior", jobs: 52 },
+    { level: "Lead", jobs: 34 },
+    { level: "Middle", jobs: 32 },
+    { level: "Principal", jobs: 18 }
+  ]
+};
+
+export const previewCandidateRoadmap: CandidateRoadmap = {
+  title: "Cloud Backend Career Roadmap",
+  currentTrack: "Java microservices, Kafka, AWS, observability",
+  readinessScore: 88,
+  milestones: [
+    {
+      title: "Production Java foundation",
+      status: "COMPLETED",
+      evidence: "Spring Boot services, RBAC, validation, Flyway, and tests.",
+      nextAction: "Prepare a concise architecture narrative."
+    },
+    {
+      title: "Event reliability",
+      status: "IN_PROGRESS",
+      evidence: "Kafka, transactional outbox, retries, and idempotency.",
+      nextAction: "Practice a duplicate-event debugging story."
+    },
+    {
+      title: "Cloud readiness",
+      status: "NEXT",
+      evidence: "Terraform AWS blueprint, Helm, External Secrets, GitOps.",
+      nextAction: "Rehearse first apply and rollback checklist."
+    }
+  ],
+  recommendedPrompts: [
+    "Quiz me on Kafka outbox failure modes",
+    "Explain my AWS blueprint to a staff engineer",
+    "Create a STAR story for a production incident"
+  ]
+};
+
+export const previewInterviewPrep: InterviewPrep[] = [
+  {
+    conversationId: "preview-interview-architecture",
+    title: "Explain the production architecture",
+    model: "claude-haiku-4-5-20251001",
+    fallback: false,
+    lastMessageAt: daysAgo(1),
+    focusAreas: ["Service boundaries", "Kafka outbox", "Cloud blueprint"]
+  },
+  {
+    conversationId: "preview-interview-security",
+    title: "Explain AI safety controls",
+    model: "claude-haiku-4-5-20251001",
+    fallback: false,
+    lastMessageAt: daysAgo(2),
+    focusAreas: ["Prompt injection", "Citations", "Fallback behavior"]
+  }
+];
+
+export const previewOperationsSummary: OperationsSummary = {
+  auditEvents: 820,
+  distinctActors: 94,
+  latestEventAt: daysAgo(0),
+  topActions: [
+    { label: "SUBMIT_APPLICATION", count: 240 },
+    { label: "CHANGE_APPLICATION_STATUS", count: 180 },
+    { label: "AI_TOOL_EXECUTED", count: 92 },
+    { label: "APPROVE_JOB", count: 64 }
+  ],
+  actorRoles: [
+    { label: "CANDIDATE", count: 420 },
+    { label: "EMPLOYER", count: 260 },
+    { label: "ADMIN", count: 140 }
+  ]
+};
+
 function previewJob(id: string, title: string, description: string, location: string, level: string, skills: string[]): Job {
   return {
     id,
@@ -260,4 +474,20 @@ function daysAgo(days: number) {
   const value = new Date();
   value.setDate(value.getDate() - days);
   return value.toISOString();
+}
+
+function daysFromNow(days: number) {
+  const value = new Date();
+  value.setDate(value.getDate() + days);
+  return value.toISOString();
+}
+
+function previewTimeline(title: string, status: string, description: string) {
+  return {
+    applicationId: `preview-${title.toLowerCase().replaceAll(" ", "-")}`,
+    title,
+    status,
+    description,
+    occurredAt: daysAgo(1)
+  };
 }

@@ -6,14 +6,19 @@ import {
   Bot,
   BriefcaseBusiness,
   Building2,
+  ChartSpline,
   ClipboardList,
   Cloud,
+  FileCheck2,
   GitBranch,
+  GraduationCap,
   LayoutDashboard,
   LogOut,
+  Map,
   Search,
   ShieldCheck,
-  UserRoundCheck
+  UserRoundCheck,
+  UsersRound
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -21,12 +26,27 @@ import { usePathname, useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { clearSession, getSession } from "@/lib/session";
 
-const navItems = [
-  { href: "/jobs", label: "Jobs", icon: BriefcaseBusiness },
-  { href: "/assistant", label: "AI Assistant", icon: Bot },
-  { href: "/candidate", label: "Candidate", icon: ClipboardList },
-  { href: "/employer", label: "Employer", icon: Building2 },
-  { href: "/admin", label: "Admin", icon: ShieldCheck }
+const navGroups = [
+  {
+    label: "Client",
+    items: [
+      { href: "/jobs", label: "Discover Jobs", icon: BriefcaseBusiness },
+      { href: "/candidate", label: "Candidate Home", icon: ClipboardList },
+      { href: "/candidate/applications", label: "Applications", icon: FileCheck2 },
+      { href: "/candidate/assessments", label: "Assessments", icon: GraduationCap },
+      { href: "/candidate/roadmap", label: "Roadmap", icon: Map }
+    ]
+  },
+  {
+    label: "Operations",
+    items: [
+      { href: "/employer", label: "Employer Pipeline", icon: Building2 },
+      { href: "/admin", label: "Admin Control", icon: ShieldCheck },
+      { href: "/assistant", label: "AI Assistant", icon: Bot },
+      { href: "/platform/observability", label: "Observability", icon: ChartSpline },
+      { href: "/community", label: "Community", icon: UsersRound }
+    ]
+  }
 ];
 
 const pageMeta: Record<string, { title: string; subtitle: string }> = {
@@ -39,8 +59,36 @@ const pageMeta: Record<string, { title: string; subtitle: string }> = {
     subtitle: "RAG answers, citations, and tool traces over the DevHire Cloud platform."
   },
   "/candidate": {
-    title: "Candidate Command Center",
-    subtitle: "Track applications, notifications, and interview movement."
+    title: "Candidate Career Hub",
+    subtitle: "Applications, offers, skill proof, roadmap, and interview prep for cloud backend roles."
+  },
+  "/candidate/applications": {
+    title: "Application Tracker",
+    subtitle: "A candidate-facing pipeline for status movement, duplicate protection, and offer readiness."
+  },
+  "/candidate/profile": {
+    title: "Candidate Profile",
+    subtitle: "Portfolio-grade profile and preferences for job matching."
+  },
+  "/candidate/assessments": {
+    title: "Skill Assessment",
+    subtitle: "Verified skill evidence for Java, cloud, event reliability, and production operations."
+  },
+  "/candidate/offers": {
+    title: "Offer Review",
+    subtitle: "Offer letters, compensation signals, and acceptance checkpoints."
+  },
+  "/candidate/interview-prep": {
+    title: "AI Interview Prep",
+    subtitle: "Claude-backed practice prompts, citations, and tool traces for production interviews."
+  },
+  "/candidate/roadmap": {
+    title: "Cloud Career Roadmap",
+    subtitle: "Milestones, readiness score, and next actions for senior backend growth."
+  },
+  "/candidate/skill-analytics": {
+    title: "Cloud Skill Analytics",
+    subtitle: "Market demand, salary bands, locations, and skill frequency from published jobs."
   },
   "/employer": {
     title: "Employer Hiring Console",
@@ -49,6 +97,22 @@ const pageMeta: Record<string, { title: string; subtitle: string }> = {
   "/admin": {
     title: "Administrative Control Plane",
     subtitle: "Approve companies, promote jobs, and inspect audit events."
+  },
+  "/platform/observability": {
+    title: "Observability & Event Streaming",
+    subtitle: "Domain KPIs, event reliability, SLO posture, and operational runbooks."
+  },
+  "/platform/cloud": {
+    title: "Infrastructure & K8s Control Plane",
+    subtitle: "AWS blueprint, Helm, External Secrets, GitOps, and deployment guardrails."
+  },
+  "/platform/releases": {
+    title: "CI/CD & Deployment Registry",
+    subtitle: "Release evidence, workflow status, image provenance, and reviewer verification."
+  },
+  "/community": {
+    title: "Engineering Community Hub",
+    subtitle: "Curated learning paths, portfolio proof, and cloud backend interview practice."
   },
   "/login": {
     title: "Secure Access",
@@ -88,16 +152,21 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </span>
         </Link>
         <nav className="nav-list" aria-label="Primary">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const active = pathname.startsWith(item.href);
-            return (
-              <Link key={item.href} href={item.href} className={active ? "nav-item active" : "nav-item"}>
-                <Icon size={18} />
-                <span>{item.label}</span>
-              </Link>
-            );
-          })}
+          {navGroups.map((group) => (
+            <div className="nav-group" key={group.label}>
+              <span className="nav-group-label">{group.label}</span>
+              {group.items.map((item) => {
+                const Icon = item.icon;
+                const active = pathname === item.href || (item.href !== "/candidate" && pathname.startsWith(`${item.href}/`));
+                return (
+                  <Link key={item.href} href={item.href} className={active ? "nav-item active" : "nav-item"}>
+                    <Icon size={18} />
+                    <span>{item.label}</span>
+                  </Link>
+                );
+              })}
+            </div>
+          ))}
         </nav>
         <div className="rail-health" aria-label="Platform health">
           <span className="rail-kicker">Platform signals</span>

@@ -141,3 +141,120 @@ export type PageResponse<T> = {
   number: number;
   size: number;
 };
+
+export type StatusCount = {
+  status: string;
+  count: number;
+};
+
+export type CandidateTimelineItem = {
+  applicationId: string;
+  title: string;
+  status: string;
+  description: string;
+  occurredAt: string;
+};
+
+export type CandidateDashboardSummary = {
+  applications: number;
+  activeApplications: number;
+  interviews: number;
+  offers: number;
+  statusDistribution: StatusCount[];
+  timeline: CandidateTimelineItem[];
+};
+
+export type CandidateApplicationsSummary = {
+  totalApplications: number;
+  duplicateProtectedJobs: number;
+  statusDistribution: StatusCount[];
+  recentActivity: CandidateTimelineItem[];
+};
+
+export type CandidateOffer = {
+  id: string;
+  applicationId: string;
+  jobTitle: string;
+  companyName: string;
+  compensation: string;
+  status: string;
+  highlights: string[];
+  expiresAt?: string;
+  createdAt: string;
+};
+
+export type CandidateAssessment = {
+  id: string;
+  title: string;
+  provider: string;
+  score: number;
+  maxScore: number;
+  status: string;
+  skills: string[];
+  completedAt?: string;
+};
+
+export type EmployerPipelineSummary = {
+  totalApplications: number;
+  activeCandidates: number;
+  interviewReady: number;
+  offers: number;
+  statusDistribution: StatusCount[];
+  recentActivity: CandidateTimelineItem[];
+};
+
+export type SkillDemand = {
+  skill: string;
+  jobs: number;
+};
+
+export type LocationDemand = {
+  location: string;
+  jobs: number;
+};
+
+export type LevelDemand = {
+  level: string;
+  jobs: number;
+};
+
+export type SkillAnalytics = {
+  publishedJobs: number;
+  averageSalaryMin: number;
+  averageSalaryMax: number;
+  topSkills: SkillDemand[];
+  topLocations: LocationDemand[];
+  levelDistribution: LevelDemand[];
+};
+
+export type RoadmapMilestone = {
+  title: string;
+  status: string;
+  evidence: string;
+  nextAction: string;
+};
+
+export type CandidateRoadmap = {
+  title: string;
+  currentTrack: string;
+  readinessScore: number;
+  milestones: RoadmapMilestone[];
+  recommendedPrompts: string[];
+};
+
+export type InterviewPrep = {
+  conversationId: string;
+  title: string;
+  model: string;
+  fallback: boolean;
+  lastMessageAt: string;
+  focusAreas: string[];
+};
+
+export type OperationsSummary = {
+  auditEvents: number;
+  distinctActors: number;
+  latestEventAt?: string;
+  topActions: { label: string; count: number }[];
+  actorRoles: { label: string; count: number }[];
+};
