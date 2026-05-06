@@ -3294,3 +3294,13 @@ Verification:
 
 - Wired `demo-data-summary.ps1 -Aggregates -Json` into `portfolio-verify.ps1 -Docs`.
 - Updated review evidence so the deterministic 1,108-row portfolio dataset and domain distributions are part of the default reviewer proof path, not only a standalone optional script.
+
+## v0.7 Auth JWT coverage ratchet
+
+- Added focused `JwtService` tests for:
+  - signed access-token claims and authentication,
+  - Redis blacklist rejection,
+  - blacklist TTL persistence,
+  - invalid token rejection,
+  - JWT property default TTLs and minimum secret validation.
+- Raised the `auth-service` coverage gate from 44% to 60% after coverage increased to 67.4%.
