@@ -23,6 +23,65 @@ $expected = @(
     [pscustomobject]@{ Service = "ai-service"; Database = "devhire_ai"; Table = "ai_conversations"; PortfolioRows = 20; Purpose = "Claude assistant conversation history and usage evidence" }
 )
 
+function New-ExpectedAggregate {
+    param(
+        [Parameter(Mandatory = $true)][string]$Name,
+        [Parameter(Mandatory = $true)][object[]]$Rows
+    )
+
+    [pscustomobject]@{
+        Name = $Name
+        Source = "migration formulas"
+        Rows = $Rows
+    }
+}
+
+function Get-ExpectedAggregates {
+    $aggregates = @()
+    $aggregates += New-ExpectedAggregate -Name "Companies by status" -Rows @(
+            [pscustomobject]@{ Dimension = "APPROVED"; Count = 21; Evidence = "public job eligibility and employer dashboards" },
+            [pscustomobject]@{ Dimension = "PENDING"; Count = 2; Evidence = "admin approval queue" },
+            [pscustomobject]@{ Dimension = "REJECTED"; Count = 1; Evidence = "admin rejection path" }
+        )
+    $aggregates += New-ExpectedAggregate -Name "Jobs by status" -Rows @(
+            [pscustomobject]@{ Dimension = "PUBLISHED"; Count = 150; Evidence = "public search, filters, pagination" },
+            [pscustomobject]@{ Dimension = "PENDING_REVIEW"; Count = 15; Evidence = "admin job approval queue" },
+            [pscustomobject]@{ Dimension = "CLOSED"; Count = 10; Evidence = "closed posting state" },
+            [pscustomobject]@{ Dimension = "DRAFT"; Count = 3; Evidence = "employer draft state" },
+            [pscustomobject]@{ Dimension = "REJECTED"; Count = 2; Evidence = "admin rejection path" }
+        )
+    $aggregates += New-ExpectedAggregate -Name "Applications by status" -Rows @(
+            [pscustomobject]@{ Dimension = "SUBMITTED"; Count = 130; Evidence = "candidate submitted pipeline" },
+            [pscustomobject]@{ Dimension = "REVIEWING"; Count = 33; Evidence = "employer screening queue" },
+            [pscustomobject]@{ Dimension = "INTERVIEW"; Count = 27; Evidence = "interview stage dashboard" },
+            [pscustomobject]@{ Dimension = "REJECTED"; Count = 19; Evidence = "rejection state and history" },
+            [pscustomobject]@{ Dimension = "OFFER"; Count = 17; Evidence = "offer stage KPI" },
+            [pscustomobject]@{ Dimension = "WITHDRAWN"; Count = 14; Evidence = "candidate withdrawal path" }
+        )
+    $aggregates += New-ExpectedAggregate -Name "Notifications by email status" -Rows @(
+            [pscustomobject]@{ Dimension = "PENDING"; Count = 151; Evidence = "delivery backlog and unread pagination" },
+            [pscustomobject]@{ Dimension = "SENT"; Count = 36; Evidence = "Mailpit/email success evidence" },
+            [pscustomobject]@{ Dimension = "FAILED_RETRYABLE"; Count = 15; Evidence = "retry queue and alerting" },
+            [pscustomobject]@{ Dimension = "FAILED_PERMANENT"; Count = 9; Evidence = "permanent failure handling" },
+            [pscustomobject]@{ Dimension = "SKIPPED_NO_EMAIL"; Count = 9; Evidence = "fallback internal notification" }
+        )
+    $aggregates += New-ExpectedAggregate -Name "Top audit actions" -Rows @(
+            [pscustomobject]@{ Dimension = "SEARCH_JOBS"; Count = 151; Evidence = "candidate search activity" },
+            [pscustomobject]@{ Dimension = "LOGIN"; Count = 35; Evidence = "auth audit volume" },
+            [pscustomobject]@{ Dimension = "CREATE_COMPANY"; Count = 28; Evidence = "employer onboarding audit" },
+            [pscustomobject]@{ Dimension = "CREATE_JOB"; Count = 18; Evidence = "job authoring audit" },
+            [pscustomobject]@{ Dimension = "APPROVE_COMPANY"; Count = 18; Evidence = "admin company approval audit" },
+            [pscustomobject]@{ Dimension = "SUBMIT_APPLICATION"; Count = 13; Evidence = "candidate application audit" },
+            [pscustomobject]@{ Dimension = "CHANGE_APPLICATION_STATUS"; Count = 7; Evidence = "pipeline transition audit" },
+            [pscustomobject]@{ Dimension = "APPROVE_JOB"; Count = 6; Evidence = "admin job approval audit" },
+            [pscustomobject]@{ Dimension = "AI_TOOL_EXECUTED"; Count = 4; Evidence = "AI assistant audit trail" }
+        )
+    $aggregates += New-ExpectedAggregate -Name "AI usage fallback" -Rows @(
+            [pscustomobject]@{ Dimension = "fallback=true"; Count = 20; Evidence = "CI-safe Claude Haiku fallback and citation evidence" }
+        )
+    return $aggregates
+}
+
 function Invoke-ScalarSql {
     param(
         [Parameter(Mandatory = $true)][string]$Database,
@@ -109,6 +168,10 @@ try {
     }
 
     $runtimeAggregates = @()
+    $expectedAggregates = @()
+    if ($Aggregates) {
+        $expectedAggregates = Get-ExpectedAggregates
+    }
     if ($FromDocker -and $Aggregates) {
         $runtimeAggregates = Get-RuntimeAggregates
     }
@@ -116,6 +179,7 @@ try {
     if ($Json) {
         [pscustomobject]@{
             ExpectedRows = $rows
+            ExpectedAggregates = $expectedAggregates
             Aggregates = $runtimeAggregates
         } | ConvertTo-Json -Depth 8
     } else {
@@ -123,14 +187,23 @@ try {
         $total = ($rows | Measure-Object -Property PortfolioRows -Sum).Sum
         Write-Host ""
         Write-Host "Expected portfolio volume seed rows: $total"
-        if ($runtimeAggregates.Count -gt 0) {
-            foreach ($aggregate in $runtimeAggregates) {
+        if ($expectedAggregates.Count -gt 0) {
+            foreach ($aggregate in $expectedAggregates) {
                 Write-Host ""
-                Write-Host $aggregate.Name
+                Write-Host "Expected $($aggregate.Name)"
                 $aggregate.Rows | Format-Table -AutoSize
             }
         }
-        if (-not $FromDocker) {
+        if ($runtimeAggregates.Count -gt 0) {
+            foreach ($aggregate in $runtimeAggregates) {
+                Write-Host ""
+                Write-Host "Runtime $($aggregate.Name)"
+                $aggregate.Rows | Format-Table -AutoSize
+            }
+        }
+        if (-not $FromDocker -and -not $Aggregates) {
+            Write-Host "Tip: add -Aggregates for expected distribution evidence, or add -FromDocker after 'docker compose up -d' to compare expected vs runtime table counts."
+        } elseif (-not $FromDocker) {
             Write-Host "Tip: add -FromDocker after 'docker compose up -d' to compare expected vs runtime table counts."
         } elseif (-not $Aggregates) {
             Write-Host "Tip: add -Aggregates to show status distributions for runtime dashboards."

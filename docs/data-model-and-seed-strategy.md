@@ -52,6 +52,12 @@ Static expected counts:
 .\scripts\demo-data-summary.ps1
 ```
 
+Static expected status/action distributions:
+
+```powershell
+.\scripts\demo-data-summary.ps1 -Aggregates
+```
+
 Runtime table counts and domain aggregates after Docker is running:
 
 ```powershell
@@ -83,3 +89,16 @@ Generated reports are written under `reports/` and stay ignored.
 | Runtime service health | actuator, JVM, Hikari, Prometheus scrape status |
 
 The dataset is synthetic and safe to commit. It contains no real candidate resumes, credentials, provider keys, or production emails.
+
+## Reviewer Distribution Snapshot
+
+The reviewer dataset is not a random dump. The distributions are shaped to exercise product screens and domain metrics:
+
+| Domain | Expected distribution |
+|---|---|
+| Company review | 21 approved, 2 pending, 1 rejected |
+| Job lifecycle | 150 published, 15 pending review, 10 closed, 3 draft, 2 rejected |
+| Application pipeline | 130 submitted, 33 reviewing, 27 interview, 19 rejected, 17 offer, 14 withdrawn |
+| Email delivery | 151 pending, 36 sent, 15 retryable failures, 9 permanent failures, 9 skipped because no email |
+| Audit activity | search-heavy candidate traffic plus login, company/job approval, application, and AI tool events |
+| AI evidence | fallback-backed Claude Haiku conversations with citations and tool traces for CI-safe review |
