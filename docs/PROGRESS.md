@@ -12,12 +12,14 @@ This file records implementation progress, verification commands, and commit bou
 - Added deterministic Flyway-backed candidate offer and assessment data in `application-service`.
 - Added a user-service profile persistence hardening slice: case-insensitive email uniqueness, repository lookup helpers, and a Testcontainers-backed repository IT for Flyway seed profile segmentation.
 - Hardened `migration-smoke.ps1` with an early Docker daemon preflight so reviewer runs fail fast and clearly when Docker Desktop is not available.
+- Added company-service workflow hardening tests for duplicate slug rejection, invalid slug rejection, admin reject reason persistence, non-admin approval blocking, and outbox event publishing.
 - Documented the Stitch-to-route mapping in `docs/ui-redesign-v0.6.md` and updated the design system notes.
 
 Verification:
 
 - `mvn -T1 -pl application-service,job-service,ai-service,audit-service,api-gateway -am test` passed.
 - `mvn -T1 -pl user-service -am verify` passed; `UserProfileRepositoryIT` was skipped because Docker daemon was not available in this local session.
+- `mvn -T1 -pl company-service -am test` passed after company workflow hardening.
 - `.\scripts\migration-smoke.ps1 -Services user-service -SkipStart` now fails fast with a clear Docker daemon availability message when Docker Desktop is off.
 - `cd frontend && npm run typecheck` passed.
 - `cd frontend && npm run build` passed.

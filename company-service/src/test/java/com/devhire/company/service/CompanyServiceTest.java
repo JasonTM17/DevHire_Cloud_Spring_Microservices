@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class CompanyServiceTest {
@@ -44,6 +45,27 @@ class CompanyServiceTest {
 
         assertThat(response.slug()).isEqualTo("devhire-labs");
         assertThat(response.status()).isEqualTo(CompanyStatus.PENDING);
+        verify(eventPublisher).publishAudit(any());
+    }
+
+    @Test
+    void duplicateSlugIsRejectedBeforePersistence() {
+        when(repository.existsBySlug("devhire-labs")).thenReturn(true);
+
+        assertThatThrownBy(() -> service.create(
+                new AuthenticatedUser(UUID.randomUUID(), "employer@example.com", UserRole.EMPLOYER),
+                new CompanyCreateRequest("DevHire Labs", null, null, null, null, null)
+        )).isInstanceOf(DevHireException.class)
+                .hasMessageContaining("Company slug already exists");
+    }
+
+    @Test
+    void invalidCompanyNameCannotProduceSlug() {
+        assertThatThrownBy(() -> service.create(
+                new AuthenticatedUser(UUID.randomUUID(), "employer@example.com", UserRole.EMPLOYER),
+                new CompanyCreateRequest("!!!", null, null, null, null, null)
+        )).isInstanceOf(DevHireException.class)
+                .hasMessageContaining("Company name cannot produce a valid slug");
     }
 
     @Test
@@ -67,6 +89,36 @@ class CompanyServiceTest {
         var response = service.approve(new AuthenticatedUser(UUID.randomUUID(), "admin@example.com", UserRole.ADMIN), companyId);
 
         assertThat(response.status()).isEqualTo(CompanyStatus.APPROVED);
+        verify(eventPublisher).publishAudit(any());
+        verify(eventPublisher).publishCompanyReviewed(any());
+    }
+
+    @Test
+    void nonAdminCannotApproveCompany() {
+        assertThatThrownBy(() -> service.approve(
+                new AuthenticatedUser(UUID.randomUUID(), "employer@example.com", UserRole.EMPLOYER),
+                UUID.randomUUID()
+        )).isInstanceOf(DevHireException.class)
+                .hasMessageContaining("Required role: ADMIN");
+    }
+
+    @Test
+    void adminRejectsCompanyWithReason() {
+        Company company = new Company(UUID.randomUUID(), "DevHire Labs", "devhire-labs", null, null, null, null, null);
+        UUID companyId = UUID.randomUUID();
+        ReflectionTestUtils.setField(company, "id", companyId);
+        ReflectionTestUtils.setField(company, "createdAt", Instant.parse("2026-05-02T00:00:00Z"));
+        ReflectionTestUtils.setField(company, "updatedAt", Instant.parse("2026-05-02T00:00:00Z"));
+        when(repository.findById(companyId)).thenReturn(Optional.of(company));
+
+        var response = service.reject(
+                new AuthenticatedUser(UUID.randomUUID(), "admin@example.com", UserRole.ADMIN),
+                companyId,
+                "Missing company verification");
+
+        assertThat(response.status()).isEqualTo(CompanyStatus.REJECTED);
+        assertThat(response.rejectionReason()).isEqualTo("Missing company verification");
+        verify(eventPublisher).publishAudit(any());
+        verify(eventPublisher).publishCompanyReviewed(any());
     }
 }
-
