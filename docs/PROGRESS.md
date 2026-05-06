@@ -3304,3 +3304,12 @@ Verification:
   - invalid token rejection,
   - JWT property default TTLs and minimum secret validation.
 - Raised the `auth-service` coverage gate from 44% to 60% after coverage increased to 67.4%.
+
+## v0.7 Common contract coverage ratchet
+
+- Added common web contract tests for:
+  - domain exceptions preserving status, path, and trace id,
+  - data-integrity errors mapping to safe conflict responses without leaking SQL details,
+  - unexpected exceptions returning stable internal-error responses,
+  - correlation id preservation, generation, response header propagation, and MDC cleanup.
+- Raised the `common-lib` coverage gate from 48% to 60% after coverage increased to 67.5%.
