@@ -39,6 +39,7 @@ DevHire Cloud models a compact ITviec / LinkedIn Jobs platform with authenticati
 | 5 / 15 / 30 minute review route | [professional-review-map.md](professional-review-map.md) |
 | Production scorecard | [production-engineering-scorecard.md](production-engineering-scorecard.md) |
 | Runtime proof | [runtime-evidence-v0.4.md](runtime-evidence-v0.4.md) |
+| Portfolio demo data | [demo-data.md](demo-data.md) |
 | Service catalog | [service-catalog.md](service-catalog.md) |
 | Architecture decisions | [architecture-review-index.md](architecture-review-index.md) |
 | API compatibility | [api-compatibility.md](api-compatibility.md) |

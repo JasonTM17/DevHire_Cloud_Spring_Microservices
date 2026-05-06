@@ -3073,3 +3073,29 @@ Committed as `fix(terraform): avoid powershell builtin variable collision`.
   - `.\scripts\check-coverage.ps1`
   - `.\scripts\portfolio-verify.ps1 -Docs -Docker -Cloud`
   - `git diff --check`
+
+## v0.5.0 Portfolio volume demo data
+
+- Added a second, high-volume synthetic seed layer on top of the original compact demo data.
+- Kept service-owned Flyway migrations instead of a shared fixture so each microservice still owns its own database and seed lifecycle.
+- Added deterministic portfolio data:
+  - 72 generated auth accounts and matching user profiles,
+  - 24 fictional companies across approved, pending, and rejected states,
+  - 180 jobs across published, review, closed, draft, and rejected states,
+  - 240 applications with status history,
+  - 220 notifications with SMTP delivery/retry states,
+  - 280 audit logs,
+  - 20 AI conversations with assistant messages, citations, tool traces, and usage events.
+- Expanded frontend preview data so reviewer screenshots and offline preview mode show realistic volume counts instead of tiny demo lists.
+- Added `docs/demo-data.md` and `scripts/demo-data-summary.ps1` for reviewer-facing dataset inspection.
+
+Verification:
+
+- `mvn -T1 clean verify`
+- `cd frontend; npm run typecheck; npm run build; npm run e2e:all`
+- `.\scripts\docs-quality.ps1`
+- `.\scripts\docs-parity.ps1`
+- `.\scripts\demo-data-summary.ps1`
+- PostgreSQL seed migration smoke across auth, user, company, job, application, notification, audit, and ai temporary databases
+- `.\scripts\portfolio-verify.ps1 -Docs -Docker`
+- `git diff --check`

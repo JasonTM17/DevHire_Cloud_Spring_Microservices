@@ -32,6 +32,7 @@ DevHire Cloud is a production-grade Java 21/Spring Boot microservices portfolio 
 | Latest public release | [v0.4.6 release](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.4.6) |
 | Canonical reviewer evidence | [Review evidence pack](docs/REVIEW_EVIDENCE.md) |
 | Runtime proof | [Runtime evidence v0.4](docs/runtime-evidence-v0.4.md) |
+| Portfolio demo data | [Synthetic volume seed](docs/demo-data.md) |
 | 5/15/30 minute review route | [Professional review map](docs/professional-review-map.md) |
 | Root layout | [Repository structure](docs/repository-structure.md) |
 | Service boundaries | [Service catalog](docs/service-catalog.md) |

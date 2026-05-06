@@ -14,6 +14,7 @@ Read:
 - `docs/service-catalog.md`
 - `docs/architecture-review-index.md`
 - `docs/design-system.md`
+- `docs/demo-data.md`
 - `docs/evidence-manifest.md`
 - `docs/runtime-acceptance-matrix.md`
 - `docs/release-evidence/v0.4.6.md`
@@ -62,6 +63,7 @@ For a short static gate:
 .\scripts\evidence-audit.ps1
 .\scripts\repo-hygiene.ps1
 .\scripts\runtime-evidence-summary.ps1
+.\scripts\demo-data-summary.ps1
 ```
 
 For runtime proof after the Docker stack is up:

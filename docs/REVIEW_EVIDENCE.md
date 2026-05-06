@@ -13,6 +13,7 @@ This is the short reviewer-facing evidence path. `docs/PROGRESS.md` remains an i
 | Dependabot posture | Zero-noise cleanup applied: open Dependabot PR count is 0; future updates are handled through scheduled curated batches |
 | E2E posture | `cd frontend && npm run e2e:all` is self-starting and passed locally with 5 desktop + 2 mobile smoke tests |
 | Coverage posture | Parent JaCoCo baseline raised to 35%; per-module script thresholds ratchet current measured modules |
+| Demo data posture | Synthetic portfolio volume seed adds 1,108 primary records across service-owned databases; see [demo-data.md](demo-data.md) |
 | Deployment posture | Prod Helm avoids `latest`, requires secret refs, cloud policy audit passes, and Terraform validation is race-safe |
 
 Latest hardening evidence: [v0.4.9 cloud completion evidence](release-evidence/v0.4.9.md).
@@ -42,6 +43,7 @@ Latest hardening evidence: [v0.4.9 cloud completion evidence](release-evidence/v
 .\scripts\cloud-policy-audit.ps1
 .\scripts\cloud-verify.ps1
 .\scripts\cloud-evidence-summary.ps1
+.\scripts\demo-data-summary.ps1
 ```
 
 Reviewer-friendly frontend browser proof:
