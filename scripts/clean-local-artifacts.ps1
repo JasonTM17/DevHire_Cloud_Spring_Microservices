@@ -95,6 +95,20 @@ Get-ChildItem -Path $repoRoot -File -Recurse -Include "hs_err_pid*.log", "replay
         if ($null -ne $candidate) { $candidates.Add($candidate) }
     }
 
+Get-ChildItem -Path (Join-Path $repoRoot "deploy\terraform") -Directory -Recurse -Filter ".terraform" -Force -ErrorAction SilentlyContinue |
+    ForEach-Object {
+        $relative = Get-WorkspaceRelativePath -FullPath $_.FullName
+        $candidate = New-Candidate -Path $relative -Reason "Generated Terraform provider/module cache." -DeleteByDefault $true
+        if ($null -ne $candidate) { $candidates.Add($candidate) }
+    }
+
+Get-ChildItem -Path (Join-Path $repoRoot "deploy\terraform") -File -Recurse -Filter ".terraform.lock.hcl" -Force -ErrorAction SilentlyContinue |
+    ForEach-Object {
+        $relative = Get-WorkspaceRelativePath -FullPath $_.FullName
+        $candidate = New-Candidate -Path $relative -Reason "Generated Terraform provider lock file from local validation." -DeleteByDefault $true
+        if ($null -ne $candidate) { $candidates.Add($candidate) }
+    }
+
 $envCandidate = New-Candidate -Path ".env" -Reason "Ignored local secret file; kept by default." -DeleteByDefault ([bool]$IncludeLocalEnv)
 if ($null -ne $envCandidate) { $candidates.Add($envCandidate) }
 

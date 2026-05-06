@@ -3,6 +3,7 @@ param(
     [switch]$Backend,
     [switch]$Frontend,
     [switch]$Docker,
+    [switch]$Cloud,
     [switch]$Runtime,
     [switch]$Security,
     [switch]$Docs,
@@ -59,7 +60,7 @@ $scopedEnvNames = @(
 )
 
 function Enable-DefaultScopes {
-    if (-not ($Backend -or $Frontend -or $Docker -or $Runtime -or $Security -or $Docs -or $PublicFacade -or $E2EPreview -or $All)) {
+    if (-not ($Backend -or $Frontend -or $Docker -or $Cloud -or $Runtime -or $Security -or $Docs -or $PublicFacade -or $E2EPreview -or $All)) {
         $script:Docs = $true
         $script:Docker = $true
     }
@@ -68,6 +69,7 @@ function Enable-DefaultScopes {
         $script:Backend = $true
         $script:Frontend = $true
         $script:Docker = $true
+        $script:Cloud = $true
         $script:Runtime = $true
         $script:Security = $true
         $script:Docs = $true
@@ -161,6 +163,7 @@ function Write-PortfolioReport {
             backend = [bool]$Backend
             frontend = [bool]$Frontend
             docker = [bool]$Docker
+            cloud = [bool]$Cloud
             runtime = [bool]$Runtime
             security = [bool]$Security
             docs = [bool]$Docs
@@ -292,6 +295,12 @@ try {
                 docker compose up -d --build
                 Assert-LastExitCode "docker compose up"
             }
+        }
+    }
+
+    if ($Cloud) {
+        Invoke-PortfolioStep "cloud blueprint verification" ".\scripts\cloud-verify.ps1" {
+            & "$PSScriptRoot\cloud-verify.ps1"
         }
     }
 

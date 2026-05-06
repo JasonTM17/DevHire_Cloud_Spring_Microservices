@@ -5,10 +5,31 @@ DevHire Cloud is cloud-ready as a blueprint and evidence package. It is not pret
 ## What Is Deployable Now
 
 - Docker Compose local stack with PostgreSQL, Redis, Kafka, OpenSearch, Mailpit, Prometheus, Grafana, Loki, Tempo, backend services, AI service, and frontend.
+- Raw Kubernetes manifests for all backend services, including `ai-service`, with explicit SHA/release placeholder tags instead of `latest`.
 - Helm chart with local, staging, prod, AWS staging, and AWS prod values.
-- Argo CD sample applications for local-style and AWS-style GitOps review.
+- Argo CD sample applications for local-style and AWS-style GitOps review on the repository `master` branch.
 - Terraform AWS blueprint with modules for network, EKS, data services, container repositories, and secret placeholders.
 - External Secrets wiring that references AWS Secrets Manager placeholders.
+
+## v0.4.8 Cloud Verification Contract
+
+The reviewer-facing cloud gate is Docker-first so it still works when local Terraform, Helm, or kubeconform binaries are not installed.
+
+```powershell
+.\scripts\cloud-verify.ps1
+.\scripts\portfolio-verify.ps1 -Cloud
+```
+
+The script verifies:
+
+| Check | Expected result |
+|---|---|
+| Terraform | `fmt`, `init -backend=false`, and `validate` for `dev`, `staging`, and `prod`; no `terraform apply` |
+| Helm | `lint` and `template` for local, staging, prod, AWS staging, and AWS prod values |
+| Raw Kubernetes | `kubectl kustomize deploy/k8s` renders successfully and includes `ai-service` |
+| Image posture | Raw K8s and Helm defaults do not use `latest` |
+| GitOps branch | Argo CD baseline uses `targetRevision: master` |
+| Credentials | AWS credentials are not required for validation |
 
 ## What Requires A Real AWS Account
 
@@ -50,7 +71,8 @@ Audit command:
 - image tags must be release or commit-SHA based; the prod file uses `sha-REPLACE_WITH_GIT_SHA` as an explicit replacement marker instead of `latest`;
 - `imagePullPolicy` is `Always` so a new immutable tag is pulled during rollout;
 - `global.requireSecretRefs=true`, so pods that need secret material cannot silently boot without the expected Kubernetes Secret;
-- local values keep secret refs optional for `helm template` and reviewer-friendly development.
+- local values keep secret refs optional for `helm template` and reviewer-friendly development;
+- default chart values are safe to render and do not create example secrets unless the local values file explicitly asks for them.
 
 ## Remote State Migration
 
@@ -106,9 +128,11 @@ See `docs/cost-estimate.md` before enabling any of them.
 ## Reviewer Commands
 
 ```powershell
-.\scripts\terraform-validate.ps1 -SkipTflint -SkipTrivy
-helm template devhire-cloud .\deploy\helm\devhire-cloud -f .\deploy\helm\devhire-cloud\values-aws-staging.yaml
-helm template devhire-cloud .\deploy\helm\devhire-cloud -f .\deploy\helm\devhire-cloud\values-aws-prod.yaml
+.\scripts\cloud-verify.ps1
+.\scripts\portfolio-verify.ps1 -Cloud
+.\scripts\terraform-validate.ps1
+docker compose config --quiet
+kubectl kustomize deploy\k8s
 ```
 
-Use the full Terraform validation script without skip flags when Docker has enough time and network access to pull the scanner images.
+`cloud-verify.ps1` will use local `helm`/`kubectl` when available and containerized tools when they are missing. It writes ignored reports under `reports/cloud-verify/`.

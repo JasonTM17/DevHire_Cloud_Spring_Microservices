@@ -23,6 +23,7 @@ DevHire Cloud is a production-grade Java 21/Spring Boot microservices portfolio 
 | Branch protection | Applied on `master` | Required check contexts audited before apply |
 | Dependabot queue | 0 open PRs after zero-noise cleanup | Remaining updates are handled by scheduled curated batches |
 | E2E preview | Self-starting desktop + mobile smoke passed locally | `cd frontend && npm run e2e:all` |
+| Cloud blueprint | AWS blueprint ready, not applied | `.\scripts\cloud-verify.ps1`; no AWS credentials or Terraform apply required |
 
 ## Reviewer Quick Links
 
@@ -61,6 +62,20 @@ Runtime gate when the Docker stack is running:
 .\scripts\portfolio-verify.ps1 -Runtime -GatewayUrl http://localhost:8080
 ```
 
+Cloud blueprint gate without AWS credentials:
+
+```powershell
+.\scripts\cloud-verify.ps1
+.\scripts\portfolio-verify.ps1 -Cloud
+```
+
+Clean generated local artifacts before handing the repo to a reviewer:
+
+```powershell
+.\scripts\clean-local-artifacts.ps1 -DryRun
+.\scripts\clean-local-artifacts.ps1 -Apply
+```
+
 ## 30-Second Review
 
 DevHire Cloud is a production engineering portfolio, not a single-service CRUD demo. It shows how a recruitment platform can be decomposed into service-owned databases, secured through a gateway, coordinated with Kafka/outbox events, searched through OpenSearch, operated with SLO dashboards, released through CI/CD, and explained through a Claude Haiku assistant.
@@ -83,7 +98,7 @@ Best reviewer path:
 | Event reliability | Kafka events, transactional outbox, retry/dead-letter states, idempotent consumers |
 | Operations | Prometheus, Grafana SLO dashboard, Loki, Tempo, OpenTelemetry, Mailpit, chaos smoke, DR scripts |
 | Delivery | GitHub Actions, Docker matrix builds, GHCR release images, release notes, release evidence |
-| Cloud readiness | Kubernetes, Helm, Argo CD, AWS Terraform blueprint, External Secrets wiring |
+| Cloud readiness | Kubernetes raw manifests, Helm, Argo CD, AWS Terraform blueprint, External Secrets wiring, Dockerized cloud verification |
 | AI portfolio layer | Claude Haiku assistant, RAG-style citations, fallback mode, tool traces, AI evaluation script |
 
 ## Portfolio Screenshots

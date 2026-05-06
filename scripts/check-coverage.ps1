@@ -5,12 +5,12 @@ param(
 $ErrorActionPreference = "Stop"
 
 $thresholds = @{
-    "ai-service"           = 0.44
-    "api-gateway"          = 0.36
+    "ai-service"           = 0.445
+    "api-gateway"          = 0.365
     "application-service"  = 0.63
     "audit-service"        = 0.63
-    "auth-service"         = 0.43
-    "common-lib"           = 0.40
+    "auth-service"         = 0.44
+    "common-lib"           = 0.41
     "company-service"      = 0.62
     "job-service"          = 0.52
     "notification-service" = 0.75

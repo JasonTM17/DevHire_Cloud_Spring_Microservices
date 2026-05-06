@@ -29,6 +29,7 @@ DevHire Cloud models a compact ITviec / LinkedIn Jobs platform with authenticati
 | Branch protection | `master` protected; strict admin enforcement is part of the v0.4.7 gate | [Branch protection](branch-protection.md) |
 | Dependabot queue | 0 open PRs after zero-noise cleanup | [Dependabot cleanup](dependabot-cleanup-v0.4.md) |
 | E2E smoke | Self-starting desktop and mobile frontend smoke | `cd frontend && npm run e2e:all` |
+| Cloud blueprint | AWS blueprint ready, not applied | `.\scripts\cloud-verify.ps1`; no AWS credentials or Terraform apply required |
 
 ## Reviewer Quick Links
 
@@ -63,6 +64,20 @@ Full runtime gate after the Docker stack is running:
 
 ```powershell
 .\scripts\portfolio-verify.ps1 -Runtime -GatewayUrl http://localhost:8080
+```
+
+Cloud blueprint verification without AWS credentials:
+
+```powershell
+.\scripts\cloud-verify.ps1
+.\scripts\portfolio-verify.ps1 -Cloud
+```
+
+Clean generated local artifacts before review:
+
+```powershell
+.\scripts\clean-local-artifacts.ps1 -DryRun
+.\scripts\clean-local-artifacts.ps1 -Apply
 ```
 
 ## Architecture

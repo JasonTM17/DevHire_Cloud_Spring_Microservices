@@ -1,7 +1,8 @@
 global:
   namespace: devhire-staging
   imageRegistry: ghcr.io/jasontm17/devhire
-  imageTag: staging
+  imageTag: sha-REPLACE_WITH_GIT_SHA
+  imagePullPolicy: Always
   publicDomain: staging.devhire.invalid
   publicBaseUrl: https://staging.devhire.invalid
   smtpFrom: no-reply@staging.devhire.invalid
