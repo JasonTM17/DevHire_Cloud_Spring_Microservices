@@ -2938,3 +2938,21 @@ Verification:
 - `.\scripts\terraform-validate.ps1` passed on 2026-05-06 for dev, staging, and prod.
 
 Committed as `fix(terraform): serialize cloud validation cleanup`.
+
+## Phase 141 - AWS blueprint guardrail hardening
+
+- Added `scripts/cloud-policy-audit.ps1` as a reviewer-facing cloud posture gate for Helm, raw Kubernetes, GitOps, Terraform data-plane security, ECR immutability, and cost guardrails.
+- Wired `cloud-verify.ps1` to call the policy audit before Terraform/Helm/Kustomize rendering.
+- Replaced broad kubeconform missing-schema ignores with an explicit External Secrets skip list so unrelated schema gaps are still caught.
+- Added `scripts/cloud-evidence-summary.ps1` to summarize the latest cloud verification and policy audit reports without committing generated report output.
+- Hardened Terraform modules with restricted EKS public endpoint CIDRs and configurable RDS backup, deletion protection, log export, snapshot-tagging, auto-minor-upgrade, performance insights, and Multi-AZ posture.
+- Wired `portfolio-verify.ps1 -Cloud` to emit a cloud evidence summary after verification.
+
+Verification:
+
+- `.\scripts\cloud-policy-audit.ps1` passed on 2026-05-06 with 72 checks.
+- `.\scripts\terraform-validate.ps1` passed on 2026-05-06 for dev, staging, and prod after module changes.
+- `.\scripts\cloud-verify.ps1` passed on 2026-05-06 with policy audit, Terraform validate, Helm lint/template, Kustomize, and kubeconform.
+- `.\scripts\cloud-evidence-summary.ps1` passed on 2026-05-06.
+
+Committed as `chore(cloud): harden aws blueprint guardrails`.

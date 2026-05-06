@@ -129,14 +129,7 @@ New-Item -ItemType Directory -Force -Path $renderRoot | Out-Null
 Push-Location $repoRoot
 try {
     Invoke-CloudStep "cloud policy assertions" "cloud policy assertions" {
-        Assert-TextAbsent -Path "deploy/k8s/services.yaml" -Pattern ":latest" -Reason "Raw Kubernetes service manifests must not use mutable latest tags."
-        Assert-TextAbsent -Path "deploy/k8s/kustomization.yaml" -Pattern "newTag:\s*latest" -Reason "Raw Kubernetes kustomization must not use mutable latest tags."
-        Assert-TextPresent -Path "deploy/k8s/services.yaml" -Pattern "name:\s*ai-service" -Reason "Raw Kubernetes manifests must include ai-service."
-        Assert-TextPresent -Path "deploy/k8s/kustomization.yaml" -Pattern "devhire/ai-service" -Reason "Raw Kubernetes image kustomization must include ai-service."
-        Assert-TextPresent -Path "deploy/gitops/argocd-application.yaml" -Pattern "targetRevision:\s*master" -Reason "GitOps baseline must track the repository default branch."
-        Assert-TextAbsent -Path "deploy/gitops/argocd-application.yaml" -Pattern "targetRevision:\s*main" -Reason "GitOps baseline must not reference the wrong branch."
-        Assert-TextAbsent -Path "deploy/helm/devhire-cloud/values.yaml" -Pattern "imageTag:\s*latest" -Reason "Helm default values must not use latest."
-        Assert-TextAbsent -Path "deploy/helm/devhire-cloud/values.yaml" -Pattern "createExample:\s*true" -Reason "Helm default values must not create example secrets by default."
+        & "$PSScriptRoot\cloud-policy-audit.ps1"
     }
 
     if (-not $SkipTerraform) {
@@ -173,7 +166,13 @@ try {
         foreach ($renderedFile in $renderedFiles) {
             $relative = (Resolve-Path -LiteralPath $renderedFile).Path.Substring($repoRoot.Length + 1).Replace("\", "/")
             Invoke-CloudStep "kubeconform $relative" "kubeconform $relative" {
-                Invoke-ContainerTool -Image $KubeconformImage -Arguments @("-strict", "-summary", "-ignore-missing-schemas", $relative)
+                Invoke-ContainerTool -Image $KubeconformImage -Arguments @(
+                    "-strict",
+                    "-summary",
+                    "-skip",
+                    "ExternalSecret,ClusterSecretStore",
+                    $relative
+                )
             }
         }
     }

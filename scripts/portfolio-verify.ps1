@@ -302,6 +302,9 @@ try {
         Invoke-PortfolioStep "cloud blueprint verification" ".\scripts\cloud-verify.ps1" {
             & "$PSScriptRoot\cloud-verify.ps1"
         }
+        Invoke-PortfolioStep "cloud evidence summary" ".\scripts\cloud-evidence-summary.ps1" {
+            & "$PSScriptRoot\cloud-evidence-summary.ps1"
+        }
     }
 
     if ($Runtime) {
