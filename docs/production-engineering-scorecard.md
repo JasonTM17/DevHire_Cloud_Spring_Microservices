@@ -79,6 +79,7 @@ Evidence:
 - [Versioning](versioning.md)
 - [Release evidence v0.4](release-evidence/v0.4.0.md)
 - [v0.4.6 public credibility evidence](release-evidence/v0.4.6.md)
+- [v0.5.1 production runtime depth evidence](release-evidence/v0.5.1.md)
 
 ## Cloud Readiness
 
@@ -129,6 +130,7 @@ Evidence:
 - [Repository health](repository-health.md)
 - [v0.4.6 public credibility evidence](release-evidence/v0.4.6.md)
 - [v0.5.0 reviewer-grade evidence baseline](release-evidence/v0.5.0.md)
+- [v0.5.1 production runtime depth evidence](release-evidence/v0.5.1.md)
 - `scripts/github-governance.ps1 -DryRun`
 - `scripts/github-facade-assert.ps1 -AllowOwnerActions`
 - `scripts/professionalism-audit.ps1`

@@ -3138,3 +3138,29 @@ Verification:
 - `.\scripts\portfolio-verify.ps1 -Docs -Docker`
 - `.\scripts\migration-smoke.ps1`
 - `.\scripts\migration-smoke.ps1 -Services ai-service -SkipStart`
+
+## v0.5.1 Coverage ratchet follow-up
+
+- Added focused Gateway tests for:
+  - correlation ID preservation and generation,
+  - highest-precedence correlation filter ordering,
+  - rate-limit key selection from authenticated user, remote address, and anonymous fallback,
+  - CORS origin parsing from environment configuration.
+- Added user profile mapper tests for skill normalization, blank input behavior, and entity-to-response mapping.
+- Tightened user profile skill normalization so blank-only skill lists persist as `null` instead of an empty CSV value.
+- Added job search service tests for Micrometer search request and latency metrics on both success and adapter failure paths.
+- Ratcheted explicit module coverage gates after tests landed:
+  - `api-gateway`: 36.5% -> 50.0%,
+  - `job-service`: 52.0% -> 54.0%,
+  - `user-service`: 75.0% -> 76.0%.
+
+Verification:
+
+- `mvn -T1 -pl api-gateway,user-service -am verify`
+- `mvn -T1 -pl job-service -am verify`
+- `mvn -T1 -pl user-service -am verify`
+- `.\scripts\check-coverage.ps1`
+- `.\scripts\docs-quality.ps1`
+- `.\scripts\docs-parity.ps1`
+- `.\scripts\evidence-manifest-verify.ps1`
+- `.\scripts\repo-hygiene.ps1`

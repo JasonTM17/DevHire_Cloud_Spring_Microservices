@@ -15,6 +15,8 @@ import com.devhire.job.search.JobSearchAdapter;
 import com.devhire.job.search.JobSearchIndex;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
@@ -35,8 +37,9 @@ class JobServiceTest {
     private final JobSearchAdapter searchAdapter = mock(JobSearchAdapter.class);
     private final JobSearchIndex searchIndex = mock(JobSearchIndex.class);
     private final JobEventPublisher eventPublisher = mock(JobEventPublisher.class);
+    private final SimpleMeterRegistry meterRegistry = new SimpleMeterRegistry();
     private final JobService service = new JobService(repository, new JobMapper(), companyClient, searchAdapter, searchIndex,
-            eventPublisher, new SimpleMeterRegistry());
+            eventPublisher, meterRegistry);
 
     @Test
     void employerCreatesDraftForApprovedOwnedCompany() {
@@ -87,9 +90,61 @@ class JobServiceTest {
         assertThat(response.publishedAt()).isNotNull();
     }
 
+    @Test
+    void searchRecordsSuccessMetricsForPublishedJobs() {
+        var criteria = new com.devhire.job.dto.request.JobSearchCriteria("java", "Java", "Remote",
+                BigDecimal.valueOf(3000), BigDecimal.valueOf(6000), "Senior");
+        var pageable = PageRequest.of(0, 10);
+        Job job = searchableJob(UUID.randomUUID());
+        when(searchAdapter.searchPublished(criteria, pageable)).thenReturn(new PageImpl<>(List.of(job), pageable, 1));
+
+        var page = service.search(criteria, pageable);
+
+        assertThat(page.getTotalElements()).isEqualTo(1);
+        assertThat(meterRegistry.find("devhire_job_search_requests")
+                .tag("status", "success")
+                .counter()
+                .count()).isEqualTo(1.0d);
+        assertThat(meterRegistry.find("devhire_job_search_latency")
+                .tag("status", "success")
+                .timer()
+                .count()).isEqualTo(1L);
+    }
+
+    @Test
+    void searchRecordsErrorMetricsWhenAdapterFails() {
+        var criteria = new com.devhire.job.dto.request.JobSearchCriteria("java", null, null, null, null, null);
+        var pageable = PageRequest.of(0, 10);
+        when(searchAdapter.searchPublished(criteria, pageable)).thenThrow(new IllegalStateException("search down"));
+
+        assertThatThrownBy(() -> service.search(criteria, pageable))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("search down");
+        assertThat(meterRegistry.find("devhire_job_search_requests")
+                .tag("status", "error")
+                .counter()
+                .count()).isEqualTo(1.0d);
+        assertThat(meterRegistry.find("devhire_job_search_latency")
+                .tag("status", "error")
+                .timer()
+                .count()).isEqualTo(1L);
+    }
+
     private static JobCreateRequest request(UUID companyId) {
         return new JobCreateRequest(companyId, "Senior Java", "Build APIs", "Java", "Budget",
                 BigDecimal.valueOf(3000), BigDecimal.valueOf(5000), "Remote", "Senior", "Full-time",
                 List.of("Java", "Kafka"));
+    }
+
+    private static Job searchableJob(UUID id) {
+        Job job = new Job(UUID.randomUUID(), UUID.randomUUID());
+        job.updateContent("Senior Java", "Build APIs", "Java", "Budget", BigDecimal.ONE, BigDecimal.TEN,
+                "Remote", "Senior", "Full-time", "Java,Kafka");
+        job.submitReview();
+        job.approve();
+        ReflectionTestUtils.setField(job, "id", id);
+        ReflectionTestUtils.setField(job, "createdAt", Instant.parse("2026-05-02T00:00:00Z"));
+        ReflectionTestUtils.setField(job, "updatedAt", Instant.parse("2026-05-02T00:00:00Z"));
+        return job;
     }
 }

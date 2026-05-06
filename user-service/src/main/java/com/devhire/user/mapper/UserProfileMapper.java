@@ -32,11 +32,15 @@ public class UserProfileMapper {
         if (skills == null || skills.isEmpty()) {
             return null;
         }
-        return String.join(",", skills.stream()
+        List<String> normalizedSkills = skills.stream()
                 .map(String::trim)
                 .filter(skill -> !skill.isBlank())
                 .distinct()
-                .toList());
+                .toList();
+        if (normalizedSkills.isEmpty()) {
+            return null;
+        }
+        return String.join(",", normalizedSkills);
     }
 
     private static List<String> toSkills(String csv) {
@@ -49,4 +53,3 @@ public class UserProfileMapper {
                 .toList();
     }
 }
-

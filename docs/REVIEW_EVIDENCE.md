@@ -7,17 +7,17 @@ This is the short reviewer-facing evidence path. `docs/PROGRESS.md` remains an i
 | Evidence | Status |
 |---|---|
 | Latest public release | `v0.4.6` is visible on GitHub |
-| Current development evidence | `v0.4.9` cloud completion evidence is green on PR #29; release tag waits for protected-branch merge |
+| Current development evidence | `v0.5.1` runtime depth and coverage evidence is staged on PR #29; release tag waits for protected-branch merge and required review |
 | GitHub About/Homepage/Topics | Applied through owner-authenticated GitHub API; 20 topics are set |
 | Branch protection | Applied on `master`; public branch API confirms `protected=true`, and detailed protection reads are owner-token only |
 | Dependabot posture | Zero-noise cleanup applied: open Dependabot PR count is 0; future updates are handled through scheduled curated batches |
 | E2E posture | `cd frontend && npm run e2e:all` is self-starting and passed locally with 5 desktop + 2 mobile smoke tests |
-| Coverage posture | Parent JaCoCo baseline raised to 35%; per-module script thresholds ratchet current measured modules |
+| Coverage posture | Parent JaCoCo baseline raised to 35%; per-module gates now ratchet reviewer-critical modules including `api-gateway` at 50%, `job-service` at 54%, and `user-service` at 76% |
 | Demo data posture | Synthetic portfolio volume seed adds 1,108 primary records across service-owned databases; see [demo-data.md](demo-data.md) and [data model strategy](data-model-and-seed-strategy.md) |
 | Runtime observability posture | Domain metrics for funnel, notifications, audit, outbox, search, and AI are emitted and verified by `runtime-observability-smoke.ps1` |
 | Deployment posture | Prod Helm avoids `latest`, requires secret refs, cloud policy audit passes, and Terraform validation is race-safe |
 
-Latest hardening evidence: [v0.4.9 cloud completion evidence](release-evidence/v0.4.9.md).
+Latest hardening evidence: [v0.5.1 production runtime depth evidence](release-evidence/v0.5.1.md).
 
 ## What To Review First
 
