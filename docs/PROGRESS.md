@@ -3283,3 +3283,9 @@ Verification:
   - per-service GitHub Actions Docker build cache scopes,
   - blocking HIGH/CRITICAL image vulnerability severity.
 - Updated the production engineering scorecard so security evidence now reflects both vulnerability blocking and CI reliability posture.
+
+## v0.8 Observability catalog gate
+
+- Added `scripts/observability-catalog-verify.ps1` to statically verify that production-domain metrics are represented in Prometheus rules, Grafana dashboard JSON, or runtime observability smoke assertions.
+- Wired the observability catalog gate into `portfolio-verify.ps1 -Docs` so reviewer verification catches missing domain metric evidence before screenshots or dashboards drift.
+- Updated `docs/observability-evidence.md` with a domain metric catalog covering gateway, recruitment funnel, notifications, outbox, audit, search, AI, database pool, and JVM metrics.
