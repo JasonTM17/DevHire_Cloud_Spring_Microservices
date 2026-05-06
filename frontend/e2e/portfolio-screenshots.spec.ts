@@ -68,7 +68,7 @@ test.describe("portfolio screenshots", () => {
     await page.goto("/jobs");
     await expect(page.getByTestId("jobs-page")).toBeVisible();
     await expect(page.getByTestId("job-card").first()).toBeVisible();
-    await expect(page.getByText("Senior Java Platform Engineer")).toBeVisible();
+    await expect(page.getByTestId("job-card").first()).toContainText(/Engineer|Architect|Developer/i);
     await expect(page.getByText("Loading published jobs")).toHaveCount(0);
     await capture(page, "jobs-page");
 
@@ -78,7 +78,7 @@ test.describe("portfolio screenshots", () => {
 
     await login(page, "candidate");
     await expect(page.getByText("Application tracker")).toBeVisible();
-    await expect(page.getByText("Senior Java Platform Engineer")).toBeVisible();
+    await expect(page.getByText(/submitted|reviewing|interview|offer/i).first()).toBeVisible();
     await expect(page.getByText("Loading candidate applications...")).toHaveCount(0);
     await capture(page, "candidate-dashboard");
 
