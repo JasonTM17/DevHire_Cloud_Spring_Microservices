@@ -93,12 +93,22 @@ SELECT
     answer,
     TRUE,
     jsonb_build_array(
-        jsonb_build_object('sourceId', 'docs/architecture.md', 'title', 'Architecture'),
-        jsonb_build_object('sourceId', 'docs/REVIEW_EVIDENCE.md', 'title', 'Reviewer Evidence')
+        jsonb_build_object(
+            'sourceType', 'DOC',
+            'sourcePath', 'docs/architecture.md',
+            'title', 'Architecture',
+            'snippet', 'Service boundaries, gateway routing, async events, and cloud deployment topology.'
+        ),
+        jsonb_build_object(
+            'sourceType', 'DOC',
+            'sourcePath', 'docs/REVIEW_EVIDENCE.md',
+            'title', 'Reviewer Evidence',
+            'snippet', 'Curated release, runtime, security, cloud, and observability proof for reviewers.'
+        )
     ),
     jsonb_build_array(
-        jsonb_build_object('name', 'explain_architecture', 'status', 'completed'),
-        jsonb_build_object('name', 'get_platform_health_snapshot', 'status', 'completed')
+        jsonb_build_object('name', 'explain_architecture', 'status', 'completed', 'summary', 'Architecture evidence retrieved'),
+        jsonb_build_object('name', 'get_platform_health_snapshot', 'status', 'completed', 'summary', 'Platform health snapshot generated')
     ),
     now() - ((i % 20) || ' days')::interval + '5 minutes'::interval
 FROM conversation_seed
