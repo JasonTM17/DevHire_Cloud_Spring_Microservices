@@ -3273,3 +3273,13 @@ Verification:
 - Updated public GitHub homepage to the `v0.5.1` release and replaced the GitHub Release body with `docs/release-notes/v0.5.1.md`.
 - Moved active development versions to `0.6.0-SNAPSHOT` for Maven and `0.6.0` for frontend/Helm chart.
 - Reframed `v1.0.0` docs as future acceptance checklists, not published release evidence.
+
+## v0.7 Security evidence hardening
+
+- Documented the Trivy image scan reliability hardening that was added after the GitHub PR image scan matrix hit Maven Central rate-limit noise.
+- Added a `professionalism-audit.ps1` check for:
+  - Security workflow image scan presence,
+  - matrix throttling with `max-parallel: 2`,
+  - per-service GitHub Actions Docker build cache scopes,
+  - blocking HIGH/CRITICAL image vulnerability severity.
+- Updated the production engineering scorecard so security evidence now reflects both vulnerability blocking and CI reliability posture.

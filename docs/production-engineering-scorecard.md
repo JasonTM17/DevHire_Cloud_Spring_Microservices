@@ -7,7 +7,7 @@ This scorecard gives reviewers a fast, evidence-backed view of DevHire Cloud as 
 | Category | Score | Evidence |
 |---|---:|---|
 | Architecture and service boundaries | 9/10 | Multi-module Spring Boot services, service-owned databases, Flyway migrations, gateway routing, no shared JPA entities, architecture tests |
-| Security and identity | 8/10 | JWT access tokens, refresh rotation, logout blacklist, BCrypt, role checks, security headers, Gitleaks, blocking Trivy image scans, CodeQL |
+| Security and identity | 8/10 | JWT access tokens, refresh rotation, logout blacklist, BCrypt, role checks, security headers, Gitleaks, blocking Trivy image scans with throttled/cache-backed image builds, CodeQL |
 | Reliability and event delivery | 8/10 | Kafka, transactional outbox, retry/dead-letter states, idempotent notification/audit consumers, chaos smoke scripts |
 | Observability and SLOs | 9/10 | Actuator, Prometheus rules, Grafana SLO/domain dashboards, Loki, Tempo, OpenTelemetry, runtime metrics smoke, seeded funnel metrics |
 | CI/CD and release governance | 8/10 | Maven verify, frontend build, ratcheted coverage gate, Docker matrix, docs/security/terraform workflows, release notes, release evidence, `v0.5.1` public release |

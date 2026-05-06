@@ -210,6 +210,23 @@ try {
     $workflowEvidenceStatus = if (@("CI", "Docker Images", "Documentation", "Security", "CodeQL") | Where-Object { $_ -notin $workflowNames }) { "warning" } else { "passed" }
     Add-Check -Checks $checks -Name "public workflow evidence" -Status $workflowEvidenceStatus -Details "$($workflowRows.Count) latest workflow row(s) visible"
 
+    $securityWorkflowPath = Join-Path $repoRoot ".github/workflows/security.yml"
+    $securityWorkflow = Get-Content -Raw -Encoding UTF8 $securityWorkflowPath
+    $imageScanGuardrails = [ordered]@{
+        hasImageScan = $securityWorkflow -match "(?m)^\s*image-scan:"
+        throttlesMatrix = $securityWorkflow -match "(?m)^\s*max-parallel:\s*2\s*$"
+        usesPerServiceBuildCache = ($securityWorkflow -match "cache-from:\s*type=gha,scope=security-\$\{\{\s*matrix\.service\s*\}\}") -and
+            ($securityWorkflow -match "cache-to:\s*type=gha,scope=security-\$\{\{\s*matrix\.service\s*\}\},mode=max")
+        blocksHighCritical = ($securityWorkflow -match "severity:\s*HIGH,CRITICAL") -and
+            ($securityWorkflow -match "exit-code:\s*`"1`"")
+    }
+    $missingImageScanGuardrails = @(
+        $imageScanGuardrails.GetEnumerator() |
+            Where-Object { -not $_.Value } |
+            ForEach-Object { $_.Key }
+    )
+    Add-Check -Checks $checks -Name "security image scan reliability guardrails" -Status $(if ($missingImageScanGuardrails.Count -eq 0) { "passed" } else { "failed" }) -Details $(if ($missingImageScanGuardrails.Count -eq 0) { "matrix throttling, cache, and blocking severity are configured" } else { "missing: $($missingImageScanGuardrails -join ', ')" })
+
     $dependabotOpenCount = if ($dependabotResult.ok) { [int]$dependabotResult.value.total_count } else { -1 }
     Add-Check -Checks $checks -Name "dependabot triage visibility" -Status $(if ($dependabotOpenCount -ge 0) { "informational" } else { "warning" }) -Details "$dependabotOpenCount open Dependabot PR(s)"
 
