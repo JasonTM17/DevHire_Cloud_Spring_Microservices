@@ -5,10 +5,18 @@ on:
     paths:
       - "deploy/terraform/aws/**"
       - "scripts/terraform-validate.ps1"
+      - "scripts/terraform-race-smoke.ps1"
+      - "scripts/cloud-policy-audit.ps1"
+      - "scripts/cloud-verify.ps1"
+      - "scripts/cloud-evidence-summary.ps1"
       - ".github/workflows/terraform.yml"
       - ".github/dependabot.yml"
       - "docs/aws-terraform.md"
       - "docs/cost-estimate.md"
+      - "docs/cloud-readiness-review.md"
+      - "docs/cloud-completion-scorecard.md"
+      - "docs/cloud-apply-runbook.md"
+      - "docs/aws-account-bootstrap.md"
   workflow_dispatch:
 
 permissions:
@@ -27,3 +35,19 @@ jobs:
       - name: Terraform fmt validate lint and config scan
         shell: pwsh
         run: ./scripts/terraform-validate.ps1
+
+      - name: Terraform validation race smoke
+        shell: pwsh
+        run: ./scripts/terraform-race-smoke.ps1
+
+      - name: Cloud policy audit
+        shell: pwsh
+        run: ./scripts/cloud-policy-audit.ps1
+
+      - name: Cloud render and schema verification
+        shell: pwsh
+        run: ./scripts/cloud-verify.ps1 -SkipTerraform
+
+      - name: Cloud evidence summary
+        shell: pwsh
+        run: ./scripts/cloud-evidence-summary.ps1

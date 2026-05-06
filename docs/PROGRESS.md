@@ -2973,3 +2973,20 @@ Verification:
 - Documentation/static gates will be rerun before commit.
 
 Committed as `docs(cloud): add apply-ready runbooks and scorecard`.
+
+## Phase 143 - Strict cloud render and policy CI gate
+
+- Updated the Terraform GitHub Actions workflow to run the new cloud guardrails:
+  - Terraform validation race smoke.
+  - Cloud policy audit.
+  - Helm/Kustomize/kubeconform cloud verification without re-running Terraform twice.
+  - Cloud evidence summary generation.
+- Expanded workflow path filters so cloud docs and verification scripts trigger the Terraform/cloud gate.
+- Made `cloud-verify.ps1` use `Join-Path` for internal script calls so it remains portable across Windows and Linux PowerShell runners.
+
+Verification:
+
+- `.\scripts\cloud-verify.ps1` passed locally after the script path update.
+- Documentation/static gates passed before this phase and will be rerun before final push.
+
+Committed as `test(cloud): add strict render and policy verification`.

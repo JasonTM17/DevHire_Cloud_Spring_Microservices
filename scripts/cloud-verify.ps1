@@ -14,6 +14,8 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
+$cloudPolicyAuditScript = Join-Path $PSScriptRoot "cloud-policy-audit.ps1"
+$terraformValidateScript = Join-Path $PSScriptRoot "terraform-validate.ps1"
 $reportRoot = if ([System.IO.Path]::IsPathRooted($ReportDir)) {
     [System.IO.Path]::GetFullPath($ReportDir)
 } else {
@@ -129,12 +131,12 @@ New-Item -ItemType Directory -Force -Path $renderRoot | Out-Null
 Push-Location $repoRoot
 try {
     Invoke-CloudStep "cloud policy assertions" "cloud policy assertions" {
-        & "$PSScriptRoot\cloud-policy-audit.ps1"
+        & $cloudPolicyAuditScript
     }
 
     if (-not $SkipTerraform) {
         Invoke-CloudStep "terraform safe validate" ".\scripts\terraform-validate.ps1" {
-            & "$PSScriptRoot\terraform-validate.ps1"
+            & $terraformValidateScript
         }
     }
 
