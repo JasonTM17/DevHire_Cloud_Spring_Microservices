@@ -24,7 +24,7 @@ $serviceCatalog = @{
         Database = "devhire_smoke_user_$runId"
         MigrationPath = "user-service/src/main/resources/db/migration"
         CountSql = "SELECT count(*) FROM user_profiles;"
-        MinimumRows = 72
+        MinimumRows = 78
     }
     "company-service" = @{
         Database = "devhire_smoke_company_$runId"
@@ -122,8 +122,25 @@ function Wait-Postgres {
     } while ($true)
 }
 
+function Assert-DockerAvailable {
+    $previousPreference = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        & docker version --format "{{.Server.Version}}" 2>$null | Out-Null
+        $exitCode = $LASTEXITCODE
+    } finally {
+        $ErrorActionPreference = $previousPreference
+    }
+
+    if ($exitCode -ne 0) {
+        throw "Docker daemon is not available. Start Docker Desktop, then rerun migration smoke. Use 'mvn -T1 clean verify' for non-Docker compile/test gates."
+    }
+}
+
 Push-Location $repoRoot
 try {
+    Assert-DockerAvailable
+
     if (-not $SkipStart) {
         docker compose up -d postgres
         if ($LASTEXITCODE -ne 0) {

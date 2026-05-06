@@ -10,11 +10,15 @@ This file records implementation progress, verification commands, and commit bou
 - Added platform routes for observability, cloud control plane, and releases.
 - Added backend read-model endpoints for candidate dashboard, applications, offers, assessments, employer pipeline, skill analytics, AI roadmap/interview prep, and admin operations summary.
 - Added deterministic Flyway-backed candidate offer and assessment data in `application-service`.
+- Added a user-service profile persistence hardening slice: case-insensitive email uniqueness, repository lookup helpers, and a Testcontainers-backed repository IT for Flyway seed profile segmentation.
+- Hardened `migration-smoke.ps1` with an early Docker daemon preflight so reviewer runs fail fast and clearly when Docker Desktop is not available.
 - Documented the Stitch-to-route mapping in `docs/ui-redesign-v0.6.md` and updated the design system notes.
 
 Verification:
 
 - `mvn -T1 -pl application-service,job-service,ai-service,audit-service,api-gateway -am test` passed.
+- `mvn -T1 -pl user-service -am verify` passed; `UserProfileRepositoryIT` was skipped because Docker daemon was not available in this local session.
+- `.\scripts\migration-smoke.ps1 -Services user-service -SkipStart` now fails fast with a clear Docker daemon availability message when Docker Desktop is off.
 - `cd frontend && npm run typecheck` passed.
 - `cd frontend && npm run build` passed.
 - `cd frontend && npm run e2e:all` passed with 5 desktop and 2 mobile Playwright smoke tests.
