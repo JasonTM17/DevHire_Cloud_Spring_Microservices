@@ -2,6 +2,20 @@
 
 This file records implementation progress, verification commands, and commit boundaries.
 
+## 2026-05-06 - GitHub audit tooling hardening
+
+- Merged the runtime reviewer evidence refresh into `master` after all PR checks passed, then restored branch protection with the repository governance script.
+- Verified `master` workflow status is green at `ea596db038d03a5b2ecbd35c80e6358374c4e0c5`.
+- Fixed false-negative local GitHub health reporting by allowing `repository-health.ps1` and `github-workflow-status.ps1` to fall back to authenticated `gh api` when no `GITHUB_TOKEN` environment variable is present.
+- Confirmed public GitHub facade signals through the hardened scripts: About description set, homepage set, 20 topics, `master` protected, release `v0.5.1` visible, Dependabot open PR count `0`.
+
+Verification:
+
+- `.\scripts\repository-health.ps1` passed without `GITHUB_TOKEN`.
+- `.\scripts\github-workflow-status.ps1 -Branch master -RequireGreen` passed without `GITHUB_TOKEN`.
+- `.\scripts\repo-hygiene.ps1` passed.
+- `git diff --check` passed.
+
 ## 2026-05-06 - Canonical v0.5.1 facade cleanup
 
 - Canonicalized the public reviewer story: latest public release is `v0.5.1`, active development is `0.6.0-SNAPSHOT`, and v1 remains a roadmap/acceptance target rather than a claimed release.

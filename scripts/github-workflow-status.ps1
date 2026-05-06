@@ -47,8 +47,42 @@ if ($hasToken) {
     $headers["Authorization"] = "Bearer $token"
 }
 
+$ghCommand = Get-Command gh -ErrorAction SilentlyContinue
+
 function Invoke-GitHubJson {
     param([Parameter(Mandatory = $true)][string]$Uri)
+
+    if (-not $hasToken -and $null -ne $ghCommand) {
+        $apiPath = $Uri -replace "^https://api\.github\.com/", ""
+        try {
+            $output = & gh api $apiPath 2>&1
+            if ($LASTEXITCODE -ne 0) {
+                [pscustomobject]@{
+                    ok = $false
+                    statusCode = $null
+                    value = $null
+                    error = ($output | Out-String).Trim()
+                }
+                return
+            }
+
+            [pscustomobject]@{
+                ok = $true
+                statusCode = 200
+                value = ($output | Out-String | ConvertFrom-Json)
+                error = $null
+            }
+            return
+        } catch {
+            [pscustomobject]@{
+                ok = $false
+                statusCode = $null
+                value = $null
+                error = $_.Exception.Message
+            }
+            return
+        }
+    }
 
     try {
         [pscustomobject]@{
