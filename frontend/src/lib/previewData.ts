@@ -12,9 +12,9 @@ export const previewJobs: PageResponse<Job> = {
     previewJob("preview-data-platform", "Recruitment Data Platform Engineer", "Operate search indexing, analytics events, job recommendations, and reporting pipelines.", "Remote Vietnam", "Middle", ["PostgreSQL", "OpenSearch", "Kafka", "Analytics"])
   ],
   totalElements: 188,
-  totalPages: 1,
+  totalPages: 16,
   number: 0,
-  size: 8
+  size: 12
 };
 
 export const previewApplications: PageResponse<Application> = {

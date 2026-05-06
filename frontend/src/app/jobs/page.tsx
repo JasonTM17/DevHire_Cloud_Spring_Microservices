@@ -1,7 +1,21 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Activity, BriefcaseBusiness, Clock3, Database, Filter, Loader2, MapPin, Search, ShieldCheck, SlidersHorizontal } from "lucide-react";
+import {
+  Activity,
+  BriefcaseBusiness,
+  ChevronLeft,
+  ChevronRight,
+  Clock3,
+  Database,
+  Filter,
+  Loader2,
+  MapPin,
+  Search,
+  ShieldCheck,
+  SlidersHorizontal,
+  X
+} from "lucide-react";
 import Link from "next/link";
 import { DemoModeNotice } from "@/components/DemoModeNotice";
 import { CompanyLogo } from "@/components/CompanyLogo";
@@ -16,22 +30,30 @@ export default function JobsPage() {
   const [keyword, setKeyword] = useState("");
   const [skill, setSkill] = useState("");
   const [location, setLocation] = useState("");
+  const [level, setLevel] = useState("");
+  const [salaryMin, setSalaryMin] = useState("");
+  const [pageNumber, setPageNumber] = useState(0);
   const [sortOrder, setSortOrder] = useState<"publishedAt,desc" | "salaryMax,desc">("publishedAt,desc");
   const [jobs, setJobs] = useState<PageResponse<Job> | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
 
   const params = useMemo(() => {
-    const value = new URLSearchParams({ page: "0", size: "12", sort: sortOrder });
-    if (keyword) value.set("keyword", keyword);
-    if (skill) value.set("skill", skill);
-    if (location) value.set("location", location);
+    const value = new URLSearchParams({ page: String(pageNumber), size: "12", sort: sortOrder });
+    if (keyword.trim()) value.set("keyword", keyword.trim());
+    if (skill.trim()) value.set("skill", skill.trim());
+    if (location.trim()) value.set("location", location.trim());
+    if (level.trim()) value.set("level", level.trim());
+    if (salaryMin.trim()) value.set("salaryMin", salaryMin.trim());
     return value;
-  }, [keyword, skill, location, sortOrder]);
+  }, [keyword, skill, location, level, salaryMin, pageNumber, sortOrder]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     setKeyword(params.get("keyword") ?? "");
+    setSkill(params.get("skill") ?? "");
+    setLocation(params.get("location") ?? "");
+    setLevel(params.get("level") ?? "");
   }, []);
 
   useEffect(() => {
@@ -49,6 +71,23 @@ export default function JobsPage() {
   }, [params]);
 
   const visibleJobs = jobs?.content ?? [];
+  const totalPages = Math.max(jobs?.totalPages ?? 1, 1);
+  const currentPage = Math.min((jobs?.number ?? pageNumber) + 1, totalPages);
+  const hasFilters = Boolean(keyword.trim() || skill.trim() || location.trim() || level.trim() || salaryMin.trim());
+
+  function updateFilter(next: () => void) {
+    setPageNumber(0);
+    next();
+  }
+
+  function clearFilters() {
+    setKeyword("");
+    setSkill("");
+    setLocation("");
+    setLevel("");
+    setSalaryMin("");
+    setPageNumber(0);
+  }
 
   return (
     <section className="page-stack" data-testid="jobs-page">
@@ -79,40 +118,82 @@ export default function JobsPage() {
       <div className="filter-bar">
         <label>
           <Search size={16} />
-          <input value={keyword} onChange={(event) => setKeyword(event.target.value)} placeholder="Keyword" />
+          <input
+            value={keyword}
+            onChange={(event) => updateFilter(() => setKeyword(event.target.value))}
+            placeholder="Keyword"
+          />
         </label>
         <label>
           <Filter size={16} />
-          <input value={skill} onChange={(event) => setSkill(event.target.value)} placeholder="Skill" />
+          <input
+            value={skill}
+            onChange={(event) => updateFilter(() => setSkill(event.target.value))}
+            placeholder="Skill"
+          />
         </label>
         <label>
           <MapPin size={16} />
-          <input value={location} onChange={(event) => setLocation(event.target.value)} placeholder="Location" />
+          <input
+            value={location}
+            onChange={(event) => updateFilter(() => setLocation(event.target.value))}
+            placeholder="Location"
+          />
+        </label>
+        <label>
+          <ShieldCheck size={16} />
+          <select
+            aria-label="Level"
+            value={level}
+            onChange={(event) => updateFilter(() => setLevel(event.target.value))}
+          >
+            <option value="">Any level</option>
+            <option value="Junior">Junior</option>
+            <option value="Middle">Middle</option>
+            <option value="Mid-Senior">Mid-Senior</option>
+            <option value="Senior">Senior</option>
+            <option value="Lead">Lead</option>
+          </select>
+        </label>
+        <label>
+          <BriefcaseBusiness size={16} />
+          <input
+            min="0"
+            type="number"
+            value={salaryMin}
+            onChange={(event) => updateFilter(() => setSalaryMin(event.target.value))}
+            placeholder="Minimum salary"
+          />
         </label>
       </div>
 
       <div className="toolbar">
         <div className="filter-tabs" aria-label="Job filters">
-          <button className="tab active" type="button" onClick={() => {
-            setKeyword("");
-            setSkill("");
+          <button className={!hasFilters ? "tab active" : "tab"} type="button" onClick={clearFilters}>Published</button>
+          <button className={location.toLowerCase().includes("remote") ? "tab active" : "tab"} type="button" onClick={() => updateFilter(() => setLocation("Remote"))}>Remote</button>
+          <button className={level === "Senior" ? "tab active" : "tab"} type="button" onClick={() => updateFilter(() => {
+            setLevel("Senior");
             setLocation("");
-          }}>Published</button>
-          <button className={location.toLowerCase().includes("remote") ? "tab active" : "tab"} type="button" onClick={() => setLocation("Remote")}>Remote</button>
-          <button className={skill === "Senior" ? "tab active" : "tab"} type="button" onClick={() => {
-            setSkill("Senior");
-            setLocation("");
-          }}>Senior</button>
-          <button className={skill === "Java" ? "tab active" : "tab"} type="button" onClick={() => setSkill("Java")}>Java</button>
+          })}>Senior</button>
+          <button className={skill === "Java" ? "tab active" : "tab"} type="button" onClick={() => updateFilter(() => setSkill("Java"))}>Java</button>
         </div>
-        <button
-          className="button outline"
-          type="button"
-          onClick={() => setSortOrder((value) => value === "publishedAt,desc" ? "salaryMax,desc" : "publishedAt,desc")}
-        >
-          <SlidersHorizontal size={16} />
-          Sort: {sortOrder === "publishedAt,desc" ? "newest" : "salary"}
-        </button>
+        <div className="toolbar-actions">
+          <span className="muted">Page {currentPage} of {totalPages}</span>
+          {hasFilters ? (
+            <button className="button outline" type="button" onClick={clearFilters}>
+              <X size={16} />
+              Clear filters
+            </button>
+          ) : null}
+          <button
+            className="button outline"
+            type="button"
+            onClick={() => updateFilter(() => setSortOrder((value) => value === "publishedAt,desc" ? "salaryMax,desc" : "publishedAt,desc"))}
+          >
+            <SlidersHorizontal size={16} />
+            Sort: {sortOrder === "publishedAt,desc" ? "newest" : "salary"}
+          </button>
+        </div>
       </div>
 
       <div className="metrics-row">
@@ -124,61 +205,89 @@ export default function JobsPage() {
 
       <DemoModeNotice message={error} />
       <div className="results-layout">
-        <div className="job-grid" data-testid="job-grid">
-          {loading ? (
-            <div className="empty-state">
-              <Loader2 className="spin" size={18} />
-              <strong>Loading published jobs</strong>
-              <span>Calling Gateway, search adapter, and job-service.</span>
-            </div>
-          ) : null}
-          {!loading && visibleJobs.length === 0 ? (
-            <div className="empty-state">
-              <Search size={18} />
-              <strong>No jobs match this filter</strong>
-              <span>Try a broader keyword, skill, or location.</span>
-            </div>
-          ) : null}
-          {!loading && visibleJobs.map((job) => {
-            const brand = brandForJob(job);
-            return (
-              <Link className="job-card" data-testid="job-card" href={`/jobs/${job.id}`} key={job.id}>
-                <div className="job-card-top">
-                  <div className="company-line">
-                    <CompanyLogo brand={brand} />
-                    <span>
-                      <strong>{brand.name}</strong>
-                      <span>{brand.industry}</span>
-                    </span>
+        <div className="results-main">
+          <div className="job-grid" data-testid="job-grid">
+            {loading ? (
+              <div className="empty-state">
+                <Loader2 className="spin" size={18} />
+                <strong>Loading published jobs</strong>
+                <span>Calling Gateway, search adapter, and job-service.</span>
+              </div>
+            ) : null}
+            {!loading && visibleJobs.length === 0 ? (
+              <div className="empty-state">
+                <Search size={18} />
+                <strong>No jobs match this filter</strong>
+                <span>Try a broader keyword, skill, location, level, or salary range.</span>
+              </div>
+            ) : null}
+            {!loading && visibleJobs.map((job) => {
+              const brand = brandForJob(job);
+              return (
+                <Link className="job-card" data-testid="job-card" href={`/jobs/${job.id}`} key={job.id}>
+                  <div className="job-card-top">
+                    <div className="company-line">
+                      <CompanyLogo brand={brand} />
+                      <span>
+                        <strong>{brand.name}</strong>
+                        <span>{brand.industry}</span>
+                      </span>
+                    </div>
+                    <StatusPill value={job.status} />
                   </div>
-                  <StatusPill value={job.status} />
-                </div>
-                <div>
-                  <h2>{job.title}</h2>
-                  <div className="job-meta">
-                    <span>{job.location ?? "Remote"}</span>
-                    <span>{job.level ?? "Any level"}</span>
-                    <strong>{salary(job)}</strong>
+                  <div>
+                    <h2>{job.title}</h2>
+                    <div className="job-meta">
+                      <span>{job.location ?? "Remote"}</span>
+                      <span>{job.level ?? "Any level"}</span>
+                      <strong>{salary(job)}</strong>
+                    </div>
                   </div>
-                </div>
-                <p>{job.description}</p>
-                <div className="tag-row">
-                  {(job.skills ?? []).slice(0, 4).map((item) => (
-                    <span className="tag" key={item}>
-                      {item}
-                    </span>
-                  ))}
-                </div>
-                <div className="infra-row">
-                  {infraBadges(job).map((item) => (
-                    <span className="infra-tag" key={item}>
-                      {item}
-                    </span>
-                  ))}
-                </div>
-              </Link>
-            );
-          })}
+                  <p>{job.description}</p>
+                  <div className="tag-row">
+                    {(job.skills ?? []).slice(0, 4).map((item) => (
+                      <span className="tag" key={item}>
+                        {item}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="infra-row">
+                    {infraBadges(job).map((item) => (
+                      <span className="infra-tag" key={item}>
+                        {item}
+                      </span>
+                    ))}
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+          <div className="pagination-bar" aria-label="Jobs pagination">
+            <span>
+              Showing {visibleJobs.length} of {jobs?.totalElements ?? 0} published jobs
+            </span>
+            <div className="pagination-actions">
+              <button
+                className="button outline"
+                disabled={loading || currentPage <= 1}
+                type="button"
+                onClick={() => setPageNumber((value) => Math.max(value - 1, 0))}
+              >
+                <ChevronLeft size={16} />
+                Previous
+              </button>
+              <strong>{currentPage} / {totalPages}</strong>
+              <button
+                className="button outline"
+                disabled={loading || currentPage >= totalPages}
+                type="button"
+                onClick={() => setPageNumber((value) => Math.min(value + 1, totalPages - 1))}
+              >
+                Next
+                <ChevronRight size={16} />
+              </button>
+            </div>
+          </div>
         </div>
         <aside className="insight-panel">
           <p className="eyebrow">Production insights</p>

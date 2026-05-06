@@ -477,7 +477,7 @@ h3 {
 
 .filter-bar {
   display: grid;
-  grid-template-columns: minmax(220px, 1.2fr) repeat(2, minmax(180px, 0.7fr));
+  grid-template-columns: minmax(220px, 1.2fr) repeat(4, minmax(150px, 0.7fr));
   gap: 12px;
 }
 
@@ -521,7 +521,8 @@ textarea:focus {
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
 }
 
-.filter-bar input {
+.filter-bar input,
+.filter-bar select {
   min-height: auto;
   border: 0;
   padding: 0;
@@ -580,6 +581,11 @@ textarea {
   align-items: start;
 }
 
+.results-main {
+  display: grid;
+  gap: 14px;
+}
+
 .split-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(360px, 0.8fr);
@@ -591,6 +597,35 @@ textarea {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 14px;
+}
+
+.pagination-bar {
+  min-height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+}
+
+.pagination-bar span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.pagination-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pagination-actions strong {
+  min-width: 58px;
+  text-align: center;
 }
 
 .job-card {
@@ -1230,6 +1265,21 @@ textarea {
 
   .inline-form {
     grid-template-columns: 1fr;
+  }
+
+  .toolbar,
+  .pagination-bar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .toolbar-actions,
+  .pagination-actions {
+    width: 100%;
+  }
+
+  .pagination-actions .button {
+    flex: 1;
   }
 }
 
