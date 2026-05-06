@@ -3018,3 +3018,16 @@ Verification:
 - Static workflow validation will be rerun before the workflow trigger polish commit.
 
 Committed as `ci(github): support release hardening branch checks`.
+
+## Phase 146 - Terraform CI file ownership fix
+
+- Fixed the hosted Terraform workflow failure where Dockerized Terraform created `.terraform` provider files as root on Linux runners and PowerShell cleanup could not remove them.
+- Updated `terraform-validate.ps1` so Docker tools run as the host UID/GID on non-Windows runners while keeping Windows behavior unchanged.
+- Kept `HOME=/tmp` inside Dockerized tools so non-root container users have a writable home for tool caches.
+
+Verification:
+
+- Local `.\scripts\terraform-validate.ps1 -Environments dev -SkipTflint -SkipTrivy` will be rerun before commit.
+- Hosted Terraform workflow will be rechecked after push.
+
+Committed as `fix(terraform): avoid root-owned ci cache files`.

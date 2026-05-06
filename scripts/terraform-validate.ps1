@@ -75,12 +75,36 @@ function Invoke-Docker {
         [string[]]$Arguments
     )
 
-    & docker run --rm `
-        -e TF_IN_AUTOMATION=true `
-        -v "${Root}:/workspace" `
-        -w $Workdir `
-        $Image `
-        @Arguments
+    $dockerArguments = @(
+        "run",
+        "--rm",
+        "-e",
+        "TF_IN_AUTOMATION=true",
+        "-e",
+        "HOME=/tmp"
+    )
+
+    $isWindows = [System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform(
+        [System.Runtime.InteropServices.OSPlatform]::Windows
+    )
+    if (-not $isWindows) {
+        $uid = (& id -u).Trim()
+        $gid = (& id -g).Trim()
+        if ($uid -and $gid) {
+            $dockerArguments += @("--user", "${uid}:${gid}")
+        }
+    }
+
+    $dockerArguments += @(
+        "-v",
+        "${Root}:/workspace",
+        "-w",
+        $Workdir,
+        $Image
+    )
+    $dockerArguments += $Arguments
+
+    & docker @dockerArguments
 }
 
 function Clear-TerraformCache {
