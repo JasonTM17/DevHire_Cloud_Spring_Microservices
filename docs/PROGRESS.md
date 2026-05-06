@@ -3153,6 +3153,29 @@ Verification:
 - `.\scripts\docs-parity.ps1`
 - `.\scripts\evidence-manifest-verify.ps1`
 - `.\scripts\portfolio-verify.ps1 -Docs -Docker`
+
+## v1.0 Release scaffolding and verification pass
+
+- Added v1 release verification wrappers:
+  - `scripts/v1-release-verify.ps1`,
+  - `scripts/v1-runtime-evidence.ps1`,
+  - `scripts/v1-cloud-evidence.ps1`,
+  - `scripts/v1-demo-data-verify.ps1`.
+- Added v1 reviewer documentation:
+  - `docs/release-notes/v1.0.0.md`,
+  - `docs/release-evidence/v1.0.0.md`,
+  - `docs/v1-reviewer-guide.md`,
+  - `docs/v1-production-gap-register.md`,
+  - `docs/v1-demo-script.md`.
+- Linked the v1 evidence path from README, English README, Japanese README, review evidence, production scorecard, docs quality, and evidence manifest.
+- Kept v1 wording honest: production-grade portfolio, apply-ready cloud blueprint, local runtime verification, not a live customer SaaS claim.
+
+Verification:
+
+- `.\scripts\docs-quality.ps1`
+- `.\scripts\docs-parity.ps1`
+- `.\scripts\evidence-manifest-verify.ps1`
+- `.\scripts\v1-release-verify.ps1 -Cloud`
 - `.\scripts\domain-placeholder-audit.ps1`
 - `.\scripts\professionalism-audit.ps1`
 - `.\scripts\portfolio-verify.ps1 -Docs -Docker`

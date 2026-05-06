@@ -50,6 +50,9 @@ DevHire Cloud models a compact ITviec / LinkedIn Jobs platform with authenticati
 | Cloud completion scorecard | [cloud-completion-scorecard.md](cloud-completion-scorecard.md) |
 | Cloud visual evidence | [cloud-visual-evidence.md](cloud-visual-evidence.md) |
 | Remaining gaps and roadmap | [remaining-gaps-and-roadmap.md](remaining-gaps-and-roadmap.md) |
+| v1 reviewer guide | [v1-reviewer-guide.md](v1-reviewer-guide.md) |
+| v1 release evidence | [release-evidence/v1.0.0.md](release-evidence/v1.0.0.md) |
+| v1 demo script | [v1-demo-script.md](v1-demo-script.md) |
 | Demo script | [demo-script.md](demo-script.md) |
 
 Fast local verification:
@@ -87,6 +90,13 @@ Cloud blueprint verification without AWS credentials:
 .\scripts\cloud-policy-audit.ps1
 .\scripts\terraform-race-smoke.ps1
 .\scripts\portfolio-verify.ps1 -Cloud
+```
+
+v1 release evidence gate:
+
+```powershell
+.\scripts\v1-release-verify.ps1 -Cloud
+.\scripts\v1-cloud-evidence.ps1
 ```
 
 ## Cloud State Matrix

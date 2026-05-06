@@ -74,6 +74,10 @@
         "scripts/cloud-verify.ps1",
         "scripts/cloud-policy-audit.ps1",
         "scripts/cloud-evidence-summary.ps1",
+        "scripts/v1-release-verify.ps1",
+        "scripts/v1-runtime-evidence.ps1",
+        "scripts/v1-cloud-evidence.ps1",
+        "scripts/v1-demo-data-verify.ps1",
         "scripts/check-coverage.ps1"
       ]
     },
@@ -135,6 +139,9 @@
         "docs/repository-health.md",
         "docs/production-engineering-scorecard.md",
         "docs/remaining-gaps-and-roadmap.md",
+        "docs/v1-reviewer-guide.md",
+        "docs/v1-production-gap-register.md",
+        "docs/v1-demo-script.md",
         "docs/repository-structure.md",
         "docs/design-system.md",
         "docs/release-evidence/v0.3.0.md",
@@ -147,7 +154,9 @@
         "docs/release-evidence/v0.4.8.md",
         "docs/release-evidence/v0.4.9.md",
         "docs/release-evidence/v0.5.0.md",
-        "docs/release-evidence/v0.5.1.md"
+        "docs/release-evidence/v0.5.1.md",
+        "docs/release-notes/v1.0.0.md",
+        "docs/release-evidence/v1.0.0.md"
       ]
     },
     {

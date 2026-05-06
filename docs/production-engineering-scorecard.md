@@ -127,6 +127,9 @@ These are not code gaps. They are account or release-operation follow-ups:
 Evidence:
 
 - [Remaining gaps and roadmap](remaining-gaps-and-roadmap.md)
+- [v1 reviewer guide](v1-reviewer-guide.md)
+- [v1 production gap register](v1-production-gap-register.md)
+- [v1.0.0 release evidence](release-evidence/v1.0.0.md)
 - [GitHub governance](github-governance.md)
 - [Branch protection](branch-protection.md)
 - [Repository health](repository-health.md)

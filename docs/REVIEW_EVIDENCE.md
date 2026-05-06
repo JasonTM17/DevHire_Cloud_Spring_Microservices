@@ -17,6 +17,7 @@ This is the short reviewer-facing evidence path. `docs/PROGRESS.md` remains an i
 | Runtime observability posture | Domain metrics for funnel, notifications, audit, outbox, search, and AI are emitted and verified by `runtime-observability-smoke.ps1` |
 | Deployment posture | Prod Helm avoids `latest`, requires secret refs, cloud policy audit passes, and Terraform validation is race-safe |
 | Transparent gaps | Remaining production gaps are documented instead of hidden; see [remaining gaps and roadmap](remaining-gaps-and-roadmap.md) |
+| v1 release posture | v1 reviewer, demo, release evidence, cloud evidence, runtime evidence, and gap-register commands are prepared for the final release path |
 
 Latest hardening evidence: [v0.5.1 production runtime depth evidence](release-evidence/v0.5.1.md).
 
@@ -50,6 +51,9 @@ Latest hardening evidence: [v0.5.1 production runtime depth evidence](release-ev
 .\scripts\migration-smoke.ps1
 .\scripts\runtime-observability-smoke.ps1 -GatewayUrl http://localhost:8080
 .\scripts\portfolio-runtime-report.ps1 -GatewayUrl http://localhost:8080
+.\scripts\v1-release-verify.ps1 -Cloud
+.\scripts\v1-cloud-evidence.ps1
+.\scripts\v1-demo-data-verify.ps1
 ```
 
 Reviewer-friendly frontend browser proof:
@@ -79,6 +83,7 @@ Runtime proof when Docker is already running:
 | AI is controlled | Claude Haiku provider config, fallback mode, citations, tool traces, [AI safety](ai-safety.md) |
 | Cloud is blueprint-safe | Helm, Argo CD, AWS Terraform blueprint, External Secrets, race-safe validation, [cloud completion scorecard](cloud-completion-scorecard.md) |
 | Gaps are explicit | [Remaining gaps and roadmap](remaining-gaps-and-roadmap.md) separates portfolio evidence from real-production follow-ups |
+| v1 release path is explicit | [v1 reviewer guide](v1-reviewer-guide.md), [v1 demo script](v1-demo-script.md), and [v1.0.0 release evidence](release-evidence/v1.0.0.md) define final acceptance |
 
 ## Owner-Applied State
 

@@ -46,6 +46,9 @@ DevHire Cloud is a production-grade Java 21/Spring Boot microservices portfolio 
 | Cloud visual evidence | [Cloud visual evidence](docs/cloud-visual-evidence.md) |
 | Production engineering scorecard | [Scorecard](docs/production-engineering-scorecard.md) |
 | Remaining gaps and roadmap | [Transparent gaps and next production steps](docs/remaining-gaps-and-roadmap.md) |
+| v1 reviewer guide | [v1 reviewer guide](docs/v1-reviewer-guide.md) |
+| v1 release evidence | [v1.0.0 release evidence](docs/release-evidence/v1.0.0.md) |
+| v1 demo script | [10-minute v1 demo script](docs/v1-demo-script.md) |
 | Public repo governance | [Repository health](docs/repository-health.md) |
 | Governance verification | [GitHub governance](docs/github-governance.md), [workflow status](scripts/github-workflow-status.ps1), [settings as code](.github/settings.yml) |
 
@@ -83,6 +86,13 @@ Cloud blueprint gate without AWS credentials:
 .\scripts\cloud-policy-audit.ps1
 .\scripts\terraform-race-smoke.ps1
 .\scripts\portfolio-verify.ps1 -Cloud
+```
+
+v1 release evidence gate:
+
+```powershell
+.\scripts\v1-release-verify.ps1 -Cloud
+.\scripts\v1-cloud-evidence.ps1
 ```
 
 Clean generated local artifacts before handing the repo to a reviewer:
