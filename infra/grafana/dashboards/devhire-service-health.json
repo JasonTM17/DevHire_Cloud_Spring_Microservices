@@ -1,0 +1,46 @@
+{
+  "uid": "devhire-service-health",
+  "title": "DevHire Service Health",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "tags": ["devhire", "health", "microservices"],
+  "time": {"from": "now-1h", "to": "now"},
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Service Targets Up",
+      "gridPos": {"h": 6, "w": 8, "x": 0, "y": 0},
+      "targets": [{"expr": "sum(up{job=\"devhire-services\"})", "legendFormat": "up"}]
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "Gateway Request Rate",
+      "gridPos": {"h": 6, "w": 8, "x": 8, "y": 0},
+      "targets": [{"expr": "sum(rate(http_server_requests_seconds_count{application=\"api-gateway\"}[5m]))", "legendFormat": "requests/s"}]
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "Gateway 5xx Rate",
+      "gridPos": {"h": 6, "w": 8, "x": 16, "y": 0},
+      "targets": [{"expr": "sum(rate(http_server_requests_seconds_count{application=\"api-gateway\",status=~\"5..\"}[5m]))", "legendFormat": "5xx/s"}]
+    },
+    {
+      "id": 4,
+      "type": "timeseries",
+      "title": "JVM Heap Usage",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 6},
+      "targets": [{"expr": "sum by (application) (jvm_memory_used_bytes{area=\"heap\"})", "legendFormat": "{{application}}"}]
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "DB Pool Active Connections",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 6},
+      "targets": [{"expr": "sum by (application) (hikaricp_connections_active)", "legendFormat": "{{application}}"}]
+    }
+  ]
+}

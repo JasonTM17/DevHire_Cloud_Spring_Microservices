@@ -17,7 +17,7 @@ DevHire Cloud is a production-grade Java 21/Spring Boot microservices portfolio 
 | Signal | Current Public State | Verification / Owner Action |
 |---|---|---|
 | Latest release | `v0.4.6` is public | [Release](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.4.6) |
-| Current hardening evidence | `v0.4.9` cloud completion on `master` | [Review evidence](docs/REVIEW_EVIDENCE.md), [cloud evidence](docs/release-evidence/v0.4.9.md) |
+| Current hardening evidence | `v0.4.9` cloud completion PR is green; release tag waits for protected-branch merge | [Review evidence](docs/REVIEW_EVIDENCE.md), [cloud evidence](docs/release-evidence/v0.4.9.md) |
 | About description | Applied | Verified through owner-authenticated GitHub API |
 | Topics | Applied: 20 topics | Verified through owner-authenticated GitHub API |
 | Branch protection | Applied on `master` | Required check contexts audited before apply |
@@ -32,6 +32,9 @@ DevHire Cloud is a production-grade Java 21/Spring Boot microservices portfolio 
 | Latest public release | [v0.4.6 release](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.4.6) |
 | Canonical reviewer evidence | [Review evidence pack](docs/REVIEW_EVIDENCE.md) |
 | Runtime proof | [Runtime evidence v0.4](docs/runtime-evidence-v0.4.md) |
+| Portfolio demo data | [Synthetic volume seed](docs/demo-data.md) |
+| Data model and seed strategy | [Service-owned seed strategy](docs/data-model-and-seed-strategy.md) |
+| Runtime observability proof | [SLO and domain metrics](docs/slo.md), `.\scripts\runtime-observability-smoke.ps1` |
 | 5/15/30 minute review route | [Professional review map](docs/professional-review-map.md) |
 | Root layout | [Repository structure](docs/repository-structure.md) |
 | Service boundaries | [Service catalog](docs/service-catalog.md) |
@@ -62,6 +65,14 @@ Runtime gate when the Docker stack is running:
 
 ```powershell
 .\scripts\portfolio-verify.ps1 -Runtime -GatewayUrl http://localhost:8080
+.\scripts\runtime-observability-smoke.ps1 -GatewayUrl http://localhost:8080
+```
+
+Curated runtime evidence pack when Docker is available:
+
+```powershell
+.\scripts\portfolio-demo-evidence.ps1 -StartStack -CaptureScreenshots -PromoteScreenshots
+.\scripts\portfolio-runtime-report.ps1 -GatewayUrl http://localhost:8080
 ```
 
 Cloud blueprint gate without AWS credentials:

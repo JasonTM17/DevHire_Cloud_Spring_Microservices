@@ -41,6 +41,8 @@ Sanitized evidence summary from ignored local reports:
 | Audit ingestion | `runtime-reliability.ps1` | admin audit log includes key actions after login/apply/status change | audit event publishing or consumer path is broken | `audit-service`, Kafka |
 | AI assistant safety | `ai-eval.ps1`, `runtime-reliability.ps1` | prompt-injection style request is refused, citations/tool traces remain present, no live API key required | fallback/safety guard or cited answer contract is broken | `ai-service` |
 | OpenAPI conformance | `openapi-verify.ps1` | required service paths are present in live `/v3/api-docs` | public API drifted from portfolio contract | all services |
+| Runtime domain metrics | `runtime-observability-smoke.ps1` | custom recruitment, outbox, email, audit, search, and AI metrics exist with non-zero seeded samples | observability is only infrastructure-level, not domain-runtime proof | core services and observability |
+| Demo data aggregates | `demo-data-summary.ps1 -FromDocker -Aggregates` | runtime counts by job/application/notification/audit/AI state are visible | seed data or migrations drifted from dashboards | service-owned PostgreSQL databases |
 | Role-based load smoke | `perf-suite.ps1` | k6 checks pass and thresholds stay inside smoke limits | endpoint latency/error rate regressed | gateway and core services |
 | Degraded OpenSearch | `chaos-smoke.ps1 -Scenario opensearch -Recover` | public job search still returns through fallback | fallback adapter or recovery path is broken | `job-service` |
 | Kafka outage posture | `chaos-smoke.ps1 -Scenario kafka -Recover` | outbox retains pending work and recovery is explicit | event reliability posture is broken | event publishers, Kafka |

@@ -7,12 +7,14 @@ This is the short reviewer-facing evidence path. `docs/PROGRESS.md` remains an i
 | Evidence | Status |
 |---|---|
 | Latest public release | `v0.4.6` is visible on GitHub |
-| Current development evidence | `v0.4.9` cloud completion evidence is committed on `master` |
+| Current development evidence | `v0.4.9` cloud completion evidence is green on PR #29; release tag waits for protected-branch merge |
 | GitHub About/Homepage/Topics | Applied through owner-authenticated GitHub API; 20 topics are set |
 | Branch protection | Applied on `master`; public branch API confirms `protected=true`, and detailed protection reads are owner-token only |
 | Dependabot posture | Zero-noise cleanup applied: open Dependabot PR count is 0; future updates are handled through scheduled curated batches |
 | E2E posture | `cd frontend && npm run e2e:all` is self-starting and passed locally with 5 desktop + 2 mobile smoke tests |
 | Coverage posture | Parent JaCoCo baseline raised to 35%; per-module script thresholds ratchet current measured modules |
+| Demo data posture | Synthetic portfolio volume seed adds 1,108 primary records across service-owned databases; see [demo-data.md](demo-data.md) and [data model strategy](data-model-and-seed-strategy.md) |
+| Runtime observability posture | Domain metrics for funnel, notifications, audit, outbox, search, and AI are emitted and verified by `runtime-observability-smoke.ps1` |
 | Deployment posture | Prod Helm avoids `latest`, requires secret refs, cloud policy audit passes, and Terraform validation is race-safe |
 
 Latest hardening evidence: [v0.4.9 cloud completion evidence](release-evidence/v0.4.9.md).
@@ -29,6 +31,7 @@ Latest hardening evidence: [v0.4.9 cloud completion evidence](release-evidence/v
 
 ```powershell
 .\scripts\portfolio-verify.ps1 -Docs -Docker
+.\scripts\docs-parity.ps1
 .\scripts\evidence-manifest-verify.ps1
 .\scripts\github-governance.ps1 -DryRun
 .\scripts\github-check-contexts.ps1
@@ -41,6 +44,11 @@ Latest hardening evidence: [v0.4.9 cloud completion evidence](release-evidence/v
 .\scripts\cloud-policy-audit.ps1
 .\scripts\cloud-verify.ps1
 .\scripts\cloud-evidence-summary.ps1
+.\scripts\demo-data-summary.ps1
+.\scripts\demo-data-summary.ps1 -FromDocker -Aggregates
+.\scripts\migration-smoke.ps1
+.\scripts\runtime-observability-smoke.ps1 -GatewayUrl http://localhost:8080
+.\scripts\portfolio-runtime-report.ps1 -GatewayUrl http://localhost:8080
 ```
 
 Reviewer-friendly frontend browser proof:
@@ -54,6 +62,7 @@ Runtime proof when Docker is already running:
 
 ```powershell
 .\scripts\portfolio-verify.ps1 -Runtime -GatewayUrl http://localhost:8080
+.\scripts\portfolio-demo-evidence.ps1 -StartStack -CaptureScreenshots -PromoteScreenshots
 .\scripts\runtime-evidence-summary.ps1
 ```
 
@@ -65,6 +74,7 @@ Runtime proof when Docker is already running:
 | Security is not a README-only claim | JWT/refresh flow, gateway validation, Gitleaks, Trivy, CodeQL, SBOM, [security evidence](security-evidence.md) |
 | Events are reliable | Kafka, transactional outbox, idempotent consumers, chaos scripts, runbooks |
 | Operations are observable | Prometheus rules, Grafana SLO dashboard, Loki/Tempo/OTel, [observability evidence](observability-evidence.md) |
+| Domain runtime data is observable | Recruitment funnel, notification delivery, audit ingestion, outbox, search, and AI metrics, [SLO docs](slo.md) |
 | AI is controlled | Claude Haiku provider config, fallback mode, citations, tool traces, [AI safety](ai-safety.md) |
 | Cloud is blueprint-safe | Helm, Argo CD, AWS Terraform blueprint, External Secrets, race-safe validation, [cloud completion scorecard](cloud-completion-scorecard.md) |
 

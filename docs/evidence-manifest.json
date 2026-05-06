@@ -39,6 +39,7 @@
       "description": "Reviewer, smoke, reliability, security, and operations scripts exist.",
       "requiredPaths": [
         "scripts/portfolio-verify.ps1",
+        "scripts/portfolio-demo-evidence.ps1",
         "scripts/runtime-reliability.ps1",
         "scripts/runtime-evidence-summary.ps1",
         "scripts/api-smoke.ps1",
@@ -49,6 +50,8 @@
         "scripts/chaos-smoke.ps1",
         "scripts/dr-verify.ps1",
         "scripts/docs-quality.ps1",
+        "scripts/docs-parity.ps1",
+        "scripts/demo-data-summary.ps1",
         "scripts/evidence-audit.ps1",
         "scripts/repo-hygiene.ps1",
         "scripts/runtime-preflight.ps1",
@@ -105,6 +108,7 @@
         "docs/README_JA.md",
         "LICENSE",
         "docs/REVIEW_EVIDENCE.md",
+        "docs/demo-data.md",
         "docs/professional-review-map.md",
         "docs/service-catalog.md",
         "docs/architecture-review-index.md",
@@ -140,7 +144,8 @@
         "docs/release-evidence/v0.4.6.md",
         "docs/release-notes/v0.4.6.md",
         "docs/release-evidence/v0.4.8.md",
-        "docs/release-evidence/v0.4.9.md"
+        "docs/release-evidence/v0.4.9.md",
+        "docs/release-evidence/v0.5.0.md"
       ]
     },
     {

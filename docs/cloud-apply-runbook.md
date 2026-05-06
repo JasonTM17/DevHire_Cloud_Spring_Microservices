@@ -12,6 +12,21 @@ This runbook describes how DevHire Cloud should be applied to AWS when a real ac
 
 ## Apply Sequence
 
+## First Real AWS Apply Checklist
+
+Before the first `terraform apply`, the owner should record these decisions in the private deployment ticket or change request:
+
+| Area | Required decision |
+|---|---|
+| Account | AWS account id, region, IAM administrator, and break-glass owner are confirmed. |
+| Budget | Monthly budget alarm, service quota review, and explicit approval for RDS, EKS, MSK, OpenSearch, NAT, and load balancer costs. |
+| State | S3 backend bucket and DynamoDB lock table are created, encrypted, versioned, and not committed to Git. |
+| Domain | Public domain, ACM certificate, DNS zone, and ingress hostname are owned by the deployer. |
+| Secrets | JWT, database, SMTP, Anthropic, OpenSearch, and OAuth/API keys are written to Secrets Manager outside Terraform state. |
+| Images | GHCR or ECR image tags are immutable release tags or commit SHAs, never `latest`. |
+| Rollback | Previous image tag, RDS snapshot/backup, outbox replay plan, and destroy plan are reviewed before traffic cutover. |
+| Evidence | CI, Docker, Security, CodeQL, Terraform, E2E, cloud policy audit, and runtime smoke links are attached. |
+
 1. Confirm repository gates:
 
 ```powershell

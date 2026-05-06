@@ -24,7 +24,7 @@ DevHire Cloud models a compact ITviec / LinkedIn Jobs platform with authenticati
 | Item | Current state | Verification |
 |---|---|---|
 | Latest public release | `v0.4.6` | [GitHub release](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.4.6) |
-| Current hardening evidence | `v0.4.9` cloud completion pass | [Review evidence](REVIEW_EVIDENCE.md), [cloud evidence](release-evidence/v0.4.9.md) |
+| Current hardening evidence | `v0.4.9` cloud completion PR is green; release tag waits for protected-branch merge | [Review evidence](REVIEW_EVIDENCE.md), [cloud evidence](release-evidence/v0.4.9.md) |
 | GitHub About / homepage / topics | Applied through governance automation | [Repository governance](github-governance.md) |
 | Branch protection | `master` protected; strict admin enforcement is part of the v0.4.7 gate | [Branch protection](branch-protection.md) |
 | Dependabot queue | 0 open PRs after zero-noise cleanup | [Dependabot cleanup](dependabot-cleanup-v0.4.md) |
@@ -39,6 +39,9 @@ DevHire Cloud models a compact ITviec / LinkedIn Jobs platform with authenticati
 | 5 / 15 / 30 minute review route | [professional-review-map.md](professional-review-map.md) |
 | Production scorecard | [production-engineering-scorecard.md](production-engineering-scorecard.md) |
 | Runtime proof | [runtime-evidence-v0.4.md](runtime-evidence-v0.4.md) |
+| Portfolio demo data | [demo-data.md](demo-data.md) |
+| Data model and seed strategy | [data-model-and-seed-strategy.md](data-model-and-seed-strategy.md) |
+| Runtime observability proof | [slo.md](slo.md), `.\scripts\runtime-observability-smoke.ps1` |
 | Service catalog | [service-catalog.md](service-catalog.md) |
 | Architecture decisions | [architecture-review-index.md](architecture-review-index.md) |
 | API compatibility | [api-compatibility.md](api-compatibility.md) |
@@ -66,6 +69,14 @@ Full runtime gate after the Docker stack is running:
 
 ```powershell
 .\scripts\portfolio-verify.ps1 -Runtime -GatewayUrl http://localhost:8080
+.\scripts\runtime-observability-smoke.ps1 -GatewayUrl http://localhost:8080
+```
+
+Curated runtime evidence pack:
+
+```powershell
+.\scripts\portfolio-demo-evidence.ps1 -StartStack -CaptureScreenshots -PromoteScreenshots
+.\scripts\portfolio-runtime-report.ps1 -GatewayUrl http://localhost:8080
 ```
 
 Cloud blueprint verification without AWS credentials:

@@ -27,6 +27,14 @@ Every backend service image and the Next.js frontend image now carries Open Cont
 
 The `Docker Images` and `Security` workflows pass these values during pull request and branch builds. The `Release Images` workflow publishes the same metadata to GHCR and tags every image by both release version and commit SHA. SBOM generation and Trivy scanning then attach to images that can be traced back to repository source, commit, and release evidence.
 
+Release images now request BuildKit provenance attestations and SBOM output during the GHCR publish workflow:
+
+- `provenance: mode=max` records source, build input, and commit metadata for release images;
+- `sbom: true` emits package inventory from the image build;
+- workflow permissions include `attestations: write` and `id-token: write` so the project is ready for keyless provenance flows without storing signing keys.
+
+Future real-cloud releases can add cosign keyless verification as a deployment admission check. The portfolio keeps this optional so normal pull requests do not require cloud or registry secrets.
+
 Trivy filesystem scanning blocks critical repository vulnerabilities. Trivy image scanning now runs for pull requests, manual runs, and schedules, and it fails on actionable HIGH/CRITICAL image vulnerabilities instead of only uploading advisory artifacts. Runtime Docker images run `apk upgrade --no-cache` during image build so fixed Alpine packages, such as security-patched TLS libraries, are pulled into the final non-root image layers. The Maven parent also pins `tomcat.version` when a patched embedded Tomcat line is available before the next Spring Boot service release.
 
 ## Runtime Security Controls
