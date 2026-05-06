@@ -32,6 +32,32 @@ groups:
           summary: DevHire Gateway p95 latency is above 1s
           description: Gateway p95 latency is over the SLO threshold for 10 minutes.
 
+      - alert: DevHireGatewayRouteP95LatencyHigh
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (route, le) (rate(devhire_gateway_request_latency_seconds_bucket[5m]))
+          ) > 1
+        for: 10m
+        labels:
+          severity: warning
+          service: api-gateway
+          slo: route-latency
+        annotations:
+          summary: DevHire Gateway route p95 latency is above 1s
+          description: '{{ $labels.route }} is slower than the route SLO. Check downstream service health, rate limiting, and traces.'
+
+      - alert: DevHireGatewayRateLimitSpike
+        expr: sum by (route) (increase(devhire_gateway_rate_limited_total[10m])) > 20
+        for: 5m
+        labels:
+          severity: warning
+          service: api-gateway
+          slo: traffic-control
+        annotations:
+          summary: DevHire Gateway rate-limit spike detected
+          description: '{{ $labels.route }} is receiving elevated 429 responses. Check client behavior and Redis rate limiter health.'
+
       - alert: DevHireServiceDown
         expr: up{job="devhire-services"} == 0
         for: 2m

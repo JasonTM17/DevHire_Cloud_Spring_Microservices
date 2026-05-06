@@ -71,11 +71,28 @@ if (-not $SkipTraffic) {
 }
 
 $scrapes = @{
+    gateway = Get-Metrics -BaseUrl $GatewayUrl
     application = Get-Metrics -BaseUrl $ApplicationUrl
     notification = Get-Metrics -BaseUrl $NotificationUrl
     audit = Get-Metrics -BaseUrl $AuditUrl
     job = Get-Metrics -BaseUrl $JobUrl
     ai = Get-Metrics -BaseUrl $AiUrl
+}
+
+Invoke-Step "gateway route metrics" {
+    if ($SkipTraffic) {
+        if ($scrapes.gateway -match "(?m)^devhire_gateway_requests_total(\{| )") {
+            Assert-MetricExists -Content $scrapes.gateway -MetricName "devhire_gateway_requests_total"
+            Assert-MetricExists -Content $scrapes.gateway -MetricName "devhire_gateway_request_latency_seconds_count"
+        } else {
+            Write-Host "Gateway custom route metrics are traffic-driven; skipping non-zero assertion because -SkipTraffic was used."
+        }
+    } else {
+        Assert-MetricExists -Content $scrapes.gateway -MetricName "devhire_gateway_requests_total"
+        Assert-NonZeroSample -Content $scrapes.gateway -MetricName "devhire_gateway_requests_total"
+        Assert-MetricExists -Content $scrapes.gateway -MetricName "devhire_gateway_request_latency_seconds_count"
+        Assert-NonZeroSample -Content $scrapes.gateway -MetricName "devhire_gateway_request_latency_seconds_count"
+    }
 }
 
 Invoke-Step "application domain metrics" {
