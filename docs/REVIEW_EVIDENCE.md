@@ -24,6 +24,16 @@ See [status.md](status.md) for the single source of truth.
 | 15 minutes | [Service catalog](service-catalog.md), [architecture review index](architecture-review-index.md), [security evidence](security-evidence.md) |
 | 30 minutes | `.\scripts\portfolio-verify.ps1 -Docs -Docker -Cloud`, [cloud readiness](cloud-readiness-review.md), [runtime matrix](runtime-acceptance-matrix.md) |
 
+## Current Development Evidence
+
+| Area | Evidence now present |
+|---|---|
+| Product workflow | Jobs page has keyword, skill, location, level, minimum salary, sorting, clear-filter, result total, and pagination controls. |
+| Frontend preview | [frontend-preview-deploy.md](frontend-preview-deploy.md) documents Vercel as frontend-only preview; backend remains Spring Cloud Gateway plus Java services. |
+| Gateway observability | `api-gateway` emits `devhire_gateway_requests_total`, `devhire_gateway_request_latency_seconds`, and `devhire_gateway_rate_limited_total` by route/status. |
+| Runtime observability smoke | `runtime-observability-smoke.ps1` now checks Gateway custom metrics together with recruitment, notification, audit, search, AI, and outbox metrics. |
+| SLO alerts | Prometheus rules include Gateway route p95 latency and route-level rate-limit spike alerts. |
+
 ## Verification Commands
 
 ```powershell
