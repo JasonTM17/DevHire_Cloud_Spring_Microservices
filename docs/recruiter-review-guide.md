@@ -90,6 +90,8 @@ Open:
 - `docs/email-sandbox.md`
 - `docs/external-secrets.md`
 - `docs/cloud-readiness-review.md`
+- `docs/cloud-completion-scorecard.md`
+- `docs/cloud-apply-runbook.md`
 - `docs/runtime-reliability-review.md`
 - `docs/runtime-acceptance-matrix.md`
 - `docs/runtime-evidence-v0.4.md`

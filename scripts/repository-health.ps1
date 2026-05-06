@@ -3,7 +3,7 @@ param(
     [string]$Owner = "JasonTM17",
     [string]$Repo = "DevHire_Cloud_Spring_Microservices",
     [string]$DefaultBranch = "master",
-    [string]$LatestRelease = "v0.3.0",
+    [string]$LatestRelease = "v0.4.6",
     [string]$OutputDir = "reports/repository-health"
 )
 
@@ -129,13 +129,14 @@ if ($dependabotResult.ok) {
 
 $evidenceRows = @(Get-LocalEvidenceStatus -Paths @(
     "docs/runtime-evidence-v0.4.md",
-    "docs/release-evidence/v0.3.0.md",
-    "docs/release-evidence/v0.4.0.md",
+    "docs/release-evidence/v0.4.6.md",
+    "docs/release-evidence/v0.4.9.md",
     "docs/github-governance.md",
     "docs/branch-protection.md",
     "docs/dependabot-cleanup-v0.4.md",
     "docs/security-evidence.md",
-    "docs/cloud-readiness-review.md"
+    "docs/cloud-readiness-review.md",
+    "docs/cloud-completion-scorecard.md"
 ))
 
 $metadata = [ordered]@{

@@ -7,15 +7,15 @@ This is the short reviewer-facing evidence path. `docs/PROGRESS.md` remains an i
 | Evidence | Status |
 |---|---|
 | Latest public release | `v0.4.6` is visible on GitHub |
-| Current development evidence | `v0.4.6` public credibility, self-starting E2E, and repository-facade gates are committed on `master` |
+| Current development evidence | `v0.4.9` cloud completion evidence is committed on `master` |
 | GitHub About/Homepage/Topics | Applied through owner-authenticated GitHub API; 20 topics are set |
 | Branch protection | Applied on `master`; public branch API confirms `protected=true`, and detailed protection reads are owner-token only |
 | Dependabot posture | Zero-noise cleanup applied: open Dependabot PR count is 0; future updates are handled through scheduled curated batches |
 | E2E posture | `cd frontend && npm run e2e:all` is self-starting and passed locally with 5 desktop + 2 mobile smoke tests |
 | Coverage posture | Parent JaCoCo baseline raised to 35%; per-module script thresholds ratchet current measured modules |
-| Deployment posture | Prod Helm avoids `latest`, requires secret refs, and security image scans fail actionable HIGH/CRITICAL findings |
+| Deployment posture | Prod Helm avoids `latest`, requires secret refs, cloud policy audit passes, and Terraform validation is race-safe |
 
-Latest hardening evidence: [v0.4.6 public credibility evidence](release-evidence/v0.4.6.md).
+Latest hardening evidence: [v0.4.9 cloud completion evidence](release-evidence/v0.4.9.md).
 
 ## What To Review First
 
@@ -37,6 +37,10 @@ Latest hardening evidence: [v0.4.6 public credibility evidence](release-evidence
 .\scripts\dependabot-zero-noise.ps1 -DryRun
 .\scripts\public-portfolio-audit.ps1
 .\scripts\github-workflow-status.ps1
+.\scripts\terraform-race-smoke.ps1
+.\scripts\cloud-policy-audit.ps1
+.\scripts\cloud-verify.ps1
+.\scripts\cloud-evidence-summary.ps1
 ```
 
 Reviewer-friendly frontend browser proof:
@@ -62,7 +66,7 @@ Runtime proof when Docker is already running:
 | Events are reliable | Kafka, transactional outbox, idempotent consumers, chaos scripts, runbooks |
 | Operations are observable | Prometheus rules, Grafana SLO dashboard, Loki/Tempo/OTel, [observability evidence](observability-evidence.md) |
 | AI is controlled | Claude Haiku provider config, fallback mode, citations, tool traces, [AI safety](ai-safety.md) |
-| Cloud is blueprint-safe | Helm, Argo CD, AWS Terraform blueprint, External Secrets, [cloud readiness review](cloud-readiness-review.md) |
+| Cloud is blueprint-safe | Helm, Argo CD, AWS Terraform blueprint, External Secrets, race-safe validation, [cloud completion scorecard](cloud-completion-scorecard.md) |
 
 ## Owner-Applied State
 

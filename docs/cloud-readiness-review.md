@@ -20,6 +20,20 @@ The reviewer-facing cloud gate is Docker-first so it still works when local Terr
 .\scripts\portfolio-verify.ps1 -Cloud
 ```
 
+## v0.4.9 Apply-Ready Evidence Additions
+
+v0.4.9 adds a stricter cloud evidence layer:
+
+| Evidence | Command |
+|---|---|
+| Race-safe Terraform validation | `.\scripts\terraform-race-smoke.ps1` |
+| Cloud guardrail audit | `.\scripts\cloud-policy-audit.ps1` |
+| Latest sanitized cloud report summary | `.\scripts\cloud-evidence-summary.ps1` |
+| AWS account preparation | [aws-account-bootstrap.md](aws-account-bootstrap.md) |
+| Controlled apply procedure | [cloud-apply-runbook.md](cloud-apply-runbook.md) |
+| Cloud completion scorecard | [cloud-completion-scorecard.md](cloud-completion-scorecard.md) |
+| Cloud architecture diagrams | [cloud-visual-evidence.md](cloud-visual-evidence.md) |
+
 The script verifies:
 
 | Check | Expected result |
@@ -129,6 +143,9 @@ See `docs/cost-estimate.md` before enabling any of them.
 
 ```powershell
 .\scripts\cloud-verify.ps1
+.\scripts\cloud-policy-audit.ps1
+.\scripts\terraform-race-smoke.ps1
+.\scripts\cloud-evidence-summary.ps1
 .\scripts\portfolio-verify.ps1 -Cloud
 .\scripts\terraform-validate.ps1
 docker compose config --quiet

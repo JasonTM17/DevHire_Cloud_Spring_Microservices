@@ -18,10 +18,10 @@ Latest v0.4.6 health scan focus:
 | Dependabot PRs | 0 open PRs after zero-noise cleanup; future updates are handled by scheduled curated batches |
 | Runtime evidence | `docs/runtime-evidence-v0.4.md` |
 | E2E posture | `cd frontend && npm run e2e:all` is self-starting; desktop + mobile smoke passed locally |
-| Cloud posture | AWS blueprint is render/validate-ready; no AWS apply has been run |
+| Cloud posture | AWS blueprint is apply-ready as code, race-safe, policy-audited, and not applied |
 | Tracked source hygiene | Clean; generated reports, targets, `.next`, Playwright output, and local `.env` remain ignored |
 
-v0.4.6 verification result: owner-authenticated GitHub API confirmed the repository description, homepage, 20 topics, and `master protected=true`. Deferred-major Dependabot PRs were closed through the curation script, the final zero-noise pass reduced open Dependabot PRs to 0, and `github-workflow-status.ps1 -RequireGreen` passed for the latest `master` head.
+v0.4.9 verification result: owner-authenticated GitHub API confirmed the repository description, homepage, 20 topics, and `master protected=true`. Deferred-major Dependabot PRs were closed through the curation script, the final zero-noise pass reduced open Dependabot PRs to 0, `github-workflow-status.ps1 -RequireGreen` passed for the latest `master` head, and cloud verification now includes race-safe Terraform validation plus 72 cloud policy checks.
 
 Commands executed for this snapshot:
 
@@ -30,6 +30,9 @@ Commands executed for this snapshot:
 .\scripts\repository-health.ps1
 .\scripts\github-facade-assert.ps1 -AllowOwnerActions
 .\scripts\public-portfolio-audit.ps1
+.\scripts\terraform-race-smoke.ps1
+.\scripts\cloud-policy-audit.ps1
+.\scripts\cloud-verify.ps1
 ```
 
 ## Generate A Fresh Report
@@ -120,3 +123,5 @@ npm run e2e:all
 - [Dependabot cleanup v0.4](dependabot-cleanup-v0.4.md)
 - [Runtime evidence v0.4](runtime-evidence-v0.4.md)
 - [Security evidence](security-evidence.md)
+- [Cloud readiness review](cloud-readiness-review.md)
+- [Cloud completion scorecard](cloud-completion-scorecard.md)

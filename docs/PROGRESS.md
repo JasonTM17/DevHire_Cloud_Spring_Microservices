@@ -2956,3 +2956,20 @@ Verification:
 - `.\scripts\cloud-evidence-summary.ps1` passed on 2026-05-06.
 
 Committed as `chore(cloud): harden aws blueprint guardrails`.
+
+## Phase 142 - Cloud apply-ready documentation and evidence
+
+- Added AWS account bootstrap guidance for IAM, remote state, budgets, domains, secrets, and image publishing.
+- Added a cloud apply runbook that keeps `terraform apply` manual, reviewed, and out of CI.
+- Added a cloud completion scorecard that separates Docker/Helm/K8s/Terraform verification from real AWS deployment.
+- Added cloud visual evidence with source-controlled Mermaid diagrams for the AWS blueprint, GitOps flow, and verification flow.
+- Updated Vietnamese, English, and Japanese reviewer documentation with the cloud state matrix, new cloud commands, and v0.4.9 evidence links.
+- Updated repository health, review evidence, production scorecard, GitHub profile notes, and evidence manifest to remove stale current-release drift and include v0.4.9 cloud evidence.
+
+Verification:
+
+- `.\scripts\cloud-verify.ps1` passed on 2026-05-06.
+- `.\scripts\cloud-evidence-summary.ps1` passed on 2026-05-06.
+- Documentation/static gates will be rerun before commit.
+
+Committed as `docs(cloud): add apply-ready runbooks and scorecard`.

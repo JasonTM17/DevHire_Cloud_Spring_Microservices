@@ -71,7 +71,7 @@ portfolio
 - Enable Dependabot alerts.
 - Enable secret scanning if available for the account.
 - Add `CODEOWNERS` review requirement.
-- Keep release `v0.3.0` visible as the current public portfolio release.
+- Keep release `v0.4.6` visible as the current public portfolio release until the next tagged release is cut.
 
 ## Automation
 

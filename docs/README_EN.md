@@ -24,7 +24,7 @@ DevHire Cloud models a compact ITviec / LinkedIn Jobs platform with authenticati
 | Item | Current state | Verification |
 |---|---|---|
 | Latest public release | `v0.4.6` | [GitHub release](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.4.6) |
-| Current hardening evidence | `v0.4.6 / v0.4.7` public credibility pass | [Review evidence](REVIEW_EVIDENCE.md), [release evidence](release-evidence/v0.4.6.md) |
+| Current hardening evidence | `v0.4.9` cloud completion pass | [Review evidence](REVIEW_EVIDENCE.md), [cloud evidence](release-evidence/v0.4.9.md) |
 | GitHub About / homepage / topics | Applied through governance automation | [Repository governance](github-governance.md) |
 | Branch protection | `master` protected; strict admin enforcement is part of the v0.4.7 gate | [Branch protection](branch-protection.md) |
 | Dependabot queue | 0 open PRs after zero-noise cleanup | [Dependabot cleanup](dependabot-cleanup-v0.4.md) |
@@ -44,6 +44,8 @@ DevHire Cloud models a compact ITviec / LinkedIn Jobs platform with authenticati
 | API compatibility | [api-compatibility.md](api-compatibility.md) |
 | Security and supply chain | [security-evidence.md](security-evidence.md) |
 | Cloud blueprint | [cloud-readiness-review.md](cloud-readiness-review.md) |
+| Cloud completion scorecard | [cloud-completion-scorecard.md](cloud-completion-scorecard.md) |
+| Cloud visual evidence | [cloud-visual-evidence.md](cloud-visual-evidence.md) |
 | Demo script | [demo-script.md](demo-script.md) |
 
 Fast local verification:
@@ -70,8 +72,22 @@ Cloud blueprint verification without AWS credentials:
 
 ```powershell
 .\scripts\cloud-verify.ps1
+.\scripts\cloud-policy-audit.ps1
+.\scripts\terraform-race-smoke.ps1
 .\scripts\portfolio-verify.ps1 -Cloud
 ```
+
+## Cloud State Matrix
+
+| Layer | Current status | Reviewer proof |
+|---|---|---|
+| Docker Compose | Local runtime stack | `docker compose config --quiet` |
+| Raw Kubernetes | Renderable, includes `ai-service`, no `latest` tags | `kubectl kustomize deploy/k8s` |
+| Helm | Local, staging, prod, and AWS values lint/render | `.\scripts\cloud-verify.ps1` |
+| GitOps | Argo CD samples target `master` | `deploy/gitops/*.yaml` |
+| Terraform AWS | Apply-ready blueprint, not applied locally | `.\scripts\terraform-validate.ps1` |
+| Cloud policy | 72 guardrail checks | `.\scripts\cloud-policy-audit.ps1` |
+| Real AWS apply | Requires account, budget, domain, remote state, and secrets | [cloud-apply-runbook.md](cloud-apply-runbook.md) |
 
 Clean generated local artifacts before review:
 

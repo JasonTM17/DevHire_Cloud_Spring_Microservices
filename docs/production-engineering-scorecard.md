@@ -11,12 +11,12 @@ This scorecard gives reviewers a fast, evidence-backed view of DevHire Cloud as 
 | Reliability and event delivery | 8/10 | Kafka, transactional outbox, retry/dead-letter states, idempotent notification/audit consumers, chaos smoke scripts |
 | Observability and SLOs | 8/10 | Actuator, Prometheus rules, Grafana SLO dashboard, Loki, Tempo, OpenTelemetry, runtime evidence docs |
 | CI/CD and release governance | 8/10 | Maven verify, frontend build, ratcheted coverage gate, Docker matrix, docs/security/terraform workflows, release notes, release evidence |
-| Cloud readiness | 8.5/10 | Docker Compose, Kubernetes manifests without `latest`, `ai-service` raw K8s coverage, Helm chart with immutable defaults, Argo CD samples, AWS Terraform blueprint, External Secrets wiring, Dockerized cloud verification |
+| Cloud readiness | 9/10 | Docker Compose, Kubernetes manifests without `latest`, `ai-service` raw K8s coverage, Helm chart with immutable defaults, Argo CD samples, AWS Terraform blueprint, External Secrets wiring, race-safe Terraform validation, cloud policy audit |
 | Runtime reviewer proof | 8.5/10 | Self-starting frontend E2E smoke, portfolio verification scripts, API smoke, AI eval, Mailpit smoke, OpenAPI verify, performance and chaos smoke wrappers |
 | AI portfolio layer | 8/10 | Claude Haiku assistant, RAG citations, fallback mode, tool traces, AI safety docs, eval dataset |
 | Public GitHub facade | 9.5/10 | About/Homepage/Topics and `master` branch protection are applied; facade assertion handles public-limited protection details correctly, and settings-as-code disables admin bypass |
 
-Overall portfolio posture: **8.9/10 production engineering evidence**, with the main remaining gap being any account-level GHCR visibility settings and future real-cloud deployment evidence.
+Overall portfolio posture: **9.0/10 production engineering evidence**, with the main remaining gap being future real-cloud deployment evidence in an AWS account.
 
 ## Architecture
 
@@ -78,15 +78,20 @@ Evidence:
 
 ## Cloud Readiness
 
-Cloud deployment is intentionally blueprint-safe. The repo contains Docker Compose for local runtime, Kubernetes raw manifests, Helm values for local/staging/prod/AWS, Argo CD samples, External Secrets wiring, and an AWS Terraform blueprint for EKS, RDS, Redis, MSK, OpenSearch, ECR, and Secrets Manager. v0.4.8 removes mutable `latest` tags from raw/prod defaults, adds `ai-service` to raw Kubernetes, aligns GitOps with the `master` branch, and adds a Docker-first `cloud-verify.ps1` gate. No cloud apply or secret commit is required.
+Cloud deployment is intentionally blueprint-safe. The repo contains Docker Compose for local runtime, Kubernetes raw manifests, Helm values for local/staging/prod/AWS, Argo CD samples, External Secrets wiring, and an AWS Terraform blueprint for EKS, RDS, Redis, MSK, OpenSearch, ECR, and Secrets Manager. v0.4.9 adds race-safe Terraform validation, stricter cloud policy auditing, explicit kubeconform CRD skip handling, AWS account bootstrap docs, and an apply runbook. No cloud apply or secret commit is required.
 
 Evidence:
 
 - [Cloud readiness review](cloud-readiness-review.md)
+- [Cloud completion scorecard](cloud-completion-scorecard.md)
+- [AWS account bootstrap](aws-account-bootstrap.md)
+- [Cloud apply runbook](cloud-apply-runbook.md)
 - [AWS Terraform docs](../deploy/terraform/aws/TERRAFORM_DOCS.md)
 - `deploy/helm/devhire-cloud`
 - `deploy/gitops`
 - `scripts/cloud-verify.ps1`
+- `scripts/cloud-policy-audit.ps1`
+- `scripts/terraform-race-smoke.ps1`
 
 ## Runtime Proof
 
