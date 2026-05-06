@@ -29,6 +29,7 @@ See [status.md](status.md) for the single source of truth.
 | Area | Evidence now present |
 |---|---|
 | Product workflow | Jobs page has keyword, skill, location, level, minimum salary, sorting, clear-filter, result total, and pagination controls. |
+| Rich demo data | `portfolio-verify.ps1 -Docs` now runs `demo-data-summary.ps1 -Aggregates -Json` so the 1,108-row deterministic dataset and status/action distributions are part of reviewer verification. |
 | Frontend preview | [frontend-preview-deploy.md](frontend-preview-deploy.md) documents Vercel as frontend-only preview; backend remains Spring Cloud Gateway plus Java services. |
 | Gateway observability | `api-gateway` emits `devhire_gateway_requests_total`, `devhire_gateway_request_latency_seconds`, and `devhire_gateway_rate_limited_total` by route/status. |
 | Runtime observability smoke | `runtime-observability-smoke.ps1` now checks Gateway custom metrics together with recruitment, notification, audit, search, AI, and outbox metrics. |

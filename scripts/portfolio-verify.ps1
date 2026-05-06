@@ -212,6 +212,9 @@ try {
         Invoke-PortfolioStep "version consistency" ".\scripts\version-consistency.ps1" {
             & "$PSScriptRoot\version-consistency.ps1"
         }
+        Invoke-PortfolioStep "portfolio data distribution summary" ".\scripts\demo-data-summary.ps1 -Aggregates -Json" {
+            & "$PSScriptRoot\demo-data-summary.ps1" -Aggregates -Json | Out-Null
+        }
         Invoke-PortfolioStep "api compatibility manifest" ".\scripts\api-compatibility.ps1 -ManifestOnly" {
             & "$PSScriptRoot\api-compatibility.ps1" -ManifestOnly
         }
