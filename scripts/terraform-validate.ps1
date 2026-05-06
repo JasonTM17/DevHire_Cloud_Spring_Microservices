@@ -5,13 +5,54 @@ param(
     [string]$TrivyImage = "aquasec/trivy:0.58.2",
     [switch]$SkipTflint,
     [switch]$SkipTrivy,
-    [switch]$KeepTerraformCache
+    [switch]$KeepTerraformCache,
+    [int]$LockTimeoutSeconds = 900
 )
 
 $ErrorActionPreference = "Stop"
 
 $Root = (Resolve-Path "$PSScriptRoot\..").Path
 $TerraformRoot = Join-Path $Root "deploy\terraform\aws"
+$LockDirectory = Join-Path $Root "reports\.locks"
+$TerraformLockPath = Join-Path $LockDirectory "terraform-validate.lock"
+
+function Acquire-TerraformValidationLock {
+    New-Item -ItemType Directory -Force -Path $LockDirectory | Out-Null
+
+    $deadline = (Get-Date).AddSeconds($LockTimeoutSeconds)
+    do {
+        try {
+            $stream = [System.IO.File]::Open(
+                $TerraformLockPath,
+                [System.IO.FileMode]::OpenOrCreate,
+                [System.IO.FileAccess]::ReadWrite,
+                [System.IO.FileShare]::None
+            )
+            $stream.SetLength(0)
+            $writer = [System.IO.StreamWriter]::new($stream, [System.Text.Encoding]::UTF8, 1024, $true)
+            $writer.WriteLine("pid=$PID")
+            $writer.WriteLine("startedAt=$((Get-Date).ToString("o"))")
+            $writer.Flush()
+            $writer.Dispose()
+            Write-Host "Acquired Terraform validation lock: $TerraformLockPath"
+            return $stream
+        } catch [System.IO.IOException] {
+            if ((Get-Date) -ge $deadline) {
+                throw "Timed out after ${LockTimeoutSeconds}s waiting for Terraform validation lock: $TerraformLockPath"
+            }
+            Start-Sleep -Milliseconds 500
+        }
+    } while ($true)
+}
+
+function Release-TerraformValidationLock {
+    param([AllowNull()][System.IO.FileStream]$LockStream)
+
+    if ($LockStream) {
+        $LockStream.Dispose()
+        Write-Host "Released Terraform validation lock."
+    }
+}
 
 function Invoke-Checked {
     param(
@@ -48,7 +89,16 @@ function Clear-TerraformCache {
     $targets += Get-ChildItem -Path $TerraformRoot -Recurse -Force -File -Filter ".terraform.lock.hcl" -ErrorAction SilentlyContinue
 
     foreach ($target in $targets) {
-        $resolved = (Resolve-Path -LiteralPath $target.FullName).Path
+        if (-not (Test-Path -LiteralPath $target.FullName)) {
+            continue
+        }
+
+        $resolvedPath = Resolve-Path -LiteralPath $target.FullName -ErrorAction SilentlyContinue
+        if (-not $resolvedPath) {
+            continue
+        }
+
+        $resolved = $resolvedPath.Path
         if (-not $resolved.StartsWith($TerraformRoot, [System.StringComparison]::OrdinalIgnoreCase)) {
             throw "Refusing to remove generated Terraform cache outside ${TerraformRoot}: $resolved"
         }
@@ -56,7 +106,10 @@ function Clear-TerraformCache {
     }
 }
 
+$terraformValidationLock = $null
 try {
+    $terraformValidationLock = Acquire-TerraformValidationLock
+
     Invoke-Checked "Terraform fmt" {
         Invoke-Docker -Image $TerraformImage -Workdir "/workspace" -Arguments @("fmt", "-check", "-recursive", "deploy/terraform/aws")
     }
@@ -90,6 +143,7 @@ try {
                 "config",
                 "--severity", "CRITICAL",
                 "--exit-code", "1",
+                "--skip-check-update",
                 "--skip-dirs", ".terraform",
                 "deploy/terraform/aws"
             )
@@ -97,7 +151,11 @@ try {
     }
 }
 finally {
-    if (-not $KeepTerraformCache) {
-        Clear-TerraformCache
+    try {
+        if (-not $KeepTerraformCache) {
+            Clear-TerraformCache
+        }
+    } finally {
+        Release-TerraformValidationLock -LockStream $terraformValidationLock
     }
 }

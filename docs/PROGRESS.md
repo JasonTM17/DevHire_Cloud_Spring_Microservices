@@ -2922,3 +2922,19 @@ Verification:
 - Passed `.\scripts\domain-placeholder-audit.ps1`.
 - Passed `.\scripts\professionalism-audit.ps1`.
 - Passed `git diff --check`.
+
+## Phase 140 - Terraform validation race hardening
+
+- Fixed the Terraform validation cleanup race that appeared when `terraform-validate.ps1` and `cloud-verify.ps1` ran concurrently.
+- Added a cross-process validation lock under ignored `reports/.locks/` so Terraform init/validate/cache cleanup is serialized while still allowing reviewers to launch cloud checks from multiple shells.
+- Made Terraform cache cleanup tolerant of paths that disappear between enumeration and deletion.
+- Added `scripts/terraform-race-smoke.ps1` to prove concurrent validation no longer breaks `.terraform` cleanup.
+- Switched the Trivy config scan to `--skip-check-update` to avoid noisy remote policy bundle updates during local portfolio verification.
+
+Verification:
+
+- `.\scripts\terraform-validate.ps1 -Environments dev -SkipTflint -SkipTrivy` passed on 2026-05-06.
+- `.\scripts\terraform-race-smoke.ps1` passed on 2026-05-06 with two concurrent validation runs.
+- `.\scripts\terraform-validate.ps1` passed on 2026-05-06 for dev, staging, and prod.
+
+Committed as `fix(terraform): serialize cloud validation cleanup`.
