@@ -3,35 +3,42 @@
 import { useEffect, useState } from "react";
 import { Activity, Bot, Building2, ClipboardCheck, Gauge, RefreshCw, ScrollText, ShieldCheck } from "lucide-react";
 import { CompanyLogo } from "@/components/CompanyLogo";
+import { DemoModeNotice } from "@/components/DemoModeNotice";
 import { MetricCard } from "@/components/MetricCard";
 import { StatusPill } from "@/components/StatusPill";
 import { api } from "@/lib/api";
 import { brandForCompany } from "@/lib/demoCompanies";
-import { previewAiProviderStatus, previewAuditLogs, previewCompanies } from "@/lib/previewData";
-import type { AiProviderStatus, AuditLog, Company, PageResponse } from "@/types/domain";
+import { previewAiProviderStatus, previewAuditLogs, previewCompanies, previewJobs } from "@/lib/previewData";
+import type { AiProviderStatus, AuditLog, Company, Job, PageResponse } from "@/types/domain";
 
 export default function AdminPage() {
-  const [companies, setCompanies] = useState<PageResponse<Company> | null>(null);
-  const [audit, setAudit] = useState<PageResponse<AuditLog> | null>(null);
-  const [aiProvider, setAiProvider] = useState<AiProviderStatus | null>(null);
-  const [jobId, setJobId] = useState("");
+  const [companies, setCompanies] = useState<PageResponse<Company>>(previewCompanies);
+  const [audit, setAudit] = useState<PageResponse<AuditLog>>(previewAuditLogs);
+  const [aiProvider, setAiProvider] = useState<AiProviderStatus>(previewAiProviderStatus);
+  const [reviewJobs, setReviewJobs] = useState<PageResponse<Job>>(previewJobs);
+  const [selectedJobId, setSelectedJobId] = useState(previewJobs.content[0]?.id ?? "");
   const [message, setMessage] = useState("");
   const [reindexing, setReindexing] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   function load() {
     setLoading(true);
-    Promise.all([api.companies(), api.auditLogs(), api.aiProviderStatus()])
-      .then(([companyPage, auditPage, providerStatus]) => {
+    const jobParams = new URLSearchParams({ page: "0", size: "12", sort: "publishedAt,desc" });
+    Promise.all([api.companies(), api.auditLogs(), api.aiProviderStatus(), api.jobs(jobParams)])
+      .then(([companyPage, auditPage, providerStatus, jobPage]) => {
         setCompanies(companyPage);
         setAudit(auditPage);
         setAiProvider(providerStatus);
+        setReviewJobs(jobPage.content.length ? jobPage : previewJobs);
+        setSelectedJobId((current) => current || jobPage.content[0]?.id || previewJobs.content[0]?.id || "");
         setMessage("");
       })
       .catch((ex) => {
         setCompanies(previewCompanies);
         setAudit(previewAuditLogs);
         setAiProvider(previewAiProviderStatus);
+        setReviewJobs(previewJobs);
+        setSelectedJobId(previewJobs.content[0]?.id ?? "");
         setMessage(previewDashboardMessage(ex));
       })
       .finally(() => setLoading(false));
@@ -45,10 +52,13 @@ export default function AdminPage() {
   }
 
   async function approveJob() {
-    if (!jobId) return;
+    if (!selectedJobId) {
+      setMessage("Select a reviewable job before approving.");
+      return;
+    }
     try {
-      await api.approveJob(jobId);
-      setMessage("Job approved.");
+      await api.approveJob(selectedJobId);
+      setMessage(`Job approved: ${selectedJobTitle(reviewJobs.content, selectedJobId)}.`);
     } catch (ex) {
       setMessage(ex instanceof Error ? ex.message : "Cannot approve job");
     }
@@ -91,7 +101,8 @@ export default function AdminPage() {
         <MetricCard icon={ShieldCheck} label="Pending" value={companies?.content.filter((item) => item.status === "PENDING").length ?? 0} helper="Needs admin action" />
         <MetricCard icon={Bot} label="AI mode" value={aiProvider?.mode ?? "UNKNOWN"} helper={aiProvider?.apiKeyConfigured ? "Claude API" : "Fallback safe"} />
       </div>
-      {message ? <p className={positiveMessage ? "success" : "error preview-note"}>{message}</p> : null}
+      {message && positiveMessage ? <p className="success">{message}</p> : null}
+      {message && !positiveMessage ? <DemoModeNotice message={message} /> : null}
       <div className="split-grid">
         <div className="panel">
           <div className="section-title">
@@ -99,11 +110,11 @@ export default function AdminPage() {
             <h2>Company reviews</h2>
           </div>
           <div className="table-list">
-            {loading ? <div className="empty-state compact">Loading admin review queue...</div> : null}
-            {!loading && companies?.content.length === 0 ? (
+            {loading && companies.content.length === 0 ? <div className="empty-state compact">Loading admin review queue...</div> : null}
+            {companies.content.length === 0 ? (
               <div className="empty-state compact">No companies waiting for review.</div>
             ) : null}
-            {!loading && companies?.content.map((company) => (
+            {companies.content.map((company) => (
               <div className="table-row" key={company.id}>
                 <div className="company-line">
                   <CompanyLogo brand={brandForCompany(company)} size="sm" />
@@ -122,7 +133,17 @@ export default function AdminPage() {
             ))}
           </div>
           <div className="form inline-form">
-            <input value={jobId} onChange={(event) => setJobId(event.target.value)} placeholder="Pending job ID" />
+            <select
+              aria-label="Reviewable job"
+              value={selectedJobId}
+              onChange={(event) => setSelectedJobId(event.target.value)}
+            >
+              {reviewJobs.content.map((job) => (
+                <option key={job.id} value={job.id}>
+                  {job.title} - {job.status}
+                </option>
+              ))}
+            </select>
             <button className="button primary" type="button" onClick={approveJob}>
               Approve job
             </button>
@@ -134,9 +155,9 @@ export default function AdminPage() {
             <h2>Audit log</h2>
           </div>
           <div className="stack">
-            {loading ? <div className="empty-state compact">Loading audit stream...</div> : null}
-            {!loading && audit?.content.length === 0 ? <div className="empty-state compact">No audit events yet.</div> : null}
-            {!loading && audit?.content.slice(0, 12).map((item) => (
+            {loading && audit.content.length === 0 ? <div className="empty-state compact">Loading audit stream...</div> : null}
+            {audit.content.length === 0 ? <div className="empty-state compact">No audit events yet.</div> : null}
+            {audit.content.slice(0, 12).map((item) => (
               <div className="audit-item" key={item.id}>
                 <div className="status-line">
                   <strong>{item.action}</strong>
@@ -196,7 +217,11 @@ export default function AdminPage() {
 function previewDashboardMessage(ex: unknown) {
   const message = ex instanceof Error ? ex.message : "";
   if (!message || message === "Failed to fetch") {
-    return "Live API Gateway is offline; showing curated admin control-plane preview data.";
+    return "Curated admin control-plane data is active so reviewers can inspect approvals, audit, and AI operations without starting Docker.";
   }
-  return `${message}. Showing curated admin control-plane preview data.`;
+  return `${message}. Curated admin control-plane data is active for this reviewer session.`;
+}
+
+function selectedJobTitle(jobs: Job[], id: string) {
+  return jobs.find((job) => job.id === id)?.title ?? id;
 }

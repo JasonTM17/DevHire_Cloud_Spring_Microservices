@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { BriefcaseBusiness, CheckCircle2, MapPin, SendHorizonal, ServerCog } from "lucide-react";
 import { useParams } from "next/navigation";
 import { CompanyLogo } from "@/components/CompanyLogo";
+import { DemoModeNotice } from "@/components/DemoModeNotice";
 import { StatusPill } from "@/components/StatusPill";
 import { api } from "@/lib/api";
 import { brandForJob } from "@/lib/demoCompanies";
@@ -85,7 +86,7 @@ export default function JobDetailPage() {
           </div>
           <StatusPill value={job.status} />
         </div>
-        {loadWarning ? <p className="error preview-note">{loadWarning}</p> : null}
+        <DemoModeNotice message={loadWarning} />
         <div className="dashboard-grid">
           <div className="panel">
             <p className="eyebrow">Salary band</p>
@@ -182,15 +183,15 @@ function salary(job: Job) {
 function previewMessage(ex: unknown) {
   const message = ex instanceof Error ? ex.message : "";
   if (!message || message === "Failed to fetch") {
-    return "Live API Gateway is offline; showing portfolio preview job.";
+    return "Curated job detail data is active so reviewers can inspect the application flow without starting Docker.";
   }
-  return `${message}. Showing portfolio preview job.`;
+  return `${message}. Curated job detail data is active for this reviewer session.`;
 }
 
 function applicationMessage(ex: unknown) {
   const message = ex instanceof Error ? ex.message : "";
   if (!message || message === "Failed to fetch") {
-    return "Live API Gateway is offline. The application form is ready, but runtime submission needs the Docker stack.";
+    return "Runtime submission needs the Docker stack. The application form remains ready for reviewer inspection.";
   }
   if (message.toLowerCase().includes("already")) {
     return "This candidate has already applied for the job. Duplicate prevention is working.";

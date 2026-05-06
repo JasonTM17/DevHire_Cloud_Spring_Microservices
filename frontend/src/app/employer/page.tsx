@@ -3,21 +3,23 @@
 import { useEffect, useMemo, useState } from "react";
 import { Building2, ClipboardList, GitPullRequestArrow, Plus, Send, UsersRound } from "lucide-react";
 import { CompanyLogo } from "@/components/CompanyLogo";
+import { DemoModeNotice } from "@/components/DemoModeNotice";
 import { MetricCard } from "@/components/MetricCard";
 import { StatusPill } from "@/components/StatusPill";
 import { api } from "@/lib/api";
 import { brandForCompany } from "@/lib/demoCompanies";
-import { previewApplications, previewCompanies } from "@/lib/previewData";
-import type { Application, Company, PageResponse } from "@/types/domain";
+import { previewApplications, previewCompanies, previewJobs } from "@/lib/previewData";
+import type { Application, Company, Job, PageResponse } from "@/types/domain";
 
 export default function EmployerPage() {
-  const [companies, setCompanies] = useState<PageResponse<Company> | null>(null);
+  const [companies, setCompanies] = useState<PageResponse<Company>>(previewCompanies);
   const [companyName, setCompanyName] = useState("Portfolio Labs");
   const [jobTitle, setJobTitle] = useState("Senior Java Platform Engineer");
-  const [jobId, setJobId] = useState("");
-  const [applications, setApplications] = useState<PageResponse<Application> | null>(null);
+  const [jobs, setJobs] = useState<PageResponse<Job>>(previewJobs);
+  const [selectedJobId, setSelectedJobId] = useState(previewJobs.content[0]?.id ?? "");
+  const [applications, setApplications] = useState<PageResponse<Application>>(previewApplications);
   const [message, setMessage] = useState("");
-  const [loadingCompanies, setLoadingCompanies] = useState(true);
+  const [loadingCompanies, setLoadingCompanies] = useState(false);
 
   const approvedCompany = useMemo(
     () => companies?.content.find((company) => company.status === "APPROVED"),
@@ -26,13 +28,18 @@ export default function EmployerPage() {
 
   function loadCompanies() {
     setLoadingCompanies(true);
-    api.companies()
-      .then((page) => {
+    const jobParams = new URLSearchParams({ page: "0", size: "12", sort: "publishedAt,desc" });
+    Promise.all([api.companies(), api.jobs(jobParams)])
+      .then(([page, jobPage]) => {
         setCompanies(page);
+        setJobs(jobPage.content.length ? jobPage : previewJobs);
+        setSelectedJobId((current) => current || jobPage.content[0]?.id || previewJobs.content[0]?.id || "");
         setMessage("");
       })
       .catch((ex) => {
         setCompanies(previewCompanies);
+        setJobs(previewJobs);
+        setSelectedJobId(previewJobs.content[0]?.id ?? "");
         setMessage(previewDashboardMessage(ex));
       })
       .finally(() => setLoadingCompanies(false));
@@ -45,7 +52,7 @@ export default function EmployerPage() {
     try {
       await api.createCompany({
         name: companyName,
-        website: "https://portfolio.example",
+        website: "https://careers.devhire.local/portfolio-labs",
         size: "51-200",
         industry: "Software",
         description: "Engineering organization hiring backend and platform talent."
@@ -77,7 +84,8 @@ export default function EmployerPage() {
         skills: ["Java", "Spring Boot", "Kafka", "PostgreSQL"]
       });
       await api.submitJobReview(job.id);
-      setJobId(job.id);
+      setJobs((current) => ({ ...current, content: [job, ...current.content], totalElements: current.totalElements + 1 }));
+      setSelectedJobId(job.id);
       setMessage(`Job submitted for review: ${job.id}`);
     } catch (ex) {
       setMessage(ex instanceof Error ? ex.message : "Cannot create job");
@@ -85,13 +93,13 @@ export default function EmployerPage() {
   }
 
   async function loadApplications() {
-    if (!jobId) {
+    if (!selectedJobId) {
       setApplications(previewApplications);
       setMessage("Showing curated applicant preview for the selected portfolio job.");
       return;
     }
     try {
-      setApplications(await api.applicationsForJob(jobId));
+      setApplications(await api.applicationsForJob(selectedJobId));
       setMessage("");
     } catch (ex) {
       setApplications(previewApplications);
@@ -125,7 +133,8 @@ export default function EmployerPage() {
         <MetricCard icon={ClipboardList} label="Applications" value={applications?.totalElements ?? 0} helper="For selected job" />
         <MetricCard icon={UsersRound} label="Pipeline" value="Interview" helper="Status mutation ready" />
       </div>
-      {message ? <p className={message.includes("Cannot") || message.includes("No approved") || message.includes("offline") ? "error preview-note" : "success"}>{message}</p> : null}
+      {message && isPositiveMessage(message) ? <p className="success">{message}</p> : null}
+      {message && !isPositiveMessage(message) ? <DemoModeNotice message={message} /> : null}
       <div className="split-grid">
         <div className="panel">
           <div className="section-title">
@@ -140,11 +149,11 @@ export default function EmployerPage() {
             </button>
           </div>
           <div className="table-list">
-            {loadingCompanies ? <div className="empty-state compact">Loading employer companies...</div> : null}
-            {!loadingCompanies && companies?.content.length === 0 ? (
+            {loadingCompanies && companies.content.length === 0 ? <div className="empty-state compact">Loading employer companies...</div> : null}
+            {companies.content.length === 0 ? (
               <div className="empty-state compact">No companies yet. Create one to enter the admin approval workflow.</div>
             ) : null}
-            {!loadingCompanies && companies?.content.map((company) => (
+            {companies.content.map((company) => (
               <div className="table-row" key={company.id}>
                 <div className="company-line">
                   <CompanyLogo brand={brandForCompany(company)} size="sm" />
@@ -171,13 +180,23 @@ export default function EmployerPage() {
             </button>
           </div>
           <div className="form inline-form">
-            <input value={jobId} onChange={(event) => setJobId(event.target.value)} placeholder="Job ID" />
+            <select
+              aria-label="Applicant pipeline job"
+              value={selectedJobId}
+              onChange={(event) => setSelectedJobId(event.target.value)}
+            >
+              {jobs.content.map((job) => (
+                <option key={job.id} value={job.id}>
+                  {job.title} - {job.status}
+                </option>
+              ))}
+            </select>
             <button className="button secondary" type="button" onClick={loadApplications}>
               Load applicants
             </button>
           </div>
           <div className="table-list">
-            {applications?.content.map((item) => (
+            {applications.content.map((item) => (
               <div className="table-row" key={item.id}>
                 <span>
                   <strong>{item.candidateId.startsWith("preview") ? "Candidate Linh Nguyen" : `Candidate ${item.candidateId.slice(0, 8)}`}</strong>
@@ -198,7 +217,11 @@ export default function EmployerPage() {
 function previewDashboardMessage(ex: unknown) {
   const message = ex instanceof Error ? ex.message : "";
   if (!message || message === "Failed to fetch") {
-    return "Live API Gateway is offline; showing curated employer preview data.";
+    return "Curated employer pipeline data is active so reviewers can inspect onboarding and applicant flow without starting Docker.";
   }
-  return `${message}. Showing curated employer preview data.`;
+  return `${message}. Curated employer pipeline data is active for this reviewer session.`;
+}
+
+function isPositiveMessage(message: string) {
+  return message.includes("submitted") || message.includes("preview") || message.includes("selected portfolio");
 }

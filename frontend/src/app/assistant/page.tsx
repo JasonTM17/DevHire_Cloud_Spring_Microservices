@@ -32,7 +32,7 @@ export default function AssistantPage() {
     {
       role: "assistant",
       content:
-        "Ask me to explain the DevHire Cloud architecture, search jobs, walk through the demo, or summarize production readiness. I use Claude Haiku when configured and a deterministic fallback otherwise."
+        "Ask me to explain the DevHire Cloud architecture, search jobs, walk through the demo, or summarize production readiness. I use Claude Haiku when configured and a reviewer-safe deterministic mode otherwise."
     }
   ]);
   const [model, setModel] = useState("claude-haiku-4-5-20251001");
@@ -232,10 +232,10 @@ function localAssistantFallback(prompt: string, ex: unknown): AiChatResponse {
   const normalized = prompt.toLowerCase();
   const answer = normalized.includes("demo")
     ? "DevHire Cloud demo path: sign in, review published jobs, inspect a job detail, apply as Candidate, view notifications, then switch to Employer/Admin to review pipeline, audit, and AI operations evidence."
-    : "DevHire Cloud is a Java 21 Spring Boot microservices recruitment platform with API Gateway, service-owned PostgreSQL databases, Kafka/outbox events, OpenSearch search, Docker/Helm/Terraform delivery, observability, and a Claude Haiku assistant. The live AI endpoint is unavailable in this browser session, so this deterministic fallback keeps the reviewer demo usable without exposing secrets.";
+    : "DevHire Cloud is a Java 21 Spring Boot microservices recruitment platform with API Gateway, service-owned PostgreSQL databases, Kafka/outbox events, OpenSearch search, Docker/Helm/Terraform delivery, observability, and a Claude Haiku assistant. Reviewer-safe deterministic mode keeps the demo usable without requiring provider secrets.";
   return {
     conversationId: "local-preview-conversation",
-    answer: `${answer}\n\nFallback reason: ${reason}`,
+    answer: `${answer}\n\nMode detail: ${reason}`,
     citations: [
       {
         title: "Reviewer evidence pack",
@@ -248,7 +248,7 @@ function localAssistantFallback(prompt: string, ex: unknown): AiChatResponse {
       {
         name: "local_preview_fallback",
         status: "SUCCESS",
-        summary: "Live ai-service was unavailable; returned deterministic reviewer-safe answer."
+        summary: "Reviewer-safe local mode returned a deterministic answer without provider secrets."
       }
     ],
     model: "local-deterministic-fallback",

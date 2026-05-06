@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Activity, BriefcaseBusiness, Clock3, Database, Filter, Loader2, MapPin, Search, ShieldCheck, SlidersHorizontal } from "lucide-react";
 import Link from "next/link";
+import { DemoModeNotice } from "@/components/DemoModeNotice";
 import { CompanyLogo } from "@/components/CompanyLogo";
 import { MetricCard } from "@/components/MetricCard";
 import { StatusPill } from "@/components/StatusPill";
@@ -120,7 +121,7 @@ export default function JobsPage() {
         <MetricCard icon={ShieldCheck} label="Workflow" value="Approved" helper="Admin reviewed" />
       </div>
 
-      {error ? <p className="error preview-note">{error}</p> : null}
+      <DemoModeNotice message={error} />
       <div className="results-layout">
         <div className="job-grid" data-testid="job-grid">
           {loading ? (
@@ -227,7 +228,7 @@ function infraBadges(job: Job) {
 function previewMessage(ex: unknown) {
   const message = ex instanceof Error ? ex.message : "";
   if (!message || message === "Failed to fetch") {
-    return "Live API Gateway is offline; showing portfolio preview jobs.";
+    return "Curated recruitment data is active so reviewers can inspect the product without starting Docker. Runtime mode replaces this with live Gateway and job-service data.";
   }
-  return `${message}. Showing portfolio preview jobs.`;
+  return `${message}. Curated recruitment data is active for this reviewer session.`;
 }

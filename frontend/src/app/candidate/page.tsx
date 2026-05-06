@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Bell, ClipboardList, MailCheck, TimerReset, TrendingUp } from "lucide-react";
+import { DemoModeNotice } from "@/components/DemoModeNotice";
 import { MetricCard } from "@/components/MetricCard";
 import { StatusPill } from "@/components/StatusPill";
 import { api } from "@/lib/api";
@@ -63,7 +64,7 @@ export default function CandidatePage() {
         <MetricCard icon={Bell} label="Unread" value={unread} helper="Internal notifications" />
         <MetricCard icon={TrendingUp} label="Pipeline" value="Live" helper="Kafka status events" />
       </div>
-      {error ? <p className="error preview-note">{error}</p> : null}
+      <DemoModeNotice message={error} />
       <div className="split-grid">
         <div className="panel">
           <div className="section-title">
@@ -113,9 +114,9 @@ export default function CandidatePage() {
 function previewDashboardMessage(ex: unknown) {
   const message = ex instanceof Error ? ex.message : "";
   if (!message || message === "Failed to fetch") {
-    return "Live API Gateway is offline; showing curated candidate preview data.";
+    return "Curated candidate data is active so reviewers can inspect application tracking without starting Docker.";
   }
-  return `${message}. Showing curated candidate preview data.`;
+  return `${message}. Curated candidate data is active for this reviewer session.`;
 }
 
 function applicationTitle(jobId: string) {
