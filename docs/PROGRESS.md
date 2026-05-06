@@ -3043,3 +3043,33 @@ Verification:
 - Hosted Terraform workflow will be rechecked after push.
 
 Committed as `fix(terraform): avoid powershell builtin variable collision`.
+## v0.5.0 Reviewer-grade product and evidence pass
+
+- Created clean branch `v0.5-product-runtime-polish` from the green `v0.4.9-cloud-completion` baseline.
+- Verified PR #29 is mergeable and green for CI, Docker Images, Documentation, Security, CodeQL, E2E Smoke, and Terraform.
+- Did not merge or tag `v0.4.9` from this session because protected-branch release finalization must use an owner-approved GitHub path.
+- Polished frontend reviewer workflows:
+  - replaced raw admin/employer Job ID inputs with selectable job review and applicant pipeline controls,
+  - added reviewer demo mode notices instead of broken-looking offline warnings,
+  - prevented primary dashboard screenshots from landing on `UNKNOWN`/loading-only states.
+- Added backend contract tests for common response envelopes and Gateway error responses.
+- Raised the `common-lib` coverage gate from 41% to 48% after the new contract tests lifted measured coverage to 49.1%.
+- Added curated runtime evidence tooling:
+  - `scripts/portfolio-demo-evidence.ps1`,
+  - expanded `scripts/visual-evidence-audit.ps1`,
+  - `scripts/docs-parity.ps1` wired into `portfolio-verify`.
+- Added release provenance hardening in the GHCR release workflow with BuildKit provenance/SBOM output.
+- Updated trilingual docs, review evidence, release evidence, scorecards, and recruiter guide for v0.5.0.
+- Verification run during this pass:
+  - `cd frontend; npm run typecheck`
+  - `cd frontend; npm run build`
+  - `cd frontend; npm run e2e:all`
+  - `mvn -pl common-lib,api-gateway -am test`
+  - `.\scripts\docs-parity.ps1`
+  - `.\scripts\visual-evidence-audit.ps1`
+  - `.\scripts\docs-quality.ps1`
+  - `.\scripts\evidence-manifest-verify.ps1`
+  - `docker compose config --quiet`
+  - `.\scripts\check-coverage.ps1`
+  - `.\scripts\portfolio-verify.ps1 -Docs -Docker -Cloud`
+  - `git diff --check`
