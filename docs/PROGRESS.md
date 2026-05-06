@@ -12,6 +12,7 @@ This file records implementation progress, verification commands, and commit bou
 - Tightened frontend evidence copy so primary screenshots avoid raw IDs, `UNKNOWN`, offline banners, and fallback/debug wording.
 - Hardened visual evidence audit rules to catch rough UI copy in primary frontend/evidence surfaces.
 - Integrated the v1 roadmap as future acceptance planning only, not as released evidence.
+- Fixed the PR security workflow blocker by overriding `org.postgresql:postgresql` to `42.7.11`, the fixed version for `CVE-2026-42198` reported by Trivy image scans.
 
 Verification:
 
@@ -30,6 +31,7 @@ Verification:
 - `cd frontend && npm run typecheck && npm run build && npm run e2e:all` passed.
 - `.\scripts\repository-health.ps1` passed: About/Homepage/Topics set, `master` protected, Dependabot open PR count `0`.
 - `.\scripts\github-workflow-status.ps1 -Branch master -RequireGreen` passed.
+- `mvn -q -pl auth-service dependency:tree "-Dincludes=org.postgresql:postgresql"` confirmed `org.postgresql:postgresql:42.7.11`.
 
 ## Phase 0 - Repository bootstrap
 
