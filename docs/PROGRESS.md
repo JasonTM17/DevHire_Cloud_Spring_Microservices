@@ -13,6 +13,7 @@ This file records implementation progress, verification commands, and commit bou
 - Hardened visual evidence audit rules to catch rough UI copy in primary frontend/evidence surfaces.
 - Integrated the v1 roadmap as future acceptance planning only, not as released evidence.
 - Fixed the PR security workflow blocker by overriding `org.postgresql:postgresql` to `42.7.11`, the fixed version for `CVE-2026-42198` reported by Trivy image scans.
+- Fixed the remaining Trivy image blocker by overriding `org.bouncycastle:bcprov-jdk18on` to `1.84`, the fixed version for `CVE-2026-5598` reported through Spring Cloud starter transitive dependencies.
 
 Verification:
 
@@ -32,6 +33,7 @@ Verification:
 - `.\scripts\repository-health.ps1` passed: About/Homepage/Topics set, `master` protected, Dependabot open PR count `0`.
 - `.\scripts\github-workflow-status.ps1 -Branch master -RequireGreen` passed.
 - `mvn -q -pl auth-service dependency:tree "-Dincludes=org.postgresql:postgresql"` confirmed `org.postgresql:postgresql:42.7.11`.
+- `mvn -q -pl api-gateway dependency:tree "-Dincludes=org.bouncycastle:bcprov-jdk18on"` confirmed `org.bouncycastle:bcprov-jdk18on:1.84`.
 
 ## Phase 0 - Repository bootstrap
 
