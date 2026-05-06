@@ -16,6 +16,18 @@ Verification:
 - `.\scripts\repo-hygiene.ps1` passed.
 - `git diff --check` passed.
 
+## 2026-05-06 - Static demo data distribution evidence
+
+- Extended `demo-data-summary.ps1 -Aggregates` so reviewers can inspect deterministic portfolio distributions without starting Docker.
+- Added expected status/action distributions for companies, jobs, applications, notification email delivery, audit logs, and AI usage.
+- Updated data documentation to explain how the seed dataset supports pagination, recruitment funnel dashboards, email retry evidence, audit filtering, and CI-safe AI review.
+
+Verification:
+
+- `.\scripts\demo-data-summary.ps1 -Aggregates` passed.
+- PR image scans initially exposed a CI reliability issue: parallel security image builds could hit Maven Central `403 Forbidden` while resolving Spring Boot parent POMs.
+- Hardened the Security workflow image scan with `max-parallel: 2` and GitHub Actions Docker build cache scopes per service.
+
 ## 2026-05-06 - Canonical v0.5.1 facade cleanup
 
 - Canonicalized the public reviewer story: latest public release is `v0.5.1`, active development is `0.6.0-SNAPSHOT`, and v1 remains a roadmap/acceptance target rather than a claimed release.

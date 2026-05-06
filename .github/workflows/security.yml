@@ -136,6 +136,7 @@ jobs:
     timeout-minutes: 45
     strategy:
       fail-fast: false
+      max-parallel: 2
       matrix:
         service:
           - api-gateway
@@ -178,6 +179,8 @@ jobs:
             BUILD_CREATED=${{ steps.image-metadata.outputs.created }}
             NEXT_PUBLIC_API_BASE_URL=${{ vars.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080' }}
           tags: devhire/${{ matrix.service }}:security-${{ github.sha }}
+          cache-from: type=gha,scope=security-${{ matrix.service }}
+          cache-to: type=gha,scope=security-${{ matrix.service }},mode=max
           labels: |
             org.opencontainers.image.title=devhire-${{ matrix.service }}
             org.opencontainers.image.description=DevHire Cloud ${{ matrix.service }} image

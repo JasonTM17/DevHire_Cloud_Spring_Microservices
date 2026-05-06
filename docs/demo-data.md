@@ -30,6 +30,12 @@ Static summary:
 .\scripts\demo-data-summary.ps1
 ```
 
+Static distribution evidence without Docker:
+
+```powershell
+.\scripts\demo-data-summary.ps1 -Aggregates
+```
+
 Runtime count comparison after Docker is running:
 
 ```powershell
@@ -48,6 +54,19 @@ The runtime command queries each service-owned PostgreSQL database independently
 - Application rows are generated with unique `(candidate_id, job_id)` pairs to preserve the production duplicate-prevention constraint.
 - Job statuses intentionally include `PUBLISHED`, `PENDING_REVIEW`, `CLOSED`, `DRAFT`, and `REJECTED`.
 - Notification rows intentionally include `PENDING`, `SENT`, `FAILED_RETRYABLE`, `FAILED_PERMANENT`, and `SKIPPED_NO_EMAIL`.
+
+## Distribution Evidence
+
+The static aggregate mode is intentionally deterministic, so reviewers can confirm the portfolio dataset supports dashboards even before starting Docker:
+
+| Signal | Distribution |
+|---|---|
+| Companies | 21 approved, 2 pending, 1 rejected |
+| Jobs | 150 published, 15 pending review, 10 closed, 3 draft, 2 rejected |
+| Applications | 130 submitted, 33 reviewing, 27 interview, 19 rejected, 17 offer, 14 withdrawn |
+| Notifications | 151 pending, 36 sent, 15 retryable failures, 9 permanent failures, 9 skipped because no email |
+| Audit logs | 151 job searches, 35 logins, 28 company creates, 18 job creates, 18 company approvals, 13 application submissions, 7 application transitions, 6 job approvals, 4 AI tool executions |
+| AI usage | 20 fallback-backed Claude Haiku conversations for CI-safe review |
 
 ## Demo Accounts
 
