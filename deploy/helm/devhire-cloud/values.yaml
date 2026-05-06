@@ -2,8 +2,8 @@ global:
   namespace: devhire
   replicas: 2
   imageRegistry: ghcr.io/jasontm17/devhire
-  imageTag: latest
-  imagePullPolicy: IfNotPresent
+  imageTag: sha-REPLACE_WITH_GIT_SHA
+  imagePullPolicy: Always
   requireSecretRefs: false
   publicDomain: devhire.invalid
   publicBaseUrl: https://devhire.invalid
@@ -66,14 +66,8 @@ global:
 
 secrets:
   name: devhire-secrets
-  createExample: true
-  stringData:
-    JWT_SECRET: replace-with-strong-jwt-secret
-    POSTGRES_USER: devhire
-    POSTGRES_PASSWORD: replace-with-database-password
-    SPRING_MAIL_USERNAME: replace-with-smtp-username
-    SPRING_MAIL_PASSWORD: replace-with-smtp-password
-    ANTHROPIC_API_KEY: replace-with-anthropic-key
+  createExample: false
+  stringData: {}
 
 externalSecrets:
   enabled: false

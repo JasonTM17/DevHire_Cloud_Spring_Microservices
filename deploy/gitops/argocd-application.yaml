@@ -10,7 +10,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices.git
-    targetRevision: main
+    targetRevision: master
     path: deploy/helm/devhire-cloud
     helm:
       valueFiles:

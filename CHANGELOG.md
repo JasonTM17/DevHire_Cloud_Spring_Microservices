@@ -9,6 +9,7 @@ The project follows Conventional Commits and keeps release notes under `docs/rel
 ### Added
 
 - Runtime proof workflow hardening, dependency triage evidence, and v0.4 release baseline documentation.
+- Cloud blueprint verification hardening, raw Kubernetes `ai-service` coverage, immutable deployment tag defaults, and Docker-first cloud review command.
 
 ## 0.3.0 - 2026-05-04
 

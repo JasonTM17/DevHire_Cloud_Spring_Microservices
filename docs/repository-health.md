@@ -18,6 +18,8 @@ Latest v0.4.6 health scan focus:
 | Dependabot PRs | 0 open PRs after zero-noise cleanup; future updates are handled by scheduled curated batches |
 | Runtime evidence | `docs/runtime-evidence-v0.4.md` |
 | E2E posture | `cd frontend && npm run e2e:all` is self-starting; desktop + mobile smoke passed locally |
+| Cloud posture | AWS blueprint is render/validate-ready; no AWS apply has been run |
+| Tracked source hygiene | Clean; generated reports, targets, `.next`, Playwright output, and local `.env` remain ignored |
 
 v0.4.6 verification result: owner-authenticated GitHub API confirmed the repository description, homepage, 20 topics, and `master protected=true`. Deferred-major Dependabot PRs were closed through the curation script, the final zero-noise pass reduced open Dependabot PRs to 0, and `github-workflow-status.ps1 -RequireGreen` passed for the latest `master` head.
 
@@ -55,8 +57,17 @@ The root should show engineering intent, not local tool output:
 
 - `.stitch/` was removed from tracked files; the UI design source now lives in [design-system.md](design-system.md).
 - [Repository structure](repository-structure.md) explains every top-level folder that remains.
-- `scripts/clean-local-artifacts.ps1` cleans ignored generated artifacts while keeping `.env` and `frontend/node_modules` unless explicitly requested.
+- `scripts/clean-local-artifacts.ps1` cleans ignored generated artifacts such as `reports/`, Maven `target/`, frontend `.next/`, Playwright reports/results, and Terraform cache files while keeping `.env` and `frontend/node_modules` unless explicitly requested.
 - `scripts/repo-hygiene.ps1` verifies no forbidden runtime, secret, report, or crash artifacts are tracked.
+
+Fresh reviewer cleanup:
+
+```powershell
+.\scripts\clean-local-artifacts.ps1 -DryRun
+.\scripts\clean-local-artifacts.ps1 -Apply
+```
+
+The `.env` file is intentionally reported, not deleted, unless `-IncludeLocalEnv` is passed.
 
 ## Owner Actions
 

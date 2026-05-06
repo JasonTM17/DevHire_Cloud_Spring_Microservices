@@ -14,10 +14,10 @@ DevHire Cloud uses release tags for portfolio milestones and snapshot versions f
 
 ## Current State
 
-- Latest released portfolio version: `v0.3.0`.
+- Latest released portfolio version: `v0.4.6`.
 - Current Maven development version: `0.4.0-SNAPSHOT`.
 - Current frontend development version: `0.4.0`.
-- Next planned release evidence: `docs/release-evidence/v0.4.0.md`.
+- Next planned release evidence: `docs/release-evidence/v0.4.8.md`.
 
 ## Release Flow
 

@@ -2,7 +2,7 @@ global:
   namespace: devhire-staging
   imageRegistry: 123456789012.dkr.ecr.ap-southeast-1.amazonaws.com/devhire-staging
   imageTag: replace-with-git-sha
-  imagePullPolicy: IfNotPresent
+  imagePullPolicy: Always
   publicDomain: staging.devhire.invalid
   publicBaseUrl: https://staging.devhire.invalid
   smtpFrom: no-reply@staging.devhire.invalid

@@ -15,28 +15,31 @@ resources:
 images:
   - name: devhire/api-gateway
     newName: ghcr.io/jasontm17/devhire/api-gateway
-    newTag: latest
+    newTag: sha-REPLACE_WITH_GIT_SHA
   - name: devhire/auth-service
     newName: ghcr.io/jasontm17/devhire/auth-service
-    newTag: latest
+    newTag: sha-REPLACE_WITH_GIT_SHA
   - name: devhire/user-service
     newName: ghcr.io/jasontm17/devhire/user-service
-    newTag: latest
+    newTag: sha-REPLACE_WITH_GIT_SHA
   - name: devhire/company-service
     newName: ghcr.io/jasontm17/devhire/company-service
-    newTag: latest
+    newTag: sha-REPLACE_WITH_GIT_SHA
   - name: devhire/job-service
     newName: ghcr.io/jasontm17/devhire/job-service
-    newTag: latest
+    newTag: sha-REPLACE_WITH_GIT_SHA
   - name: devhire/application-service
     newName: ghcr.io/jasontm17/devhire/application-service
-    newTag: latest
+    newTag: sha-REPLACE_WITH_GIT_SHA
   - name: devhire/notification-service
     newName: ghcr.io/jasontm17/devhire/notification-service
-    newTag: latest
+    newTag: sha-REPLACE_WITH_GIT_SHA
   - name: devhire/audit-service
     newName: ghcr.io/jasontm17/devhire/audit-service
-    newTag: latest
+    newTag: sha-REPLACE_WITH_GIT_SHA
+  - name: devhire/ai-service
+    newName: ghcr.io/jasontm17/devhire/ai-service
+    newTag: sha-REPLACE_WITH_GIT_SHA
   - name: devhire/frontend
     newName: ghcr.io/jasontm17/devhire/frontend
-    newTag: latest
+    newTag: sha-REPLACE_WITH_GIT_SHA

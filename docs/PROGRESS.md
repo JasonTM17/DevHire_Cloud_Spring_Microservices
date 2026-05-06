@@ -2889,3 +2889,36 @@ Verification before PR:
   - `.\scripts\github-facade-assert.ps1 -RequireProtectionDetails`
   - `.\scripts\docs-quality.ps1`
   - `git diff --check`
+
+## v0.4.8 Cloud blueprint production polish
+
+- Hardened raw Kubernetes so service images use explicit `sha-REPLACE_WITH_GIT_SHA` replacement markers instead of mutable `latest` tags.
+- Added `ai-service` to raw Kubernetes deployments, services, PDB, HPA, image kustomization, config map values, and secret examples.
+- Aligned the local Argo CD sample with the repository default branch by switching `targetRevision` from `main` to `master`.
+- Hardened Helm defaults so the base chart renders safely without `latest` tags or example secrets; AWS staging/prod values now use `imagePullPolicy: Always`.
+- Added `scripts/cloud-verify.ps1`, a Docker-first reviewer gate for Terraform validate, Helm lint/template, Kustomize render, kubeconform, and cloud policy assertions without AWS credentials or `terraform apply`.
+- Added `-Cloud` support to `scripts/portfolio-verify.ps1`.
+- Extended `scripts/clean-local-artifacts.ps1` to include Terraform cache and generated lock files while keeping `.env` protected by default.
+- Added v0.4.8 release evidence and updated trilingual docs, repository health, cloud readiness, production scorecard, docs-quality, and evidence manifest.
+- Ratcheted low-module coverage thresholds for `ai-service`, `api-gateway`, `auth-service`, and `common-lib`.
+
+Verification:
+
+- Passed fast cloud verification with `.\scripts\cloud-verify.ps1 -SkipTerraform -SkipKubeconform`.
+- Passed full cloud verification with `.\scripts\cloud-verify.ps1`:
+  - Terraform fmt/init/validate for `dev`, `staging`, and `prod`;
+  - Helm lint and template for local/staging/prod/AWS values through Dockerized Helm;
+  - raw Kustomize render;
+  - kubeconform for Helm and raw K8s output.
+- Passed `.\scripts\portfolio-verify.ps1 -Docs -Docker -Cloud`.
+- Passed `docker compose config --quiet`.
+- Passed `mvn -T1 clean verify`.
+- Passed `.\scripts\check-coverage.ps1` with the ratcheted thresholds.
+- Passed `cd frontend; npm run typecheck; npm run build`.
+- Passed `cd frontend; npm run e2e:all`.
+- Passed `.\scripts\docs-quality.ps1`.
+- Passed `.\scripts\evidence-manifest-verify.ps1`.
+- Passed `.\scripts\repo-hygiene.ps1`.
+- Passed `.\scripts\domain-placeholder-audit.ps1`.
+- Passed `.\scripts\professionalism-audit.ps1`.
+- Passed `git diff --check`.

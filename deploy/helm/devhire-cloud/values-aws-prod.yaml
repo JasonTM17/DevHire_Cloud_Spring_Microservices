@@ -2,7 +2,7 @@ global:
   namespace: devhire
   imageRegistry: 123456789012.dkr.ecr.ap-southeast-1.amazonaws.com/devhire-prod
   imageTag: replace-with-release-sha
-  imagePullPolicy: IfNotPresent
+  imagePullPolicy: Always
   publicDomain: devhire.invalid
   publicBaseUrl: https://devhire.invalid
   smtpFrom: no-reply@devhire.invalid

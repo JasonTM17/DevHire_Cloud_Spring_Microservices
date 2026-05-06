@@ -23,8 +23,8 @@ spec:
           type: RuntimeDefault
       containers:
         - name: frontend
-          image: devhire/frontend:latest
-          imagePullPolicy: IfNotPresent
+          image: devhire/frontend:sha-REPLACE_WITH_GIT_SHA
+          imagePullPolicy: Always
           ports:
             - name: http
               containerPort: 3000
@@ -96,8 +96,8 @@ spec:
           type: RuntimeDefault
       containers:
         - name: api-gateway
-          image: devhire/api-gateway:latest
-          imagePullPolicy: IfNotPresent
+          image: devhire/api-gateway:sha-REPLACE_WITH_GIT_SHA
+          imagePullPolicy: Always
           ports:
             - name: http
               containerPort: 8080
@@ -171,8 +171,8 @@ spec:
           type: RuntimeDefault
       containers:
         - name: auth-service
-          image: devhire/auth-service:latest
-          imagePullPolicy: IfNotPresent
+          image: devhire/auth-service:sha-REPLACE_WITH_GIT_SHA
+          imagePullPolicy: Always
           ports:
             - name: http
               containerPort: 8081
@@ -265,8 +265,8 @@ spec:
           type: RuntimeDefault
       containers:
         - name: user-service
-          image: devhire/user-service:latest
-          imagePullPolicy: IfNotPresent
+          image: devhire/user-service:sha-REPLACE_WITH_GIT_SHA
+          imagePullPolicy: Always
           ports:
             - name: http
               containerPort: 8082
@@ -354,8 +354,8 @@ spec:
           type: RuntimeDefault
       containers:
         - name: company-service
-          image: devhire/company-service:latest
-          imagePullPolicy: IfNotPresent
+          image: devhire/company-service:sha-REPLACE_WITH_GIT_SHA
+          imagePullPolicy: Always
           ports:
             - name: http
               containerPort: 8083
@@ -443,8 +443,8 @@ spec:
           type: RuntimeDefault
       containers:
         - name: job-service
-          image: devhire/job-service:latest
-          imagePullPolicy: IfNotPresent
+          image: devhire/job-service:sha-REPLACE_WITH_GIT_SHA
+          imagePullPolicy: Always
           ports:
             - name: http
               containerPort: 8084
@@ -532,8 +532,8 @@ spec:
           type: RuntimeDefault
       containers:
         - name: application-service
-          image: devhire/application-service:latest
-          imagePullPolicy: IfNotPresent
+          image: devhire/application-service:sha-REPLACE_WITH_GIT_SHA
+          imagePullPolicy: Always
           ports:
             - name: http
               containerPort: 8085
@@ -621,8 +621,8 @@ spec:
           type: RuntimeDefault
       containers:
         - name: notification-service
-          image: devhire/notification-service:latest
-          imagePullPolicy: IfNotPresent
+          image: devhire/notification-service:sha-REPLACE_WITH_GIT_SHA
+          imagePullPolicy: Always
           ports:
             - name: http
               containerPort: 8086
@@ -720,8 +720,8 @@ spec:
           type: RuntimeDefault
       containers:
         - name: audit-service
-          image: devhire/audit-service:latest
-          imagePullPolicy: IfNotPresent
+          image: devhire/audit-service:sha-REPLACE_WITH_GIT_SHA
+          imagePullPolicy: Always
           ports:
             - name: http
               containerPort: 8087
@@ -782,4 +782,98 @@ spec:
   ports:
     - name: http
       port: 8087
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-service
+  labels:
+    app.kubernetes.io/name: ai-service
+    app.kubernetes.io/part-of: devhire-cloud
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ai-service
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: ai-service
+        app.kubernetes.io/part-of: devhire-cloud
+    spec:
+      serviceAccountName: devhire-service
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: ai-service
+          image: devhire/ai-service:sha-REPLACE_WITH_GIT_SHA
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8088
+          envFrom:
+            - configMapRef:
+                name: devhire-config
+          env:
+            - name: SPRING_DATASOURCE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: devhire-secrets
+                  key: AI_DATABASE_URL
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: devhire-secrets
+                  key: AI_DATABASE_USERNAME
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: devhire-secrets
+                  key: AI_DATABASE_PASSWORD
+            - name: ANTHROPIC_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: devhire-secrets
+                  key: ANTHROPIC_API_KEY
+          resources:
+            requests:
+              cpu: 150m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: http
+            initialDelaySeconds: 25
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: http
+            initialDelaySeconds: 70
+            periodSeconds: 20
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ai-service
+  labels:
+    app.kubernetes.io/name: ai-service
+    app.kubernetes.io/part-of: devhire-cloud
+spec:
+  selector:
+    app.kubernetes.io/name: ai-service
+  ports:
+    - name: http
+      port: 8088
       targetPort: http
