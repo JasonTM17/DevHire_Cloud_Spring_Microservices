@@ -16,6 +16,7 @@ This is the short reviewer-facing evidence path. `docs/PROGRESS.md` remains an i
 | Demo data posture | Synthetic portfolio volume seed adds 1,108 primary records across service-owned databases; see [demo-data.md](demo-data.md) and [data model strategy](data-model-and-seed-strategy.md) |
 | Runtime observability posture | Domain metrics for funnel, notifications, audit, outbox, search, and AI are emitted and verified by `runtime-observability-smoke.ps1` |
 | Deployment posture | Prod Helm avoids `latest`, requires secret refs, cloud policy audit passes, and Terraform validation is race-safe |
+| Transparent gaps | Remaining production gaps are documented instead of hidden; see [remaining gaps and roadmap](remaining-gaps-and-roadmap.md) |
 
 Latest hardening evidence: [v0.5.1 production runtime depth evidence](release-evidence/v0.5.1.md).
 
@@ -77,6 +78,7 @@ Runtime proof when Docker is already running:
 | Domain runtime data is observable | Recruitment funnel, notification delivery, audit ingestion, outbox, search, and AI metrics, [SLO docs](slo.md) |
 | AI is controlled | Claude Haiku provider config, fallback mode, citations, tool traces, [AI safety](ai-safety.md) |
 | Cloud is blueprint-safe | Helm, Argo CD, AWS Terraform blueprint, External Secrets, race-safe validation, [cloud completion scorecard](cloud-completion-scorecard.md) |
+| Gaps are explicit | [Remaining gaps and roadmap](remaining-gaps-and-roadmap.md) separates portfolio evidence from real-production follow-ups |
 
 ## Owner-Applied State
 

@@ -2,6 +2,8 @@
 
 DevHire Cloud is a portfolio system, but it intentionally models the checklist a production engineer would expect before handing a platform to another team.
 
+For the deliberately transparent list of what is still not proven in a live production environment, see [remaining gaps and roadmap](remaining-gaps-and-roadmap.md).
+
 ## Runtime
 
 - Every backend service exposes `/actuator/health`, readiness/liveness probes, and `/actuator/prometheus`.

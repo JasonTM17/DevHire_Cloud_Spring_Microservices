@@ -122,9 +122,11 @@ These are not code gaps. They are account or release-operation follow-ups:
 
 - confirm GHCR package visibility if public package browsing is part of the demo.
 - deploy the AWS blueprint to a real staging account when cloud credentials and budget are available.
+- review the explicit [remaining gaps and roadmap](remaining-gaps-and-roadmap.md) before presenting the project as a live production SaaS.
 
 Evidence:
 
+- [Remaining gaps and roadmap](remaining-gaps-and-roadmap.md)
 - [GitHub governance](github-governance.md)
 - [Branch protection](branch-protection.md)
 - [Repository health](repository-health.md)

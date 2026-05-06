@@ -17,7 +17,7 @@ DevHire Cloud is a production-grade Java 21/Spring Boot microservices portfolio 
 | Signal | Current Public State | Verification / Owner Action |
 |---|---|---|
 | Latest release | `v0.4.6` is public | [Release](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.4.6) |
-| Current hardening evidence | `v0.4.9` cloud completion PR is green; release tag waits for protected-branch merge | [Review evidence](docs/REVIEW_EVIDENCE.md), [cloud evidence](docs/release-evidence/v0.4.9.md) |
+| Current hardening evidence | `v0.5.1` runtime depth and coverage evidence builds on the `v0.4.9` cloud completion baseline; release tag waits for protected-branch review | [Review evidence](docs/REVIEW_EVIDENCE.md), [v0.5.1 evidence](docs/release-evidence/v0.5.1.md) |
 | About description | Applied | Verified through owner-authenticated GitHub API |
 | Topics | Applied: 20 topics | Verified through owner-authenticated GitHub API |
 | Branch protection | Applied on `master` | Required check contexts audited before apply |
@@ -45,6 +45,7 @@ DevHire Cloud is a production-grade Java 21/Spring Boot microservices portfolio 
 | Cloud completion scorecard | [Cloud completion scorecard](docs/cloud-completion-scorecard.md) |
 | Cloud visual evidence | [Cloud visual evidence](docs/cloud-visual-evidence.md) |
 | Production engineering scorecard | [Scorecard](docs/production-engineering-scorecard.md) |
+| Remaining gaps and roadmap | [Transparent gaps and next production steps](docs/remaining-gaps-and-roadmap.md) |
 | Public repo governance | [Repository health](docs/repository-health.md) |
 | Governance verification | [GitHub governance](docs/github-governance.md), [workflow status](scripts/github-workflow-status.ps1), [settings as code](.github/settings.yml) |
 
@@ -102,7 +103,7 @@ Best reviewer path:
 3. Run `.\scripts\portfolio-verify.ps1 -Docs -Docker` for a fast local gate.
 4. Run `.\scripts\portfolio-verify.ps1 -Runtime -GatewayUrl http://localhost:8080` when Docker is already running and you want runtime proof.
 5. Use [Runtime acceptance matrix](docs/runtime-acceptance-matrix.md) to map each production claim to its verification command.
-6. Check [Review evidence pack](docs/REVIEW_EVIDENCE.md), [v0.4.6 public credibility evidence](docs/release-evidence/v0.4.6.md), and [v0.4.9 cloud completion evidence](docs/release-evidence/v0.4.9.md).
+6. Check [Review evidence pack](docs/REVIEW_EVIDENCE.md), [v0.5.1 runtime depth evidence](docs/release-evidence/v0.5.1.md), and [remaining gaps and roadmap](docs/remaining-gaps-and-roadmap.md).
 
 ## Production Proof
 

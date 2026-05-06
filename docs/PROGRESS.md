@@ -3133,6 +3133,26 @@ Verification:
 - `.\scripts\docs-parity.ps1`
 - `.\scripts\evidence-manifest-verify.ps1`
 - `.\scripts\repo-hygiene.ps1`
+
+## v0.5.1 Professional documentation gap pass
+
+- Added `docs/remaining-gaps-and-roadmap.md` as the canonical truthful gap register for:
+  - protected-branch release state,
+  - AWS apply readiness versus real cloud deployment,
+  - local runtime evidence versus hosted demo evidence,
+  - monitoring limits without long-running traffic,
+  - synthetic data constraints,
+  - uneven module coverage roadmap,
+  - security and supply-chain next steps.
+- Linked the gap register from README, English README, Japanese README, review evidence, production scorecard, production readiness notes, and the evidence manifest.
+- Updated reviewer-facing docs to point from the v0.4.9 cloud-only state to the current v0.5.1 runtime depth evidence.
+
+Verification:
+
+- `.\scripts\docs-quality.ps1`
+- `.\scripts\docs-parity.ps1`
+- `.\scripts\evidence-manifest-verify.ps1`
+- `.\scripts\portfolio-verify.ps1 -Docs -Docker`
 - `.\scripts\domain-placeholder-audit.ps1`
 - `.\scripts\professionalism-audit.ps1`
 - `.\scripts\portfolio-verify.ps1 -Docs -Docker`

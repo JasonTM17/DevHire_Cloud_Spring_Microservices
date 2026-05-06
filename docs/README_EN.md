@@ -24,7 +24,7 @@ DevHire Cloud models a compact ITviec / LinkedIn Jobs platform with authenticati
 | Item | Current state | Verification |
 |---|---|---|
 | Latest public release | `v0.4.6` | [GitHub release](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.4.6) |
-| Current hardening evidence | `v0.4.9` cloud completion PR is green; release tag waits for protected-branch merge | [Review evidence](REVIEW_EVIDENCE.md), [cloud evidence](release-evidence/v0.4.9.md) |
+| Current hardening evidence | `v0.5.1` runtime depth and coverage evidence builds on the `v0.4.9` cloud completion baseline; release tag waits for protected-branch review | [Review evidence](REVIEW_EVIDENCE.md), [v0.5.1 evidence](release-evidence/v0.5.1.md) |
 | GitHub About / homepage / topics | Applied through governance automation | [Repository governance](github-governance.md) |
 | Branch protection | `master` protected; strict admin enforcement is part of the v0.4.7 gate | [Branch protection](branch-protection.md) |
 | Dependabot queue | 0 open PRs after zero-noise cleanup | [Dependabot cleanup](dependabot-cleanup-v0.4.md) |
@@ -49,6 +49,7 @@ DevHire Cloud models a compact ITviec / LinkedIn Jobs platform with authenticati
 | Cloud blueprint | [cloud-readiness-review.md](cloud-readiness-review.md) |
 | Cloud completion scorecard | [cloud-completion-scorecard.md](cloud-completion-scorecard.md) |
 | Cloud visual evidence | [cloud-visual-evidence.md](cloud-visual-evidence.md) |
+| Remaining gaps and roadmap | [remaining-gaps-and-roadmap.md](remaining-gaps-and-roadmap.md) |
 | Demo script | [demo-script.md](demo-script.md) |
 
 Fast local verification:
