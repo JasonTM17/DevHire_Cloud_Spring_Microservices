@@ -3099,3 +3099,42 @@ Verification:
 - PostgreSQL seed migration smoke across auth, user, company, job, application, notification, audit, and ai temporary databases
 - `.\scripts\portfolio-verify.ps1 -Docs -Docker`
 - `git diff --check`
+
+## v0.5.1 Production runtime depth and observability pass
+
+- Added Testcontainers repository/integration coverage for auth, company, application, notification, audit, and AI persistence paths.
+- Added a reusable `scripts/migration-smoke.ps1` gate that applies each service-owned Flyway migration set to temporary PostgreSQL databases and validates expected seed row counts.
+- Added domain runtime metrics and tests:
+  - application status totals and transition gauges,
+  - notification/read and email delivery gauges,
+  - audit action ingestion gauges,
+  - job search request/fallback/latency metrics,
+  - AI conversation and usage gauges,
+  - shared transactional outbox backlog gauges.
+- Added Grafana dashboard evidence for service health, recruitment funnel, event reliability, search/AI, and database/JVM views.
+- Added runtime evidence automation:
+  - `scripts/runtime-observability-smoke.ps1`,
+  - `scripts/portfolio-runtime-report.ps1`,
+  - richer `scripts/demo-data-summary.ps1 -FromDocker -Aggregates`.
+- Updated frontend dashboards to expose richer reviewer-facing totals:
+  - job pagination/page-size evidence,
+  - candidate application status distribution,
+  - employer applicant pipeline summary,
+  - admin audit action distribution.
+- Added `docs/data-model-and-seed-strategy.md` and refreshed runtime acceptance, SLO, scorecard, review evidence, and trilingual README links.
+
+Verification:
+
+- `mvn -T1 clean verify`
+- `.\scripts\check-coverage.ps1`
+- `cd frontend; npm run typecheck; npm run build; npm run e2e:all`
+- `docker compose config --quiet`
+- `.\scripts\docs-quality.ps1`
+- `.\scripts\docs-parity.ps1`
+- `.\scripts\evidence-manifest-verify.ps1`
+- `.\scripts\repo-hygiene.ps1`
+- `.\scripts\domain-placeholder-audit.ps1`
+- `.\scripts\professionalism-audit.ps1`
+- `.\scripts\portfolio-verify.ps1 -Docs -Docker`
+- `.\scripts\migration-smoke.ps1`
+- `.\scripts\migration-smoke.ps1 -Services ai-service -SkipStart`

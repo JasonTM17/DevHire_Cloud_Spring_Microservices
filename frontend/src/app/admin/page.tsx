@@ -79,6 +79,7 @@ export default function AdminPage() {
 
   const aiCircuitOpen = aiProvider?.circuitBreakerState === "OPEN";
   const positiveMessage = message.includes("approved") || message.includes("reindexed");
+  const auditActionCounts = countBy(audit.content, (item) => item.action);
 
   return (
     <section className="page-stack" data-testid="admin-dashboard">
@@ -154,6 +155,14 @@ export default function AdminPage() {
             <ScrollText size={20} />
             <h2>Audit log</h2>
           </div>
+          <div className="insight-list compact">
+            {Object.entries(auditActionCounts).slice(0, 4).map(([action, count]) => (
+              <div className="insight-line" key={action}>
+                <span>{action.replaceAll("_", " ").toLowerCase()}</span>
+                <strong>{count}</strong>
+              </div>
+            ))}
+          </div>
           <div className="stack">
             {loading && audit.content.length === 0 ? <div className="empty-state compact">Loading audit stream...</div> : null}
             {audit.content.length === 0 ? <div className="empty-state compact">No audit events yet.</div> : null}
@@ -224,4 +233,12 @@ function previewDashboardMessage(ex: unknown) {
 
 function selectedJobTitle(jobs: Job[], id: string) {
   return jobs.find((job) => job.id === id)?.title ?? id;
+}
+
+function countBy<T>(items: T[], selector: (item: T) => string) {
+  return items.reduce<Record<string, number>>((acc, item) => {
+    const key = selector(item);
+    acc[key] = (acc[key] ?? 0) + 1;
+    return acc;
+  }, {});
 }

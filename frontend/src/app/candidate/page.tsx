@@ -39,6 +39,7 @@ export default function CandidatePage() {
   }
 
   const unread = notifications?.content.filter((item) => !item.read).length ?? 0;
+  const statusCounts = countBy(applications?.content ?? [], (item) => item.status);
 
   return (
     <section className="page-stack" data-testid="candidate-dashboard">
@@ -70,6 +71,14 @@ export default function CandidatePage() {
           <div className="section-title">
             <TimerReset size={20} />
             <h2>Application tracker</h2>
+          </div>
+          <div className="insight-list compact">
+            {["SUBMITTED", "REVIEWING", "INTERVIEW", "OFFER"].map((status) => (
+              <div className="insight-line" key={status}>
+                <span>{status.toLowerCase().replace("_", " ")}</span>
+                <strong>{statusCounts[status] ?? 0}</strong>
+              </div>
+            ))}
           </div>
           <div className="table-list">
             {loading ? <div className="empty-state compact">Loading candidate applications...</div> : null}
@@ -132,4 +141,12 @@ function emailStatusLabel(status: string) {
   if (status === "DISABLED") return "internal notification fallback";
   if (status === "FAILED_RETRYABLE") return "queued for retry";
   return status.toLowerCase().replaceAll("_", " ");
+}
+
+function countBy<T>(items: T[], selector: (item: T) => string) {
+  return items.reduce<Record<string, number>>((acc, item) => {
+    const key = selector(item);
+    acc[key] = (acc[key] ?? 0) + 1;
+    return acc;
+  }, {});
 }

@@ -25,6 +25,10 @@ export default function EmployerPage() {
     () => companies?.content.find((company) => company.status === "APPROVED"),
     [companies]
   );
+  const pipelineCounts = useMemo(
+    () => countBy(applications.content, (item) => item.status),
+    [applications]
+  );
 
   function loadCompanies() {
     setLoadingCompanies(true);
@@ -195,6 +199,14 @@ export default function EmployerPage() {
               Load applicants
             </button>
           </div>
+          <div className="insight-list compact">
+            {["SUBMITTED", "REVIEWING", "INTERVIEW", "OFFER"].map((status) => (
+              <div className="insight-line" key={status}>
+                <span>{status.toLowerCase().replace("_", " ")}</span>
+                <strong>{pipelineCounts[status] ?? 0}</strong>
+              </div>
+            ))}
+          </div>
           <div className="table-list">
             {applications.content.map((item) => (
               <div className="table-row" key={item.id}>
@@ -224,4 +236,12 @@ function previewDashboardMessage(ex: unknown) {
 
 function isPositiveMessage(message: string) {
   return message.includes("submitted") || message.includes("preview") || message.includes("selected portfolio");
+}
+
+function countBy<T>(items: T[], selector: (item: T) => string) {
+  return items.reduce<Record<string, number>>((acc, item) => {
+    const key = selector(item);
+    acc[key] = (acc[key] ?? 0) + 1;
+    return acc;
+  }, {});
 }

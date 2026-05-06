@@ -40,6 +40,8 @@ DevHire Cloud models a compact ITviec / LinkedIn Jobs platform with authenticati
 | Production scorecard | [production-engineering-scorecard.md](production-engineering-scorecard.md) |
 | Runtime proof | [runtime-evidence-v0.4.md](runtime-evidence-v0.4.md) |
 | Portfolio demo data | [demo-data.md](demo-data.md) |
+| Data model and seed strategy | [data-model-and-seed-strategy.md](data-model-and-seed-strategy.md) |
+| Runtime observability proof | [slo.md](slo.md), `.\scripts\runtime-observability-smoke.ps1` |
 | Service catalog | [service-catalog.md](service-catalog.md) |
 | Architecture decisions | [architecture-review-index.md](architecture-review-index.md) |
 | API compatibility | [api-compatibility.md](api-compatibility.md) |
@@ -67,12 +69,14 @@ Full runtime gate after the Docker stack is running:
 
 ```powershell
 .\scripts\portfolio-verify.ps1 -Runtime -GatewayUrl http://localhost:8080
+.\scripts\runtime-observability-smoke.ps1 -GatewayUrl http://localhost:8080
 ```
 
 Curated runtime evidence pack:
 
 ```powershell
 .\scripts\portfolio-demo-evidence.ps1 -StartStack -CaptureScreenshots -PromoteScreenshots
+.\scripts\portfolio-runtime-report.ps1 -GatewayUrl http://localhost:8080
 ```
 
 Cloud blueprint verification without AWS credentials:

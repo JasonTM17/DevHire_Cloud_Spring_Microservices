@@ -117,6 +117,7 @@ export default function JobsPage() {
 
       <div className="metrics-row">
         <MetricCard icon={BriefcaseBusiness} label="Results" value={jobs?.totalElements ?? 0} helper="Paginated search" />
+        <MetricCard icon={Database} label="Page size" value={jobs?.size ?? 12} helper={`${jobs?.totalPages ?? 1} result pages`} />
         <MetricCard icon={Clock3} label="Search p95" value="128ms" helper="Prometheus target" />
         <MetricCard icon={ShieldCheck} label="Workflow" value="Approved" helper="Admin reviewed" />
       </div>

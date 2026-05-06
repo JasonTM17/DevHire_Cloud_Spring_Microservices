@@ -33,6 +33,8 @@ DevHire Cloud is a production-grade Java 21/Spring Boot microservices portfolio 
 | Canonical reviewer evidence | [Review evidence pack](docs/REVIEW_EVIDENCE.md) |
 | Runtime proof | [Runtime evidence v0.4](docs/runtime-evidence-v0.4.md) |
 | Portfolio demo data | [Synthetic volume seed](docs/demo-data.md) |
+| Data model and seed strategy | [Service-owned seed strategy](docs/data-model-and-seed-strategy.md) |
+| Runtime observability proof | [SLO and domain metrics](docs/slo.md), `.\scripts\runtime-observability-smoke.ps1` |
 | 5/15/30 minute review route | [Professional review map](docs/professional-review-map.md) |
 | Root layout | [Repository structure](docs/repository-structure.md) |
 | Service boundaries | [Service catalog](docs/service-catalog.md) |
@@ -63,12 +65,14 @@ Runtime gate when the Docker stack is running:
 
 ```powershell
 .\scripts\portfolio-verify.ps1 -Runtime -GatewayUrl http://localhost:8080
+.\scripts\runtime-observability-smoke.ps1 -GatewayUrl http://localhost:8080
 ```
 
 Curated runtime evidence pack when Docker is available:
 
 ```powershell
 .\scripts\portfolio-demo-evidence.ps1 -StartStack -CaptureScreenshots -PromoteScreenshots
+.\scripts\portfolio-runtime-report.ps1 -GatewayUrl http://localhost:8080
 ```
 
 Cloud blueprint gate without AWS credentials:

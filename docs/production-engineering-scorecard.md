@@ -9,14 +9,14 @@ This scorecard gives reviewers a fast, evidence-backed view of DevHire Cloud as 
 | Architecture and service boundaries | 9/10 | Multi-module Spring Boot services, service-owned databases, Flyway migrations, gateway routing, no shared JPA entities, architecture tests |
 | Security and identity | 8/10 | JWT access tokens, refresh rotation, logout blacklist, BCrypt, role checks, security headers, Gitleaks, blocking Trivy image scans, CodeQL |
 | Reliability and event delivery | 8/10 | Kafka, transactional outbox, retry/dead-letter states, idempotent notification/audit consumers, chaos smoke scripts |
-| Observability and SLOs | 8/10 | Actuator, Prometheus rules, Grafana SLO dashboard, Loki, Tempo, OpenTelemetry, runtime evidence docs |
+| Observability and SLOs | 9/10 | Actuator, Prometheus rules, Grafana SLO/domain dashboards, Loki, Tempo, OpenTelemetry, runtime metrics smoke, seeded funnel metrics |
 | CI/CD and release governance | 8/10 | Maven verify, frontend build, ratcheted coverage gate, Docker matrix, docs/security/terraform workflows, release notes, release evidence |
 | Cloud readiness | 9/10 | Docker Compose, Kubernetes manifests without `latest`, `ai-service` raw K8s coverage, Helm chart with immutable defaults, Argo CD samples, AWS Terraform blueprint, External Secrets wiring, race-safe Terraform validation, cloud policy audit |
 | Runtime reviewer proof | 9/10 | Self-starting frontend E2E smoke, portfolio verification scripts, curated demo evidence pack, API smoke, AI eval, Mailpit smoke, OpenAPI verify, performance and chaos smoke wrappers |
 | AI portfolio layer | 8/10 | Claude Haiku assistant, RAG citations, fallback mode, tool traces, AI safety docs, eval dataset |
 | Public GitHub facade | 9.5/10 | About/Homepage/Topics and `master` branch protection are applied; facade assertion handles public-limited protection details correctly, and settings-as-code disables admin bypass |
 
-Overall portfolio posture: **9.1/10 production engineering evidence**, with the main remaining gap being future real-cloud deployment evidence in an AWS account.
+Overall portfolio posture: **9.2/10 production engineering evidence**, with the main remaining gap being future real-cloud deployment evidence in an AWS account.
 
 ## Architecture
 
@@ -54,14 +54,18 @@ Evidence:
 
 ## Observability
 
-Services expose actuator health and metrics. The Docker stack includes Prometheus, Grafana, Loki, Tempo, and OpenTelemetry Collector. Alerts and dashboards focus on availability, latency, error rate, JVM pressure, outbox health, and AI assistant provider behavior.
+Services expose actuator health and metrics. The Docker stack includes Prometheus, Grafana, Loki, Tempo, and OpenTelemetry Collector. Alerts and dashboards focus on availability, latency, error rate, JVM pressure, DB pool pressure, outbox health, recruitment funnel state, notification delivery, audit ingestion, search fallback, and AI assistant provider behavior.
 
 Evidence:
 
 - [SLO documentation](slo.md)
-- `infra/prometheus/rules/devhire-alerts.yml`
+- `infra/prometheus/rules/devhire-slo.yml`
 - `infra/grafana/dashboards/devhire-slo-overview.json`
+- `infra/grafana/dashboards/devhire-recruitment-funnel.json`
+- `infra/grafana/dashboards/devhire-event-reliability.json`
+- `infra/grafana/dashboards/devhire-search-and-ai.json`
 - [Runtime evidence v0.4](runtime-evidence-v0.4.md)
+- `scripts/runtime-observability-smoke.ps1`
 
 ## Delivery
 
