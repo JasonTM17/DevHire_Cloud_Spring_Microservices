@@ -2990,3 +2990,17 @@ Verification:
 - Documentation/static gates passed before this phase and will be rerun before final push.
 
 Committed as `test(cloud): add strict render and policy verification`.
+
+## Phase 144 - v0.4.9 cloud evidence refresh and final verification
+
+- Updated the v0.4.9 release evidence with the concrete cloud-hardening commit trail and final verification results.
+- Confirmed the cloud verification path is now reviewer-friendly and does not require AWS credentials or `terraform apply`.
+
+Verification:
+
+- `.\scripts\portfolio-verify.ps1 -Docs -Docker -Cloud` passed on 2026-05-06.
+- `mvn -T1 clean verify` passed on 2026-05-06.
+- `.\scripts\check-coverage.ps1` passed on 2026-05-06.
+- `cd frontend; npm run typecheck; npm run build` passed on 2026-05-06.
+
+Committed as `docs(evidence): refresh cloud and reviewer proof pack`.
