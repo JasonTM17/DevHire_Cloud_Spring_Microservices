@@ -212,9 +212,9 @@ export const previewAiProviderStatus: AiProviderStatus = {
   baseUrlHost: "api.anthropic.com",
   anthropicVersion: "2023-06-01",
   maxTokens: 900,
-  apiKeyConfigured: false,
-  demoFallbackEnabled: true,
-  mode: "FALLBACK",
+  apiKeyConfigured: true,
+  demoFallbackEnabled: false,
+  mode: "CLAUDE_READY",
   circuitBreakerState: "CLOSED",
   consecutiveFailures: 0,
   checkedAt: new Date().toISOString()

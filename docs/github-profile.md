@@ -1,22 +1,8 @@
-# GitHub Repository Profile Checklist
+# GitHub Repository Profile
 
-Use this checklist to make the public GitHub repository look like a senior production engineering portfolio.
-
-## Status Badges
-
-Add these badges near the top of `README.md` after the repository is public and GitHub Actions are enabled:
-
-```markdown
-[![CI](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/ci.yml/badge.svg)](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/ci.yml)
-[![Docker](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/docker.yml/badge.svg)](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/docker.yml)
-[![Security](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/security.yml/badge.svg)](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/security.yml)
-[![Terraform](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/terraform.yml/badge.svg)](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/terraform.yml)
-[![Docs](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/docs.yml/badge.svg)](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/docs.yml)
-```
+Use this page to keep the public GitHub facade aligned with the current release.
 
 ## About
-
-Owner action status: not applied from the local shell because `GITHUB_TOKEN` was not configured. The repository is public, but GitHub API currently reports empty About description, homepage, and topics. Preview or apply the target state with `scripts/github-governance.ps1`.
 
 Description:
 
@@ -24,10 +10,10 @@ Description:
 Production-grade Java 21 Spring Boot microservices recruitment platform with JWT, Kafka, OpenSearch, Docker, Kubernetes, Terraform, observability, CI/CD, and Claude Haiku AI RAG assistant.
 ```
 
-Website:
+Homepage:
 
 ```text
-https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.4.6
+https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.5.1
 ```
 
 Topics:
@@ -55,45 +41,26 @@ devops
 portfolio
 ```
 
-## Recommended Settings
-
-- Protect `master`.
-- Require pull request before merging.
-- Require status checks:
-  - `CI / Maven Verify`
-  - `Docker Images`
-  - `Security / Gitleaks Secret Scan`
-  - `CodeQL / Analyze`
-  - `Terraform / Validate AWS Blueprint`
-  - `Docs / Documentation Quality`
-  - `AI Evaluation / Claude Assistant Smoke`
-- Disable force pushes.
-- Enable Dependabot alerts.
-- Enable secret scanning if available for the account.
-- Add `CODEOWNERS` review requirement.
-- Keep release `v0.4.6` visible as the current public portfolio release until the next tagged release is cut.
-
-## Automation
-
-Preview the full GitHub publication target:
+## Verification
 
 ```powershell
 .\scripts\github-governance.ps1 -DryRun
+.\scripts\github-facade-assert.ps1
+.\scripts\repository-health.ps1
 ```
 
-Apply About/Homepage/Topics only from an owner shell:
+## Required Settings
 
-```powershell
-$env:GITHUB_TOKEN = "<owner-token>"
-.\scripts\github-governance.ps1 -Apply
-Remove-Item Env:\GITHUB_TOKEN
-```
+- Protect `master`.
+- Require pull request before merging.
+- Require status checks for Maven, Docker, Docs, Security, CodeQL, and Terraform.
+- Disable force pushes.
+- Enable Dependabot alerts and secret scanning when available.
+- Keep `CODEOWNERS` review requirement enabled.
 
-The same apply command attempts branch protection for `master` with the required checks documented in `docs/branch-protection.md`.
+## Release Flow
 
-## Manual Release Flow
-
-1. Open a release PR using the checklist in `docs/release-checklist-v0.2.md` plus the current release evidence file.
-2. Attach sanitized screenshots or command summaries for Docker, smoke, performance, OpenAPI, Terraform, security, and docs gates.
-3. Merge only after `docs/PROGRESS.md`, release notes, and release evidence match the actual verification.
-4. Create an annotated `vX.Y.Z` tag from a green `master` commit and let `.github/workflows/release.yml` publish the release.
+1. Prepare release notes in `docs/release-notes/<tag>.md`.
+2. Merge release changes through protected `master`.
+3. Tag from a green `master` commit.
+4. Let `.github/workflows/release.yml` publish images and create the release from the matching notes file.

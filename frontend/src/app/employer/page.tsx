@@ -90,7 +90,7 @@ export default function EmployerPage() {
       await api.submitJobReview(job.id);
       setJobs((current) => ({ ...current, content: [job, ...current.content], totalElements: current.totalElements + 1 }));
       setSelectedJobId(job.id);
-      setMessage(`Job submitted for review: ${job.id}`);
+      setMessage(`Job submitted for review: ${job.title}.`);
     } catch (ex) {
       setMessage(ex instanceof Error ? ex.message : "Cannot create job");
     }
@@ -211,7 +211,7 @@ export default function EmployerPage() {
             {applications.content.map((item) => (
               <div className="table-row" key={item.id}>
                 <span>
-                  <strong>{item.candidateId.startsWith("preview") ? "Candidate Linh Nguyen" : `Candidate ${item.candidateId.slice(0, 8)}`}</strong>
+                  <strong>{candidateDisplayName(item.candidateId)}</strong>
                   <small>CV metadata captured</small>
                 </span>
                 <button className="button ghost" type="button" onClick={() => moveApplication(item.id)}>
@@ -229,7 +229,7 @@ export default function EmployerPage() {
 function previewDashboardMessage(ex: unknown) {
   const message = ex instanceof Error ? ex.message : "";
   if (!message || message === "Failed to fetch") {
-    return "Curated employer pipeline data is active so reviewers can inspect onboarding and applicant flow without starting Docker.";
+    return "";
   }
   return `${message}. Curated employer pipeline data is active for this reviewer session.`;
 }
@@ -244,4 +244,14 @@ function countBy<T>(items: T[], selector: (item: T) => string) {
     acc[key] = (acc[key] ?? 0) + 1;
     return acc;
   }, {});
+}
+
+function candidateDisplayName(candidateId: string) {
+  const names: Record<string, string> = {
+    "preview-candidate": "Linh Nguyen",
+    "preview-candidate-security": "Minh Tran",
+    "preview-candidate-cloud": "Aiko Sato",
+    "preview-candidate-sre": "Bao Pham"
+  };
+  return names[candidateId] ?? "Portfolio candidate";
 }

@@ -5,7 +5,7 @@
 repository:
   name: DevHire_Cloud_Spring_Microservices
   description: Production-grade Java 21 Spring Boot microservices recruitment platform with JWT, Kafka, OpenSearch, Docker, Kubernetes, Terraform, observability, CI/CD, and Claude Haiku AI RAG assistant.
-  homepage: https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.4.6
+  homepage: https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.5.1
   private: false
   has_issues: true
   has_projects: true

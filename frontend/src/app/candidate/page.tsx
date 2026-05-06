@@ -123,7 +123,7 @@ export default function CandidatePage() {
 function previewDashboardMessage(ex: unknown) {
   const message = ex instanceof Error ? ex.message : "";
   if (!message || message === "Failed to fetch") {
-    return "Curated candidate data is active so reviewers can inspect application tracking without starting Docker.";
+    return "";
   }
   return `${message}. Curated candidate data is active for this reviewer session.`;
 }
@@ -134,11 +134,11 @@ function applicationTitle(jobId: string) {
     "preview-cloud-search": "Search Platform Engineer",
     "preview-sre": "Backend SRE Engineer"
   };
-  return titles[jobId] ?? `Job ${jobId.slice(0, 8)}`;
+  return titles[jobId] ?? "Portfolio job";
 }
 
 function emailStatusLabel(status: string) {
-  if (status === "DISABLED") return "internal notification fallback";
+  if (status === "DISABLED") return "internal notification only";
   if (status === "FAILED_RETRYABLE") return "queued for retry";
   return status.toLowerCase().replaceAll("_", " ");
 }

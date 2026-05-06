@@ -1,9 +1,9 @@
 [CmdletBinding()]
 param(
     [string]$Root = ".",
-    [string]$ExpectedMavenVersion = "0.4.0-SNAPSHOT",
-    [string]$ExpectedFrontendVersion = "0.4.0",
-    [string]$LatestRelease = "v0.4.6"
+    [string]$ExpectedMavenVersion = "0.6.0-SNAPSHOT",
+    [string]$ExpectedFrontendVersion = "0.6.0",
+    [string]$LatestRelease = "v0.5.1"
 )
 
 Set-StrictMode -Version Latest
@@ -60,14 +60,17 @@ if (Test-Path $packageLockPath) {
 }
 
 $changelog = Get-Content -Raw -Encoding UTF8 (Join-Path $rootPath "CHANGELOG.md")
-if ($changelog -notmatch "## 0\.4\.0 - Unreleased") {
-    throw "CHANGELOG.md does not record the active 0.4.0 development section."
+if ($changelog -notmatch "## 0\.6\.0 - Unreleased") {
+    throw "CHANGELOG.md does not record the active 0.6.0 development section."
 }
-if ($changelog -notmatch "## 0\.3\.0 - 2026-05-04") {
-    throw "CHANGELOG.md does not record the released 0.3.0 date."
+if ($changelog -notmatch "## 0\.5\.1 - 2026-05-06") {
+    throw "CHANGELOG.md does not record the released 0.5.1 date."
 }
-if ($changelog -notmatch "## 0\.2\.0 - 2026-05-03") {
-    throw "CHANGELOG.md does not record the released 0.2.0 date."
+if ($changelog -notmatch "## 0\.4\.6 - 2026-05-05") {
+    throw "CHANGELOG.md does not record the released 0.4.6 date."
+}
+if ($changelog -match "release tag waits|staged on PR #29|awaits protected-branch") {
+    throw "CHANGELOG.md still contains stale pre-release wording."
 }
 
 $releaseNotesPath = Join-Path $rootPath "docs/release-notes/$LatestRelease.md"

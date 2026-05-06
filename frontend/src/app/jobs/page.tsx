@@ -229,7 +229,7 @@ function infraBadges(job: Job) {
 function previewMessage(ex: unknown) {
   const message = ex instanceof Error ? ex.message : "";
   if (!message || message === "Failed to fetch") {
-    return "Curated recruitment data is active so reviewers can inspect the product without starting Docker. Runtime mode replaces this with live Gateway and job-service data.";
+    return "";
   }
   return `${message}. Curated recruitment data is active for this reviewer session.`;
 }

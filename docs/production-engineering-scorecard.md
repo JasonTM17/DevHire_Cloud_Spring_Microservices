@@ -10,13 +10,15 @@ This scorecard gives reviewers a fast, evidence-backed view of DevHire Cloud as 
 | Security and identity | 8/10 | JWT access tokens, refresh rotation, logout blacklist, BCrypt, role checks, security headers, Gitleaks, blocking Trivy image scans, CodeQL |
 | Reliability and event delivery | 8/10 | Kafka, transactional outbox, retry/dead-letter states, idempotent notification/audit consumers, chaos smoke scripts |
 | Observability and SLOs | 9/10 | Actuator, Prometheus rules, Grafana SLO/domain dashboards, Loki, Tempo, OpenTelemetry, runtime metrics smoke, seeded funnel metrics |
-| CI/CD and release governance | 8/10 | Maven verify, frontend build, ratcheted coverage gate, Docker matrix, docs/security/terraform workflows, release notes, release evidence |
+| CI/CD and release governance | 8/10 | Maven verify, frontend build, ratcheted coverage gate, Docker matrix, docs/security/terraform workflows, release notes, release evidence, `v0.5.1` public release |
 | Cloud readiness | 9/10 | Docker Compose, Kubernetes manifests without `latest`, `ai-service` raw K8s coverage, Helm chart with immutable defaults, Argo CD samples, AWS Terraform blueprint, External Secrets wiring, race-safe Terraform validation, cloud policy audit |
 | Runtime reviewer proof | 9/10 | Self-starting frontend E2E smoke, portfolio verification scripts, curated demo evidence pack, API smoke, AI eval, Mailpit smoke, OpenAPI verify, performance and chaos smoke wrappers |
 | AI portfolio layer | 8/10 | Claude Haiku assistant, RAG citations, fallback mode, tool traces, AI safety docs, eval dataset |
 | Public GitHub facade | 9.5/10 | About/Homepage/Topics and `master` branch protection are applied; facade assertion handles public-limited protection details correctly, and settings-as-code disables admin bypass |
 
 Overall portfolio posture: **9.2/10 production engineering evidence**, with the main remaining gap being future real-cloud deployment evidence in an AWS account.
+
+Current public release: `v0.5.1`. Current development cycle: `0.6.0-SNAPSHOT`. The `v1.0.0` files are roadmap and acceptance evidence only.
 
 ## Architecture
 
@@ -64,7 +66,7 @@ Evidence:
 - `infra/grafana/dashboards/devhire-recruitment-funnel.json`
 - `infra/grafana/dashboards/devhire-event-reliability.json`
 - `infra/grafana/dashboards/devhire-search-and-ai.json`
-- [Runtime evidence v0.4](runtime-evidence-v0.4.md)
+- [Runtime acceptance matrix](runtime-acceptance-matrix.md)
 - `scripts/runtime-observability-smoke.ps1`
 
 ## Delivery
@@ -77,8 +79,6 @@ Evidence:
 - `.github/workflows/docker.yml`
 - `.github/workflows/release.yml`
 - [Versioning](versioning.md)
-- [Release evidence v0.4](release-evidence/v0.4.0.md)
-- [v0.4.6 public credibility evidence](release-evidence/v0.4.6.md)
 - [v0.5.1 production runtime depth evidence](release-evidence/v0.5.1.md)
 
 ## Cloud Readiness
@@ -129,12 +129,10 @@ Evidence:
 - [Remaining gaps and roadmap](remaining-gaps-and-roadmap.md)
 - [v1 reviewer guide](v1-reviewer-guide.md)
 - [v1 production gap register](v1-production-gap-register.md)
-- [v1.0.0 release evidence](release-evidence/v1.0.0.md)
+- [v1.0.0 acceptance checklist](release-evidence/v1.0.0.md)
 - [GitHub governance](github-governance.md)
 - [Branch protection](branch-protection.md)
 - [Repository health](repository-health.md)
-- [v0.4.6 public credibility evidence](release-evidence/v0.4.6.md)
-- [v0.5.0 reviewer-grade evidence baseline](release-evidence/v0.5.0.md)
 - [v0.5.1 production runtime depth evidence](release-evidence/v0.5.1.md)
 - `scripts/github-governance.ps1 -DryRun`
 - `scripts/github-facade-assert.ps1 -AllowOwnerActions`

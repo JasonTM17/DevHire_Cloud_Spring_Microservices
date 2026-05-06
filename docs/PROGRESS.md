@@ -2,6 +2,35 @@
 
 This file records implementation progress, verification commands, and commit boundaries.
 
+## 2026-05-06 - Canonical v0.5.1 facade cleanup
+
+- Canonicalized the public reviewer story: latest public release is `v0.5.1`, active development is `0.6.0-SNAPSHOT`, and v1 remains a roadmap/acceptance target rather than a claimed release.
+- Bumped Maven modules to `0.6.0-SNAPSHOT`, frontend to `0.6.0`, and Helm chart to `0.6.0` with `appVersion: 0.5.1`.
+- Rebuilt the Vietnamese, English, and Japanese reviewer landing pages around the same release, cloud, runtime, security, AI, and verification signals.
+- Added `docs/status.md` and `docs/release-notes/v0.5.1.md` as reviewer-facing source-of-truth documents.
+- Updated GitHub homepage metadata and the `v0.5.1` GitHub Release body through `gh`; no token or generated API response was committed.
+- Tightened frontend evidence copy so primary screenshots avoid raw IDs, `UNKNOWN`, offline banners, and fallback/debug wording.
+- Hardened visual evidence audit rules to catch rough UI copy in primary frontend/evidence surfaces.
+- Integrated the v1 roadmap as future acceptance planning only, not as released evidence.
+
+Verification:
+
+- `.\scripts\version-consistency.ps1` passed.
+- `.\scripts\docs-quality.ps1` passed.
+- `.\scripts\docs-parity.ps1` passed for Vietnamese, English, and Japanese.
+- `.\scripts\evidence-manifest-verify.ps1` passed.
+- `.\scripts\repo-hygiene.ps1` passed.
+- `.\scripts\domain-placeholder-audit.ps1` passed.
+- `.\scripts\professionalism-audit.ps1` passed.
+- `.\scripts\visual-evidence-audit.ps1` passed.
+- `docker compose config --quiet` passed.
+- `.\scripts\portfolio-verify.ps1 -Docs -Docker -Cloud` passed, including Terraform safe validation, Helm render, Kustomize render, kubeconform, and cloud policy audit.
+- `mvn -T1 clean verify` passed across all 11 Maven modules.
+- `.\scripts\check-coverage.ps1` passed. Remaining ratchet gaps are intentionally visible: `user-service` is 1.1% above threshold and `job-service` is 1.5% above threshold.
+- `cd frontend && npm run typecheck && npm run build && npm run e2e:all` passed.
+- `.\scripts\repository-health.ps1` passed: About/Homepage/Topics set, `master` protected, Dependabot open PR count `0`.
+- `.\scripts\github-workflow-status.ps1 -Branch master -RequireGreen` passed.
+
 ## Phase 0 - Repository bootstrap
 
 - Initialized the Git repository at the workspace root.
@@ -3207,3 +3236,10 @@ Verification:
 - `.\scripts\docs-parity.ps1`
 - `.\scripts\evidence-manifest-verify.ps1`
 - `.\scripts\repo-hygiene.ps1`
+# 2026-05-06 - Canonical v0.5.1 Facade Cleanup
+
+- Started cleanup branch `cleanup-v0.5.1-facade` after `v0.5.1` was released from protected `master`.
+- Chosen policy: keep historical tags/releases for auditability, but make `v0.5.1` the only current public release in reviewer-facing docs.
+- Updated public GitHub homepage to the `v0.5.1` release and replaced the GitHub Release body with `docs/release-notes/v0.5.1.md`.
+- Moved active development versions to `0.6.0-SNAPSHOT` for Maven and `0.6.0` for frontend/Helm chart.
+- Reframed `v1.0.0` docs as future acceptance checklists, not published release evidence.

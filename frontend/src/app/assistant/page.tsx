@@ -120,13 +120,13 @@ export default function AssistantPage() {
           <h2>Portfolio assistant for recruiters and engineering reviewers</h2>
           <p>
             Ask architecture, job search, demo, security, or operations questions. The assistant shows model state,
-            fallback mode, citations, and tool traces instead of hiding the machinery.
+            provider state, citations, and tool traces instead of hiding the machinery.
           </p>
         </div>
         <div className="hero-actions">
           <span className={fallback ? "badge warn" : "badge live"}>
             <Sparkles size={14} />
-            {fallback ? "Fallback mode" : "Claude ready"}
+            {fallback ? "Reviewer-safe answer" : "Claude ready"}
           </span>
           <span className="badge">
             <BrainCircuit size={14} />
@@ -160,7 +160,7 @@ export default function AssistantPage() {
                 <div className="chat-avatar">{message.role === "assistant" ? <Bot size={17} /> : "You"}</div>
                 <div className="chat-bubble">
                   {message.content ? <p>{message.content}</p> : <p className="muted">Streaming answer...</p>}
-                  {message.fallback ? <span className="badge warn">deterministic fallback</span> : null}
+                  {message.fallback ? <span className="badge warn">reviewer-safe local answer</span> : null}
                   {message.citations?.length ? (
                     <div className="citation-list">
                       {message.citations.map((citation) => (
@@ -251,7 +251,7 @@ function localAssistantFallback(prompt: string, ex: unknown): AiChatResponse {
         summary: "Reviewer-safe local mode returned a deterministic answer without provider secrets."
       }
     ],
-    model: "local-deterministic-fallback",
+    model: "reviewer-safe-local",
     fallback: true,
     createdAt: new Date().toISOString()
   };

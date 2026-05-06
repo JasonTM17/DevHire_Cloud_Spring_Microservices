@@ -8,7 +8,7 @@ param(
     [string]$Owner = "JasonTM17",
     [string]$Repo = "DevHire_Cloud_Spring_Microservices",
     [string]$DefaultBranch = "master",
-    [string]$ExpectedHomepage = "https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.4.6",
+    [string]$ExpectedHomepage = "https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.5.1",
     [string]$ExpectedDescription = "Production-grade Java 21 Spring Boot microservices recruitment platform with JWT, Kafka, OpenSearch, Docker, Kubernetes, Terraform, observability, CI/CD, and Claude Haiku AI RAG assistant.",
     [string[]]$ExpectedTopics = @(
         "java",

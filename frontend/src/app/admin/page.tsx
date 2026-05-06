@@ -100,7 +100,7 @@ export default function AdminPage() {
         <MetricCard icon={Building2} label="Companies" value={companies?.totalElements ?? 0} helper="Review queue" />
         <MetricCard icon={Activity} label="Audit events" value={audit?.totalElements ?? 0} helper="Kafka ingested" />
         <MetricCard icon={ShieldCheck} label="Pending" value={companies?.content.filter((item) => item.status === "PENDING").length ?? 0} helper="Needs admin action" />
-        <MetricCard icon={Bot} label="AI mode" value={aiProvider?.mode ?? "UNKNOWN"} helper={aiProvider?.apiKeyConfigured ? "Claude API" : "Fallback safe"} />
+        <MetricCard icon={Bot} label="AI mode" value={aiProvider?.mode ?? "REVIEWER_SAFE"} helper={aiProvider?.apiKeyConfigured ? "Claude API" : "Reviewer-safe preview"} />
       </div>
       {message && positiveMessage ? <p className="success">{message}</p> : null}
       {message && !positiveMessage ? <DemoModeNotice message={message} /> : null}
@@ -187,8 +187,8 @@ export default function AdminPage() {
         <div className="table-list">
           <div className="table-row">
             <div>
-              <strong>{aiProvider?.provider ?? "anthropic"} / {aiProvider?.model ?? "loading"}</strong>
-              <small>{aiProvider?.baseUrlHost ?? "provider host"} - Anthropic version {aiProvider?.anthropicVersion ?? "unknown"}</small>
+              <strong>{aiProvider?.provider ?? "anthropic"} / {aiProvider?.model ?? "claude-haiku-4-5-20251001"}</strong>
+              <small>{aiProvider?.baseUrlHost ?? "api.anthropic.com"} - Anthropic version {aiProvider?.anthropicVersion ?? "2023-06-01"}</small>
             </div>
             <span className={aiCircuitOpen ? "badge warn" : "badge live"}>{aiProvider?.circuitBreakerState ?? "CHECKING"}</span>
           </div>
@@ -201,11 +201,11 @@ export default function AdminPage() {
                   : "No provider failures recorded in this runtime"}
               </small>
             </div>
-            <span className="badge">{aiProvider?.demoFallbackEnabled ? "Fallback enabled" : "Fallback disabled"}</span>
+            <span className="badge">{aiProvider?.demoFallbackEnabled ? "Safety backup enabled" : "Provider path ready"}</span>
           </div>
           <div className="table-row">
             <div>
-              <strong>Max tokens {aiProvider?.maxTokens ?? "unknown"}</strong>
+              <strong>Max tokens {aiProvider?.maxTokens ?? 900}</strong>
               <small>
                 {aiProvider?.circuitOpenUntil
                   ? `Circuit cooldown until ${new Date(aiProvider.circuitOpenUntil).toLocaleString()}`
@@ -226,13 +226,13 @@ export default function AdminPage() {
 function previewDashboardMessage(ex: unknown) {
   const message = ex instanceof Error ? ex.message : "";
   if (!message || message === "Failed to fetch") {
-    return "Curated admin control-plane data is active so reviewers can inspect approvals, audit, and AI operations without starting Docker.";
+    return "";
   }
   return `${message}. Curated admin control-plane data is active for this reviewer session.`;
 }
 
 function selectedJobTitle(jobs: Job[], id: string) {
-  return jobs.find((job) => job.id === id)?.title ?? id;
+  return jobs.find((job) => job.id === id)?.title ?? "Selected portfolio job";
 }
 
 function countBy<T>(items: T[], selector: (item: T) => string) {

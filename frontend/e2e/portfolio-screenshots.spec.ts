@@ -25,10 +25,28 @@ const accounts = {
 } as const;
 
 async function capture(page: Page, name: string) {
+  await assertPrimaryEvidenceReady(page);
   await page.screenshot({
     path: path.join(screenshotsDir, `${name}.png`),
     fullPage: true
   });
+}
+
+async function assertPrimaryEvidenceReady(page: Page) {
+  const bodyText = await page.locator("body").innerText();
+  const forbidden = [
+    "UNKNOWN",
+    "Loading",
+    "Pending job ID",
+    "Job ID",
+    "Live API Gateway is offline",
+    "Fallback disabled",
+    "local-deterministic-fallback",
+    "Reviewer demo mode"
+  ];
+  for (const term of forbidden) {
+    expect(bodyText, `Primary screenshot must not contain rough evidence term: ${term}`).not.toContain(term);
+  }
 }
 
 async function login(page: Page, account: keyof typeof accounts) {
@@ -50,6 +68,8 @@ test.describe("portfolio screenshots", () => {
     await page.goto("/jobs");
     await expect(page.getByTestId("jobs-page")).toBeVisible();
     await expect(page.getByTestId("job-card").first()).toBeVisible();
+    await expect(page.getByText("Senior Java Platform Engineer")).toBeVisible();
+    await expect(page.getByText("Loading published jobs")).toHaveCount(0);
     await capture(page, "jobs-page");
 
     await page.getByTestId("job-card").first().click();
@@ -57,6 +77,9 @@ test.describe("portfolio screenshots", () => {
     await capture(page, "job-detail");
 
     await login(page, "candidate");
+    await expect(page.getByText("Application tracker")).toBeVisible();
+    await expect(page.getByText("Senior Java Platform Engineer")).toBeVisible();
+    await expect(page.getByText("Loading candidate applications...")).toHaveCount(0);
     await capture(page, "candidate-dashboard");
 
     await page.goto("/assistant");
@@ -67,9 +90,15 @@ test.describe("portfolio screenshots", () => {
     await capture(page, "assistant-page");
 
     await login(page, "employer");
+    await expect(page.getByText("Company and pipeline")).toBeVisible();
+    await expect(page.getByText("Job workflow")).toBeVisible();
+    await expect(page.getByText("Loading employer companies...")).toHaveCount(0);
     await capture(page, "employer-dashboard");
 
     await login(page, "admin");
+    await expect(page.getByText("Review console")).toBeVisible();
+    await expect(page.getByText("AI provider operations")).toBeVisible();
+    await expect(page.getByText("Loading admin review queue...")).toHaveCount(0);
     await capture(page, "admin-dashboard");
   });
 });
