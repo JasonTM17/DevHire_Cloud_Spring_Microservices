@@ -2,8 +2,8 @@ apiVersion: v2
 name: devhire-cloud
 description: Production-style Helm chart for DevHire Cloud microservices recruitment platform.
 type: application
-version: 0.1.0
-appVersion: "0.1.0"
+version: 0.6.0
+appVersion: "0.5.1"
 keywords:
   - java
   - spring-boot

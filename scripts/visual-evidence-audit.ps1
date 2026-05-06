@@ -2,7 +2,8 @@
 param(
     [string]$ScreenshotsDir = "docs/screenshots",
     [int]$MinWidth = 1200,
-    [int]$MinHeight = 850
+    [int]$MinHeight = 850,
+    [switch]$SkipSourceGuard
 )
 
 Set-StrictMode -Version Latest
@@ -88,6 +89,47 @@ $results | Format-Table -AutoSize | Out-String | Write-Host
 
 if ($failed.Count -gt 0) {
     throw "Visual evidence audit failed for $($failed.Count) screenshot(s). Regenerate with: cd frontend; npm run screenshots:ops-evidence"
+}
+
+if (-not $SkipSourceGuard) {
+    $primarySourceFiles = @(
+        "frontend/src/app/admin/page.tsx",
+        "frontend/src/app/employer/page.tsx",
+        "frontend/src/app/candidate/page.tsx",
+        "frontend/src/app/jobs/page.tsx",
+        "frontend/src/app/jobs/[id]/page.tsx",
+        "frontend/src/app/assistant/page.tsx"
+    )
+    $forbiddenText = @(
+        "UNKNOWN",
+        "Pending job ID",
+        "Live API Gateway is offline",
+        "Fallback disabled",
+        "local-deterministic-fallback",
+        "Job `$`{jobId.slice",
+        "Candidate `$`{item.candidateId.slice",
+        "Job submitted for review: `$`{job.id"
+    )
+
+    foreach ($relativePath in $primarySourceFiles) {
+        $sourcePath = Join-Path $repoRoot $relativePath
+        if (-not (Test-Path -LiteralPath $sourcePath)) {
+            throw "Visual evidence source guard missing expected file: $relativePath"
+        }
+        $content = Get-Content -Raw -Encoding UTF8 -LiteralPath $sourcePath
+        foreach ($term in $forbiddenText) {
+            if ($content.Contains($term)) {
+                throw "Visual evidence source guard failed: $relativePath contains '$term'."
+            }
+        }
+    }
+
+    $screenshotSpec = Get-Content -Raw -Encoding UTF8 (Join-Path $repoRoot "frontend/e2e/portfolio-screenshots.spec.ts")
+    foreach ($requiredAssertion in @("assertPrimaryEvidenceReady", "Reviewer demo mode", "local-deterministic-fallback")) {
+        if (-not $screenshotSpec.Contains($requiredAssertion)) {
+            throw "Visual evidence screenshot spec is missing required readiness assertion: $requiredAssertion"
+        }
+    }
 }
 
 Write-Host "Visual evidence audit passed."

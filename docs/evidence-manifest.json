@@ -1,5 +1,5 @@
 {
-  "version": "0.4.0",
+  "version": "0.6.0",
   "generatedFor": "DevHire Cloud - Microservices Recruitment Platform",
   "description": "Machine-checkable portfolio evidence manifest for reviewer and CI validation.",
   "categories": [
@@ -110,6 +110,7 @@
         "README.md",
         "docs/README_EN.md",
         "docs/README_JA.md",
+        "docs/status.md",
         "LICENSE",
         "docs/REVIEW_EVIDENCE.md",
         "docs/demo-data.md",
@@ -155,6 +156,7 @@
         "docs/release-evidence/v0.4.9.md",
         "docs/release-evidence/v0.5.0.md",
         "docs/release-evidence/v0.5.1.md",
+        "docs/release-notes/v0.5.1.md",
         "docs/release-notes/v1.0.0.md",
         "docs/release-evidence/v1.0.0.md"
       ]

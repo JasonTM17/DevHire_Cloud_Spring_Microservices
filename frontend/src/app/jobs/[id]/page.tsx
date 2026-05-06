@@ -183,7 +183,7 @@ function salary(job: Job) {
 function previewMessage(ex: unknown) {
   const message = ex instanceof Error ? ex.message : "";
   if (!message || message === "Failed to fetch") {
-    return "Curated job detail data is active so reviewers can inspect the application flow without starting Docker.";
+    return "";
   }
   return `${message}. Curated job detail data is active for this reviewer session.`;
 }
