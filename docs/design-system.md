@@ -43,6 +43,17 @@ DevHire Cloud should read as a production SaaS recruitment operations platform, 
 - Status chips: small, high-contrast, semantic colors.
 - Tables: fixed row rhythm, subtle background, clear right-aligned actions.
 
+## v0.6 Stitch Redesign Direction
+
+The v0.6 product surface follows the latest Stitch project `projects/5421325194779586117`.
+The canvas now separates three product regions:
+
+- Admin/Ops: dense control-plane views for operations, pipelines, observability, cloud, releases, and AI operations.
+- Employer/Company: company profile and hiring pipeline workflows.
+- Client/Candidate: mobile-first candidate flows for job discovery, applications, profile, assessments, offers, interview prep, career roadmap, skill analytics, and community.
+
+Candidate screens should feel guided and focused. Admin and platform screens should stay compact, operational, and evidence-heavy. Primary portfolio screenshots must not show raw IDs, `UNKNOWN`, loading-only panels, fallback/offline warnings, or smoke labels.
+
 ## Repository Facade Decision
 
 This document used to live under `.stitch/DESIGN.md`. It is now a normal portfolio document under `docs/` so the GitHub root presents as an engineering repository rather than a tool workspace export.

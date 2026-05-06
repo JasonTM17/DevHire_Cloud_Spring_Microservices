@@ -2,6 +2,28 @@
 
 This file records implementation progress, verification commands, and commit boundaries.
 
+## 2026-05-06 - v0.6 Stitch client/admin redesign implementation
+
+- Re-scanned Stitch project `projects/5421325194779586117` and mapped the expanded client screens plus admin/ops screens into product routes.
+- Refactored the frontend navigation into role-aware Candidate, Employer, Admin/Ops, and Platform workspaces.
+- Added candidate routes for applications, profile, assessments, offers, AI interview prep, roadmap, skill analytics, and community.
+- Added platform routes for observability, cloud control plane, and releases.
+- Added backend read-model endpoints for candidate dashboard, applications, offers, assessments, employer pipeline, skill analytics, AI roadmap/interview prep, and admin operations summary.
+- Added deterministic Flyway-backed candidate offer and assessment data in `application-service`.
+- Documented the Stitch-to-route mapping in `docs/ui-redesign-v0.6.md` and updated the design system notes.
+
+Verification:
+
+- `mvn -T1 -pl application-service,job-service,ai-service,audit-service,api-gateway -am test` passed.
+- `cd frontend && npm run typecheck` passed.
+- `cd frontend && npm run build` passed.
+- `cd frontend && npm run e2e:all` passed with 5 desktop and 2 mobile Playwright smoke tests.
+- `mvn -T1 clean verify` passed across all 11 Maven modules; Testcontainers integration tests were skipped because Docker daemon was not available in this local session.
+- `.\scripts\check-coverage.ps1` passed after adding read-model service tests.
+- `.\scripts\api-compatibility.ps1 -ManifestOnly` passed with manifest version `0.6.0` and 48 tracked endpoints.
+- `.\scripts\portfolio-verify.ps1 -Docs -Docker` passed.
+- `.\scripts\portfolio-verify.ps1 -Docs -Docker -Cloud` passed every docs/docker/cloud policy step but stopped at Terraform safe validate because local Terraform is absent and Dockerized Terraform cannot run while Docker daemon is off.
+
 ## 2026-05-06 - GitHub audit tooling hardening
 
 - Merged the runtime reviewer evidence refresh into `master` after all PR checks passed, then restored branch protection with the repository governance script.

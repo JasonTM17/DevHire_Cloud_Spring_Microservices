@@ -22,6 +22,7 @@ DevHire Cloud is a Java 21 / Spring Boot 3.5 production engineering portfolio fo
 | Evidence pack | [REVIEW_EVIDENCE.md](REVIEW_EVIDENCE.md) |
 | Architecture | [architecture-review-index.md](architecture-review-index.md) |
 | Service catalog | [service-catalog.md](service-catalog.md) |
+| v0.6 Stitch redesign | [ui-redesign-v0.6.md](ui-redesign-v0.6.md) |
 | Frontend preview | [frontend-preview-deploy.md](frontend-preview-deploy.md) |
 | Cloud readiness | [cloud-readiness-review.md](cloud-readiness-review.md) |
 | Production scorecard | [production-engineering-scorecard.md](production-engineering-scorecard.md) |

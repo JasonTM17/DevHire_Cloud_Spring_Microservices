@@ -28,6 +28,7 @@ DevHire Cloud là một portfolio microservices Java 21 / Spring Boot 3.5 cho n�
 | Evidence pack | [docs/REVIEW_EVIDENCE.md](docs/REVIEW_EVIDENCE.md) |
 | Architecture | [docs/architecture-review-index.md](docs/architecture-review-index.md) |
 | Service catalog | [docs/service-catalog.md](docs/service-catalog.md) |
+| v0.6 Stitch redesign | [docs/ui-redesign-v0.6.md](docs/ui-redesign-v0.6.md) |
 | Frontend preview | [docs/frontend-preview-deploy.md](docs/frontend-preview-deploy.md) |
 | Cloud readiness | [docs/cloud-readiness-review.md](docs/cloud-readiness-review.md) |
 | Production scorecard | [docs/production-engineering-scorecard.md](docs/production-engineering-scorecard.md) |
