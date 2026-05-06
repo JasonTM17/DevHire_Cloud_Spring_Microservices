@@ -3004,3 +3004,17 @@ Verification:
 - `cd frontend; npm run typecheck; npm run build` passed on 2026-05-06.
 
 Committed as `docs(evidence): refresh cloud and reviewer proof pack`.
+
+## Phase 145 - Release branch workflow trigger polish
+
+- Renamed the pushed implementation branch from `codex/v0.4.9-cloud-completion` to `v0.4.9-cloud-completion` for a cleaner public repository facade.
+- Deleted the old remote `codex/` branch after the new branch was pushed.
+- Added `v*` push triggers to the primary CI, Docker, Documentation, Security, CodeQL, E2E, and Terraform workflows so release/hardening branches without the `codex/` prefix still receive hosted checks before opening or merging a PR.
+
+Verification:
+
+- `git push -u origin v0.4.9-cloud-completion` passed on 2026-05-06.
+- `git push origin --delete codex/v0.4.9-cloud-completion` passed on 2026-05-06.
+- Static workflow validation will be rerun before the workflow trigger polish commit.
+
+Committed as `ci(github): support release hardening branch checks`.

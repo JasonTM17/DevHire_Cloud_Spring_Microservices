@@ -6,6 +6,7 @@ on:
       - main
       - master
       - "codex/**"
+      - "v*"
   pull_request:
   workflow_dispatch:
   schedule:
@@ -51,4 +52,3 @@ jobs:
         uses: github/codeql-action/analyze@v3
         with:
           category: "/language:${{ matrix.language }}"
-

@@ -1,9 +1,36 @@
 name: Terraform
 
 on:
+  push:
+    branches:
+      - main
+      - master
+      - "codex/**"
+      - "v*"
+    paths:
+      - "deploy/terraform/aws/**"
+      - "deploy/helm/devhire-cloud/**"
+      - "deploy/k8s/**"
+      - "deploy/gitops/**"
+      - "scripts/terraform-validate.ps1"
+      - "scripts/terraform-race-smoke.ps1"
+      - "scripts/cloud-policy-audit.ps1"
+      - "scripts/cloud-verify.ps1"
+      - "scripts/cloud-evidence-summary.ps1"
+      - ".github/workflows/terraform.yml"
+      - ".github/dependabot.yml"
+      - "docs/aws-terraform.md"
+      - "docs/cost-estimate.md"
+      - "docs/cloud-readiness-review.md"
+      - "docs/cloud-completion-scorecard.md"
+      - "docs/cloud-apply-runbook.md"
+      - "docs/aws-account-bootstrap.md"
   pull_request:
     paths:
       - "deploy/terraform/aws/**"
+      - "deploy/helm/devhire-cloud/**"
+      - "deploy/k8s/**"
+      - "deploy/gitops/**"
       - "scripts/terraform-validate.ps1"
       - "scripts/terraform-race-smoke.ps1"
       - "scripts/cloud-policy-audit.ps1"
