@@ -3,6 +3,7 @@ param(
     [string]$PostgresUser = $(if ($env:POSTGRES_USER) { $env:POSTGRES_USER } else { "devhire" }),
     [string]$PostgresPassword = $(if ($env:POSTGRES_PASSWORD) { $env:POSTGRES_PASSWORD } else { "devhire_local_password" }),
     [switch]$FromDocker,
+    [switch]$Aggregates,
     [switch]$Json
 )
 
@@ -36,6 +37,60 @@ function Invoke-ScalarSql {
     return [int]($result | Select-Object -First 1)
 }
 
+function Invoke-TableSql {
+    param(
+        [Parameter(Mandatory = $true)][string]$Database,
+        [Parameter(Mandatory = $true)][string]$Sql,
+        [Parameter(Mandatory = $true)][string[]]$Columns
+    )
+
+    $result = docker compose exec -T -e "PGPASSWORD=$PostgresPassword" postgres `
+        psql -U $PostgresUser -d $Database -t -A -F "|" -v ON_ERROR_STOP=1 -c $Sql
+    if ($LASTEXITCODE -ne 0) {
+        throw "PostgreSQL aggregate query failed for $Database"
+    }
+    foreach ($line in $result) {
+        if (-not $line.Trim()) {
+            continue
+        }
+        $values = $line -split "\|", $Columns.Count
+        $object = [ordered]@{}
+        for ($i = 0; $i -lt $Columns.Count; $i++) {
+            $object[$Columns[$i]] = $values[$i]
+        }
+        [pscustomobject]$object
+    }
+}
+
+function Get-RuntimeAggregates {
+    @(
+        [pscustomobject]@{
+            Name = "Companies by status"
+            Rows = @(Invoke-TableSql -Database "devhire_company" -Columns @("status", "count") -Sql "SELECT status, count(*) FROM companies GROUP BY status ORDER BY status;")
+        },
+        [pscustomobject]@{
+            Name = "Jobs by status"
+            Rows = @(Invoke-TableSql -Database "devhire_job" -Columns @("status", "count") -Sql "SELECT status, count(*) FROM jobs GROUP BY status ORDER BY status;")
+        },
+        [pscustomobject]@{
+            Name = "Applications by status"
+            Rows = @(Invoke-TableSql -Database "devhire_application" -Columns @("status", "count") -Sql "SELECT status, count(*) FROM job_applications GROUP BY status ORDER BY status;")
+        },
+        [pscustomobject]@{
+            Name = "Notifications by email status"
+            Rows = @(Invoke-TableSql -Database "devhire_notification" -Columns @("email_status", "count") -Sql "SELECT email_status, count(*) FROM notifications GROUP BY email_status ORDER BY email_status;")
+        },
+        [pscustomobject]@{
+            Name = "Top audit actions"
+            Rows = @(Invoke-TableSql -Database "devhire_audit" -Columns @("action", "count") -Sql "SELECT action, count(*) FROM audit_logs GROUP BY action ORDER BY count(*) DESC, action LIMIT 12;")
+        },
+        [pscustomobject]@{
+            Name = "AI usage"
+            Rows = @(Invoke-TableSql -Database "devhire_ai" -Columns @("fallback", "count", "avg_latency_ms") -Sql "SELECT fallback::text, count(*), round(avg(latency_ms))::int FROM ai_usage_events GROUP BY fallback ORDER BY fallback;")
+        }
+    )
+}
+
 Push-Location $repoRoot
 try {
     $rows = foreach ($item in $expected) {
@@ -53,15 +108,32 @@ try {
         }
     }
 
+    $runtimeAggregates = @()
+    if ($FromDocker -and $Aggregates) {
+        $runtimeAggregates = Get-RuntimeAggregates
+    }
+
     if ($Json) {
-        $rows | ConvertTo-Json -Depth 4
+        [pscustomobject]@{
+            ExpectedRows = $rows
+            Aggregates = $runtimeAggregates
+        } | ConvertTo-Json -Depth 8
     } else {
         $rows | Format-Table -AutoSize
         $total = ($rows | Measure-Object -Property PortfolioRows -Sum).Sum
         Write-Host ""
         Write-Host "Expected portfolio volume seed rows: $total"
+        if ($runtimeAggregates.Count -gt 0) {
+            foreach ($aggregate in $runtimeAggregates) {
+                Write-Host ""
+                Write-Host $aggregate.Name
+                $aggregate.Rows | Format-Table -AutoSize
+            }
+        }
         if (-not $FromDocker) {
             Write-Host "Tip: add -FromDocker after 'docker compose up -d' to compare expected vs runtime table counts."
+        } elseif (-not $Aggregates) {
+            Write-Host "Tip: add -Aggregates to show status distributions for runtime dashboards."
         }
     }
 } finally {

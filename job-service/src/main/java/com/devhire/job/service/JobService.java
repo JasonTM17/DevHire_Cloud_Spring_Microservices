@@ -20,6 +20,9 @@ import com.devhire.job.repository.JobRepository;
 import com.devhire.job.search.JobSearchAdapter;
 import com.devhire.job.search.JobSearchIndex;
 import feign.FeignException;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -27,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.Duration;
 import java.util.Map;
 import java.util.UUID;
 
@@ -38,15 +42,18 @@ public class JobService {
     private final JobSearchAdapter searchAdapter;
     private final JobSearchIndex searchIndex;
     private final JobEventPublisher eventPublisher;
+    private final MeterRegistry meterRegistry;
 
     public JobService(JobRepository repository, JobMapper mapper, CompanyClient companyClient,
-                      JobSearchAdapter searchAdapter, JobSearchIndex searchIndex, JobEventPublisher eventPublisher) {
+                      JobSearchAdapter searchAdapter, JobSearchIndex searchIndex, JobEventPublisher eventPublisher,
+                      MeterRegistry meterRegistry) {
         this.repository = repository;
         this.mapper = mapper;
         this.companyClient = companyClient;
         this.searchAdapter = searchAdapter;
         this.searchIndex = searchIndex;
         this.eventPublisher = eventPublisher;
+        this.meterRegistry = meterRegistry;
     }
 
     @Transactional
@@ -63,7 +70,16 @@ public class JobService {
 
     @Transactional(readOnly = true)
     public Page<JobResponse> search(JobSearchCriteria criteria, Pageable pageable) {
-        return searchAdapter.searchPublished(criteria, pageable).map(mapper::toResponse);
+        long start = System.nanoTime();
+        String adapter = searchAdapter.getClass().getSimpleName();
+        try {
+            Page<JobResponse> response = searchAdapter.searchPublished(criteria, pageable).map(mapper::toResponse);
+            recordSearch(adapter, "success", start);
+            return response;
+        } catch (RuntimeException ex) {
+            recordSearch(adapter, "error", start);
+            throw ex;
+        }
     }
 
     @Transactional(readOnly = true)
@@ -195,5 +211,20 @@ public class JobService {
         if (min != null && max != null && min.compareTo(max) > 0) {
             throw new DevHireException(ErrorCode.BAD_REQUEST, "salaryMin must be less than or equal to salaryMax");
         }
+    }
+
+    private void recordSearch(String adapter, String status, long startNanos) {
+        Counter.builder("devhire_job_search_requests")
+                .description("DevHire job search requests")
+                .tag("adapter", adapter)
+                .tag("status", status)
+                .register(meterRegistry)
+                .increment();
+        Timer.builder("devhire_job_search_latency")
+                .description("DevHire job search request latency")
+                .tag("adapter", adapter)
+                .tag("status", status)
+                .register(meterRegistry)
+                .record(Duration.ofNanos(System.nanoTime() - startNanos));
     }
 }

@@ -338,6 +338,9 @@ try {
         Invoke-PortfolioStep "openapi verify" ".\scripts\openapi-verify.ps1 -GatewayUrl $GatewayUrl" {
             & "$PSScriptRoot\openapi-verify.ps1" -GatewayUrl $GatewayUrl
         }
+        Invoke-PortfolioStep "runtime observability smoke" ".\scripts\runtime-observability-smoke.ps1 -GatewayUrl $GatewayUrl -SkipTraffic" {
+            & "$PSScriptRoot\runtime-observability-smoke.ps1" -GatewayUrl $GatewayUrl -SkipTraffic
+        }
         Invoke-PortfolioStep "role based perf smoke" ".\scripts\perf-suite.ps1 -GatewayUrl $GatewayUrl -Scenario all -Vus $PerfVus -Duration $PerfDuration" {
             & "$PSScriptRoot\perf-suite.ps1" -GatewayUrl $GatewayUrl -Scenario all -Vus $PerfVus -Duration $PerfDuration
         }

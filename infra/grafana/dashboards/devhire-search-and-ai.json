@@ -1,0 +1,39 @@
+{
+  "uid": "devhire-search-and-ai",
+  "title": "DevHire Search And AI",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "tags": ["devhire", "search", "ai"],
+  "time": {"from": "now-6h", "to": "now"},
+  "panels": [
+    {
+      "id": 1,
+      "type": "timeseries",
+      "title": "Job Search Requests",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+      "targets": [{"expr": "sum by (adapter, status) (rate(devhire_job_search_requests_total[5m]))", "legendFormat": "{{adapter}} {{status}}"}]
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "Job Search p95 Latency",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+      "targets": [{"expr": "histogram_quantile(0.95, sum by (le, adapter, status) (rate(devhire_job_search_latency_seconds_bucket[5m])))", "legendFormat": "{{adapter}} {{status}}"}]
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "AI Conversations / Usage Events",
+      "gridPos": {"h": 6, "w": 8, "x": 0, "y": 8},
+      "targets": [{"expr": "devhire_ai_conversations_total", "legendFormat": "conversations"}, {"expr": "devhire_ai_usage_events_total", "legendFormat": "usage events"}]
+    },
+    {
+      "id": 4,
+      "type": "timeseries",
+      "title": "AI Chat Latency And Fallbacks",
+      "gridPos": {"h": 6, "w": 16, "x": 8, "y": 8},
+      "targets": [{"expr": "histogram_quantile(0.95, sum by (le) (rate(devhire_ai_chat_latency_seconds_bucket[5m])))", "legendFormat": "p95 latency"}, {"expr": "increase(devhire_ai_fallback_total[15m])", "legendFormat": "fallbacks"}]
+    }
+  ]
+}

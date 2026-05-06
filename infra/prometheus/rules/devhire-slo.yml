@@ -82,6 +82,53 @@ groups:
           summary: DevHire outbox publishing failures detected
           description: 'Outbox publish failures were observed for topic {{ $labels.topic }}. Check Kafka, retry backlog, and dead-letter status.'
 
+      - alert: DevHireOutboxBacklogHigh
+        expr: sum by (service, status) (devhire_outbox_backlog{status=~"PENDING|FAILED|DEAD_LETTER"}) > 50
+        for: 15m
+        labels:
+          severity: warning
+          slo: event-reliability
+        annotations:
+          summary: DevHire outbox backlog is above 50 rows
+          description: '{{ $labels.service }} has an outbox backlog in {{ $labels.status }}. Check Kafka, publisher retries, and dead-letter runbooks.'
+
+      - alert: DevHireEmailRetryBacklogHigh
+        expr: sum(devhire_email_delivery_total{status="FAILED_RETRYABLE"}) > 25
+        for: 30m
+        labels:
+          severity: warning
+          service: notification-service
+          slo: notification-delivery
+        annotations:
+          summary: DevHire email retry backlog is high
+          description: Retryable email delivery failures are accumulating. Check Mailpit/Gmail SMTP, provider rate limits, and fallback internal notifications.
+
+      - alert: DevHireSearchFallbackSpike
+        expr: increase(devhire_job_search_requests_total{status="fallback"}[15m]) > 5
+        for: 5m
+        labels:
+          severity: warning
+          service: job-service
+          slo: search-resilience
+        annotations:
+          summary: DevHire search fallback spike detected
+          description: OpenSearch searches are falling back to PostgreSQL frequently. Check OpenSearch readiness, index health, and query failures.
+
+      - alert: DevHireDbPoolSaturation
+        expr: |
+          (
+            sum by (application) (hikaricp_connections_active)
+            /
+            clamp_min(sum by (application) (hikaricp_connections_max), 1)
+          ) > 0.85
+        for: 10m
+        labels:
+          severity: warning
+          slo: database-capacity
+        annotations:
+          summary: DevHire database connection pool saturation is high
+          description: '{{ $labels.application }} is using more than 85% of the configured Hikari connection pool.'
+
       - alert: DevHireAiP95LatencyHigh
         expr: |
           histogram_quantile(

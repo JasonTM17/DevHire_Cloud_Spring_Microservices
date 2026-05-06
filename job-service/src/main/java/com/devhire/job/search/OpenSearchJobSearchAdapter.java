@@ -5,6 +5,8 @@ import com.devhire.job.dto.request.JobSearchCriteria;
 import com.devhire.job.entity.Job;
 import com.devhire.job.entity.JobStatus;
 import com.devhire.job.repository.JobRepository;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -35,15 +37,18 @@ public class OpenSearchJobSearchAdapter implements JobSearchAdapter {
     private final OpenSearchProperties properties;
     private final JobRepository repository;
     private final PostgresJobSearchAdapter fallback;
+    private final MeterRegistry meterRegistry;
 
     public OpenSearchJobSearchAdapter(OpenSearchClient client,
                                       OpenSearchProperties properties,
                                       JobRepository repository,
-                                      PostgresJobSearchAdapter fallback) {
+                                      PostgresJobSearchAdapter fallback,
+                                      MeterRegistry meterRegistry) {
         this.client = client;
         this.properties = properties;
         this.repository = repository;
         this.fallback = fallback;
+        this.meterRegistry = meterRegistry;
     }
 
     @Override
@@ -68,6 +73,12 @@ public class OpenSearchJobSearchAdapter implements JobSearchAdapter {
         } catch (RuntimeException ex) {
             log.warn("opensearch_job_search_failed message={}", ex.getMessage());
             if (properties.fallbackToPostgres()) {
+                Counter.builder("devhire_job_search_requests")
+                        .description("DevHire job search requests")
+                        .tag("adapter", "OpenSearchJobSearchAdapter")
+                        .tag("status", "fallback")
+                        .register(meterRegistry)
+                        .increment();
                 return fallback.searchPublished(criteria, pageable);
             }
             throw ex;
