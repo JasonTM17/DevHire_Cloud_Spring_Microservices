@@ -84,10 +84,10 @@ function Invoke-Docker {
         "HOME=/tmp"
     )
 
-    $isWindows = [System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform(
+    $runningOnWindows = [System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform(
         [System.Runtime.InteropServices.OSPlatform]::Windows
     )
-    if (-not $isWindows) {
+    if (-not $runningOnWindows) {
         $uid = (& id -u).Trim()
         $gid = (& id -g).Trim()
         if ($uid -and $gid) {

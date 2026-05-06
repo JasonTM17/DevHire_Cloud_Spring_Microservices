@@ -3031,3 +3031,15 @@ Verification:
 - Hosted Terraform workflow will be rechecked after push.
 
 Committed as `fix(terraform): avoid root-owned ci cache files`.
+
+## Phase 147 - Terraform CI PowerShell compatibility fix
+
+- Fixed a Linux PowerShell compatibility issue in `terraform-validate.ps1`; the local variable `$isWindows` conflicted with the built-in read-only `$IsWindows` variable because PowerShell variable names are case-insensitive.
+- Renamed it to `$runningOnWindows` while preserving the non-Windows Docker UID/GID behavior.
+
+Verification:
+
+- `.\scripts\terraform-validate.ps1 -Environments dev -SkipTflint -SkipTrivy` will be rerun before commit.
+- Hosted Terraform workflow will be rechecked after push.
+
+Committed as `fix(terraform): avoid powershell builtin variable collision`.
