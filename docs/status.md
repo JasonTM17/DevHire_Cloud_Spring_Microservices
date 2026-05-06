@@ -17,6 +17,15 @@ This page is the single source of truth for the current public state of DevHire 
 | Runtime posture | Local Docker Compose runtime with smoke, observability, E2E, and data evidence |
 | v1 posture | Roadmap and acceptance checklist only; no `v1.0.0` tag exists or should be claimed |
 
+## Current Development Highlights
+
+| Track | Current evidence |
+|---|---|
+| Product UX | Reviewer-facing jobs workflow now includes richer filters, sorting, totals, and pagination. |
+| Frontend deploy | Optional Vercel preview path exists for `frontend/` only; Java backend deployment remains Docker/AWS blueprint. |
+| Gateway operations | Gateway emits route request, latency, and rate-limit metrics with Prometheus alert coverage. |
+| Runtime proof | Runtime observability smoke checks Gateway metrics plus domain KPI metrics when Docker is running. |
+
 ## Reviewer Path
 
 1. Start with [README](../README.md), [English README](README_EN.md), or [Japanese README](README_JA.md).
