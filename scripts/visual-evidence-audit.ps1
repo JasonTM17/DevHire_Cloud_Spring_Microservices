@@ -16,6 +16,16 @@ $screenshotsRoot = if ([System.IO.Path]::IsPathRooted($ScreenshotsDir)) {
 }
 
 $checks = @(
+    @{ Path = "jobs-page.png"; MinKb = 100; Label = "Jobs product screenshot" },
+    @{ Path = "job-detail.png"; MinKb = 100; Label = "Job detail product screenshot" },
+    @{ Path = "candidate-dashboard.png"; MinKb = 70; Label = "Candidate dashboard screenshot" },
+    @{ Path = "employer-dashboard.png"; MinKb = 70; Label = "Employer dashboard screenshot" },
+    @{ Path = "admin-dashboard.png"; MinKb = 70; Label = "Admin dashboard screenshot" },
+    @{ Path = "assistant-page.png"; MinKb = 100; Label = "AI assistant screenshot" },
+    @{ Path = "docker-runtime-jobs.png"; MinKb = 100; Label = "Docker runtime jobs screenshot" },
+    @{ Path = "ops-ai-provider.png"; MinKb = 100; Label = "AI provider operations evidence" },
+    @{ Path = "ops-mailpit.png"; MinKb = 70; Label = "Mailpit delivery evidence" },
+    @{ Path = "ops-openapi-job-service.png"; MinKb = 70; Label = "OpenAPI evidence" },
     @{ Path = "ops-prometheus-rules.png"; MinKb = 100; Label = "Prometheus SLO alert evidence" },
     @{ Path = "ops-grafana-slo.png"; MinKb = 100; Label = "Grafana SLO dashboard evidence" }
 )
