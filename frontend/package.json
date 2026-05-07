@@ -14,6 +14,7 @@
     "e2e:all": "node scripts/e2e-preview.mjs all",
     "e2e:report": "playwright show-report",
     "screenshots": "playwright test e2e/portfolio-screenshots.spec.ts e2e/stitch-route-matrix.spec.ts e2e/ops-screenshots.spec.ts e2e/ops-evidence-render.spec.ts --project=chromium",
+    "screenshots:stitch": "node scripts/e2e-preview.mjs stitch",
     "screenshots:promote": "powershell -NoProfile -ExecutionPolicy Bypass -File ../scripts/screenshot-promote.ps1 -Set All",
     "screenshots:ops": "playwright test e2e/ops-screenshots.spec.ts e2e/ops-evidence-render.spec.ts --project=chromium",
     "screenshots:ops-evidence": "playwright test e2e/ops-evidence-render.spec.ts --project=chromium"

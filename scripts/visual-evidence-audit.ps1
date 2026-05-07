@@ -28,7 +28,26 @@ $checks = @(
     @{ Path = "ops-mailpit.png"; MinKb = 70; Label = "Mailpit delivery evidence" },
     @{ Path = "ops-openapi-job-service.png"; MinKb = 70; Label = "OpenAPI evidence" },
     @{ Path = "ops-prometheus-rules.png"; MinKb = 100; Label = "Prometheus SLO alert evidence" },
-    @{ Path = "ops-grafana-slo.png"; MinKb = 100; Label = "Grafana SLO dashboard evidence" }
+    @{ Path = "ops-grafana-slo.png"; MinKb = 100; Label = "Grafana SLO dashboard evidence" },
+    @{ Path = "stitch/client-jobs.png"; MinKb = 70; Label = "Stitch client job discovery" },
+    @{ Path = "stitch/client-job-detail.png"; MinKb = 70; Label = "Stitch client job detail" },
+    @{ Path = "stitch/candidate-dashboard.png"; MinKb = 70; Label = "Stitch candidate dashboard" },
+    @{ Path = "stitch/candidate-applications.png"; MinKb = 70; Label = "Stitch candidate applications" },
+    @{ Path = "stitch/candidate-profile.png"; MinKb = 70; Label = "Stitch candidate profile" },
+    @{ Path = "stitch/candidate-assessments.png"; MinKb = 70; Label = "Stitch candidate assessments" },
+    @{ Path = "stitch/candidate-offers.png"; MinKb = 70; Label = "Stitch candidate offers" },
+    @{ Path = "stitch/candidate-interview-prep.png"; MinKb = 70; Label = "Stitch candidate interview prep" },
+    @{ Path = "stitch/candidate-roadmap.png"; MinKb = 70; Label = "Stitch candidate roadmap" },
+    @{ Path = "stitch/candidate-skill-analytics.png"; MinKb = 70; Label = "Stitch candidate skill analytics" },
+    @{ Path = "stitch/client-community.png"; MinKb = 70; Label = "Stitch community hub" },
+    @{ Path = "stitch/company-profile.png"; MinKb = 70; Label = "Stitch company profile" },
+    @{ Path = "stitch/employer-pipeline.png"; MinKb = 70; Label = "Stitch employer pipeline" },
+    @{ Path = "stitch/admin-control-plane.png"; MinKb = 70; Label = "Stitch admin control plane" },
+    @{ Path = "stitch/admin-ai-ops.png"; MinKb = 70; Label = "Stitch AI operations" },
+    @{ Path = "stitch/assistant.png"; MinKb = 70; Label = "Stitch assistant workspace" },
+    @{ Path = "stitch/platform-observability.png"; MinKb = 70; Label = "Stitch observability workspace" },
+    @{ Path = "stitch/platform-cloud.png"; MinKb = 70; Label = "Stitch cloud workspace" },
+    @{ Path = "stitch/platform-releases.png"; MinKb = 70; Label = "Stitch release workspace" }
 )
 
 function Read-PngDimension {

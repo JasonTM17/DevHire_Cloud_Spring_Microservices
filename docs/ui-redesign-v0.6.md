@@ -78,15 +78,28 @@ These are seeded deterministically by Flyway so portfolio pages can render rich 
 
 ## Implementation Status
 
-| Stitch area | Status |
-|---|---|
-| Client job discovery/detail | Implemented with filters, sorting, pagination, CV URL validation, and duplicate-protection copy. |
-| Client dashboard/applications | Implemented with application status distribution and reusable timeline components. |
-| Client profile/offers/assessments/roadmap/analytics/interview prep | Implemented; profile now prefers live user-service data. |
-| Employer pipeline/company | Implemented with selectable jobs and applicant queues. |
-| Company profile | Implemented with slug-backed lookup and company-scoped jobs. |
-| Admin/Ops/platform | Implemented with review queues, audit aggregates, AI provider status, observability, cloud, and release views. |
-| Stitch route evidence | v0.6.2 adds a route-matrix screenshot spec for all mapped client, employer, admin, and platform pages. |
+| Stitch screen | Route | Data backing | Evidence |
+|---|---|---|---|
+| Job Discovery | `/jobs` | Job service public search with keyword, skill, location, salary, level, type, company, sorting, and pagination | `stitch/client-jobs.png`, Playwright route matrix |
+| Job Detail | `/jobs/[id]` | Published-only job detail plus application submit state | `stitch/client-job-detail.png`, dynamic published-job E2E |
+| Candidate Dashboard | `/candidate` | Application service dashboard read model and notification read model | `stitch/candidate-dashboard.png`, candidate login E2E |
+| My Applications | `/candidate/applications` | Application summary read model with status distribution and timeline | `stitch/candidate-applications.png` |
+| Candidate Profile | `/candidate/profile` | `GET /api/users/me` when signed in, polished read-only sample when unauthenticated | `stitch/candidate-profile.png` |
+| Skill Assessment | `/candidate/assessments` | Application service assessment read model | `stitch/candidate-assessments.png` |
+| Offer Letter | `/candidate/offers` | Application service offer read model | `stitch/candidate-offers.png` |
+| AI Interview Prep | `/candidate/interview-prep` | AI service interview-prep read model | `stitch/candidate-interview-prep.png` |
+| Cloud Career Roadmap | `/candidate/roadmap` | AI service roadmap read model | `stitch/candidate-roadmap.png` |
+| Cloud Skill Analytics | `/candidate/skill-analytics` | Job service skill analytics read model | `stitch/candidate-skill-analytics.png` |
+| Engineering Community Hub | `/community` | Curated frontend content for v0.6 | `stitch/client-community.png` |
+| Company Profile & Jobs | `/companies/[slug]` | Approved company slug lookup and company-scoped public jobs | `stitch/company-profile.png` |
+| Recruitment Pipelines | `/employer` | Employer company list, employer pipeline summary, and applicant queue | `stitch/employer-pipeline.png`, employer login E2E |
+| Operations Dashboard | `/admin` | Company/job review queues, operations summary, audit logs, AI provider status | `stitch/admin-control-plane.png`, admin login E2E |
+| AI RAG Talent Intelligence | `/assistant`, `/admin/ai` | AI chat, citations, provider status, and knowledge reindex controls | `stitch/assistant.png`, `stitch/admin-ai-ops.png` |
+| Observability & Event Streaming | `/platform/observability` | Static operations evidence panels linked to Prometheus/Grafana/runbooks | `stitch/platform-observability.png` |
+| Infrastructure & K8s Control Plane | `/platform/cloud` | Static cloud evidence panels linked to Terraform/Helm/GitOps scripts | `stitch/platform-cloud.png` |
+| CI/CD & Deployment Registry | `/platform/releases` | Static release evidence panels linked to workflows, image metadata, and verification scripts | `stitch/platform-releases.png` |
+
+The v0.6.3 completion pass promotes these route-matrix screenshots into `docs/screenshots/stitch/` and tracks them in `docs/evidence-manifest.json` so reviewer-facing screenshots match the Stitch implementation, not only the legacy portfolio dashboard set.
 
 ## Verification
 

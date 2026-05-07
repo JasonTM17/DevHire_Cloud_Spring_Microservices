@@ -1,6 +1,6 @@
 # DevHire Cloud - Microservices Recruitment Platform
 
-DevHire Cloud is a Java 21 / Spring Boot 3.5 production engineering portfolio for a recruitment platform similar to a small ITviec or LinkedIn Jobs. It demonstrates service boundaries, owned databases, Kafka/outbox eventing, OpenSearch, observability, Docker/Kubernetes/Terraform, CI/CD, and a Claude Haiku AI assistant.
+DevHire Cloud is a Java 21 / Spring Boot 3.5 production engineering portfolio for a recruitment platform similar to a small ITviec or LinkedIn Jobs. It demonstrates real service boundaries, service-owned databases, Kafka/outbox eventing, OpenSearch, observability, Docker/Kubernetes/Terraform, CI/CD, security evidence, and a Claude Haiku AI assistant.
 
 ## Public Repository Status
 
@@ -8,6 +8,7 @@ DevHire Cloud is a Java 21 / Spring Boot 3.5 production engineering portfolio fo
 |---|---|
 | Latest public release | [v0.5.1](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.5.1) |
 | Current development cycle | `0.6.0-SNAPSHOT` |
+| v0.6 Stitch app | PR #43 green, protected-branch review required |
 | Branch governance | Protected `master`, PR-based release flow |
 | Dependabot queue | 0 open PRs at the latest cleanup scan |
 | v1 status | Roadmap and acceptance checklist only, not a released tag |
@@ -20,11 +21,10 @@ DevHire Cloud is a Java 21 / Spring Boot 3.5 production engineering portfolio fo
 | Japanese README | [README_JA.md](README_JA.md) |
 | Current status | [status.md](status.md) |
 | Evidence pack | [REVIEW_EVIDENCE.md](REVIEW_EVIDENCE.md) |
+| v0.6 Stitch redesign | [ui-redesign-v0.6.md](ui-redesign-v0.6.md) |
 | Architecture | [architecture-review-index.md](architecture-review-index.md) |
 | Service catalog | [service-catalog.md](service-catalog.md) |
 | Security evidence | [security-evidence.md](security-evidence.md) |
-| v0.6 Stitch redesign | [ui-redesign-v0.6.md](ui-redesign-v0.6.md) |
-| Frontend preview | [frontend-preview-deploy.md](frontend-preview-deploy.md) |
 | Cloud readiness | [cloud-readiness-review.md](cloud-readiness-review.md) |
 | Production scorecard | [production-engineering-scorecard.md](production-engineering-scorecard.md) |
 
@@ -37,10 +37,21 @@ DevHire Cloud is a Java 21 / Spring Boot 3.5 production engineering portfolio fo
 | Data ownership | PostgreSQL database/schema per service, Flyway migrations, no shared JPA entities |
 | Messaging | Kafka events plus transactional outbox and idempotent consumers |
 | Search | OpenSearch adapter with PostgreSQL fallback |
-| AI | Claude Haiku assistant with citations, tool traces, safety fallback, and metrics |
+| AI | Claude Haiku assistant with citations, tool traces, safety guardrails, and metrics |
 | Observability | Actuator, Prometheus, Grafana, Loki, Tempo, OpenTelemetry, domain KPI dashboards |
 | Security | JWT/RBAC, refresh token rotation, Gitleaks, Trivy, CodeQL, SBOM, protected `master` |
 | Delivery | Maven, Docker matrix, GitHub Actions, Helm, Kubernetes, Argo CD, AWS Terraform blueprint |
+
+## v0.6 Full-App Product Surface
+
+| Area | Routes |
+|---|---|
+| Candidate | `/jobs`, `/jobs/[id]`, `/candidate`, applications, profile, assessments, offers, interview prep, roadmap, skill analytics, community |
+| Employer | `/employer`, `/companies/[slug]` |
+| Admin/Ops | `/admin`, `/admin/ai` |
+| Platform | `/assistant`, `/platform/observability`, `/platform/cloud`, `/platform/releases` |
+
+The v0.6 implementation follows Stitch project `projects/5421325194779586117`. Primary screenshots are checked to avoid raw UUIDs, `UNKNOWN`, loading-only states, smoke labels, offline banners, and fallback banners.
 
 ## Cloud State Matrix
 
@@ -93,13 +104,13 @@ Portfolio verification:
 |---|---|---|
 | ![Candidate](screenshots/candidate-dashboard.png) | ![Employer](screenshots/employer-dashboard.png) | ![Admin](screenshots/admin-dashboard.png) |
 
+| Stitch Candidate Apps | Stitch Cloud | Stitch Releases |
+|---|---|---|
+| ![Candidate applications](screenshots/stitch/candidate-applications.png) | ![Cloud](screenshots/stitch/platform-cloud.png) | ![Releases](screenshots/stitch/platform-releases.png) |
+
 | Assistant | Grafana SLO | Prometheus Rules |
 |---|---|---|
 | ![Assistant](screenshots/assistant-page.png) | ![Grafana SLO](screenshots/ops-grafana-slo.png) | ![Prometheus rules](screenshots/ops-prometheus-rules.png) |
-
-| Docker Runtime | AI Ops | Mailpit | OpenAPI |
-|---|---|---|---|
-| ![Docker runtime jobs](screenshots/docker-runtime-jobs.png) | ![AI provider operations](screenshots/ops-ai-provider.png) | ![Mailpit](screenshots/ops-mailpit.png) | ![OpenAPI job service](screenshots/ops-openapi-job-service.png) |
 
 The full visual evidence set is machine-checked in [evidence-manifest.json](evidence-manifest.json).
 
@@ -109,4 +120,4 @@ The full visual evidence set is machine-checked in [evidence-manifest.json](evid
 
 ## Honest Scope
 
-This is a production engineering portfolio release, not a live customer SaaS claim. AWS remains an apply-ready blueprint unless a separate credentialed cloud deployment phase is approved.
+This is a production engineering portfolio, not a live customer SaaS claim. AWS remains an apply-ready blueprint unless a separate credentialed cloud deployment phase is approved.

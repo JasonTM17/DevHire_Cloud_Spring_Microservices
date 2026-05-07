@@ -6,7 +6,7 @@
 [![Terraform](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/terraform.yml/badge.svg)](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/terraform.yml)
 [![Docs](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/docs.yml/badge.svg)](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/docs.yml)
 
-DevHire Cloud là một portfolio microservices Java 21 / Spring Boot 3.5 cho nền tảng tuyển dụng kiểu mini ITviec/LinkedIn Jobs. Dự án tập trung vào ranh giới service thật, dữ liệu giàu, CI/CD, Docker/Kubernetes/Terraform, observability domain KPI, và Claude Haiku AI assistant.
+DevHire Cloud là portfolio production engineering cho một nền tảng tuyển dụng kiểu mini ITviec / LinkedIn Jobs, xây bằng Java 21, Spring Boot 3.5, Next.js, Kafka, OpenSearch, Docker, Kubernetes, Terraform AWS blueprint và Claude Haiku AI assistant. Mục tiêu là chứng minh tư duy microservices thật: service boundary rõ, database sở hữu theo service, event/outbox, observability domain KPI, CI/CD, security, cloud readiness và evidence có thể kiểm chứng.
 
 ## Public Repository Status
 
@@ -14,6 +14,7 @@ DevHire Cloud là một portfolio microservices Java 21 / Spring Boot 3.5 cho n�
 |---|---|
 | Latest public release | [v0.5.1](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.5.1) |
 | Current development cycle | `0.6.0-SNAPSHOT` |
+| v0.6 Stitch app | PR #43 green, protected-branch review required |
 | Branch governance | `master` protected, PR-based release flow |
 | Dependabot queue | 0 open PRs at latest cleanup scan |
 | v1 status | Roadmap and acceptance checklist only, not a released tag |
@@ -26,11 +27,10 @@ DevHire Cloud là một portfolio microservices Java 21 / Spring Boot 3.5 cho n�
 | Japanese docs | [docs/README_JA.md](docs/README_JA.md) |
 | Current status | [docs/status.md](docs/status.md) |
 | Evidence pack | [docs/REVIEW_EVIDENCE.md](docs/REVIEW_EVIDENCE.md) |
+| v0.6 Stitch redesign | [docs/ui-redesign-v0.6.md](docs/ui-redesign-v0.6.md) |
 | Architecture | [docs/architecture-review-index.md](docs/architecture-review-index.md) |
 | Service catalog | [docs/service-catalog.md](docs/service-catalog.md) |
 | Security evidence | [docs/security-evidence.md](docs/security-evidence.md) |
-| v0.6 Stitch redesign | [docs/ui-redesign-v0.6.md](docs/ui-redesign-v0.6.md) |
-| Frontend preview | [docs/frontend-preview-deploy.md](docs/frontend-preview-deploy.md) |
 | Cloud readiness | [docs/cloud-readiness-review.md](docs/cloud-readiness-review.md) |
 | Production scorecard | [docs/production-engineering-scorecard.md](docs/production-engineering-scorecard.md) |
 
@@ -41,11 +41,22 @@ DevHire Cloud là một portfolio microservices Java 21 / Spring Boot 3.5 cho n�
 | Edge | Spring Cloud Gateway, JWT validation, CORS, rate limit, centralized error shape |
 | Core services | auth, user, company, job, application, notification, audit, AI |
 | Data ownership | PostgreSQL database/schema per service, Flyway migrations, no shared JPA entities |
-| Messaging | Kafka events plus transactional outbox and idempotent consumers |
-| Search | OpenSearch adapter with PostgreSQL fallback path |
-| AI | Claude Haiku assistant with RAG-style citations, tool traces, safety fallback, metrics |
+| Messaging | Kafka events, transactional outbox, idempotent consumers |
+| Search | OpenSearch adapter with PostgreSQL fallback |
+| AI | Claude Haiku assistant with citations, tool traces, safety guardrails, metrics |
 | Observability | Actuator, Prometheus, Grafana, Loki, Tempo, OpenTelemetry, domain KPI dashboards |
-| Delivery | Maven, Docker matrix, GitHub Actions, Helm, K8s, Argo CD, AWS Terraform blueprint |
+| Delivery | Maven, Docker matrix, GitHub Actions, Helm, raw K8s, Argo CD, Terraform AWS blueprint |
+
+## v0.6 Full-App Product Surface
+
+| Area | Routes |
+|---|---|
+| Candidate | `/jobs`, `/jobs/[id]`, `/candidate`, applications, profile, assessments, offers, interview prep, roadmap, skill analytics, community |
+| Employer | `/employer`, `/companies/[slug]` |
+| Admin/Ops | `/admin`, `/admin/ai` |
+| Platform | `/assistant`, `/platform/observability`, `/platform/cloud`, `/platform/releases` |
+
+The v0.6 work follows Stitch project `projects/5421325194779586117`. Primary screenshots are checked to avoid raw UUIDs, `UNKNOWN`, loading-only states, smoke labels, offline banners and fallback banners.
 
 ## Cloud State Matrix
 
@@ -98,22 +109,20 @@ Portfolio verification:
 |---|---|---|
 | ![Candidate](docs/screenshots/candidate-dashboard.png) | ![Employer](docs/screenshots/employer-dashboard.png) | ![Admin](docs/screenshots/admin-dashboard.png) |
 
+| Stitch Candidate Apps | Stitch Cloud | Stitch Releases |
+|---|---|---|
+| ![Candidate applications](docs/screenshots/stitch/candidate-applications.png) | ![Cloud](docs/screenshots/stitch/platform-cloud.png) | ![Releases](docs/screenshots/stitch/platform-releases.png) |
+
 | AI Assistant | Grafana SLO |
 |---|---|
 | ![Assistant](docs/screenshots/assistant-page.png) | ![Grafana SLO](docs/screenshots/ops-grafana-slo.png) |
 
-| Docker Runtime | AI Ops | Mailpit | OpenAPI |
-|---|---|---|---|
-| ![Docker runtime jobs](docs/screenshots/docker-runtime-jobs.png) | ![AI provider operations](docs/screenshots/ops-ai-provider.png) | ![Mailpit](docs/screenshots/ops-mailpit.png) | ![OpenAPI job service](docs/screenshots/ops-openapi-job-service.png) |
-
-| Prometheus Rules | Visual Evidence Manifest |
-|---|---|
-| ![Prometheus rules](docs/screenshots/ops-prometheus-rules.png) | [docs/evidence-manifest.json](docs/evidence-manifest.json) tracks all 12 curated screenshots. |
+The full visual evidence set is machine-checked in [docs/evidence-manifest.json](docs/evidence-manifest.json).
 
 ## v1 Roadmap
 
-`v1.0.0` chưa được release. Roadmap v1 tập trung vào frontend product UX, backend integration maturity, API/event compatibility, observability SLO maturity, dataset depth, cloud apply-ready evidence, and supply-chain hardening. Xem [v1 reviewer guide](docs/v1-reviewer-guide.md), [v1 demo script](docs/v1-demo-script.md), và [v1 production gap register](docs/v1-production-gap-register.md).
+`v1.0.0` chưa được release. Roadmap v1 tập trung vào product UX, backend integration maturity, API/event compatibility, observability SLO maturity, deterministic data depth, cloud apply-ready evidence và supply-chain hardening. Xem [v1 reviewer guide](docs/v1-reviewer-guide.md), [v1 demo script](docs/v1-demo-script.md) và [v1 production gap register](docs/v1-production-gap-register.md).
 
 ## Honest Scope
 
-DevHire Cloud là production engineering portfolio, không phải SaaS có traffic khách hàng thật. AWS đang ở mức apply-ready blueprint; không chạy `terraform apply`, không commit secret, không claim external pentest.
+DevHire Cloud là production engineering portfolio, không phải SaaS có traffic khách hàng thật. AWS đang ở mức apply-ready blueprint; không chạy `terraform apply`, không commit secret và không claim external pentest.

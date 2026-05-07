@@ -181,6 +181,31 @@
       ]
     },
     {
+      "name": "visual-evidence-stitch-full-app",
+      "description": "Stitch route-matrix screenshots cover the full candidate, employer, admin, AI, and platform app.",
+      "requiredPaths": [
+        "docs/screenshots/stitch/client-jobs.png",
+        "docs/screenshots/stitch/client-job-detail.png",
+        "docs/screenshots/stitch/candidate-dashboard.png",
+        "docs/screenshots/stitch/candidate-applications.png",
+        "docs/screenshots/stitch/candidate-profile.png",
+        "docs/screenshots/stitch/candidate-assessments.png",
+        "docs/screenshots/stitch/candidate-offers.png",
+        "docs/screenshots/stitch/candidate-interview-prep.png",
+        "docs/screenshots/stitch/candidate-roadmap.png",
+        "docs/screenshots/stitch/candidate-skill-analytics.png",
+        "docs/screenshots/stitch/client-community.png",
+        "docs/screenshots/stitch/company-profile.png",
+        "docs/screenshots/stitch/employer-pipeline.png",
+        "docs/screenshots/stitch/admin-control-plane.png",
+        "docs/screenshots/stitch/admin-ai-ops.png",
+        "docs/screenshots/stitch/assistant.png",
+        "docs/screenshots/stitch/platform-observability.png",
+        "docs/screenshots/stitch/platform-cloud.png",
+        "docs/screenshots/stitch/platform-releases.png"
+      ]
+    },
+    {
       "name": "runbooks",
       "description": "Operational runbooks cover incidents, degraded dependencies, and disaster recovery.",
       "requiredPaths": [

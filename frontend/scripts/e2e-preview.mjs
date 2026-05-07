@@ -156,8 +156,8 @@ async function stopServer(server) {
   }
 }
 
-if (!["desktop", "mobile", "all"].includes(mode)) {
-  throw new Error(`Unsupported E2E preview mode '${mode}'. Use desktop, mobile, or all.`);
+if (!["desktop", "mobile", "all", "stitch"].includes(mode)) {
+  throw new Error(`Unsupported E2E preview mode '${mode}'. Use desktop, mobile, stitch, or all.`);
 }
 
 console.log(`[e2e-preview] Building frontend for ${baseUrl}`);
@@ -187,6 +187,15 @@ try {
       "test",
       "e2e/devhire-smoke.spec.ts",
       "e2e/assistant-smoke.spec.ts",
+      "e2e/stitch-route-matrix.spec.ts",
+      "--project=chromium"
+    ]);
+  }
+
+  if (mode === "stitch") {
+    await run(npx, [
+      "playwright",
+      "test",
       "e2e/stitch-route-matrix.spec.ts",
       "--project=chromium"
     ]);
