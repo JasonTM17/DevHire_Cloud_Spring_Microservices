@@ -207,6 +207,9 @@ class CodeAssessmentServiceTest {
 
         @Override
         public <T> T queryForObject(String sql, Class<T> requiredType, Object... args) {
+            if (sql.contains("FOR UPDATE")) {
+                return requiredType.cast(1);
+            }
             return scalar(sql, requiredType);
         }
 

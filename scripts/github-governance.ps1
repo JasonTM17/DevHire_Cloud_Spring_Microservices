@@ -96,7 +96,11 @@ $repoPayload = [ordered]@{
     homepage = $Homepage
     has_issues = $true
     has_projects = $true
-    has_wiki = $true
+    has_wiki = $false
+    allow_squash_merge = $true
+    allow_merge_commit = $false
+    allow_rebase_merge = $true
+    delete_branch_on_merge = $true
 }
 
 $topicsPayload = [ordered]@{
@@ -174,6 +178,25 @@ function Convert-ApiResultSummary {
     }
 }
 
+function Get-OptionalProperty {
+    param(
+        [object]$Object,
+        [Parameter(Mandatory = $true)][string]$Name,
+        [object]$Fallback = $null
+    )
+
+    if ($null -eq $Object) {
+        return $Fallback
+    }
+
+    $property = $Object.PSObject.Properties[$Name]
+    if ($null -eq $property) {
+        return $Fallback
+    }
+
+    return $property.Value
+}
+
 $repoResult = Invoke-GitHubJson -Method Get -Uri $apiRoot
 $releaseResult = Invoke-GitHubJson -Method Get -Uri "$apiRoot/releases/tags/$LatestRelease"
 $branchResult = Invoke-GitHubJson -Method Get -Uri "$apiRoot/branches/$DefaultBranch"
@@ -224,6 +247,11 @@ $current = [ordered]@{
     topics = if ($repoResult.ok -and $repoResult.value.topics) { @($repoResult.value.topics) } else { @() }
     defaultBranch = if ($repoResult.ok) { $repoResult.value.default_branch } else { $null }
     visibility = if ($repoResult.ok) { $repoResult.value.visibility } else { $null }
+    hasWiki = if ($repoResult.ok) { Get-OptionalProperty -Object $repoResult.value -Name "has_wiki" } else { $null }
+    allowSquashMerge = if ($repoResult.ok) { Get-OptionalProperty -Object $repoResult.value -Name "allow_squash_merge" } else { $null }
+    allowMergeCommit = if ($repoResult.ok) { Get-OptionalProperty -Object $repoResult.value -Name "allow_merge_commit" } else { $null }
+    allowRebaseMerge = if ($repoResult.ok) { Get-OptionalProperty -Object $repoResult.value -Name "allow_rebase_merge" } else { $null }
+    deleteBranchOnMerge = if ($repoResult.ok) { Get-OptionalProperty -Object $repoResult.value -Name "delete_branch_on_merge" } else { $null }
     latestReleaseStatus = $releaseStatus
     latestReleaseVisible = if ($releaseResult.ok) { $true } else { $null }
     branchProtected = if ($branchResult.ok) { [bool]$branchResult.value.protected } else { $false }
@@ -261,6 +289,9 @@ $summary = [ordered]@{
         if (-not $current.branchProtected) { "Enable branch protection for $DefaultBranch." }
         if ($current.latestReleaseStatus -eq "missing") { "Confirm $LatestRelease release is public." }
         if ($current.latestReleaseStatus -eq "unknown") { "Check $LatestRelease release visibility manually." }
+        if ($current.hasWiki -eq $true) { "Disable the repository wiki to avoid an empty public surface." }
+        if ($current.allowMergeCommit -eq $true) { "Disable merge commits so protected releases use squash/rebase history." }
+        if ($current.deleteBranchOnMerge -eq $false) { "Enable automatic branch deletion after merge." }
     )
 }
 
@@ -295,6 +326,9 @@ $lines.Add("- Homepage: $($current.homepage)")
 $lines.Add("- Topics: $(@($current.topics) -join ', ')")
 $lines.Add("- Default branch: $($current.defaultBranch)")
 $lines.Add("- Visibility: $($current.visibility)")
+$lines.Add("- Wiki enabled: $($current.hasWiki)")
+$lines.Add("- Merge commits allowed: $($current.allowMergeCommit)")
+$lines.Add("- Delete branch on merge: $($current.deleteBranchOnMerge)")
 $lines.Add("")
 $lines.Add("## Owner Actions")
 $lines.Add("")

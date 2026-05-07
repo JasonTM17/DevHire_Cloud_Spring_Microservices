@@ -207,3 +207,51 @@ groups:
         annotations:
           summary: DevHire AI assistant 5xx rate is above 5%
           description: AI API errors are burning the assistant demo reliability budget. Check ai-service logs, database health, and Claude client configuration.
+
+      - alert: DevHireCodeGradingFailures
+        expr: increase(devhire_code_grading_requests_total{status="failure"}[10m]) > 0
+        for: 5m
+        labels:
+          severity: warning
+          service: application-service
+          slo: assessment-quality
+        annotations:
+          summary: DevHire code assessment grading failures detected
+          description: Deterministic code grading failed for submitted assessments. Check application-service logs and grader/rubric deployment changes.
+
+      - alert: DevHireCodeAssessmentReviewBacklogHigh
+        expr: sum(devhire_code_assessments_total{status=~"SUBMITTED|AUTO_REVIEWED"}) > 20
+        for: 30m
+        labels:
+          severity: warning
+          service: application-service
+          slo: assessment-review
+        annotations:
+          summary: DevHire code assessment review backlog is high
+          description: Candidate submissions are waiting for employer review. Check reviewer staffing, queue filters, and assessment due-date workflow.
+
+      - alert: DevHireCodeRiskFlagBacklogHigh
+        expr: sum(devhire_code_review_risk_flags_total{type="any"}) > 10
+        for: 30m
+        labels:
+          severity: warning
+          service: application-service
+          slo: assessment-safety
+        annotations:
+          summary: DevHire risky code submission backlog is high
+          description: Static grading detected elevated code risk flags. Review unsafe patterns and candidate feedback before advancing applicants.
+
+      - alert: DevHireCodeGradingLatencyHigh
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (le) (rate(devhire_code_grading_latency_seconds_bucket[5m]))
+          ) > 1
+        for: 10m
+        labels:
+          severity: warning
+          service: application-service
+          slo: assessment-latency
+        annotations:
+          summary: DevHire code grading p95 latency is above 1s
+          description: Deterministic code assessment analysis is slower than expected. Check rubric changes and application-service CPU pressure.

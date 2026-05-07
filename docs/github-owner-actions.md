@@ -10,6 +10,9 @@ These actions require repository owner permissions and are intentionally not for
 | Homepage | `https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.5.1` |
 | Default branch | `master` |
 | Branch protection | Required |
+| Wiki | Disabled |
+| Merge commits | Disabled |
+| Delete merged branches | Enabled |
 
 ## Apply Or Verify
 
@@ -17,6 +20,7 @@ These actions require repository owner permissions and are intentionally not for
 .\scripts\github-governance.ps1 -DryRun
 .\scripts\github-facade-assert.ps1
 .\scripts\repository-health.ps1
+.\scripts\pr-stack-status.ps1
 ```
 
 Owner-token apply path:

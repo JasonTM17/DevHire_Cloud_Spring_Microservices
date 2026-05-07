@@ -13,6 +13,7 @@ This is the curated proof pack for recruiters and senior engineering reviewers. 
 | Dependabot posture | 0 open PRs after curated cleanup |
 | Release notes | `docs/release-notes/v0.5.1.md` is the canonical release body |
 | v1 posture | Roadmap and acceptance checklist only; no `v1.0.0` release is claimed |
+| Active v0.6 stack | [pr-stack-v0.6.md](pr-stack-v0.6.md) documents the green stacked PRs and the remaining root review gate |
 
 See [status.md](status.md) for the single source of truth.
 
@@ -32,6 +33,7 @@ See [status.md](status.md) for the single source of truth.
 | Rich demo data | `portfolio-verify.ps1 -Docs` now runs `demo-data-summary.ps1 -Aggregates -Json` so the 1,108-row deterministic dataset and status/action distributions are part of reviewer verification. |
 | Frontend preview | [frontend-preview-deploy.md](frontend-preview-deploy.md) documents Vercel as frontend-only preview; backend remains Spring Cloud Gateway plus Java services. |
 | Code assessment flagship | [code-assessment-reviewer-proof.md](code-assessment-reviewer-proof.md) documents the 5-minute flow: candidate submits code, deterministic score appears, employer reviews, and admin sees assessment health. |
+| PR stack governance | [pr-stack-v0.6.md](pr-stack-v0.6.md) and `scripts/pr-stack-status.ps1` show the exact review/merge order for the active Stitch/code-assessment stack. |
 | Gateway observability | `api-gateway` emits `devhire_gateway_requests_total`, `devhire_gateway_request_latency_seconds`, and `devhire_gateway_rate_limited_total` by route/status. |
 | Runtime observability smoke | `runtime-observability-smoke.ps1` now checks Gateway custom metrics together with recruitment, notification, audit, search, AI, and outbox metrics. |
 | SLO alerts | Prometheus rules include Gateway route p95 latency and route-level rate-limit spike alerts. |
@@ -56,6 +58,7 @@ Primary screenshots must not contain raw IDs, `UNKNOWN`, loading-only panels, of
 .\scripts\docs-parity.ps1
 .\scripts\evidence-manifest-verify.ps1
 .\scripts\repository-health.ps1
+.\scripts\pr-stack-status.ps1
 .\scripts\portfolio-verify.ps1 -Docs -Docker -Cloud
 ```
 

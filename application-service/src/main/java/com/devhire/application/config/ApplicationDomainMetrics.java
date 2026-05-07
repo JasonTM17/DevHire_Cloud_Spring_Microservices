@@ -48,7 +48,7 @@ public class ApplicationDomainMetrics {
                     .tag("status", status)
                     .register(meterRegistry);
         }
-        Gauge.builder("devhire_code_grading_score", () -> count("SELECT COALESCE(avg(final_score), 0)::bigint FROM code_submissions"))
+        Gauge.builder("devhire_code_grading_score", () -> value("SELECT COALESCE(avg(final_score), 0) FROM code_submissions"))
                 .description("Average deterministic code assessment score")
                 .register(meterRegistry);
         Gauge.builder("devhire_code_review_risk_flags_total", () -> count("""
@@ -78,6 +78,15 @@ public class ApplicationDomainMetrics {
         try {
             Long value = jdbcTemplate.queryForObject(sql, Long.class, args);
             return value == null ? 0 : value;
+        } catch (DataAccessException ex) {
+            return 0;
+        }
+    }
+
+    private double value(String sql, Object... args) {
+        try {
+            Double result = jdbcTemplate.queryForObject(sql, Double.class, args);
+            return result == null ? 0 : result;
         } catch (DataAccessException ex) {
             return 0;
         }

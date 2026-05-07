@@ -13,6 +13,9 @@ DevHire Cloud treats GitHub repository presentation as part of the production po
 | Default branch | `master` |
 | Branch protection | Enabled |
 | Dependabot queue | 0 open PRs at latest cleanup scan |
+| Wiki | Disabled target; the repository should not expose an empty Wiki tab |
+| Merge policy | Squash or rebase only; merge commits disabled in settings-as-code |
+| Branch cleanup | Delete merged branches enabled in settings-as-code |
 
 ## Verification
 
@@ -20,6 +23,7 @@ DevHire Cloud treats GitHub repository presentation as part of the production po
 .\scripts\github-governance.ps1 -DryRun
 .\scripts\github-facade-assert.ps1
 .\scripts\repository-health.ps1
+.\scripts\pr-stack-status.ps1
 ```
 
 ## Apply Path

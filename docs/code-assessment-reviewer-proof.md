@@ -12,6 +12,8 @@ This page is the 5-minute reviewer path for the flagship DevHire Cloud code asse
 | Scoring is deterministic | final score comes from `static-rubric-v1`; optional AI feedback is advisory and cannot overwrite the score |
 | Review is auditable | submissions and employer decisions publish audit metadata including attempt number, code hash, grader version, rubric version, score, risk flags, and decision |
 | Operations can see health | `/admin` and `/admin/ai` surface submitted, reviewed, passed, failed, average score, and risk flag posture |
+| Attempts are production-guarded | assignment rows are locked before attempt allocation, `(assignment_id, attempt_number)` is unique, score/hash/version constraints are enforced in the database |
+| SLOs include the flagship feature | Prometheus alerts cover grading failures, review backlog, risky-submission backlog, and grading latency |
 
 ## 5-Minute Demo Path
 
@@ -36,6 +38,8 @@ This page is the 5-minute reviewer path for the flagship DevHire Cloud code asse
 | Employer | `PATCH /api/employer/code-assessments/{id}/review` | Records advance, hold, or reject with reviewer notes and final score |
 | Admin | `GET /api/admin/code-assessments/summary` | Aggregates assessment health for operations dashboard |
 
+List endpoints intentionally return `submittedCodePreview` and `hasSubmittedCode`, not the full raw submission. Full code is limited to owner detail endpoints for the candidate and employer review flow.
+
 ## Scoring Rubric
 
 | Category | Points |
@@ -47,6 +51,20 @@ This page is the 5-minute reviewer path for the flagship DevHire Cloud code asse
 | Test and evidence quality | 10 |
 
 The static grader flags starter-code-only submissions, hardcoded secrets, unsafe process execution, I/O boundary risks, and missing test evidence. Signals found only in comments are treated as weaker evidence than implementation signals.
+
+The deterministic score remains the source of truth. AI feedback can be layered in later as an advisory explanation path, but it does not override the rubric score in v0.6.7.
+
+## Operations Signals
+
+| Signal | Purpose |
+|---|---|
+| `devhire_code_assessments_total{status}` | Current assessment queue by status |
+| `devhire_code_submissions_total{language,status}` | Submitted code volume by language and grading status |
+| `devhire_code_grading_requests_total{language,status}` | Deterministic grading success/failure count |
+| `devhire_code_grading_latency_seconds` | Grading latency histogram |
+| `devhire_code_grading_score` | Average deterministic rubric score |
+| `devhire_code_review_risk_flags_total{type}` | Submissions with static risk flags |
+| `devhire_code_review_decisions_total{decision,status}` | Employer review decisions |
 
 ## Verification
 

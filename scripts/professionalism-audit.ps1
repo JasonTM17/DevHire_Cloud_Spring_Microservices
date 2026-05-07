@@ -65,6 +65,25 @@ function Add-Check {
     })
 }
 
+function Get-OptionalProperty {
+    param(
+        [object]$Object,
+        [Parameter(Mandatory = $true)][string]$Name,
+        [object]$Fallback = $null
+    )
+
+    if ($null -eq $Object) {
+        return $Fallback
+    }
+
+    $property = $Object.PSObject.Properties[$Name]
+    if ($null -eq $property) {
+        return $Fallback
+    }
+
+    return $property.Value
+}
+
 function Test-PathSet {
     param([Parameter(Mandatory = $true)][string[]]$Paths)
 
@@ -91,6 +110,9 @@ try {
         topicCount = if ($repoResult.ok -and $repoResult.value.topics) { @($repoResult.value.topics).Count } else { 0 }
         defaultBranch = if ($repoResult.ok) { $repoResult.value.default_branch } else { $null }
         visibility = if ($repoResult.ok) { $repoResult.value.visibility } else { $null }
+        wikiEnabled = if ($repoResult.ok) { Get-OptionalProperty -Object $repoResult.value -Name "has_wiki" } else { $null }
+        mergeCommitAllowed = if ($repoResult.ok) { Get-OptionalProperty -Object $repoResult.value -Name "allow_merge_commit" } else { $null }
+        deleteBranchOnMerge = if ($repoResult.ok) { Get-OptionalProperty -Object $repoResult.value -Name "delete_branch_on_merge" } else { $null }
     }
 
     $branchProtected = if ($branchResult.ok) { [bool]$branchResult.value.protected } else { $false }
@@ -99,6 +121,9 @@ try {
     if (-not $metadata.homepageSet) { $ownerActions += "Set repository homepage" }
     if ($metadata.topicCount -eq 0) { $ownerActions += "Add repository topics" }
     if (-not $branchProtected) { $ownerActions += "Protect $DefaultBranch branch" }
+    if ($metadata.wikiEnabled -eq $true) { $ownerActions += "Disable empty repository wiki" }
+    if ($metadata.mergeCommitAllowed -eq $true) { $ownerActions += "Disable merge commits for release hygiene" }
+    if ($metadata.deleteBranchOnMerge -eq $false) { $ownerActions += "Enable delete branch on merge" }
 
     $metadataStatus = if ($ownerActions.Count -eq 0) { "passed" } else { "owner-action" }
     Add-Check -Checks $checks -Name "github public facade" -Status $metadataStatus -Details "$($ownerActions.Count) owner action(s)"
@@ -168,6 +193,7 @@ try {
         "scripts/github-governance.ps1",
         "scripts/domain-placeholder-audit.ps1",
         "scripts/professionalism-audit.ps1",
+        "scripts/pr-stack-status.ps1",
         "scripts/dependabot-zero-noise.ps1",
         "scripts/github-workflow-status.ps1",
         "scripts/repo-hygiene.ps1",

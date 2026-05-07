@@ -112,6 +112,7 @@ public class CodeAssessmentService {
         }
         String normalizedLanguage = normalizeLanguage(request.language());
         String normalizedCode = request.code().trim();
+        lockAssignmentForSubmission(candidate, assignmentId);
         int attemptNumber = nextAttemptNumber(assignmentId);
         String codeHash = sha256(normalizedCode);
         Timer.Sample timer = Timer.start(meterRegistry);
@@ -312,6 +313,18 @@ public class CodeAssessmentService {
                 JOIN code_challenges c ON c.id = a.challenge_id
                 WHERE a.id = ?
                 """, (rs, rowNum) -> splitCsv(rs.getString("required_signals_csv")), assignmentId);
+    }
+
+    private void lockAssignmentForSubmission(AuthenticatedUser candidate, UUID assignmentId) {
+        Integer locked = jdbcTemplate.queryForObject("""
+                SELECT 1
+                FROM code_assessment_assignments
+                WHERE id = ? AND candidate_id = ?
+                FOR UPDATE
+                """, Integer.class, assignmentId, candidate.id());
+        if (locked == null) {
+            throw new DevHireException(ErrorCode.NOT_FOUND, "Code assessment not found");
+        }
     }
 
     private RowMapper<CodeAssessmentResponse> mapper() {

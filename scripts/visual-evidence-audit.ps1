@@ -113,13 +113,17 @@ if ($failed.Count -gt 0) {
 if (-not $SkipSourceGuard) {
     $primarySourceFiles = @(
         "frontend/src/app/admin/page.tsx",
+        "frontend/src/app/admin/ai/page.tsx",
         "frontend/src/app/employer/page.tsx",
         "frontend/src/app/candidate/page.tsx",
+        "frontend/src/app/candidate/applications/page.tsx",
         "frontend/src/app/candidate/profile/page.tsx",
         "frontend/src/app/candidate/assessments/page.tsx",
+        "frontend/src/app/candidate/offers/page.tsx",
         "frontend/src/app/candidate/interview-prep/page.tsx",
         "frontend/src/app/candidate/roadmap/page.tsx",
         "frontend/src/app/candidate/skill-analytics/page.tsx",
+        "frontend/src/app/community/page.tsx",
         "frontend/src/app/companies/[slug]/page.tsx",
         "frontend/src/app/jobs/page.tsx",
         "frontend/src/app/jobs/[id]/page.tsx",
