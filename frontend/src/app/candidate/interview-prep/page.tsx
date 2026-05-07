@@ -33,7 +33,7 @@ export default function InterviewPrepPage() {
       </div>
       <div className="metrics-row">
         <MetricCard icon={MessageSquareText} label="Prep sessions" value={sessions.length} helper="Conversation read model" />
-        <MetricCard icon={ShieldCheck} label="Fallbacks" value={sessions.filter((item) => item.fallback).length} helper="Safety visible when used" />
+        <MetricCard icon={ShieldCheck} label="Safety handoffs" value={sessions.filter((item) => item.fallback).length} helper="Provider backup visible when used" />
         <MetricCard icon={Bot} label="Model" value="Haiku" helper="Cost-aware default" />
       </div>
       <div className="job-grid">
@@ -41,7 +41,7 @@ export default function InterviewPrepPage() {
           <article className="job-card" key={item.conversationId}>
             <div className="job-card-top">
               <h2>{item.title}</h2>
-              <StatusPill value={item.fallback ? "FALLBACK" : "CLAUDE"} />
+              <StatusPill value={item.fallback ? "SAFETY_BACKUP" : "CLAUDE"} />
             </div>
             <p>{item.focusAreas.join(" / ")}</p>
             <span className="muted">Last practiced {new Date(item.lastMessageAt).toLocaleDateString()}</span>

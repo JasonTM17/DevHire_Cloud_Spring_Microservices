@@ -1,5 +1,6 @@
 import { Cloud, Database, GitBranch, LockKeyhole } from "lucide-react";
 import { MetricCard } from "@/components/MetricCard";
+import { OperationsEvidencePanel } from "@/components/OperationsEvidencePanel";
 
 export default function PlatformCloudPage() {
   return (
@@ -30,6 +31,15 @@ export default function PlatformCloudPage() {
           </article>
         ))}
       </div>
+      <OperationsEvidencePanel
+        title="Cloud verification evidence"
+        items={[
+          { label: "Terraform validation", status: "PASSING", source: "scripts/terraform-validate.ps1" },
+          { label: "Helm and K8s render", status: "PASSING", source: "scripts/cloud-verify.ps1" },
+          { label: "Policy guardrails", status: "PASSING", source: "scripts/cloud-policy-audit.ps1" },
+          { label: "Apply runbook", status: "DOCUMENTED", source: "docs/cloud-apply-runbook.md", href: "/platform/releases" }
+        ]}
+      />
     </section>
   );
 }

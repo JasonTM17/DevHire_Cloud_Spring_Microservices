@@ -22,6 +22,7 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -75,5 +76,20 @@ class JobControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error", is("VALIDATION_ERROR")));
     }
-}
 
+    @Test
+    void publicGetReturnsPublishedJobDetail() throws Exception {
+        UUID jobId = UUID.randomUUID();
+        UUID employerId = UUID.randomUUID();
+        UUID companyId = UUID.randomUUID();
+        when(jobService.get(jobId)).thenReturn(new JobResponse(jobId, companyId, employerId,
+                "Senior Java", "Build APIs", "Java", "Budget", BigDecimal.valueOf(3000), BigDecimal.valueOf(5000),
+                "Remote", "Senior", "Full-time", List.of("Java"), JobStatus.PUBLISHED, null,
+                Instant.parse("2026-05-02T01:00:00Z"), Instant.parse("2026-05-02T00:00:00Z"),
+                Instant.parse("2026-05-02T00:00:00Z")));
+
+        mockMvc.perform(get("/jobs/{id}", jobId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.status", is("PUBLISHED")));
+    }
+}

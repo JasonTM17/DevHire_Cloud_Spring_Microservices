@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Activity, Gauge, RadioTower, ScrollText } from "lucide-react";
 import { MetricCard } from "@/components/MetricCard";
+import { OperationsEvidencePanel } from "@/components/OperationsEvidencePanel";
 import { api } from "@/lib/api";
 import { previewOperationsSummary } from "@/lib/previewData";
 import type { OperationsSummary } from "@/types/domain";
@@ -48,7 +49,7 @@ export default function PlatformObservabilityPage() {
         <div className="panel">
           <h2>Runbook map</h2>
           <div className="table-list">
-            {["Gateway 5xx spike", "Outbox backlog", "Kafka consumer lag", "AI fallback spike"].map((item) => (
+            {["Gateway 5xx spike", "Outbox backlog", "Kafka consumer lag", "AI provider backup spike"].map((item) => (
               <div className="table-row" key={item}>
                 <strong>{item}</strong>
                 <span className="badge">Runbook linked</span>
@@ -57,6 +58,20 @@ export default function PlatformObservabilityPage() {
           </div>
         </div>
       </div>
+      <OperationsEvidencePanel
+        title="Runtime observability evidence"
+        items={[
+          {
+            label: "Domain metrics verification",
+            status: "SCRIPTED",
+            source: "scripts/runtime-observability-smoke.ps1",
+            displaySource: "runtime observability verification script"
+          },
+          { label: "SLO rules", status: "CATALOGED", source: "infra/prometheus/rules/devhire-alerts.yml" },
+          { label: "Grafana dashboard", status: "PROVISIONED", source: "infra/grafana/dashboards/devhire-slo-overview.json" },
+          { label: "Operations runbooks", status: "LINKED", source: "docs/runbooks/" }
+        ]}
+      />
     </section>
   );
 }

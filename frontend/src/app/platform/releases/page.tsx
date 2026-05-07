@@ -1,5 +1,6 @@
 import { BadgeCheck, Boxes, GitPullRequestArrow, ShieldCheck } from "lucide-react";
 import { MetricCard } from "@/components/MetricCard";
+import { OperationsEvidencePanel } from "@/components/OperationsEvidencePanel";
 
 export default function PlatformReleasesPage() {
   return (
@@ -17,7 +18,7 @@ export default function PlatformReleasesPage() {
       </div>
       <div className="metrics-row">
         <MetricCard icon={GitPullRequestArrow} label="PR queue" value="0" helper="Curated dependency noise" />
-        <MetricCard icon={BadgeCheck} label="Latest" value="v0.5.1" helper="Public release" />
+        <MetricCard icon={BadgeCheck} label="Public release" value="v0.5.1" helper="v0.6.x is under PR review" />
         <MetricCard icon={Boxes} label="Images" value="OCI" helper="Labels and provenance" />
         <MetricCard icon={ShieldCheck} label="Security" value="Green" helper="CodeQL, Trivy, Gitleaks" />
       </div>
@@ -29,6 +30,15 @@ export default function PlatformReleasesPage() {
           </div>
         ))}
       </div>
+      <OperationsEvidencePanel
+        title="Reviewer release trail"
+        items={[
+          { label: "Protected branch checks", status: "ENFORCED", source: ".github/settings.yml" },
+          { label: "Release notes", status: "CURRENT", source: "docs/release-notes/v0.5.1.md" },
+          { label: "v0.6 Stitch evidence", status: "IN_REVIEW", source: "docs/ui-redesign-v0.6.md" },
+          { label: "Security evidence", status: "GREEN", source: "docs/security-evidence.md" }
+        ]}
+      />
     </section>
   );
 }

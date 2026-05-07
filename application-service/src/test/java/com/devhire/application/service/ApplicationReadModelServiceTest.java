@@ -43,7 +43,7 @@ class ApplicationReadModelServiceTest {
         assertThat(summary.applications()).isEqualTo(6);
         assertThat(summary.activeApplications()).isEqualTo(5);
         assertThat(summary.interviews()).isEqualTo(2);
-        assertThat(summary.offers()).isEqualTo(2);
+        assertThat(summary.offers()).isEqualTo(1);
         assertThat(summary.timeline()).extracting(CandidateTimelineItemResponse::description)
                 .containsExactly("Interview panel scheduled");
     }

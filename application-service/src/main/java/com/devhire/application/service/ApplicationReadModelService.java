@@ -35,7 +35,7 @@ public class ApplicationReadModelService {
         List<StatusCountResponse> distribution = candidateStatusCounts(user.id());
         long applications = sum(distribution);
         long interviews = count(distribution, "INTERVIEW");
-        long offers = count(distribution, "OFFER") + countOffers(user.id());
+        long offers = Math.max(count(distribution, "OFFER"), countOffers(user.id()));
         long active = applications - count(distribution, "REJECTED") - count(distribution, "WITHDRAWN");
         return new CandidateDashboardSummaryResponse(
                 applications, active, interviews, offers, distribution, candidateTimeline(user.id(), 6));

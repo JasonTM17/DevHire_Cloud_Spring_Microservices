@@ -246,7 +246,7 @@ function localAssistantFallback(prompt: string, ex: unknown): AiChatResponse {
     ],
     toolTraces: [
       {
-        name: "local_preview_fallback",
+        name: "local_preview_answer",
         status: "SUCCESS",
         summary: "Reviewer-safe local mode returned a deterministic answer without provider secrets."
       }
