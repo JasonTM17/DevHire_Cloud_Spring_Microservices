@@ -140,6 +140,8 @@ export const api = {
   employerPipelineSummary: () => request<EmployerPipelineSummary>("/api/employer/pipeline/summary"),
   employerCodeAssessments: (params = new URLSearchParams()) =>
     request<CodeAssessment[]>(`/api/employer/code-assessments${params.toString() ? `?${params}` : ""}`),
+  employerCodeAssessment: (id: string) =>
+    request<CodeAssessment>(`/api/employer/code-assessments/${id}`),
   reviewCodeAssessment: (id: string, decision: string, note: string, finalScore?: number) =>
     request<CodeAssessment>(`/api/employer/code-assessments/${id}/review`, {
       method: "PATCH",

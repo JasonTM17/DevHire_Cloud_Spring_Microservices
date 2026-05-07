@@ -15,6 +15,8 @@ import com.devhire.common.security.UserRole;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -24,15 +26,25 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
 public class CodeAssessmentService {
+    private static final String GRADER_VERSION = "static-rubric-v1";
+    private static final String RUBRIC_VERSION = "devhire-code-rubric-v1";
+    private static final Set<String> ALLOWED_LANGUAGES = Set.of("Java", "SQL", "TypeScript");
+    private static final Set<String> FILTERABLE_STATUSES = Set.of(
+            "ASSIGNED", "SUBMITTED", "AUTO_REVIEWED", "EMPLOYER_REVIEWED", "PASSED", "FAILED");
     private static final TypeReference<List<RubricScoreResponse>> RUBRIC_TYPE = new TypeReference<>() {
     };
     private static final String SELECT_ASSESSMENT = """
@@ -42,7 +54,8 @@ public class CodeAssessmentService {
                    c.starter_code, c.skills_csv, c.required_signals_csv, c.max_score,
                    s.id AS submission_id, s.language AS submission_language, s.code_text, s.final_score,
                    s.decision, s.rubric_json::text AS rubric_json, s.risk_flags_csv, s.feedback,
-                   s.ai_feedback_fallback, s.submitted_at
+                   s.ai_feedback_fallback, s.submitted_at, s.attempt_number, s.code_hash,
+                   s.grader_version, s.rubric_version
             FROM code_assessment_assignments a
             JOIN code_challenges c ON c.id = a.challenge_id
             LEFT JOIN LATERAL (
@@ -58,15 +71,18 @@ public class CodeAssessmentService {
     private final ObjectMapper objectMapper;
     private final CodeAssessmentGrader grader;
     private final ApplicationEventPublisher eventPublisher;
+    private final MeterRegistry meterRegistry;
 
     public CodeAssessmentService(JdbcTemplate jdbcTemplate,
                                  ObjectMapper objectMapper,
                                  CodeAssessmentGrader grader,
-                                 ApplicationEventPublisher eventPublisher) {
+                                 ApplicationEventPublisher eventPublisher,
+                                 MeterRegistry meterRegistry) {
         this.jdbcTemplate = jdbcTemplate;
         this.objectMapper = objectMapper;
         this.grader = grader;
         this.eventPublisher = eventPublisher;
+        this.meterRegistry = meterRegistry;
     }
 
     @Transactional(readOnly = true)
@@ -75,7 +91,7 @@ public class CodeAssessmentService {
         return jdbcTemplate.query(SELECT_ASSESSMENT + """
                 WHERE a.candidate_id = ?
                 ORDER BY a.due_at ASC, a.assigned_at DESC
-                """, mapper(), candidate.id());
+                """, mapper(), candidate.id()).stream().map(this::withoutRawCode).toList();
     }
 
     @Transactional(readOnly = true)
@@ -94,19 +110,39 @@ public class CodeAssessmentService {
         if (assessment.dueAt() != null && assessment.dueAt().isBefore(Instant.now())) {
             throw new DevHireException(ErrorCode.CONFLICT, "Assessment submission window has closed");
         }
-        CodeAssessmentGrader.GradeResult result = grader.grade(request.code(), requiredSignals(assignmentId));
+        String normalizedLanguage = normalizeLanguage(request.language());
+        String normalizedCode = request.code().trim();
+        int attemptNumber = nextAttemptNumber(assignmentId);
+        String codeHash = sha256(normalizedCode);
+        Timer.Sample timer = Timer.start(meterRegistry);
+        CodeAssessmentGrader.GradeResult result;
+        try {
+            result = grader.grade(normalizedCode, requiredSignals(assignmentId), assessment.starterCode());
+            meterRegistry.counter("devhire_code_grading_requests_total",
+                    "language", normalizedLanguage, "status", "success").increment();
+        } catch (RuntimeException ex) {
+            meterRegistry.counter("devhire_code_grading_requests_total",
+                    "language", normalizedLanguage, "status", "failure").increment();
+            throw ex;
+        } finally {
+            timer.stop(Timer.builder("devhire_code_grading_latency_seconds")
+                    .description("Deterministic code grading latency")
+                    .tag("language", normalizedLanguage)
+                    .register(meterRegistry));
+        }
         UUID submissionId = UUID.randomUUID();
         jdbcTemplate.update("""
                         INSERT INTO code_submissions (
                             id, assignment_id, language, code_text, candidate_notes, static_score, final_score,
-                            decision, rubric_json, risk_flags_csv, feedback, ai_feedback_fallback, status, submitted_at
+                            decision, rubric_json, risk_flags_csv, feedback, ai_feedback_fallback, status, submitted_at,
+                            attempt_number, code_hash, grader_version, rubric_version
                         )
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, CAST(? AS jsonb), ?, ?, ?, 'AUTO_REVIEWED', now())
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, CAST(? AS jsonb), ?, ?, ?, 'AUTO_REVIEWED', now(), ?, ?, ?, ?)
                         """,
                 submissionId,
                 assignmentId,
-                normalizeLanguage(request.language()),
-                request.code().trim(),
+                normalizedLanguage,
+                normalizedCode,
                 blankToNull(request.notes()),
                 result.totalScore(),
                 result.totalScore(),
@@ -114,7 +150,11 @@ public class CodeAssessmentService {
                 writeJson(result.rubric()),
                 String.join(",", result.riskFlags()),
                 result.feedback(),
-                true);
+                true,
+                attemptNumber,
+                codeHash,
+                GRADER_VERSION,
+                RUBRIC_VERSION);
         jdbcTemplate.update("""
                         UPDATE code_assessment_assignments
                         SET status = 'AUTO_REVIEWED', updated_at = now()
@@ -122,10 +162,19 @@ public class CodeAssessmentService {
                         """, assignmentId, candidate.id());
         publishAudit(candidate, "CODE_SUBMITTED", assignmentId, Map.of(
                 "submissionId", submissionId.toString(),
+                "attemptNumber", attemptNumber,
+                "codeHash", codeHash,
+                "graderVersion", GRADER_VERSION,
+                "rubricVersion", RUBRIC_VERSION,
                 "score", result.totalScore(),
                 "riskFlags", result.riskFlags()));
         publishAudit(candidate, "CODE_AUTO_REVIEWED", assignmentId, Map.of(
                 "submissionId", submissionId.toString(),
+                "attemptNumber", attemptNumber,
+                "codeHash", codeHash,
+                "graderVersion", GRADER_VERSION,
+                "rubricVersion", RUBRIC_VERSION,
+                "score", result.totalScore(),
                 "decision", autoDecision(result.totalScore(), result.riskFlags())));
         return candidateAssessment(candidate, assignmentId);
     }
@@ -133,28 +182,29 @@ public class CodeAssessmentService {
     @Transactional(readOnly = true)
     public List<CodeAssessmentResponse> employerAssessments(AuthenticatedUser employer, String status, UUID jobId) {
         requireRole(employer, UserRole.EMPLOYER);
+        String normalizedStatus = normalizeStatusFilter(status);
         if ((status == null || status.isBlank()) && jobId == null) {
             return jdbcTemplate.query(SELECT_ASSESSMENT + """
                     WHERE a.employer_id = ?
                     ORDER BY a.updated_at DESC, a.due_at ASC
-                    """, mapper(), employer.id());
+                    """, mapper(), employer.id()).stream().map(this::withoutRawCode).toList();
         }
         if (status == null || status.isBlank()) {
             return jdbcTemplate.query(SELECT_ASSESSMENT + """
                     WHERE a.employer_id = ? AND a.job_id = ?
                     ORDER BY a.updated_at DESC, a.due_at ASC
-                    """, mapper(), employer.id(), jobId);
+                    """, mapper(), employer.id(), jobId).stream().map(this::withoutRawCode).toList();
         }
         if (jobId == null) {
             return jdbcTemplate.query(SELECT_ASSESSMENT + """
                     WHERE a.employer_id = ? AND a.status = ?
                     ORDER BY a.updated_at DESC, a.due_at ASC
-                    """, mapper(), employer.id(), status.toUpperCase(Locale.ROOT));
+                    """, mapper(), employer.id(), normalizedStatus).stream().map(this::withoutRawCode).toList();
         }
         return jdbcTemplate.query(SELECT_ASSESSMENT + """
                 WHERE a.employer_id = ? AND a.status = ? AND a.job_id = ?
                 ORDER BY a.updated_at DESC, a.due_at ASC
-                """, mapper(), employer.id(), status.toUpperCase(Locale.ROOT), jobId);
+                """, mapper(), employer.id(), normalizedStatus, jobId).stream().map(this::withoutRawCode).toList();
     }
 
     @Transactional(readOnly = true)
@@ -201,7 +251,16 @@ public class CodeAssessmentService {
                         """, UUID.randomUUID(), assignmentId, employer.id(), employer.role().name(), decision,
                 blankToNull(request.note()));
         publishAudit(employer, "CODE_REVIEW_COMPLETED", assignmentId,
-                Map.of("decision", decision, "finalScore", finalScore));
+                Map.of(
+                        "decision", decision,
+                        "finalScore", finalScore,
+                        "previousScore", assessment.latestScore() == null ? 0 : assessment.latestScore(),
+                        "attemptNumber", assessment.attemptNumber() == null ? 0 : assessment.attemptNumber(),
+                        "codeHash", assessment.codeHash() == null ? "unavailable" : assessment.codeHash(),
+                        "graderVersion", firstNonBlank(assessment.graderVersion(), GRADER_VERSION),
+                        "rubricVersion", firstNonBlank(assessment.rubricVersion(), RUBRIC_VERSION)));
+        meterRegistry.counter("devhire_code_review_decisions_total",
+                "decision", decision, "status", status).increment();
         return employerAssessment(employer, assignmentId);
     }
 
@@ -277,6 +336,12 @@ public class CodeAssessmentService {
                 rs.getString("feedback"),
                 rs.getBoolean("ai_feedback_fallback"),
                 rs.getString("code_text"),
+                nullableInt(rs, "attempt_number"),
+                rs.getString("code_hash"),
+                firstNonBlank(rs.getString("grader_version"), GRADER_VERSION),
+                firstNonBlank(rs.getString("rubric_version"), RUBRIC_VERSION),
+                codePreview(rs.getString("code_text")),
+                rs.getString("code_text") != null && !rs.getString("code_text").isBlank(),
                 instant(rs.getTimestamp("due_at")),
                 instant(rs.getTimestamp("assigned_at")),
                 instant(rs.getTimestamp("submitted_at")));
@@ -325,7 +390,24 @@ public class CodeAssessmentService {
     }
 
     private static String normalizeLanguage(String value) {
-        return value == null ? "Java" : value.trim();
+        String language = value == null ? "Java" : value.trim();
+        for (String allowed : ALLOWED_LANGUAGES) {
+            if (allowed.equalsIgnoreCase(language)) {
+                return allowed;
+            }
+        }
+        throw new DevHireException(ErrorCode.BAD_REQUEST, "Submission language must be Java, SQL, or TypeScript");
+    }
+
+    private static String normalizeStatusFilter(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        String status = value.trim().toUpperCase(Locale.ROOT);
+        if (!FILTERABLE_STATUSES.contains(status)) {
+            throw new DevHireException(ErrorCode.BAD_REQUEST, "Unknown code assessment status filter");
+        }
+        return status;
     }
 
     private static String blankToNull(String value) {
@@ -353,6 +435,64 @@ public class CodeAssessmentService {
 
     private static String firstNonBlank(String first, String fallback) {
         return first == null || first.isBlank() ? fallback : first;
+    }
+
+    private int nextAttemptNumber(UUID assignmentId) {
+        Integer value = jdbcTemplate.queryForObject("""
+                SELECT COALESCE(max(attempt_number), 0) + 1
+                FROM code_submissions
+                WHERE assignment_id = ?
+                """, Integer.class, assignmentId);
+        return value == null ? 1 : value;
+    }
+
+    private static String sha256(String value) {
+        try {
+            return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(value.getBytes(StandardCharsets.UTF_8)));
+        } catch (NoSuchAlgorithmException ex) {
+            throw new IllegalStateException("SHA-256 digest is unavailable", ex);
+        }
+    }
+
+    private static String codePreview(String code) {
+        if (code == null || code.isBlank()) {
+            return null;
+        }
+        String normalized = code.replaceAll("\\s+", " ").trim();
+        return normalized.length() <= 220 ? normalized : normalized.substring(0, 220) + "...";
+    }
+
+    private CodeAssessmentResponse withoutRawCode(CodeAssessmentResponse response) {
+        return new CodeAssessmentResponse(
+                response.id(),
+                response.applicationId(),
+                response.candidateName(),
+                response.jobTitle(),
+                response.challengeTitle(),
+                response.level(),
+                response.language(),
+                response.prompt(),
+                response.constraints(),
+                response.starterCode(),
+                response.status(),
+                response.maxScore(),
+                response.latestScore(),
+                response.latestDecision(),
+                response.skills(),
+                response.rubric(),
+                response.riskFlags(),
+                response.feedback(),
+                response.aiFeedbackFallback(),
+                null,
+                response.attemptNumber(),
+                response.codeHash(),
+                response.graderVersion(),
+                response.rubricVersion(),
+                response.submittedCodePreview(),
+                response.hasSubmittedCode(),
+                response.dueAt(),
+                response.assignedAt(),
+                response.submittedAt());
     }
 
     private static long sum(List<StatusCountResponse> counts) {

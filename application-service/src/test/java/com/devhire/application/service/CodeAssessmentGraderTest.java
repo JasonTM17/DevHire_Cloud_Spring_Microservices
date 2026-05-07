@@ -42,4 +42,20 @@ class CodeAssessmentGraderTest {
         assertThat(result.riskFlags()).contains("hardcoded-secret", "process-execution", "missing-test-evidence");
         assertThat(result.totalScore()).isLessThan(75);
     }
+
+    @Test
+    void flagsStarterCodeOnlySubmission() {
+        String starter = """
+                class OutboxRetryReviewer {
+                    ReviewResult review(List<OutboxEvent> events) {
+                        // implement retry-safe review
+                    }
+                }
+                """;
+
+        var result = grader.grade(starter, List.of("transaction", "batch", "assert"), starter);
+
+        assertThat(result.riskFlags()).contains("starter-code-only", "missing-test-evidence");
+        assertThat(result.totalScore()).isLessThan(70);
+    }
 }

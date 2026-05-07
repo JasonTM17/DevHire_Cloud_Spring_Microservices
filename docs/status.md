@@ -8,7 +8,7 @@ This page is the single source of truth for the current public state of DevHire 
 | GitHub release | https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.5.1 |
 | Default branch | `master` |
 | Branch protection | Enabled |
-| Open pull requests | Active v0.6 Stitch redesign stack: #43 is green and waiting for required review; v0.6.4/v0.6.5/v0.6.6 are stacked until #43 merges |
+| Open pull requests | Active v0.6 Stitch redesign stack: #43 is green and waiting for required review; v0.6.4/v0.6.5/v0.6.6/v0.6.7 are stacked until #43 merges |
 | Dependabot queue | 0 open PRs after curated cleanup |
 | Maven development version | `0.6.0-SNAPSHOT` |
 | Frontend development version | `0.6.0` |
@@ -22,8 +22,8 @@ This page is the single source of truth for the current public state of DevHire 
 | Track | Current evidence |
 |---|---|
 | Product UX | Reviewer-facing jobs workflow now includes richer filters, sorting, totals, and pagination. |
-| Stitch v0.6 | PR #43 is green and waiting for required review; the stacked v0.6.6 work adds full-app screenshot evidence, code assessment grading, review filters, and submission history. |
-| Code assessment | Candidate code submissions now have deterministic rubric scoring, submission history, employer review filters, admin health summary, due-date enforcement, and static risk flags. |
+| Stitch v0.6 | PR #43 is green and waiting for required review; the stacked v0.6.7 work adds full-app screenshot evidence and flagship code assessment proof. |
+| Code assessment | Candidate code submissions now have deterministic rubric scoring, attempt metadata, code hash, rubric versioning, redacted list/detail API boundaries, employer review dossier, admin health summary, due-date enforcement, and static risk flags. |
 | Frontend deploy | Optional Vercel preview path exists for `frontend/` only; Java backend deployment remains Docker/AWS blueprint. |
 | Gateway operations | Gateway emits route request, latency, and rate-limit metrics with Prometheus alert coverage. |
 | Runtime proof | Runtime observability smoke checks Gateway metrics plus domain KPI metrics when Docker is running. |

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Activity, Bot, Building2, ClipboardCheck, Gauge, RefreshCw, ScrollText, ShieldCheck } from "lucide-react";
+import { Activity, Bot, Building2, CheckCircle2, ClipboardCheck, Gauge, RefreshCw, ScrollText, ShieldCheck } from "lucide-react";
 import { CompanyLogo } from "@/components/CompanyLogo";
 import { DemoModeNotice } from "@/components/DemoModeNotice";
 import { MetricCard } from "@/components/MetricCard";
@@ -92,6 +92,13 @@ export default function AdminPage() {
   const aiCircuitOpen = aiProvider?.circuitBreakerState === "OPEN";
   const positiveMessage = message.includes("approved") || message.includes("reindexed");
   const auditActionCounts = countBy(audit.content, (item) => item.action);
+  const codeReviewed = codeAssessmentSummary.autoReviewed
+    + codeAssessmentSummary.employerReviewed
+    + codeAssessmentSummary.passed
+    + codeAssessmentSummary.failed;
+  const codePassRate = codeReviewed === 0
+    ? 0
+    : Math.round((codeAssessmentSummary.passed / codeReviewed) * 100);
 
   return (
     <section className="page-stack" data-testid="admin-dashboard">
@@ -199,7 +206,20 @@ export default function AdminPage() {
         <div className="metrics-row compact-metrics">
           <MetricCard icon={ClipboardCheck} label="Assignments" value={codeAssessmentSummary.totalAssignments} helper="Active code challenges" />
           <MetricCard icon={Gauge} label="Average score" value={`${codeAssessmentSummary.averageScore}%`} helper="Deterministic rubric" />
+          <MetricCard icon={CheckCircle2} label="Pass rate" value={`${codePassRate}%`} helper="Employer decisions" />
           <MetricCard icon={ShieldCheck} label="Risk flags" value={codeAssessmentSummary.riskySubmissions} helper="Needs reviewer attention" />
+        </div>
+        <div className="evidence-grid">
+          <div className="constraint-box">
+            <strong>Assessment pipeline</strong>
+            <span>{codeAssessmentSummary.submitted} submitted / {codeAssessmentSummary.autoReviewed} auto reviewed</span>
+            <span>{codeAssessmentSummary.employerReviewed} employer reviewed / {codeAssessmentSummary.failed} failed</span>
+          </div>
+          <div className="constraint-box">
+            <strong>Safety posture</strong>
+            <span>Deterministic score remains source of truth</span>
+            <span>AI feedback is advisory and non-blocking</span>
+          </div>
         </div>
         <div className="insight-list compact">
           {codeAssessmentSummary.statusDistribution.map((item) => (

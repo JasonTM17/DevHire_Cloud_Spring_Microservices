@@ -11,6 +11,7 @@ import com.devhire.common.exception.DevHireException;
 import com.devhire.common.security.AuthenticatedUser;
 import com.devhire.common.security.UserRole;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -39,7 +40,7 @@ class CodeAssessmentServiceTest {
     private final RecordingJdbcTemplate jdbcTemplate = new RecordingJdbcTemplate();
     private final ApplicationEventPublisher eventPublisher = mock(ApplicationEventPublisher.class);
     private final CodeAssessmentService service = new CodeAssessmentService(
-            jdbcTemplate, new ObjectMapper(), new CodeAssessmentGrader(), eventPublisher);
+            jdbcTemplate, new ObjectMapper(), new CodeAssessmentGrader(), eventPublisher, new SimpleMeterRegistry());
 
     @Test
     void candidateSubmissionPersistsDeterministicScoreAndAuditEvents() {
@@ -60,7 +61,7 @@ class CodeAssessmentServiceTest {
         assertThat(response.status()).isEqualTo("AUTO_REVIEWED");
         assertThat(jdbcTemplate.updates).anySatisfy(update -> {
             assertThat(update.sql()).contains("INSERT INTO code_submissions");
-            assertThat(update.args()).contains("Java", true);
+            assertThat(update.args()).contains("Java", true, 1, "static-rubric-v1", "devhire-code-rubric-v1");
         });
         assertThat(jdbcTemplate.updates).anySatisfy(update -> {
             assertThat(update.sql()).contains("UPDATE code_assessment_assignments");
@@ -169,6 +170,12 @@ class CodeAssessmentServiceTest {
                 latestScore == null ? null : "Review completed.",
                 true,
                 submittedAt == null ? null : "class Solution { @Test void provesRetry() { assert true; } }",
+                submittedAt == null ? null : 1,
+                submittedAt == null ? null : "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+                "static-rubric-v1",
+                "devhire-code-rubric-v1",
+                submittedAt == null ? null : "class Solution { @Test void provesRetry() { assert true; } }",
+                submittedAt != null,
                 dueAt,
                 Instant.parse("2026-05-01T00:00:00Z"),
                 submittedAt);
@@ -209,6 +216,9 @@ class CodeAssessmentServiceTest {
         }
 
         private static <T> T scalar(String sql, Class<T> requiredType) {
+            if (requiredType == Integer.class) {
+                return requiredType.cast(1);
+            }
             if (sql.contains("risk_flags_csv")) {
                 return requiredType.cast(2L);
             }

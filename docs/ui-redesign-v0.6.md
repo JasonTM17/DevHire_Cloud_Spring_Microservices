@@ -6,7 +6,7 @@ This document is the implementation bridge from the Stitch project to the produc
 
 - Stitch project: `projects/5421325194779586117`
 - Product split: Admin/Ops, Employer/Company, Client/Candidate
-- Frontend branches: `v0.6-stitch-client-admin-redesign`, `v0.6.1-stitch-fidelity-polish`, `v0.6.2-stitch-completion-polish`, `v0.6.3-stitch-full-app-completion`, stacked `v0.6.4-code-assessment-grading`, stacked `v0.6.5-code-assessment-review-polish`, and stacked `v0.6.6-stitch-code-assessment-completion`
+- Frontend branches: `v0.6-stitch-client-admin-redesign`, `v0.6.1-stitch-fidelity-polish`, `v0.6.2-stitch-completion-polish`, `v0.6.3-stitch-full-app-completion`, stacked `v0.6.4-code-assessment-grading`, stacked `v0.6.5-code-assessment-review-polish`, stacked `v0.6.6-stitch-code-assessment-completion`, and stacked `v0.6.7-code-assessment-flagship`
 - Goal: make the product feel like a recruitment operations platform instead of a static portfolio demo.
 
 ## Route Mapping
@@ -42,10 +42,12 @@ v0.6 keeps the existing public APIs backward compatible and adds read-model endp
 | application-service | `GET /candidate/applications/summary` | Candidate application status distribution |
 | application-service | `GET /candidate/offers` | Candidate offer review experience |
 | application-service | `GET /candidate/assessments` | Candidate assessment progress |
-| application-service | `GET /candidate/code-assessments` | Candidate code challenge queue and rubric evidence |
+| application-service | `GET /candidate/code-assessments` | Candidate code challenge queue, redacted list metadata, and rubric evidence |
+| application-service | `GET /candidate/code-assessments/{id}` | Owner-only candidate code assessment detail with submitted code |
 | application-service | `POST /candidate/code-assessments/{id}/submissions` | Safe deterministic code grading without executing untrusted code |
 | application-service | `GET /employer/pipeline/summary` | Employer pipeline counters and recent activity |
-| application-service | `GET /employer/code-assessments` | Employer-owned code review queue |
+| application-service | `GET /employer/code-assessments` | Employer-owned code review queue with redacted submitted code preview |
+| application-service | `GET /employer/code-assessments/{id}` | Employer-owned review dossier with submitted code detail |
 | application-service | `PATCH /employer/code-assessments/{id}/review` | Employer review decision and final score |
 | application-service | `GET /admin/code-assessments/summary` | Admin code assessment health and risk flags |
 | job-service | `GET /candidate/skill-analytics` | Skill, location, level, and salary demand signals |
@@ -74,7 +76,7 @@ The application service owns persisted candidate experience data:
 
 These are seeded deterministically by Flyway so portfolio pages can render rich state without cross-reading another service database.
 
-v0.6.4 keeps code grading reviewer-safe: candidate code is stored and scored with a deterministic rubric, but it is not executed. The sandbox worker boundary is intentionally deferred to a later isolated-runtime phase.
+v0.6.7 keeps code grading reviewer-safe: candidate code is stored and scored with a deterministic rubric, but it is not executed. The application service adds attempt number, code hash, grader version, rubric version, submitted-code preview, and list/detail redaction so the feature can be reviewed like a production workflow. The sandbox worker boundary is intentionally deferred to a later isolated-runtime phase.
 
 ## UX Acceptance Rules
 
@@ -96,21 +98,21 @@ v0.6.4 keeps code grading reviewer-safe: candidate code is stored and scored wit
 | Candidate Dashboard | `/candidate` | Application service dashboard read model and notification read model | `stitch/candidate-dashboard.png`, candidate login E2E |
 | My Applications | `/candidate/applications` | Application summary read model with status distribution and timeline | `stitch/candidate-applications.png` |
 | Candidate Profile | `/candidate/profile` | `GET /api/users/me` when signed in, polished read-only sample when unauthenticated | `stitch/candidate-profile.png` |
-| Skill Assessment | `/candidate/assessments` | Application service code assessment assignments, submissions, deterministic rubric scoring, static risk flags, and submission history | `stitch/candidate-assessments.png`, candidate code-submit E2E |
+| Skill Assessment | `/candidate/assessments` | Application service code assessment assignments, owner detail fetch, static cases, deterministic rubric scoring, code hash metadata, static risk flags, and submission history | `stitch/candidate-assessments.png`, candidate code-submit E2E |
 | Offer Letter | `/candidate/offers` | Application service offer read model | `stitch/candidate-offers.png` |
 | AI Interview Prep | `/candidate/interview-prep` | AI service interview-prep read model | `stitch/candidate-interview-prep.png` |
 | Cloud Career Roadmap | `/candidate/roadmap` | AI service roadmap read model | `stitch/candidate-roadmap.png` |
 | Cloud Skill Analytics | `/candidate/skill-analytics` | Job service skill analytics read model | `stitch/candidate-skill-analytics.png` |
 | Engineering Community Hub | `/community` | Curated frontend content for v0.6 | `stitch/client-community.png` |
 | Company Profile & Jobs | `/companies/[slug]` | Approved company slug lookup and company-scoped public jobs | `stitch/company-profile.png` |
-| Recruitment Pipelines | `/employer` | Employer company list, employer pipeline summary, applicant queue, and filterable code review queue | `stitch/employer-pipeline.png`, employer login E2E |
-| Operations Dashboard | `/admin` | Company/job review queues, operations summary, audit logs, AI provider status, and code assessment health | `stitch/admin-control-plane.png`, admin login E2E |
+| Recruitment Pipelines | `/employer` | Employer company list, employer pipeline summary, applicant queue, filterable code review queue, and selected candidate review dossier | `stitch/employer-pipeline.png`, employer login E2E |
+| Operations Dashboard | `/admin` | Company/job review queues, operations summary, audit logs, AI provider status, and code assessment health/pass-rate posture | `stitch/admin-control-plane.png`, admin login E2E |
 | AI RAG Talent Intelligence | `/assistant`, `/admin/ai` | AI chat, citations, provider status, and knowledge reindex controls | `stitch/assistant.png`, `stitch/admin-ai-ops.png` |
 | Observability & Event Streaming | `/platform/observability` | Static operations evidence panels linked to Prometheus/Grafana/runbooks | `stitch/platform-observability.png` |
 | Infrastructure & K8s Control Plane | `/platform/cloud` | Static cloud evidence panels linked to Terraform/Helm/GitOps scripts | `stitch/platform-cloud.png` |
 | CI/CD & Deployment Registry | `/platform/releases` | Static release evidence panels linked to workflows, image metadata, and verification scripts | `stitch/platform-releases.png` |
 
-The v0.6.3 completion pass promotes these route-matrix screenshots into `docs/screenshots/stitch/`. v0.6.4 refreshes the candidate assessment, employer pipeline, and admin control-plane screenshots so code grading evidence appears in the primary Stitch surfaces. v0.6.5 tightens the employer review card state and E2E coverage so the staged flow proves candidate submission plus employer decision, not just a static rubric panel. v0.6.6 adds candidate submission history and employer-side status/job filters so the code assessment workflow reads like an operational review queue.
+The v0.6.3 completion pass promotes these route-matrix screenshots into `docs/screenshots/stitch/`. v0.6.4 refreshes the candidate assessment, employer pipeline, and admin control-plane screenshots so code grading evidence appears in the primary Stitch surfaces. v0.6.5 tightens the employer review card state and E2E coverage so the staged flow proves candidate submission plus employer decision, not just a static rubric panel. v0.6.6 adds candidate submission history and employer-side status/job filters so the code assessment workflow reads like an operational review queue. v0.6.7 makes code assessment the flagship workflow with Assessment Studio, safe list/detail raw-code boundaries, attempt/hash/rubric metadata, employer review dossier, and admin health posture.
 
 ## Verification
 

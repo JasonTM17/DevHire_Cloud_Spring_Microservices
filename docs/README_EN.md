@@ -8,7 +8,7 @@ DevHire Cloud is a Java 21 / Spring Boot 3.5 production engineering portfolio fo
 |---|---|
 | Latest public release | [v0.5.1](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.5.1) |
 | Current development cycle | `0.6.0-SNAPSHOT` |
-| v0.6 Stitch app | PR #43 green; stacked v0.6.6 adds code assessment grading, employer review filters, and submission history |
+| v0.6 Stitch app | PR #43 green; stacked v0.6.7 promotes code assessment into the flagship candidate grading, employer review, and admin health workflow |
 | Branch governance | Protected `master`, PR-based release flow |
 | Dependabot queue | 0 open PRs at the latest cleanup scan |
 | v1 status | Roadmap and acceptance checklist only, not a released tag |
@@ -21,6 +21,7 @@ DevHire Cloud is a Java 21 / Spring Boot 3.5 production engineering portfolio fo
 | Japanese README | [README_JA.md](README_JA.md) |
 | Current status | [status.md](status.md) |
 | Evidence pack | [REVIEW_EVIDENCE.md](REVIEW_EVIDENCE.md) |
+| Code assessment proof | [code-assessment-reviewer-proof.md](code-assessment-reviewer-proof.md) |
 | v0.6 Stitch redesign | [ui-redesign-v0.6.md](ui-redesign-v0.6.md) |
 | Architecture | [architecture-review-index.md](architecture-review-index.md) |
 | Service catalog | [service-catalog.md](service-catalog.md) |
@@ -52,7 +53,7 @@ DevHire Cloud is a Java 21 / Spring Boot 3.5 production engineering portfolio fo
 | Admin/Ops | `/admin`, `/admin/ai`, code assessment health |
 | Platform | `/assistant`, `/platform/observability`, `/platform/cloud`, `/platform/releases` |
 
-The v0.6 implementation follows Stitch project `projects/5421325194779586117`. Primary screenshots are checked to avoid raw UUIDs, `UNKNOWN`, loading-only states, smoke labels, offline banners, and fallback banners. The stacked v0.6.6 work turns Skill Assessment into a real code grading workflow with safe static scoring, candidate submission history, employer review filters, and admin health evidence; sandbox execution is reserved for a later isolated-worker phase.
+The v0.6 implementation follows Stitch project `projects/5421325194779586117`. Primary screenshots are checked to avoid raw UUIDs, `UNKNOWN`, loading-only states, smoke labels, offline banners, and fallback banners. The stacked v0.6.7 work turns Skill Assessment into the flagship product feature: candidate Assessment Studio, deterministic static scoring, attempt metadata, code hash, rubric versioning, employer review dossier, and admin assessment health. Sandbox execution is reserved for a later isolated-worker phase.
 
 ## Cloud State Matrix
 
@@ -104,6 +105,10 @@ Portfolio verification:
 | Candidate | Employer | Admin |
 |---|---|---|
 | ![Candidate](screenshots/candidate-dashboard.png) | ![Employer](screenshots/employer-dashboard.png) | ![Admin](screenshots/admin-dashboard.png) |
+
+| Code Assessment Studio | Employer Review Dossier | Admin Assessment Health |
+|---|---|---|
+| ![Candidate assessment](screenshots/stitch/candidate-assessments.png) | ![Employer review](screenshots/stitch/employer-pipeline.png) | ![Admin assessment health](screenshots/stitch/admin-control-plane.png) |
 
 | Stitch Candidate Apps | Stitch Cloud | Stitch Releases |
 |---|---|---|

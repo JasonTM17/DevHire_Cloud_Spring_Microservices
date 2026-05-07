@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Braces, CheckCircle2, ClipboardCheck, Clock3, ShieldCheck, Trophy } from "lucide-react";
+import { Braces, CheckCircle2, ClipboardCheck, Clock3, PlayCircle, ShieldCheck, Trophy } from "lucide-react";
 import { MetricCard } from "@/components/MetricCard";
 import { StatusPill, statusLabel } from "@/components/StatusPill";
 import { api } from "@/lib/api";
@@ -28,6 +28,8 @@ export default function CandidateAssessmentsPage() {
   const [code, setCode] = useState(previewCodeAssessments[0]?.submittedCode ?? DEFAULT_CODE);
   const [notes, setNotes] = useState("I focused on idempotency, transaction boundaries, and reviewer-safe evidence.");
   const [message, setMessage] = useState("");
+  const [analysisMessage, setAnalysisMessage] = useState("");
+  const [loadingDetail, setLoadingDetail] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -56,8 +58,37 @@ export default function CandidateAssessmentsPage() {
       return;
     }
     setLanguage(selected.language || "Java");
-    setCode(selected.submittedCode || selected.starterCode || DEFAULT_CODE);
+    setCode(selected.submittedCode || selected.submittedCodePreview || selected.starterCode || DEFAULT_CODE);
+    setAnalysisMessage("");
+
+    if (!isUuid(selected.id) || selected.submittedCode) {
+      return;
+    }
+    setLoadingDetail(true);
+    api.candidateCodeAssessment(selected.id)
+      .then((detail) => {
+        setAssessments((current) => current.map((item) => (item.id === detail.id ? detail : item)));
+        setCode(detail.submittedCode || detail.submittedCodePreview || detail.starterCode || DEFAULT_CODE);
+      })
+      .catch(() => {
+        setCode(selected.submittedCodePreview || selected.starterCode || DEFAULT_CODE);
+      })
+      .finally(() => setLoadingDetail(false));
   }, [selected?.id]);
+
+  function runStaticAnalysis() {
+    if (!selected) {
+      return;
+    }
+    const hasTest = /(@test|assert|expect\()/i.test(code);
+    const hasRisk = /(api[_-]?key|password|secret|runtime\.getruntime|processbuilder|system\.exit)/i.test(code);
+    const caseCount = assessmentEvidenceCases(selected).filter((testCase) => testCase.matched(code)).length;
+    setAnalysisMessage(
+      `${caseCount}/${assessmentEvidenceCases(selected).length} static cases matched; ${
+        hasRisk ? "security review required" : hasTest ? "test evidence present" : "add assertion evidence"
+      }.`
+    );
+  }
 
   async function submitCode() {
     if (!selected) {
@@ -100,7 +131,7 @@ export default function CandidateAssessmentsPage() {
         </div>
         <div className="hero-actions">
           <span className="badge live">Safe static review</span>
-          <span className="badge">Sandbox boundary planned</span>
+          <span className="badge">Deterministic rubric</span>
         </div>
       </div>
 
@@ -148,6 +179,21 @@ export default function CandidateAssessmentsPage() {
                 <strong>Review constraints</strong>
                 <span>{selected.constraints}</span>
               </div>
+              <div className="evidence-grid">
+                <div className="constraint-box">
+                  <strong>Visible static cases</strong>
+                  {assessmentEvidenceCases(selected).map((testCase) => (
+                    <span key={testCase.label}>{testCase.label}</span>
+                  ))}
+                </div>
+                <div className="constraint-box">
+                  <strong>Required signals</strong>
+                  <span>{selected.skills.join(" / ")}</span>
+                  <span>Attempt {selected.attemptNumber ?? 0} / grader {selected.graderVersion ?? "static-rubric-v1"}</span>
+                  <span>Rubric {selected.rubricVersion ?? "devhire-code-rubric-v1"}</span>
+                  {selected.codeHash ? <span>Code hash {selected.codeHash.slice(0, 12)}</span> : null}
+                </div>
+              </div>
               <div className="form">
                 <select aria-label="Submission language" value={language} onChange={(event) => setLanguage(event.target.value)}>
                   <option>Java</option>
@@ -177,7 +223,13 @@ export default function CandidateAssessmentsPage() {
                     ? "Employer decision locked"
                     : submitting ? "Scoring" : "Submit for rubric score"}
                 </button>
+                <button className="button secondary" type="button" onClick={runStaticAnalysis}>
+                  <PlayCircle size={16} />
+                  Run static analysis
+                </button>
               </div>
+              {loadingDetail ? <p className="muted">Owner-only submission detail sync in progress...</p> : null}
+              {analysisMessage ? <p className="success">{analysisMessage}</p> : null}
               {message ? <p className="success">{message}</p> : null}
             </>
           ) : null}
@@ -250,6 +302,12 @@ function simulateLocalReview(item: CodeAssessment, code: string): CodeAssessment
     latestScore: score,
     latestDecision: score >= 85 && !hasRisk ? "ADVANCE" : "REVIEW",
     submittedCode: code,
+    submittedCodePreview: code.replace(/\s+/g, " ").slice(0, 220),
+    hasSubmittedCode: true,
+    attemptNumber: (item.attemptNumber ?? 0) + 1,
+    codeHash: "local-static-analysis",
+    graderVersion: item.graderVersion ?? "static-rubric-v1",
+    rubricVersion: item.rubricVersion ?? "devhire-code-rubric-v1",
     submittedAt: new Date().toISOString(),
     feedback: score >= 85
       ? "Strong production-ready submission with clear implementation signals and low review risk."
@@ -275,8 +333,34 @@ function emptyRubric() {
   ];
 }
 
+function assessmentEvidenceCases(item: CodeAssessment) {
+  if (item.language.toLowerCase() === "sql") {
+    return [
+      { label: "Scopes by employer_id", matched: (code: string) => /employer_id/i.test(code) },
+      { label: "Groups by status", matched: (code: string) => /group\s+by\s+status/i.test(code) },
+      { label: "Avoids unbounded result sets", matched: (code: string) => /limit|where/i.test(code) }
+    ];
+  }
+  if (item.challengeTitle.toLowerCase().includes("search")) {
+    return [
+      { label: "OpenSearch primary adapter", matched: (code: string) => /opensearch|search/i.test(code) },
+      { label: "PostgreSQL recovery path", matched: (code: string) => /postgres|jdbc|repository/i.test(code) },
+      { label: "Published-only visibility guard", matched: (code: string) => /published/i.test(code) }
+    ];
+  }
+  return [
+    { label: "Transaction or batch boundary", matched: (code: string) => /transaction|batch/i.test(code) },
+    { label: "Retry and max attempt handling", matched: (code: string) => /retry|maxattempt/i.test(code) },
+    { label: "Assertion-style test evidence", matched: (code: string) => /@test|assert|expect\(/i.test(code) }
+  ];
+}
+
 function formatDate(value: string) {
   return new Date(value).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
+
+function isUuid(value: string) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
 }
 
 function submissionHistory(item: CodeAssessment) {

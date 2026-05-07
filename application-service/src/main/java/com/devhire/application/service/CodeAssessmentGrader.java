@@ -14,13 +14,23 @@ public class CodeAssessmentGrader {
             "(?i)(api[_-]?key|password|passwd|secret|token)\\s*[=:]\\s*[\"'][^\"']{6,}[\"']");
 
     public GradeResult grade(String code, List<String> requiredSignals) {
+        return grade(code, requiredSignals, "");
+    }
+
+    public GradeResult grade(String code, List<String> requiredSignals, String starterCode) {
         String source = code == null ? "" : code;
         String normalized = source.toLowerCase(Locale.ROOT);
-        List<String> flags = riskFlags(source, normalized);
-        int signalMatches = (int) requiredSignals.stream()
+        String implementationOnly = stripComments(source).toLowerCase(Locale.ROOT);
+        List<String> flags = riskFlags(source, normalized, starterCode);
+        int implementationSignals = (int) requiredSignals.stream()
+                .filter(signal -> !signal.isBlank())
+                .filter(signal -> implementationOnly.contains(signal.toLowerCase(Locale.ROOT)))
+                .count();
+        int commentSignals = (int) requiredSignals.stream()
                 .filter(signal -> !signal.isBlank())
                 .filter(signal -> normalized.contains(signal.toLowerCase(Locale.ROOT)))
-                .count();
+                .count() - implementationSignals;
+        int signalMatches = implementationSignals + Math.min(2, Math.max(0, commentSignals / 2));
 
         int completeness = Math.min(40, 12 + signalMatches * 6 + Math.min(16, source.length() / 180));
         int maintainability = maintainabilityScore(source, normalized);
@@ -30,7 +40,8 @@ public class CodeAssessmentGrader {
 
         List<RubricScoreResponse> rubric = List.of(
                 new RubricScoreResponse("Correctness and completeness", completeness, 40,
-                        signalMatches + " required implementation signals found"),
+                        implementationSignals + " implementation signals and " + Math.max(0, commentSignals)
+                                + " annotated signals found"),
                 new RubricScoreResponse("Maintainability and readability", maintainability, 20,
                         "Naming, structure, and method boundaries reviewed"),
                 new RubricScoreResponse("Complexity and performance", performance, 15,
@@ -86,8 +97,11 @@ public class CodeAssessmentGrader {
         return Math.min(10, score);
     }
 
-    private static List<String> riskFlags(String source, String normalized) {
+    private static List<String> riskFlags(String source, String normalized, String starterCode) {
         List<String> flags = new ArrayList<>();
+        if (!starterCode.isBlank() && normalizeForComparison(source).equals(normalizeForComparison(starterCode))) {
+            flags.add("starter-code-only");
+        }
         if (SECRET_PATTERN.matcher(source).find()) {
             flags.add("hardcoded-secret");
         }
@@ -102,6 +116,18 @@ public class CodeAssessmentGrader {
             flags.add("missing-test-evidence");
         }
         return flags;
+    }
+
+    private static String stripComments(String source) {
+        return source
+                .replaceAll("(?s)/\\*.*?\\*/", " ")
+                .replaceAll("(?m)//.*$", " ");
+    }
+
+    private static String normalizeForComparison(String value) {
+        return stripComments(value == null ? "" : value)
+                .replaceAll("\\s+", "")
+                .toLowerCase(Locale.ROOT);
     }
 
     private static String feedback(int total, List<String> flags) {

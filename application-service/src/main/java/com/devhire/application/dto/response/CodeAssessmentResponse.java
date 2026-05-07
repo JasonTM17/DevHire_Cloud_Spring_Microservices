@@ -25,6 +25,12 @@ public record CodeAssessmentResponse(
         String feedback,
         boolean aiFeedbackFallback,
         String submittedCode,
+        Integer attemptNumber,
+        String codeHash,
+        String graderVersion,
+        String rubricVersion,
+        String submittedCodePreview,
+        boolean hasSubmittedCode,
         Instant dueAt,
         Instant assignedAt,
         Instant submittedAt

@@ -1259,7 +1259,8 @@ textarea {
 
 .assessment-list,
 .assessment-review-grid,
-.rubric-grid {
+.rubric-grid,
+.evidence-grid {
   display: grid;
   gap: 12px;
 }
@@ -1269,7 +1270,7 @@ textarea {
 .rubric-card,
 .constraint-box,
 .review-summary {
-  border: 1px solid var(--border);
+  border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--panel-muted);
 }
@@ -1366,6 +1367,18 @@ textarea {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.evidence-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.review-dossier {
+  display: grid;
+  gap: 14px;
+  margin-top: 18px;
+  border-top: 1px solid var(--line);
+  padding-top: 18px;
+}
+
 .button-row,
 .tag-list {
   display: flex;
@@ -1375,7 +1388,7 @@ textarea {
 }
 
 .compact-metrics {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .spin {
@@ -1411,7 +1424,8 @@ textarea {
   }
 
   .rubric-grid,
-  .assessment-review-grid {
+  .assessment-review-grid,
+  .evidence-grid {
     grid-template-columns: 1fr;
   }
 }

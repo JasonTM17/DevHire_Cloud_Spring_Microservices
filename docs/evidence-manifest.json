@@ -1,5 +1,5 @@
 {
-  "version": "0.6.6",
+  "version": "0.6.7",
   "generatedFor": "DevHire Cloud - Microservices Recruitment Platform",
   "description": "Machine-checkable portfolio evidence manifest for reviewer and CI validation.",
   "categories": [
@@ -115,6 +115,7 @@
         "LICENSE",
         "docs/REVIEW_EVIDENCE.md",
         "docs/demo-data.md",
+        "docs/code-assessment-reviewer-proof.md",
         "docs/professional-review-map.md",
         "docs/service-catalog.md",
         "docs/architecture-review-index.md",
@@ -182,7 +183,7 @@
     },
     {
       "name": "visual-evidence-stitch-full-app",
-      "description": "Stitch route-matrix screenshots cover the full candidate, employer, admin, AI, platform app, and v0.6.6 code assessment grading/review surfaces.",
+      "description": "Stitch route-matrix screenshots cover the full candidate, employer, admin, AI, platform app, and v0.6.7 code assessment flagship grading/review surfaces.",
       "requiredPaths": [
         "docs/screenshots/stitch/client-jobs.png",
         "docs/screenshots/stitch/client-job-detail.png",

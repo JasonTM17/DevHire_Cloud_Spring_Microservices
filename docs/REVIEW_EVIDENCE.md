@@ -31,6 +31,7 @@ See [status.md](status.md) for the single source of truth.
 | Product workflow | Jobs page has keyword, skill, location, level, minimum salary, sorting, clear-filter, result total, and pagination controls. |
 | Rich demo data | `portfolio-verify.ps1 -Docs` now runs `demo-data-summary.ps1 -Aggregates -Json` so the 1,108-row deterministic dataset and status/action distributions are part of reviewer verification. |
 | Frontend preview | [frontend-preview-deploy.md](frontend-preview-deploy.md) documents Vercel as frontend-only preview; backend remains Spring Cloud Gateway plus Java services. |
+| Code assessment flagship | [code-assessment-reviewer-proof.md](code-assessment-reviewer-proof.md) documents the 5-minute flow: candidate submits code, deterministic score appears, employer reviews, and admin sees assessment health. |
 | Gateway observability | `api-gateway` emits `devhire_gateway_requests_total`, `devhire_gateway_request_latency_seconds`, and `devhire_gateway_rate_limited_total` by route/status. |
 | Runtime observability smoke | `runtime-observability-smoke.ps1` now checks Gateway custom metrics together with recruitment, notification, audit, search, AI, and outbox metrics. |
 | SLO alerts | Prometheus rules include Gateway route p95 latency and route-level rate-limit spike alerts. |
@@ -76,6 +77,7 @@ docker compose up -d --build
 | Operations are observable | Prometheus rules, Grafana dashboards, Loki/Tempo/OTel, [observability evidence](observability-evidence.md) |
 | Domain runtime data is observable | Recruitment funnel, notification delivery, audit ingestion, outbox, search, and AI metrics, [SLO docs](slo.md) |
 | AI is controlled | Claude Haiku provider config, deterministic fallback, citations, tool traces, [AI safety](ai-safety.md) |
+| Candidate code grading is reviewer-safe | Deterministic static rubric, redacted list/detail API boundary, audit metadata, and [code assessment reviewer proof](code-assessment-reviewer-proof.md) |
 | Cloud is blueprint-safe | Helm, Argo CD, AWS Terraform blueprint, External Secrets, race-safe validation, [cloud completion scorecard](cloud-completion-scorecard.md) |
 | Gaps are explicit | [Remaining gaps and roadmap](remaining-gaps-and-roadmap.md) separates portfolio evidence from real-production follow-ups |
 | v1 path is explicit | [v1 reviewer guide](v1-reviewer-guide.md), [v1 demo script](v1-demo-script.md), and [v1 acceptance checklist](release-evidence/v1.0.0.md) define future acceptance |

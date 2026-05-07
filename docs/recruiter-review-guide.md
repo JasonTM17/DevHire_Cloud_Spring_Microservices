@@ -15,6 +15,7 @@ Read:
 - `docs/architecture-review-index.md`
 - `docs/design-system.md`
 - `docs/demo-data.md`
+- `docs/code-assessment-reviewer-proof.md`
 - `docs/evidence-manifest.md`
 - `docs/runtime-acceptance-matrix.md`
 - `docs/release-evidence/v0.4.6.md`
@@ -52,6 +53,12 @@ Review signals:
 - Flyway migrations live per service,
 - no service reads another service database directly,
 - contracts/events are versioned and tested.
+
+Code assessment flagship path:
+
+- open `docs/code-assessment-reviewer-proof.md`,
+- verify `application-service` owns code challenge migrations and APIs,
+- review `/candidate/assessments`, `/employer`, and `/admin` for candidate scoring, employer decision, and operations health.
 
 ## 3. Run The Fast Local Proof
 

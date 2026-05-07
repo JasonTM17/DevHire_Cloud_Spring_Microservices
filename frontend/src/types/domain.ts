@@ -239,6 +239,12 @@ export type CodeAssessment = {
   feedback?: string;
   aiFeedbackFallback: boolean;
   submittedCode?: string;
+  attemptNumber?: number;
+  codeHash?: string;
+  graderVersion?: string;
+  rubricVersion?: string;
+  submittedCodePreview?: string;
+  hasSubmittedCode: boolean;
   dueAt: string;
   assignedAt: string;
   submittedAt?: string;

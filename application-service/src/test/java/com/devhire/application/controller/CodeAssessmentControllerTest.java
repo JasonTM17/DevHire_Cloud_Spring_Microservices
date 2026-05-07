@@ -47,6 +47,10 @@ class CodeAssessmentControllerTest {
         mockMvc.perform(candidateGet("/candidate/code-assessments"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data[0].challengeTitle", is("Java outbox retry reviewer")))
+                .andExpect(jsonPath("$.data[0].hasSubmittedCode", is(true)))
+                .andExpect(jsonPath("$.data[0].attemptNumber", is(1)))
+                .andExpect(jsonPath("$.data[0].graderVersion", is("static-rubric-v1")))
+                .andExpect(jsonPath("$.data[0].rubricVersion", is("devhire-code-rubric-v1")))
                 .andExpect(jsonPath("$.data[0].rubric[0].category", is("Correctness and completeness")));
 
         mockMvc.perform(post("/candidate/code-assessments/{id}/submissions", assignmentId)
@@ -106,6 +110,12 @@ class CodeAssessmentControllerTest {
                 "Strong submission with employer review ready evidence.",
                 true,
                 "class CandidateSolution { assert true; }",
+                1,
+                "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+                "static-rubric-v1",
+                "devhire-code-rubric-v1",
+                "class CandidateSolution { assert true; }",
+                true,
                 Instant.now().plusSeconds(1_209_600),
                 Instant.parse("2026-05-01T00:00:00Z"),
                 Instant.parse("2026-05-06T00:00:00Z"));

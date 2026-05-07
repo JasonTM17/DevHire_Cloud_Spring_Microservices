@@ -19,6 +19,9 @@ export default function EmployerPage() {
   const [selectedJobId, setSelectedJobId] = useState(previewJobs.content[0]?.id ?? "");
   const [applications, setApplications] = useState<PageResponse<Application>>(previewApplications);
   const [codeAssessments, setCodeAssessments] = useState<CodeAssessment[]>([]);
+  const [selectedReviewId, setSelectedReviewId] = useState(previewCodeAssessments[0]?.id ?? "");
+  const [selectedReviewDetail, setSelectedReviewDetail] = useState<CodeAssessment | null>(previewCodeAssessments[0] ?? null);
+  const [reviewNote, setReviewNote] = useState("Advance if rubric evidence matches production expectations.");
   const [codeStatusFilter, setCodeStatusFilter] = useState("AUTO_REVIEWED");
   const [codeJobFilter, setCodeJobFilter] = useState("ALL");
   const [pipelineSummary, setPipelineSummary] = useState<EmployerPipelineSummary>(previewEmployerPipelineSummary);
@@ -44,6 +47,9 @@ export default function EmployerPage() {
     ),
     [codeAssessments]
   );
+  const selectedReview = selectedReviewDetail
+    ?? visibleCodeAssessments.find((item) => item.id === selectedReviewId)
+    ?? visibleCodeAssessments[0];
 
   function loadCompanies() {
     setLoadingCompanies(true);
@@ -58,7 +64,10 @@ export default function EmployerPage() {
         setCompanies(page);
         setJobs(jobPage.content.length ? jobPage : previewJobs);
         setPipelineSummary(summary);
-        setCodeAssessments(assessmentItems.length ? assessmentItems : previewCodeAssessments);
+        const nextAssessments = assessmentItems.length ? assessmentItems : previewCodeAssessments;
+        setCodeAssessments(nextAssessments);
+        setSelectedReviewId((current) => current || nextAssessments[0]?.id || "");
+        setSelectedReviewDetail(nextAssessments[0] ?? null);
         setSelectedJobId((current) => current || jobPage.content[0]?.id || previewJobs.content[0]?.id || "");
         setMessage("");
       })
@@ -67,6 +76,8 @@ export default function EmployerPage() {
         setJobs(previewJobs);
         setPipelineSummary(previewEmployerPipelineSummary);
         setCodeAssessments(previewCodeAssessments);
+        setSelectedReviewId(previewCodeAssessments[0]?.id ?? "");
+        setSelectedReviewDetail(previewCodeAssessments[0] ?? null);
         setSelectedJobId(previewJobs.content[0]?.id ?? "");
         setMessage(previewDashboardMessage(ex));
       })
@@ -147,10 +158,15 @@ export default function EmployerPage() {
     try {
       setLoadingCodeReviews(true);
       const items = await api.employerCodeAssessments(codeReviewParams(codeStatusFilter, codeJobFilter));
-      setCodeAssessments(items.length ? items : previewCodeAssessments);
+      const nextAssessments = items.length ? items : previewCodeAssessments;
+      setCodeAssessments(nextAssessments);
+      setSelectedReviewId((current) => current || nextAssessments[0]?.id || "");
+      setSelectedReviewDetail(nextAssessments.find((item) => item.id === selectedReviewId) ?? nextAssessments[0] ?? null);
       setMessage("");
     } catch (ex) {
       setCodeAssessments(previewCodeAssessments);
+      setSelectedReviewId(previewCodeAssessments[0]?.id ?? "");
+      setSelectedReviewDetail(previewCodeAssessments[0] ?? null);
       setMessage(previewDashboardMessage(ex));
     } finally {
       setLoadingCodeReviews(false);
@@ -169,20 +185,42 @@ export default function EmployerPage() {
           ? { ...item, status: decision === "ADVANCE" ? "PASSED" : "EMPLOYER_REVIEWED", latestDecision: decision }
           : item
       )));
+      setSelectedReviewDetail((current) => current?.id === id
+        ? { ...current, status: decision === "ADVANCE" ? "PASSED" : "EMPLOYER_REVIEWED", latestDecision: decision }
+        : current);
       setMessage("Code review recorded for the selected candidate.");
       return;
     }
     try {
-      const updated = await api.reviewCodeAssessment(id, decision, `${decision.toLowerCase()} after rubric review`, score);
+      const updated = await api.reviewCodeAssessment(id, decision, reviewNote, score);
       setCodeAssessments((current) => current.map((item) => (item.id === updated.id ? updated : item)));
+      setSelectedReviewDetail(updated);
       setMessage(`Code review recorded for ${updated.candidateName}.`);
     } catch (ex) {
       setCodeAssessments((current) => current.map((item) => (
         item.id === id ? { ...item, status: decision === "ADVANCE" ? "PASSED" : "EMPLOYER_REVIEWED", latestDecision: decision } : item
       )));
+      setSelectedReviewDetail((current) => current?.id === id
+        ? { ...current, status: decision === "ADVANCE" ? "PASSED" : "EMPLOYER_REVIEWED", latestDecision: decision }
+        : current);
       setMessage(ex instanceof Error && ex.message !== "Failed to fetch"
         ? ex.message
         : "Code review recorded for the selected candidate.");
+    }
+  }
+
+  async function selectCodeAssessment(item: CodeAssessment) {
+    setSelectedReviewId(item.id);
+    setSelectedReviewDetail(item);
+    if (!isUuid(item.id)) {
+      return;
+    }
+    try {
+      const detail = await api.employerCodeAssessment(item.id);
+      setSelectedReviewDetail(detail);
+      setCodeAssessments((current) => current.map((candidate) => (candidate.id === detail.id ? detail : candidate)));
+    } catch {
+      setSelectedReviewDetail(item);
     }
   }
 
@@ -344,7 +382,7 @@ export default function EmployerPage() {
                   <span className="score-chip">{item.latestScore == null ? "Pending" : `${item.latestScore}/${item.maxScore}`}</span>
                 </div>
                 <p>{item.feedback ?? "Candidate has not submitted code yet."}</p>
-                <pre className="code-preview">{(item.submittedCode ?? item.starterCode).slice(0, 360)}</pre>
+                <pre className="code-preview">{(item.submittedCodePreview ?? item.submittedCode ?? item.starterCode).slice(0, 360)}</pre>
                 <div className="tag-list">
                   {item.riskFlags.length ? item.riskFlags.map((flag) => (
                     <span className="badge warn" key={flag}>{flag.replaceAll("-", " ")}</span>
@@ -352,8 +390,17 @@ export default function EmployerPage() {
                   <span className={reviewable ? "badge live" : "badge"}>
                     {reviewable ? "Ready for employer decision" : item.submittedAt ? "Decision recorded" : "Waiting for candidate submission"}
                   </span>
+                  {item.codeHash ? <span className="badge">Hash {item.codeHash.slice(0, 10)}</span> : null}
                 </div>
                 <div className="button-row">
+                  <button
+                    aria-label={`Open review dossier for ${item.candidateName}`}
+                    className="button secondary"
+                    type="button"
+                    onClick={() => selectCodeAssessment(item)}
+                  >
+                    Open dossier
+                  </button>
                   <button
                     aria-label={`Hold ${item.candidateName}`}
                     className="button secondary"
@@ -377,6 +424,66 @@ export default function EmployerPage() {
             );
           })}
         </div>
+        {selectedReview ? (
+          <div className="review-dossier">
+            <div className="section-title">
+              <ShieldCheck size={20} />
+              <h3>{selectedReview.candidateName} / {selectedReview.challengeTitle}</h3>
+            </div>
+            <div className="evidence-grid">
+              <div className="constraint-box">
+                <strong>Candidate context</strong>
+                <span>{selectedReview.jobTitle}</span>
+                <span>Attempt {selectedReview.attemptNumber ?? 0} / score {selectedReview.latestScore ?? 0}/{selectedReview.maxScore}</span>
+                <span>Decision {selectedReview.latestDecision ? statusLabel(selectedReview.latestDecision) : "Review queue"}</span>
+              </div>
+              <div className="constraint-box">
+                <strong>Review safety</strong>
+                <span>{selectedReview.graderVersion ?? "static-rubric-v1"}</span>
+                <span>{selectedReview.rubricVersion ?? "devhire-code-rubric-v1"}</span>
+                {selectedReview.codeHash ? <span>Hash {selectedReview.codeHash.slice(0, 12)}</span> : <span>No submitted hash yet</span>}
+              </div>
+            </div>
+            <pre className="code-preview">{(selectedReview.submittedCode ?? selectedReview.submittedCodePreview ?? selectedReview.starterCode).slice(0, 900)}</pre>
+            <div className="rubric-grid">
+              {(selectedReview.rubric.length ? selectedReview.rubric : []).map((row) => (
+                <div className="rubric-card" key={row.category}>
+                  <div className="status-line">
+                    <strong>{row.category}</strong>
+                    <span className="score-chip">{row.score}/{row.maxScore}</span>
+                  </div>
+                  <p>{row.evidence}</p>
+                </div>
+              ))}
+            </div>
+            <div className="form">
+              <textarea
+                aria-label="Employer review notes"
+                value={reviewNote}
+                onChange={(event) => setReviewNote(event.target.value)}
+                placeholder="Capture reviewer rationale, edge cases, and next interview focus."
+              />
+              <div className="button-row">
+                <button
+                  className="button secondary"
+                  disabled={!isReviewableCodeAssessment(selectedReview)}
+                  type="button"
+                  onClick={() => reviewCodeAssessment(selectedReview.id, "HOLD", selectedReview.latestScore)}
+                >
+                  Hold for follow-up
+                </button>
+                <button
+                  className="button primary"
+                  disabled={!isReviewableCodeAssessment(selectedReview)}
+                  type="button"
+                  onClick={() => reviewCodeAssessment(selectedReview.id, "ADVANCE", selectedReview.latestScore ?? 85)}
+                >
+                  Advance candidate
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : null}
       </div>
     </section>
   );
