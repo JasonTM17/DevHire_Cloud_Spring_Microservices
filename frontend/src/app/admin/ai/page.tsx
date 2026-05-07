@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Bot, DatabaseZap, RefreshCw, ShieldCheck } from "lucide-react";
 import { MetricCard } from "@/components/MetricCard";
-import { StatusPill } from "@/components/StatusPill";
+import { StatusPill, statusLabel } from "@/components/StatusPill";
 import { api } from "@/lib/api";
 import { previewAiProviderStatus } from "@/lib/previewData";
 import type { AiProviderStatus } from "@/types/domain";
@@ -52,7 +52,7 @@ export default function AdminAiPage() {
       </div>
       <div className="metrics-row">
         <MetricCard icon={Bot} label="Model" value={provider.model.replace("claude-", "")} helper={provider.provider} />
-        <MetricCard icon={ShieldCheck} label="Circuit" value={provider.circuitBreakerState} helper={`${provider.consecutiveFailures} consecutive failures`} />
+        <MetricCard icon={ShieldCheck} label="Circuit" value={statusLabel(provider.circuitBreakerState)} helper={`${provider.consecutiveFailures} consecutive failures`} />
         <MetricCard icon={DatabaseZap} label="Knowledge" value="Indexed" helper="Docs, jobs, health snapshot" />
       </div>
       {message ? <p className={message.startsWith("Knowledge") ? "success" : "error"}>{message}</p> : null}

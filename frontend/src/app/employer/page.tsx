@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Braces, Building2, ClipboardList, GitPullRequestArrow, Plus, Send, ShieldCheck, UsersRound } from "lucide-react";
 import { CompanyLogo } from "@/components/CompanyLogo";
 import { DemoModeNotice } from "@/components/DemoModeNotice";
 import { MetricCard } from "@/components/MetricCard";
-import { StatusPill } from "@/components/StatusPill";
+import { StatusPill, statusLabel } from "@/components/StatusPill";
 import { api } from "@/lib/api";
 import { brandForCompany } from "@/lib/demoCompanies";
 import { previewApplications, previewCodeAssessments, previewCompanies, previewEmployerPipelineSummary, previewJobs } from "@/lib/previewData";
@@ -19,9 +19,13 @@ export default function EmployerPage() {
   const [selectedJobId, setSelectedJobId] = useState(previewJobs.content[0]?.id ?? "");
   const [applications, setApplications] = useState<PageResponse<Application>>(previewApplications);
   const [codeAssessments, setCodeAssessments] = useState<CodeAssessment[]>([]);
+  const [codeStatusFilter, setCodeStatusFilter] = useState("AUTO_REVIEWED");
+  const [codeJobFilter, setCodeJobFilter] = useState("ALL");
   const [pipelineSummary, setPipelineSummary] = useState<EmployerPipelineSummary>(previewEmployerPipelineSummary);
   const [message, setMessage] = useState("");
   const [loadingCompanies, setLoadingCompanies] = useState(false);
+  const [loadingCodeReviews, setLoadingCodeReviews] = useState(false);
+  const codeFilterReady = useRef(false);
 
   const approvedCompany = useMemo(
     () => companies?.content.find((company) => company.status === "APPROVED"),
@@ -44,7 +48,12 @@ export default function EmployerPage() {
   function loadCompanies() {
     setLoadingCompanies(true);
     const jobParams = new URLSearchParams({ page: "0", size: "12", sort: "publishedAt,desc" });
-    Promise.all([api.employerCompanies(), api.jobs(jobParams), api.employerPipelineSummary(), api.employerCodeAssessments()])
+    Promise.all([
+      api.employerCompanies(),
+      api.jobs(jobParams),
+      api.employerPipelineSummary(),
+      api.employerCodeAssessments(codeReviewParams(codeStatusFilter, codeJobFilter))
+    ])
       .then(([page, jobPage, summary, assessmentItems]) => {
         setCompanies(page);
         setJobs(jobPage.content.length ? jobPage : previewJobs);
@@ -65,6 +74,14 @@ export default function EmployerPage() {
   }
 
   useEffect(loadCompanies, []);
+
+  useEffect(() => {
+    if (!codeFilterReady.current) {
+      codeFilterReady.current = true;
+      return;
+    }
+    void loadCodeAssessments();
+  }, [codeStatusFilter, codeJobFilter]);
 
   async function createCompany() {
     setMessage("");
@@ -123,6 +140,20 @@ export default function EmployerPage() {
     } catch (ex) {
       setApplications(previewApplications);
       setMessage(previewDashboardMessage(ex));
+    }
+  }
+
+  async function loadCodeAssessments() {
+    try {
+      setLoadingCodeReviews(true);
+      const items = await api.employerCodeAssessments(codeReviewParams(codeStatusFilter, codeJobFilter));
+      setCodeAssessments(items.length ? items : previewCodeAssessments);
+      setMessage("");
+    } catch (ex) {
+      setCodeAssessments(previewCodeAssessments);
+      setMessage(previewDashboardMessage(ex));
+    } finally {
+      setLoadingCodeReviews(false);
     }
   }
 
@@ -231,7 +262,7 @@ export default function EmployerPage() {
             >
               {jobs.content.map((job) => (
                 <option key={job.id} value={job.id}>
-                  {job.title} - {job.status}
+                  {job.title} - {statusLabel(job.status)}
                 </option>
               ))}
             </select>
@@ -266,6 +297,32 @@ export default function EmployerPage() {
         <div className="section-title">
           <Braces size={20} />
           <h2>Code assessment review</h2>
+        </div>
+        <div className="form inline-form review-filter-bar">
+          <select
+            aria-label="Code review status"
+            value={codeStatusFilter}
+            onChange={(event) => setCodeStatusFilter(event.target.value)}
+          >
+            <option value="AUTO_REVIEWED">Ready for review</option>
+            <option value="EMPLOYER_REVIEWED">Reviewed</option>
+            <option value="PASSED">Passed</option>
+            <option value="FAILED">Failed</option>
+            <option value="ALL">All statuses</option>
+          </select>
+          <select
+            aria-label="Code review job scope"
+            value={codeJobFilter}
+            onChange={(event) => setCodeJobFilter(event.target.value)}
+          >
+            <option value="ALL">All employer jobs</option>
+            {jobs.content.map((job) => (
+              <option key={job.id} value={job.id}>{job.title}</option>
+            ))}
+          </select>
+          <button className="button secondary" type="button" onClick={loadCodeAssessments} disabled={loadingCodeReviews}>
+            {loadingCodeReviews ? "Syncing reviews" : "Apply filters"}
+          </button>
         </div>
         <div className="assessment-review-grid">
           {visibleCodeAssessments.length === 0 ? (
@@ -346,6 +403,17 @@ function isReviewableCodeAssessment(item: CodeAssessment) {
 
 function isUuid(value: string) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
+}
+
+function codeReviewParams(status: string, jobId: string) {
+  const params = new URLSearchParams();
+  if (status && status !== "ALL") {
+    params.set("status", status);
+  }
+  if (jobId && jobId !== "ALL") {
+    params.set("jobId", jobId);
+  }
+  return params;
 }
 
 function countBy<T>(items: T[], selector: (item: T) => string) {

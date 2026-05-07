@@ -151,6 +151,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [globalSearch, setGlobalSearch] = useState("");
   const session = typeof window === "undefined" ? null : getSession();
   const meta = pageMeta[pathname] ?? pageMeta["/jobs"];
+  const workspaceHref = session?.user.role === "ADMIN"
+    ? "/admin"
+    : session?.user.role === "EMPLOYER" ? "/employer" : "/candidate";
 
   function submitGlobalSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -270,7 +273,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 placeholder="Search published jobs"
               />
             </form>
-            <Link className="button outline" href="/candidate" aria-label="Notifications">
+            <Link className="button outline" href={workspaceHref} aria-label="Workspace notifications">
               <Bell size={16} />
             </Link>
             {session ? (

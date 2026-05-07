@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Braces, CheckCircle2, ClipboardCheck, ShieldCheck, Trophy } from "lucide-react";
+import { Braces, CheckCircle2, ClipboardCheck, Clock3, ShieldCheck, Trophy } from "lucide-react";
 import { MetricCard } from "@/components/MetricCard";
-import { StatusPill } from "@/components/StatusPill";
+import { StatusPill, statusLabel } from "@/components/StatusPill";
 import { api } from "@/lib/api";
 import { previewCodeAssessments } from "@/lib/previewData";
 import type { CodeAssessment } from "@/types/domain";
@@ -215,6 +215,27 @@ export default function CandidateAssessmentsPage() {
           </div>
         </div>
       ) : null}
+
+      {selected ? (
+        <div className="panel">
+          <div className="section-title">
+            <Clock3 size={20} />
+            <h2>Submission history</h2>
+          </div>
+          <div className="timeline-list">
+            {submissionHistory(selected).map((event) => (
+              <div className="timeline-item" key={event.title}>
+                <span className={event.completed ? "timeline-dot done" : "timeline-dot"} />
+                <span>
+                  <strong>{event.title}</strong>
+                  <small>{event.description}</small>
+                </span>
+                <StatusPill value={event.status} />
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 }
@@ -256,4 +277,41 @@ function emptyRubric() {
 
 function formatDate(value: string) {
   return new Date(value).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
+
+function submissionHistory(item: CodeAssessment) {
+  const submitted = Boolean(item.submittedAt);
+  const finalized = FINAL_STATUSES.has(item.status);
+  return [
+    {
+      title: "Challenge assigned",
+      description: `${item.challengeTitle} assigned for ${item.jobTitle}.`,
+      status: "ASSIGNED",
+      completed: true
+    },
+    {
+      title: "Candidate submission",
+      description: submitted
+        ? `Submitted ${formatDate(item.submittedAt ?? item.assignedAt)} with ${item.language} evidence.`
+        : `Due ${formatDate(item.dueAt)} with code, notes, and test evidence.`,
+      status: submitted ? "SUBMITTED" : "SCHEDULED",
+      completed: submitted
+    },
+    {
+      title: "Rubric review",
+      description: item.latestScore == null
+        ? "Deterministic rubric is generated after submission."
+        : `Latest rubric score ${item.latestScore}/${item.maxScore} across correctness, maintainability, security, and tests.`,
+      status: item.latestScore == null ? "PENDING" : "AUTO_REVIEWED",
+      completed: item.latestScore != null
+    },
+    {
+      title: "Employer decision",
+      description: finalized
+        ? `Employer decision recorded as ${statusLabel(item.status).toLowerCase()}.`
+        : "Employer review queue will decide advance, hold, or reject after rubric review.",
+      status: finalized ? item.status : "REVIEW_QUEUE",
+      completed: finalized
+    }
+  ];
 }

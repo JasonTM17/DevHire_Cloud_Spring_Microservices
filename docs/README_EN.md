@@ -8,7 +8,7 @@ DevHire Cloud is a Java 21 / Spring Boot 3.5 production engineering portfolio fo
 |---|---|
 | Latest public release | [v0.5.1](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.5.1) |
 | Current development cycle | `0.6.0-SNAPSHOT` |
-| v0.6 Stitch app | PR #43 green; v0.6.4 adds candidate code assessment grading on the stacked branch |
+| v0.6 Stitch app | PR #43 green; stacked v0.6.6 adds code assessment grading, employer review filters, and submission history |
 | Branch governance | Protected `master`, PR-based release flow |
 | Dependabot queue | 0 open PRs at the latest cleanup scan |
 | v1 status | Roadmap and acceptance checklist only, not a released tag |
@@ -52,7 +52,7 @@ DevHire Cloud is a Java 21 / Spring Boot 3.5 production engineering portfolio fo
 | Admin/Ops | `/admin`, `/admin/ai`, code assessment health |
 | Platform | `/assistant`, `/platform/observability`, `/platform/cloud`, `/platform/releases` |
 
-The v0.6 implementation follows Stitch project `projects/5421325194779586117`. Primary screenshots are checked to avoid raw UUIDs, `UNKNOWN`, loading-only states, smoke labels, offline banners, and fallback banners. v0.6.4 turns Skill Assessment into a real code grading workflow with safe static scoring; sandbox execution is reserved for a later isolated-worker phase.
+The v0.6 implementation follows Stitch project `projects/5421325194779586117`. Primary screenshots are checked to avoid raw UUIDs, `UNKNOWN`, loading-only states, smoke labels, offline banners, and fallback banners. The stacked v0.6.6 work turns Skill Assessment into a real code grading workflow with safe static scoring, candidate submission history, employer review filters, and admin health evidence; sandbox execution is reserved for a later isolated-worker phase.
 
 ## Cloud State Matrix
 

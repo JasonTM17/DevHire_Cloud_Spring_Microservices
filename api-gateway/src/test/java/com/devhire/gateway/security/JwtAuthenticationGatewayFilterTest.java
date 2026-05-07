@@ -89,6 +89,43 @@ class JwtAuthenticationGatewayFilterTest {
         verifyNoInteractions(redisTemplate);
     }
 
+    @Test
+    void publicCompanyReadsDoNotRequireJwtButStripSpoofedIdentityHeaders() {
+        for (String path : new String[] {
+                "/api/companies",
+                "/api/companies/slug/portfolio-labs",
+                "/api/companies/11111111-1111-1111-1111-111111111111"
+        }) {
+            MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest
+                    .get(path)
+                    .header(AppHeaders.USER_ID, UUID.randomUUID().toString())
+                    .header(AppHeaders.USER_ROLE, "ADMIN"));
+            AtomicReference<ServerWebExchange> downstreamExchange = new AtomicReference<>();
+            GatewayFilterChain chain = mutated -> {
+                downstreamExchange.set(mutated);
+                return Mono.empty();
+            };
+
+            filter.filter(exchange, chain).block();
+
+            assertThat(downstreamExchange.get().getRequest().getHeaders()).doesNotContainKey(AppHeaders.USER_ID);
+            assertThat(downstreamExchange.get().getRequest().getHeaders()).doesNotContainKey(AppHeaders.USER_ROLE);
+        }
+        verifyNoInteractions(redisTemplate);
+    }
+
+    @Test
+    void companyStatusQueryRequiresJwtForAdminFiltering() {
+        MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest
+                .get("/api/companies?status=PENDING"));
+        GatewayFilterChain chain = mutated -> Mono.error(new AssertionError("chain should not be called"));
+
+        filter.filter(exchange, chain).block();
+
+        assertThat(exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+        verifyNoInteractions(redisTemplate);
+    }
+
     private static String token(UUID userId, String email, String role) {
         Instant now = Instant.now();
         return Jwts.builder()

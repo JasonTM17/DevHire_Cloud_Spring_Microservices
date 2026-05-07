@@ -5,7 +5,7 @@ import { Activity, Bot, Building2, ClipboardCheck, Gauge, RefreshCw, ScrollText,
 import { CompanyLogo } from "@/components/CompanyLogo";
 import { DemoModeNotice } from "@/components/DemoModeNotice";
 import { MetricCard } from "@/components/MetricCard";
-import { StatusPill } from "@/components/StatusPill";
+import { StatusPill, statusLabel } from "@/components/StatusPill";
 import { api } from "@/lib/api";
 import { brandForCompany } from "@/lib/demoCompanies";
 import { previewAiProviderStatus, previewAuditLogs, previewCodeAssessmentSummary, previewCompanies, previewJobs, previewOperationsSummary } from "@/lib/previewData";
@@ -153,7 +153,7 @@ export default function AdminPage() {
             >
               {reviewJobs.content.map((job) => (
                 <option key={job.id} value={job.id}>
-                  {job.title} - {job.status}
+                  {job.title} - {statusLabel(job.status)}
                 </option>
               ))}
             </select>
@@ -204,7 +204,7 @@ export default function AdminPage() {
         <div className="insight-list compact">
           {codeAssessmentSummary.statusDistribution.map((item) => (
             <div className="insight-line" key={item.status}>
-              <span>{item.status.toLowerCase().replaceAll("_", " ")}</span>
+              <span>{statusLabel(item.status)}</span>
               <strong>{item.count}</strong>
             </div>
           ))}
@@ -275,7 +275,9 @@ function countBy<T>(items: T[], selector: (item: T) => string) {
 }
 
 function displayProviderMode(mode: string) {
-  return mode
-    .replace("DEMO_FALLBACK", "REVIEWER_SAFE")
-    .replace("CIRCUIT_OPEN_FALLBACK", "CIRCUIT_OPEN_SAFE_MODE");
+  return statusLabel(
+    mode
+      .replace("DEMO_FALLBACK", "REVIEWER_SAFE")
+      .replace("CIRCUIT_OPEN_FALLBACK", "CIRCUIT_OPEN_SAFE_MODE")
+  );
 }

@@ -101,6 +101,22 @@ class CodeAssessmentServiceTest {
     }
 
     @Test
+    void candidateSubmissionRejectsExpiredAssignment() {
+        jdbcTemplate.assessments.add(assessment("ASSIGNED", null, null, null, Instant.now().minusSeconds(60)));
+
+        assertThatThrownBy(() -> service.submit(candidate(), ASSIGNMENT_ID, new CodeSubmissionRequest("Java", """
+                class Solution {
+                    @Test void provesBehavior() { assert true; }
+                    void review() { /* outbox retry evidence */ }
+                }
+                """, "Submitting after deadline should be rejected.")))
+                .isInstanceOf(DevHireException.class)
+                .hasMessageContaining("submission window has closed");
+
+        assertThat(jdbcTemplate.updates).isEmpty();
+    }
+
+    @Test
     void adminSummaryAggregatesAssessmentHealthForOperationsDashboard() {
         var summary = service.adminSummary(admin());
 
@@ -124,6 +140,14 @@ class CodeAssessmentServiceTest {
     }
 
     private static CodeAssessmentResponse assessment(String status, Integer latestScore, String decision, Instant submittedAt) {
+        return assessment(status, latestScore, decision, submittedAt, Instant.now().plusSeconds(1_209_600));
+    }
+
+    private static CodeAssessmentResponse assessment(String status,
+                                                     Integer latestScore,
+                                                     String decision,
+                                                     Instant submittedAt,
+                                                     Instant dueAt) {
         return new CodeAssessmentResponse(
                 ASSIGNMENT_ID,
                 UUID.randomUUID(),
@@ -145,7 +169,7 @@ class CodeAssessmentServiceTest {
                 latestScore == null ? null : "Review completed.",
                 true,
                 submittedAt == null ? null : "class Solution { @Test void provesRetry() { assert true; } }",
-                Instant.parse("2026-05-20T00:00:00Z"),
+                dueAt,
                 Instant.parse("2026-05-01T00:00:00Z"),
                 submittedAt);
     }

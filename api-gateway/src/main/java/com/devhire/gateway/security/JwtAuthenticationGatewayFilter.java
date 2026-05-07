@@ -50,7 +50,7 @@ public class JwtAuthenticationGatewayFilter implements GlobalFilter, Ordered {
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         String path = exchange.getRequest().getPath().value();
         HttpMethod method = exchange.getRequest().getMethod();
-        if (isPublic(method, path)) {
+        if (isPublic(method, path, exchange.getRequest().getQueryParams().isEmpty())) {
             return chain.filter(stripIdentityHeaders(exchange));
         }
         String token = bearerToken(exchange);
@@ -100,7 +100,7 @@ public class JwtAuthenticationGatewayFilter implements GlobalFilter, Ordered {
                 .getPayload();
     }
 
-    private static boolean isPublic(HttpMethod method, String path) {
+    private static boolean isPublic(HttpMethod method, String path, boolean queryEmpty) {
         if (method == HttpMethod.OPTIONS) {
             return true;
         }
@@ -108,7 +108,20 @@ public class JwtAuthenticationGatewayFilter implements GlobalFilter, Ordered {
                 || path.startsWith("/actuator")
                 || path.startsWith("/swagger-ui")
                 || path.startsWith("/v3/api-docs")
+                || isPublicCompanyRead(method, path, queryEmpty)
                 || isPublicJobRead(method, path);
+    }
+
+    private static boolean isPublicCompanyRead(HttpMethod method, String path, boolean queryEmpty) {
+        if (method != HttpMethod.GET) {
+            return false;
+        }
+        if (!queryEmpty) {
+            return false;
+        }
+        return path.equals("/api/companies")
+                || path.matches("^/api/companies/slug/[^/]+$")
+                || path.matches("^/api/companies/[^/]+$");
     }
 
     private static boolean isPublicJobRead(HttpMethod method, String path) {

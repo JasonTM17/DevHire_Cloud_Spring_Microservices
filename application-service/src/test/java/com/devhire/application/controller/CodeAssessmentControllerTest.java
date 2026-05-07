@@ -106,7 +106,7 @@ class CodeAssessmentControllerTest {
                 "Strong submission with employer review ready evidence.",
                 true,
                 "class CandidateSolution { assert true; }",
-                Instant.parse("2026-05-20T00:00:00Z"),
+                Instant.now().plusSeconds(1_209_600),
                 Instant.parse("2026-05-01T00:00:00Z"),
                 Instant.parse("2026-05-06T00:00:00Z"));
     }

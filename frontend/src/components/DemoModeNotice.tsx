@@ -15,7 +15,7 @@ export function DemoModeNotice({ message }: DemoModeNoticeProps) {
     <div className="demo-mode-banner" role="status">
       <MonitorCheck size={18} />
       <div>
-        <strong>Reviewer demo mode</strong>
+        <strong>Review-ready data</strong>
         <span>{message}</span>
       </div>
     </div>

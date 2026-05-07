@@ -75,6 +75,7 @@ test.describe("DevHire Cloud portfolio smoke", () => {
     await page.goto("/candidate/assessments");
     await expect(page.getByTestId("candidate-assessments-page")).toBeVisible();
     await expect(page.getByRole("heading", { name: "Technical proof workspace" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Submission history" })).toBeVisible();
     await expect(page.getByLabel("Candidate code submission")).toBeVisible();
     await page.getByRole("button", { name: "Submit for rubric score" }).click();
     await expect(page.getByText(/Rubric score ready/i)).toBeVisible();
@@ -86,6 +87,8 @@ test.describe("DevHire Cloud portfolio smoke", () => {
     await expect(page.getByRole("heading", { name: "Job workflow" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Code assessment review" })).toBeVisible();
     await expect(page.getByLabel("Applicant pipeline job")).toBeVisible();
+    await expect(page.getByLabel("Code review status")).toBeVisible();
+    await expect(page.getByLabel("Code review job scope")).toBeVisible();
     const readyReview = page.locator(".review-card").filter({ hasText: "Ready for employer decision" }).first();
     await expect(readyReview).toBeVisible();
     await readyReview.getByRole("button", { name: /Advance/ }).click();

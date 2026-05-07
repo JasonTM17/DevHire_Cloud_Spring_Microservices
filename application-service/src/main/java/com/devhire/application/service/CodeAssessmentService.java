@@ -91,6 +91,9 @@ public class CodeAssessmentService {
         if (List.of("PASSED", "FAILED").contains(assessment.status())) {
             throw new DevHireException(ErrorCode.CONFLICT, "Assessment has already been finalized by the employer");
         }
+        if (assessment.dueAt() != null && assessment.dueAt().isBefore(Instant.now())) {
+            throw new DevHireException(ErrorCode.CONFLICT, "Assessment submission window has closed");
+        }
         CodeAssessmentGrader.GradeResult result = grader.grade(request.code(), requiredSignals(assignmentId));
         UUID submissionId = UUID.randomUUID();
         jdbcTemplate.update("""

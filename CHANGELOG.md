@@ -7,6 +7,8 @@ All notable changes to DevHire Cloud are documented here. The project follows Co
 ### Planned
 
 - Canonical reviewer facade cleanup after `v0.5.1`.
+- Stitch full-app product polish with candidate, employer, admin, platform, and code assessment evidence.
+- Code assessment grading, candidate submission history, employer review filters, admin health summary, and due-date enforcement.
 - Product screenshot and visual-evidence audit hardening.
 - v1 roadmap documentation without claiming a final `v1.0.0` release.
 

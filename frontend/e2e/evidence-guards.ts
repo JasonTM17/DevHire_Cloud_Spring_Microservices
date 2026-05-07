@@ -12,8 +12,10 @@ const forbiddenPrimaryEvidencePatterns = [
   /\bfallback\b/i,
   /\boffline\b/i,
   /\bsmoke\b/i,
+  /preview-[a-z0-9-]+/i,
+  /\b(?:AUTO_REVIEWED|EMPLOYER_REVIEWED|PENDING_REVIEW|REVIEW_QUEUE|PROVIDER_READY|SAFE_PREVIEW|REVIEWER_SAFE|CIRCUIT_OPEN_SAFE_MODE)\b/,
   /[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/i,
-  /â|�/
+  /[\u00c3\u00a2\u00ef\u00bf\u00bd]/
 ];
 
 export async function assertPrimaryEvidenceReady(page: Page) {
