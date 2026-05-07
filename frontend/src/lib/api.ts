@@ -19,6 +19,7 @@ import type {
   OperationsSummary,
   PageResponse,
   SkillAnalytics,
+  UserProfile,
   UserRole
 } from "@/types/domain";
 
@@ -109,6 +110,7 @@ export const api = {
   notifications: () => request<PageResponse<Notification>>("/api/notifications"),
   readAllNotifications: () => request<Notification[]>("/api/notifications/read-all", { method: "PATCH" }),
   companies: () => request<PageResponse<Company>>("/api/companies"),
+  companyBySlug: (slug: string) => request<Company>(`/api/companies/slug/${encodeURIComponent(slug)}`),
   createCompany: (payload: CompanyPayload) =>
     request<Company>("/api/companies", { method: "POST", body: JSON.stringify(payload) }),
   approveCompany: (id: string) => request<Company>(`/api/admin/companies/${id}/approve`, { method: "PATCH" }),
@@ -124,6 +126,7 @@ export const api = {
   applicationsForJob: (jobId: string) =>
     request<PageResponse<Application>>(`/api/employer/jobs/${jobId}/applications`),
   employerPipelineSummary: () => request<EmployerPipelineSummary>("/api/employer/pipeline/summary"),
+  userProfileMe: () => request<UserProfile>("/api/users/me"),
   updateApplicationStatus: (id: string, status: string) =>
     request<Application>(`/api/applications/${id}/status`, {
       method: "PATCH",

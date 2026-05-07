@@ -65,6 +65,14 @@ public class CompanyService {
     }
 
     @Transactional(readOnly = true)
+    public CompanyResponse getApprovedBySlug(String slug) {
+        Company company = repository.findBySlug(slug)
+                .filter(candidate -> candidate.getStatus() == CompanyStatus.APPROVED)
+                .orElseThrow(() -> new DevHireException(ErrorCode.NOT_FOUND, "Approved company not found"));
+        return mapper.toResponse(company);
+    }
+
+    @Transactional(readOnly = true)
     public CompanyInternalResponse getInternal(UUID id) {
         return mapper.toInternal(find(id));
     }
@@ -120,4 +128,3 @@ public class CompanyService {
         return slug;
     }
 }
-

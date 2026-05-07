@@ -96,16 +96,22 @@ if (-not $SkipSourceGuard) {
         "frontend/src/app/admin/page.tsx",
         "frontend/src/app/employer/page.tsx",
         "frontend/src/app/candidate/page.tsx",
+        "frontend/src/app/candidate/profile/page.tsx",
+        "frontend/src/app/companies/[slug]/page.tsx",
         "frontend/src/app/jobs/page.tsx",
         "frontend/src/app/jobs/[id]/page.tsx",
         "frontend/src/app/assistant/page.tsx"
     )
     $forbiddenText = @(
         "UNKNOWN",
+        "Loading ",
         "Pending job ID",
+        "Job ID",
         "Live API Gateway is offline",
+        "offline",
         "Fallback disabled",
         "local-deterministic-fallback",
+        "Smoke",
         "Job `$`{jobId.slice",
         "Candidate `$`{item.candidateId.slice",
         "Job submitted for review: `$`{job.id"

@@ -46,6 +46,11 @@ public class CompanyController {
         return ApiResponse.ok(companyService.get(id));
     }
 
+    @GetMapping("/companies/slug/{slug}")
+    public ApiResponse<CompanyResponse> getBySlug(@PathVariable String slug) {
+        return ApiResponse.ok(companyService.getApprovedBySlug(slug));
+    }
+
     @GetMapping("/companies")
     public ApiResponse<Page<CompanyResponse>> list(@RequestParam(required = false) CompanyStatus status,
                                                    Pageable pageable) {
@@ -74,4 +79,3 @@ public class CompanyController {
         return companyService.getInternal(id);
     }
 }
-

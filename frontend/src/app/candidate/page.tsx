@@ -3,15 +3,16 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Bell, ClipboardList, FileCheck2, MailCheck, Map, TimerReset, TrendingUp } from "lucide-react";
+import { CandidateTimeline } from "@/components/CandidateTimeline";
 import { DemoModeNotice } from "@/components/DemoModeNotice";
 import { MetricCard } from "@/components/MetricCard";
+import { StatusDistributionList } from "@/components/StatusDistributionList";
 import { StatusPill } from "@/components/StatusPill";
 import { api } from "@/lib/api";
-import { previewApplications, previewCandidateDashboardSummary, previewNotifications } from "@/lib/previewData";
-import type { Application, CandidateDashboardSummary, Notification, PageResponse } from "@/types/domain";
+import { previewCandidateDashboardSummary, previewNotifications } from "@/lib/previewData";
+import type { CandidateDashboardSummary, Notification, PageResponse } from "@/types/domain";
 
 export default function CandidatePage() {
-  const [applications, setApplications] = useState<PageResponse<Application> | null>(null);
   const [notifications, setNotifications] = useState<PageResponse<Notification> | null>(null);
   const [summary, setSummary] = useState<CandidateDashboardSummary>(previewCandidateDashboardSummary);
   const [error, setError] = useState("");
@@ -19,15 +20,13 @@ export default function CandidatePage() {
 
   function load() {
     setLoading(true);
-    Promise.all([api.myApplications(), api.notifications(), api.candidateDashboardSummary()])
-      .then(([apps, notis, dashboard]) => {
-        setApplications(apps);
+    Promise.all([api.notifications(), api.candidateDashboardSummary()])
+      .then(([notis, dashboard]) => {
         setNotifications(notis);
         setSummary(dashboard);
         setError("");
       })
       .catch((ex) => {
-        setApplications(previewApplications);
         setNotifications(previewNotifications);
         setSummary(previewCandidateDashboardSummary);
         setError(previewDashboardMessage(ex));
@@ -82,34 +81,14 @@ export default function CandidatePage() {
             <TimerReset size={20} />
             <h2>Application tracker</h2>
           </div>
-          <div className="insight-list compact">
-            {summary.statusDistribution.map(({ status, count }) => (
-              <div className="insight-line" key={status}>
-                <span>{status.toLowerCase().replace("_", " ")}</span>
-                <strong>{count}</strong>
-              </div>
-            ))}
-          </div>
-          <div className="table-list">
-            {loading ? <div className="empty-state compact">Loading candidate applications...</div> : null}
-            {!loading && applications?.content.length === 0 ? (
-              <div className="empty-state compact">No applications yet. Apply to a published job to start the pipeline.</div>
-            ) : null}
-            {!loading && applications?.content.map((item) => (
-              <div className="table-row" key={item.id}>
-                <span>
-                  <strong>{applicationTitle(item.jobId)}</strong>
-                  <small>Submitted {new Date(item.createdAt).toLocaleDateString()}</small>
-                </span>
-                <StatusPill value={item.status} />
-              </div>
-            ))}
-          </div>
+          <StatusDistributionList items={summary.statusDistribution} />
+          {loading ? <div className="empty-state compact">Syncing candidate pipeline...</div> : null}
+          {!loading ? <CandidateTimeline items={summary.timeline} /> : null}
         </div>
         <div className="panel">
           <h2>Notifications</h2>
           <div className="stack">
-            {loading ? <div className="empty-state compact">Loading notification inbox...</div> : null}
+            {loading ? <div className="empty-state compact">Syncing notification inbox...</div> : null}
             {!loading && notifications?.content.length === 0 ? (
               <div className="empty-state compact">No notifications yet. Status updates will appear here.</div>
             ) : null}
@@ -153,15 +132,6 @@ function previewDashboardMessage(ex: unknown) {
     return "";
   }
   return `${message}. Curated candidate data is active for this reviewer session.`;
-}
-
-function applicationTitle(jobId: string) {
-  const titles: Record<string, string> = {
-    "preview-java-platform": "Senior Java Platform Engineer",
-    "preview-cloud-search": "Search Platform Engineer",
-    "preview-sre": "Backend SRE Engineer"
-  };
-  return titles[jobId] ?? "Portfolio job";
 }
 
 function emailStatusLabel(status: string) {

@@ -114,7 +114,7 @@ export default function AdminPage() {
             <h2>Company reviews</h2>
           </div>
           <div className="table-list">
-            {loading && companies.content.length === 0 ? <div className="empty-state compact">Loading admin review queue...</div> : null}
+            {loading && companies.content.length === 0 ? <div className="empty-state compact">Syncing admin review queue...</div> : null}
             {companies.content.length === 0 ? (
               <div className="empty-state compact">No companies waiting for review.</div>
             ) : null}
@@ -167,7 +167,7 @@ export default function AdminPage() {
             ))}
           </div>
           <div className="stack">
-            {loading && audit.content.length === 0 ? <div className="empty-state compact">Loading audit stream...</div> : null}
+            {loading && audit.content.length === 0 ? <div className="empty-state compact">Syncing audit stream...</div> : null}
             {audit.content.length === 0 ? <div className="empty-state compact">No audit events yet.</div> : null}
             {audit.content.slice(0, 12).map((item) => (
               <div className="audit-item" key={item.id}>

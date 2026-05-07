@@ -49,6 +49,12 @@ public class PostgresJobSearchAdapter implements JobSearchAdapter {
             if (notBlank(criteria.level())) {
                 predicates.add(cb.equal(cb.lower(root.get("level")), criteria.level().toLowerCase(Locale.ROOT)));
             }
+            if (notBlank(criteria.type())) {
+                predicates.add(cb.equal(cb.lower(root.get("type")), criteria.type().toLowerCase(Locale.ROOT)));
+            }
+            if (criteria.companyId() != null) {
+                predicates.add(cb.equal(root.get("companyId"), criteria.companyId()));
+            }
             if (criteria.salaryMin() != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("salaryMax"), criteria.salaryMin()));
             }
@@ -63,4 +69,3 @@ public class PostgresJobSearchAdapter implements JobSearchAdapter {
         return value != null && !value.isBlank();
     }
 }
-

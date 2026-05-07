@@ -94,6 +94,36 @@ class CompanyServiceTest {
     }
 
     @Test
+    void approvedCompanyCanBeLoadedByPublicSlug() {
+        Company company = new Company(UUID.randomUUID(), "DevHire Labs", "devhire-labs", null, null, null, null, null);
+        UUID companyId = UUID.randomUUID();
+        ReflectionTestUtils.setField(company, "id", companyId);
+        ReflectionTestUtils.setField(company, "createdAt", Instant.parse("2026-05-02T00:00:00Z"));
+        ReflectionTestUtils.setField(company, "updatedAt", Instant.parse("2026-05-02T00:00:00Z"));
+        company.approve();
+        when(repository.findBySlug("devhire-labs")).thenReturn(Optional.of(company));
+
+        var response = service.getApprovedBySlug("devhire-labs");
+
+        assertThat(response.id()).isEqualTo(companyId);
+        assertThat(response.slug()).isEqualTo("devhire-labs");
+        assertThat(response.status()).isEqualTo(CompanyStatus.APPROVED);
+    }
+
+    @Test
+    void pendingCompanyIsHiddenFromPublicSlugLookup() {
+        Company company = new Company(UUID.randomUUID(), "DevHire Labs", "devhire-labs", null, null, null, null, null);
+        ReflectionTestUtils.setField(company, "id", UUID.randomUUID());
+        ReflectionTestUtils.setField(company, "createdAt", Instant.parse("2026-05-02T00:00:00Z"));
+        ReflectionTestUtils.setField(company, "updatedAt", Instant.parse("2026-05-02T00:00:00Z"));
+        when(repository.findBySlug("devhire-labs")).thenReturn(Optional.of(company));
+
+        assertThatThrownBy(() -> service.getApprovedBySlug("devhire-labs"))
+                .isInstanceOf(DevHireException.class)
+                .hasMessageContaining("Approved company not found");
+    }
+
+    @Test
     void nonAdminCannotApproveCompany() {
         assertThatThrownBy(() -> service.approve(
                 new AuthenticatedUser(UUID.randomUUID(), "employer@example.com", UserRole.EMPLOYER),

@@ -16,6 +16,23 @@ export type CurrentUser = {
   role: UserRole;
 };
 
+export type UserProfile = {
+  userId: string;
+  email: string;
+  role: UserRole;
+  name?: string;
+  title?: string;
+  skills?: string[];
+  experience?: string;
+  education?: string;
+  expectedSalary?: number;
+  companyPosition?: string;
+  contactInfo?: string;
+  avatarUrl?: string;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
 export type Job = {
   id: string;
   companyId: string;

@@ -159,7 +159,7 @@ export default function EmployerPage() {
             </button>
           </div>
           <div className="table-list">
-            {loadingCompanies && companies.content.length === 0 ? <div className="empty-state compact">Loading employer companies...</div> : null}
+            {loadingCompanies && companies.content.length === 0 ? <div className="empty-state compact">Syncing employer companies...</div> : null}
             {companies.content.length === 0 ? (
               <div className="empty-state compact">No companies yet. Create one to enter the admin approval workflow.</div>
             ) : null}
