@@ -14,7 +14,7 @@ DevHire Cloud là portfolio production engineering cho một nền tảng tuyể
 |---|---|
 | Latest public release | [v0.5.1](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.5.1) |
 | Current development cycle | `0.6.0-SNAPSHOT` |
-| v0.6 Stitch app | PR #43 green, protected-branch review required |
+| v0.6 Stitch app | PR #43 green; v0.6.4 adds candidate code assessment grading on the stacked branch |
 | Branch governance | `master` protected, PR-based release flow |
 | Dependabot queue | 0 open PRs at latest cleanup scan |
 | v1 status | Roadmap and acceptance checklist only, not a released tag |
@@ -44,6 +44,7 @@ DevHire Cloud là portfolio production engineering cho một nền tảng tuyể
 | Messaging | Kafka events, transactional outbox, idempotent consumers |
 | Search | OpenSearch adapter with PostgreSQL fallback |
 | AI | Claude Haiku assistant with citations, tool traces, safety guardrails, metrics |
+| Code assessment | Deterministic rubric grading for candidate submissions, employer review, admin health metrics |
 | Observability | Actuator, Prometheus, Grafana, Loki, Tempo, OpenTelemetry, domain KPI dashboards |
 | Delivery | Maven, Docker matrix, GitHub Actions, Helm, raw K8s, Argo CD, Terraform AWS blueprint |
 
@@ -51,12 +52,12 @@ DevHire Cloud là portfolio production engineering cho một nền tảng tuyể
 
 | Area | Routes |
 |---|---|
-| Candidate | `/jobs`, `/jobs/[id]`, `/candidate`, applications, profile, assessments, offers, interview prep, roadmap, skill analytics, community |
-| Employer | `/employer`, `/companies/[slug]` |
-| Admin/Ops | `/admin`, `/admin/ai` |
+| Candidate | `/jobs`, `/jobs/[id]`, `/candidate`, applications, profile, code assessments, offers, interview prep, roadmap, skill analytics, community |
+| Employer | `/employer`, `/companies/[slug]`, code-review queue |
+| Admin/Ops | `/admin`, `/admin/ai`, code assessment health |
 | Platform | `/assistant`, `/platform/observability`, `/platform/cloud`, `/platform/releases` |
 
-The v0.6 work follows Stitch project `projects/5421325194779586117`. Primary screenshots are checked to avoid raw UUIDs, `UNKNOWN`, loading-only states, smoke labels, offline banners and fallback banners.
+The v0.6 work follows Stitch project `projects/5421325194779586117`. Primary screenshots are checked to avoid raw UUIDs, `UNKNOWN`, loading-only states, smoke labels, offline banners and fallback banners. v0.6.4 turns the Skill Assessment screen into a real code grading workflow with safe static scoring; sandbox execution is intentionally reserved for a later isolated-worker phase.
 
 ## Cloud State Matrix
 

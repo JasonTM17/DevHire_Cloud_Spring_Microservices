@@ -8,14 +8,15 @@ import { MetricCard } from "@/components/MetricCard";
 import { StatusPill } from "@/components/StatusPill";
 import { api } from "@/lib/api";
 import { brandForCompany } from "@/lib/demoCompanies";
-import { previewAiProviderStatus, previewAuditLogs, previewCompanies, previewJobs, previewOperationsSummary } from "@/lib/previewData";
-import type { AiProviderStatus, AuditLog, Company, Job, OperationsSummary, PageResponse } from "@/types/domain";
+import { previewAiProviderStatus, previewAuditLogs, previewCodeAssessmentSummary, previewCompanies, previewJobs, previewOperationsSummary } from "@/lib/previewData";
+import type { AiProviderStatus, AuditLog, CodeAssessmentSummary, Company, Job, OperationsSummary, PageResponse } from "@/types/domain";
 
 export default function AdminPage() {
   const [companies, setCompanies] = useState<PageResponse<Company>>(previewCompanies);
   const [audit, setAudit] = useState<PageResponse<AuditLog>>(previewAuditLogs);
   const [aiProvider, setAiProvider] = useState<AiProviderStatus>(previewAiProviderStatus);
   const [operationsSummary, setOperationsSummary] = useState<OperationsSummary>(previewOperationsSummary);
+  const [codeAssessmentSummary, setCodeAssessmentSummary] = useState<CodeAssessmentSummary>(previewCodeAssessmentSummary);
   const [reviewJobs, setReviewJobs] = useState<PageResponse<Job>>(previewJobs);
   const [selectedJobId, setSelectedJobId] = useState(previewJobs.content[0]?.id ?? "");
   const [message, setMessage] = useState("");
@@ -24,12 +25,20 @@ export default function AdminPage() {
 
   function load() {
     setLoading(true);
-    Promise.all([api.adminCompanies("PENDING"), api.auditLogs(), api.aiProviderStatus(), api.adminJobs("PENDING_REVIEW"), api.operationsSummary()])
-      .then(([companyPage, auditPage, providerStatus, jobPage, ops]) => {
+    Promise.all([
+      api.adminCompanies("PENDING"),
+      api.auditLogs(),
+      api.aiProviderStatus(),
+      api.adminJobs("PENDING_REVIEW"),
+      api.operationsSummary(),
+      api.codeAssessmentSummary()
+    ])
+      .then(([companyPage, auditPage, providerStatus, jobPage, ops, codeSummary]) => {
         setCompanies(companyPage);
         setAudit(auditPage);
         setAiProvider(providerStatus);
         setOperationsSummary(ops);
+        setCodeAssessmentSummary(codeSummary);
         setReviewJobs(jobPage.content.length ? jobPage : previewJobs);
         setSelectedJobId((current) => current || jobPage.content[0]?.id || previewJobs.content[0]?.id || "");
         setMessage("");
@@ -39,6 +48,7 @@ export default function AdminPage() {
         setAudit(previewAuditLogs);
         setAiProvider(previewAiProviderStatus);
         setOperationsSummary(previewOperationsSummary);
+        setCodeAssessmentSummary(previewCodeAssessmentSummary);
         setReviewJobs(previewJobs);
         setSelectedJobId(previewJobs.content[0]?.id ?? "");
         setMessage(previewDashboardMessage(ex));
@@ -179,6 +189,25 @@ export default function AdminPage() {
               </div>
             ))}
           </div>
+        </div>
+      </div>
+      <div className="panel">
+        <div className="section-title">
+          <ClipboardCheck size={20} />
+          <h2>Code assessment health</h2>
+        </div>
+        <div className="metrics-row compact-metrics">
+          <MetricCard icon={ClipboardCheck} label="Assignments" value={codeAssessmentSummary.totalAssignments} helper="Active code challenges" />
+          <MetricCard icon={Gauge} label="Average score" value={`${codeAssessmentSummary.averageScore}%`} helper="Deterministic rubric" />
+          <MetricCard icon={ShieldCheck} label="Risk flags" value={codeAssessmentSummary.riskySubmissions} helper="Needs reviewer attention" />
+        </div>
+        <div className="insight-list compact">
+          {codeAssessmentSummary.statusDistribution.map((item) => (
+            <div className="insight-line" key={item.status}>
+              <span>{item.status.toLowerCase().replaceAll("_", " ")}</span>
+              <strong>{item.count}</strong>
+            </div>
+          ))}
         </div>
       </div>
       <div className="panel">

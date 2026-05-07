@@ -1,5 +1,5 @@
 {
-  "version": "0.6.2",
+  "version": "0.6.4",
   "generatedReportsDirectory": "reports/api-compatibility",
   "policy": {
     "breakingChangesRequire": [
@@ -80,7 +80,14 @@
         { "method": "GET", "localPath": "/candidate/applications/summary", "gatewayPath": "/api/candidate/applications/summary", "surface": "candidate" },
         { "method": "GET", "localPath": "/candidate/offers", "gatewayPath": "/api/candidate/offers", "surface": "candidate" },
         { "method": "GET", "localPath": "/candidate/assessments", "gatewayPath": "/api/candidate/assessments", "surface": "candidate" },
-        { "method": "GET", "localPath": "/employer/pipeline/summary", "gatewayPath": "/api/employer/pipeline/summary", "surface": "employer" }
+        { "method": "GET", "localPath": "/candidate/code-assessments", "gatewayPath": "/api/candidate/code-assessments", "surface": "candidate", "responsePolicy": "owned-by-authenticated-candidate" },
+        { "method": "GET", "localPath": "/candidate/code-assessments/{id}", "gatewayPath": "/api/candidate/code-assessments/{id}", "surface": "candidate", "responsePolicy": "owned-by-authenticated-candidate" },
+        { "method": "POST", "localPath": "/candidate/code-assessments/{id}/submissions", "gatewayPath": "/api/candidate/code-assessments/{id}/submissions", "surface": "candidate", "requestPolicy": "deterministic-rubric-no-code-execution" },
+        { "method": "GET", "localPath": "/employer/pipeline/summary", "gatewayPath": "/api/employer/pipeline/summary", "surface": "employer" },
+        { "method": "GET", "localPath": "/employer/code-assessments", "gatewayPath": "/api/employer/code-assessments", "surface": "employer", "queryParams": ["jobId", "status"], "responsePolicy": "owned-by-authenticated-employer" },
+        { "method": "GET", "localPath": "/employer/code-assessments/{id}", "gatewayPath": "/api/employer/code-assessments/{id}", "surface": "employer", "responsePolicy": "owned-by-authenticated-employer" },
+        { "method": "PATCH", "localPath": "/employer/code-assessments/{id}/review", "gatewayPath": "/api/employer/code-assessments/{id}/review", "surface": "employer" },
+        { "method": "GET", "localPath": "/admin/code-assessments/summary", "gatewayPath": "/api/admin/code-assessments/summary", "surface": "admin", "responsePolicy": "assessment-health-summary" }
       ]
     },
     {
@@ -131,6 +138,24 @@
       "eventType": "APPLICATION_STATUS_CHANGED",
       "version": 1,
       "consumers": ["notification-service", "audit-service"]
+    },
+    {
+      "topic": "audit.events",
+      "eventType": "CODE_SUBMITTED",
+      "version": 1,
+      "consumers": ["audit-service"]
+    },
+    {
+      "topic": "audit.events",
+      "eventType": "CODE_AUTO_REVIEWED",
+      "version": 1,
+      "consumers": ["audit-service"]
+    },
+    {
+      "topic": "audit.events",
+      "eventType": "CODE_REVIEW_COMPLETED",
+      "version": 1,
+      "consumers": ["audit-service"]
     },
     {
       "topic": "job.events",

@@ -1213,6 +1213,131 @@ textarea {
   padding: 16px;
 }
 
+.assessment-workspace {
+  align-items: start;
+}
+
+.assessment-list,
+.assessment-review-grid,
+.rubric-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.assessment-card,
+.review-card,
+.rubric-card,
+.constraint-box,
+.review-summary {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel-muted);
+}
+
+.assessment-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+  padding: 14px;
+  text-align: left;
+  color: var(--text);
+}
+
+.assessment-card.active {
+  border-color: #2563eb;
+  background: #eff6ff;
+}
+
+.assessment-card small,
+.review-card small {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.score-chip {
+  display: inline-flex;
+  min-width: 70px;
+  justify-content: center;
+  border-radius: 999px;
+  background: #e0f2fe;
+  padding: 6px 10px;
+  color: #075985;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.constraint-box,
+.review-summary {
+  display: grid;
+  gap: 6px;
+  padding: 14px;
+}
+
+.constraint-box span,
+.review-summary p,
+.rubric-card p,
+.review-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.code-editor,
+.code-preview {
+  min-height: 260px;
+  border: 1px solid #0f172a;
+  border-radius: 8px;
+  background: #020617;
+  color: #dbeafe;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 13px;
+  line-height: 1.55;
+  resize: vertical;
+}
+
+.code-editor {
+  padding: 14px;
+}
+
+.code-preview {
+  overflow: auto;
+  max-height: 220px;
+  padding: 12px;
+  white-space: pre-wrap;
+}
+
+.rubric-grid {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.rubric-card,
+.review-card {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+}
+
+.assessment-review-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.button-row,
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.compact-metrics {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .spin {
   animation: spin 0.9s linear infinite;
 }
@@ -1242,6 +1367,11 @@ textarea {
   }
 
   .assistant-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .rubric-grid,
+  .assessment-review-grid {
     grid-template-columns: 1fr;
   }
 }
@@ -1364,5 +1494,9 @@ textarea {
   .table-row {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .assessment-card {
+    grid-template-columns: 1fr;
   }
 }

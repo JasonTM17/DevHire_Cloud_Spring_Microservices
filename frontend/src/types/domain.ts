@@ -211,6 +211,51 @@ export type CandidateAssessment = {
   completedAt?: string;
 };
 
+export type RubricScore = {
+  category: string;
+  score: number;
+  maxScore: number;
+  evidence: string;
+};
+
+export type CodeAssessment = {
+  id: string;
+  applicationId: string;
+  candidateName: string;
+  jobTitle: string;
+  challengeTitle: string;
+  level: string;
+  language: string;
+  prompt: string;
+  constraints: string;
+  starterCode: string;
+  status: string;
+  maxScore: number;
+  latestScore?: number;
+  latestDecision?: string;
+  skills: string[];
+  rubric: RubricScore[];
+  riskFlags: string[];
+  feedback?: string;
+  aiFeedbackFallback: boolean;
+  submittedCode?: string;
+  dueAt: string;
+  assignedAt: string;
+  submittedAt?: string;
+};
+
+export type CodeAssessmentSummary = {
+  totalAssignments: number;
+  submitted: number;
+  autoReviewed: number;
+  employerReviewed: number;
+  passed: number;
+  failed: number;
+  averageScore: number;
+  riskySubmissions: number;
+  statusDistribution: StatusCount[];
+};
+
 export type EmployerPipelineSummary = {
   totalApplications: number;
   activeCandidates: number;

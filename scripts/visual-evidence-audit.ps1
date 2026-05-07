@@ -116,6 +116,7 @@ if (-not $SkipSourceGuard) {
         "frontend/src/app/employer/page.tsx",
         "frontend/src/app/candidate/page.tsx",
         "frontend/src/app/candidate/profile/page.tsx",
+        "frontend/src/app/candidate/assessments/page.tsx",
         "frontend/src/app/candidate/interview-prep/page.tsx",
         "frontend/src/app/candidate/roadmap/page.tsx",
         "frontend/src/app/candidate/skill-analytics/page.tsx",

@@ -72,12 +72,19 @@ test.describe("DevHire Cloud portfolio smoke", () => {
     await expect(page.getByTestId("candidate-profile-page")).toBeVisible();
     await expect(page.getByRole("heading", { name: /Linh Nguyen|DevHire Candidate/ })).toBeVisible();
     await expect(page.getByText(/Live profile|Read-only sample/)).toBeVisible();
+    await page.goto("/candidate/assessments");
+    await expect(page.getByTestId("candidate-assessments-page")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Technical proof workspace" })).toBeVisible();
+    await expect(page.getByLabel("Candidate code submission")).toBeVisible();
+    await page.getByRole("button", { name: "Submit for rubric score" }).click();
+    await expect(page.getByText(/Rubric score ready/i)).toBeVisible();
   });
 
   test("employer can sign in and view company and job workflow", async ({ page }) => {
     await login(page, "employer");
     await expect(page.getByRole("heading", { name: "Company onboarding" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Job workflow" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Code assessment review" })).toBeVisible();
     await expect(page.getByLabel("Applicant pipeline job")).toBeVisible();
     await expect(page.getByPlaceholder("Job ID")).toHaveCount(0);
   });
@@ -86,6 +93,7 @@ test.describe("DevHire Cloud portfolio smoke", () => {
     await login(page, "admin");
     await expect(page.getByRole("heading", { name: "Company reviews" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Audit log" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Code assessment health" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "AI provider operations" })).toBeVisible();
     await expect(page.getByLabel("Reviewable job")).toBeVisible();
     await expect(page.getByPlaceholder("Pending job ID")).toHaveCount(0);

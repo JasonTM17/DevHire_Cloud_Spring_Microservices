@@ -6,6 +6,8 @@ import type {
   CandidateAssessment,
   CandidateDashboardSummary,
   CandidateOffer,
+  CodeAssessment,
+  CodeAssessmentSummary,
   CandidateRoadmap,
   Company,
   EmployerPipelineSummary,
@@ -321,6 +323,114 @@ export const previewCandidateAssessments: CandidateAssessment[] = [
     completedAt: undefined
   }
 ];
+
+export const previewCodeAssessments: CodeAssessment[] = [
+  {
+    id: "preview-code-outbox",
+    applicationId: "preview-application-java",
+    candidateName: "Linh Nguyen",
+    jobTitle: "Senior Java Platform Engineer",
+    challengeTitle: "Java outbox retry reviewer",
+    level: "Senior",
+    language: "Java",
+    prompt: "Implement a retry-safe outbox review flow with batch claiming, idempotent publish state, and failure evidence.",
+    constraints: "Do not execute untrusted code. Show transaction boundaries, max attempts, and test evidence.",
+    starterCode: "class OutboxRetryReviewer {\n  ReviewResult review(List<OutboxEvent> events) {\n    // implement retry-safe review\n  }\n}",
+    status: "AUTO_REVIEWED",
+    maxScore: 100,
+    latestScore: 91,
+    latestDecision: "ADVANCE",
+    skills: ["Java", "Spring Boot", "Kafka", "Outbox"],
+    rubric: [
+      { category: "Correctness and completeness", score: 36, maxScore: 40, evidence: "Transaction, batch, maxAttempts, and publishedAt signals found." },
+      { category: "Maintainability and readability", score: 18, maxScore: 20, evidence: "Clear service boundary and readable method naming." },
+      { category: "Complexity and performance", score: 13, maxScore: 15, evidence: "Batch processing and map-based aggregation included." },
+      { category: "Security posture", score: 15, maxScore: 15, evidence: "No hardcoded secrets or process execution detected." },
+      { category: "Test and evidence quality", score: 9, maxScore: 10, evidence: "Candidate included assertion-style review evidence." }
+    ],
+    riskFlags: [],
+    feedback: "Strong production-ready submission with clear implementation signals and low review risk.",
+    aiFeedbackFallback: true,
+    submittedCode: "class CandidateSolution { Map<String, Integer> review(List<Event> events) { /* transaction batch maxAttempts publishedAt lastError */ return Map.of(\"published\", events.size()); } @Test void givenPendingEvents_whenReviewed_thenPublishesBatch() { assert true; } }",
+    dueAt: daysFromNow(6),
+    assignedAt: daysAgo(4),
+    submittedAt: daysAgo(1)
+  },
+  {
+    id: "preview-code-sql",
+    applicationId: "preview-application-search",
+    candidateName: "Aiko Sato",
+    jobTitle: "Search Platform Engineer",
+    challengeTitle: "SQL application funnel diagnostics",
+    level: "Mid-Senior",
+    language: "SQL",
+    prompt: "Summarize application status counts and stale review queues for an employer dashboard.",
+    constraints: "Prefer indexed filters and pagination-safe aggregation.",
+    starterCode: "SELECT status, count(*) FROM job_applications WHERE employer_id = :employerId GROUP BY status;",
+    status: "EMPLOYER_REVIEWED",
+    maxScore: 100,
+    latestScore: 84,
+    latestDecision: "REVIEW",
+    skills: ["SQL", "PostgreSQL", "Indexes", "Analytics"],
+    rubric: [
+      { category: "Correctness and completeness", score: 32, maxScore: 40, evidence: "Employer filter and grouped counts included." },
+      { category: "Maintainability and readability", score: 17, maxScore: 20, evidence: "Readable query structure." },
+      { category: "Complexity and performance", score: 14, maxScore: 15, evidence: "Index-aware filter strategy." },
+      { category: "Security posture", score: 15, maxScore: 15, evidence: "No unsafe static smell detected." },
+      { category: "Test and evidence quality", score: 6, maxScore: 10, evidence: "Needs stronger edge-case assertions." }
+    ],
+    riskFlags: ["missing-test-evidence"],
+    feedback: "Promising submission. Employer review should focus on edge cases, test depth, and stale queue behavior.",
+    aiFeedbackFallback: true,
+    submittedCode: "SELECT status, count(*) AS total FROM job_applications WHERE employer_id = :employerId GROUP BY status ORDER BY status LIMIT 50;",
+    dueAt: daysFromNow(3),
+    assignedAt: daysAgo(6),
+    submittedAt: daysAgo(2)
+  },
+  {
+    id: "preview-code-resilience",
+    applicationId: "preview-application-cloud",
+    candidateName: "Bao Pham",
+    jobTitle: "Backend SRE Engineer",
+    challengeTitle: "Search resilience implementation sketch",
+    level: "Senior",
+    language: "Java",
+    prompt: "Design an OpenSearch-first, PostgreSQL recovery path with published-only visibility.",
+    constraints: "Include adapter status, timing, exception handling, and tests.",
+    starterCode: "class JobSearchResilience {\n  SearchResult search(SearchCriteria criteria) {\n    // implement adapter recovery\n  }\n}",
+    status: "ASSIGNED",
+    maxScore: 100,
+    latestScore: undefined,
+    latestDecision: undefined,
+    skills: ["Java", "OpenSearch", "PostgreSQL", "Observability"],
+    rubric: [],
+    riskFlags: [],
+    feedback: undefined,
+    aiFeedbackFallback: true,
+    submittedCode: undefined,
+    dueAt: daysFromNow(9),
+    assignedAt: daysAgo(1),
+    submittedAt: undefined
+  }
+];
+
+export const previewCodeAssessmentSummary: CodeAssessmentSummary = {
+  totalAssignments: 18,
+  submitted: 14,
+  autoReviewed: 6,
+  employerReviewed: 4,
+  passed: 3,
+  failed: 1,
+  averageScore: 84.5,
+  riskySubmissions: 2,
+  statusDistribution: [
+    { status: "ASSIGNED", count: 4 },
+    { status: "AUTO_REVIEWED", count: 6 },
+    { status: "EMPLOYER_REVIEWED", count: 4 },
+    { status: "PASSED", count: 3 },
+    { status: "FAILED", count: 1 }
+  ]
+};
 
 export const previewEmployerPipelineSummary: EmployerPipelineSummary = {
   totalApplications: 240,

@@ -8,7 +8,7 @@ This page is the single source of truth for the current public state of DevHire 
 | GitHub release | https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.5.1 |
 | Default branch | `master` |
 | Branch protection | Enabled |
-| Open pull requests | Active v0.6 Stitch redesign stack: #43 is green and waiting for required review; v0.6.3 is stacked until #43 merges |
+| Open pull requests | Active v0.6 Stitch redesign stack: #43 is green and waiting for required review; v0.6.3/v0.6.4 are stacked until #43 merges |
 | Dependabot queue | 0 open PRs after curated cleanup |
 | Maven development version | `0.6.0-SNAPSHOT` |
 | Frontend development version | `0.6.0` |
@@ -22,7 +22,8 @@ This page is the single source of truth for the current public state of DevHire 
 | Track | Current evidence |
 |---|---|
 | Product UX | Reviewer-facing jobs workflow now includes richer filters, sorting, totals, and pagination. |
-| Stitch v0.6 | PR #43 is green and waiting for required review before protected-branch merge; v0.6.3 adds full-app screenshot evidence on top. |
+| Stitch v0.6 | PR #43 is green and waiting for required review; v0.6.3 adds full-app screenshot evidence and v0.6.4 adds code assessment grading. |
+| Code assessment | Candidate code submissions now have deterministic rubric scoring, employer review, admin health summary, and static risk flags. |
 | Frontend deploy | Optional Vercel preview path exists for `frontend/` only; Java backend deployment remains Docker/AWS blueprint. |
 | Gateway operations | Gateway emits route request, latency, and rate-limit metrics with Prometheus alert coverage. |
 | Runtime proof | Runtime observability smoke checks Gateway metrics plus domain KPI metrics when Docker is running. |

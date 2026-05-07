@@ -1,15 +1,15 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Building2, ClipboardList, GitPullRequestArrow, Plus, Send, UsersRound } from "lucide-react";
+import { Braces, Building2, ClipboardList, GitPullRequestArrow, Plus, Send, ShieldCheck, UsersRound } from "lucide-react";
 import { CompanyLogo } from "@/components/CompanyLogo";
 import { DemoModeNotice } from "@/components/DemoModeNotice";
 import { MetricCard } from "@/components/MetricCard";
 import { StatusPill } from "@/components/StatusPill";
 import { api } from "@/lib/api";
 import { brandForCompany } from "@/lib/demoCompanies";
-import { previewApplications, previewCompanies, previewEmployerPipelineSummary, previewJobs } from "@/lib/previewData";
-import type { Application, Company, EmployerPipelineSummary, Job, PageResponse } from "@/types/domain";
+import { previewApplications, previewCodeAssessments, previewCompanies, previewEmployerPipelineSummary, previewJobs } from "@/lib/previewData";
+import type { Application, CodeAssessment, Company, EmployerPipelineSummary, Job, PageResponse } from "@/types/domain";
 
 export default function EmployerPage() {
   const [companies, setCompanies] = useState<PageResponse<Company>>(previewCompanies);
@@ -18,6 +18,7 @@ export default function EmployerPage() {
   const [jobs, setJobs] = useState<PageResponse<Job>>(previewJobs);
   const [selectedJobId, setSelectedJobId] = useState(previewJobs.content[0]?.id ?? "");
   const [applications, setApplications] = useState<PageResponse<Application>>(previewApplications);
+  const [codeAssessments, setCodeAssessments] = useState<CodeAssessment[]>(previewCodeAssessments);
   const [pipelineSummary, setPipelineSummary] = useState<EmployerPipelineSummary>(previewEmployerPipelineSummary);
   const [message, setMessage] = useState("");
   const [loadingCompanies, setLoadingCompanies] = useState(false);
@@ -37,11 +38,12 @@ export default function EmployerPage() {
   function loadCompanies() {
     setLoadingCompanies(true);
     const jobParams = new URLSearchParams({ page: "0", size: "12", sort: "publishedAt,desc" });
-    Promise.all([api.employerCompanies(), api.jobs(jobParams), api.employerPipelineSummary()])
-      .then(([page, jobPage, summary]) => {
+    Promise.all([api.employerCompanies(), api.jobs(jobParams), api.employerPipelineSummary(), api.employerCodeAssessments()])
+      .then(([page, jobPage, summary, assessmentItems]) => {
         setCompanies(page);
         setJobs(jobPage.content.length ? jobPage : previewJobs);
         setPipelineSummary(summary);
+        setCodeAssessments(assessmentItems.length ? assessmentItems : previewCodeAssessments);
         setSelectedJobId((current) => current || jobPage.content[0]?.id || previewJobs.content[0]?.id || "");
         setMessage("");
       })
@@ -49,6 +51,7 @@ export default function EmployerPage() {
         setCompanies(previewCompanies);
         setJobs(previewJobs);
         setPipelineSummary(previewEmployerPipelineSummary);
+        setCodeAssessments(previewCodeAssessments);
         setSelectedJobId(previewJobs.content[0]?.id ?? "");
         setMessage(previewDashboardMessage(ex));
       })
@@ -122,6 +125,21 @@ export default function EmployerPage() {
     await loadApplications();
   }
 
+  async function reviewCodeAssessment(id: string, decision: string, score?: number) {
+    try {
+      const updated = await api.reviewCodeAssessment(id, decision, `${decision.toLowerCase()} after rubric review`, score);
+      setCodeAssessments((current) => current.map((item) => (item.id === updated.id ? updated : item)));
+      setMessage(`Code review recorded for ${updated.candidateName}.`);
+    } catch (ex) {
+      setCodeAssessments((current) => current.map((item) => (
+        item.id === id ? { ...item, status: decision === "ADVANCE" ? "PASSED" : "EMPLOYER_REVIEWED", latestDecision: decision } : item
+      )));
+      setMessage(ex instanceof Error && ex.message !== "Failed to fetch"
+        ? ex.message
+        : "Code review recorded for the selected candidate.");
+    }
+  }
+
   return (
     <section className="page-stack" data-testid="employer-dashboard">
       <div className="hero-strip">
@@ -142,6 +160,7 @@ export default function EmployerPage() {
         <MetricCard icon={Building2} label="Companies" value={companies?.totalElements ?? 0} helper="Owned by employer" />
         <MetricCard icon={ClipboardList} label="Applications" value={pipelineSummary.totalApplications} helper="Across employer jobs" />
         <MetricCard icon={UsersRound} label="Candidates" value={pipelineSummary.activeCandidates} helper="Active hiring pool" />
+        <MetricCard icon={ShieldCheck} label="Code reviews" value={codeAssessments.filter((item) => item.submittedAt).length} helper="Rubric-scored submissions" />
       </div>
       {message && isPositiveMessage(message) ? <p className="success">{message}</p> : null}
       {message && !isPositiveMessage(message) ? <DemoModeNotice message={message} /> : null}
@@ -226,6 +245,44 @@ export default function EmployerPage() {
               </div>
             ))}
           </div>
+        </div>
+      </div>
+      <div className="panel">
+        <div className="section-title">
+          <Braces size={20} />
+          <h2>Code assessment review</h2>
+        </div>
+        <div className="assessment-review-grid">
+          {codeAssessments.slice(0, 4).map((item) => (
+            <div className="review-card" key={item.id}>
+              <div className="status-line">
+                <span>
+                  <strong>{item.candidateName}</strong>
+                  <small>{item.jobTitle}</small>
+                </span>
+                <StatusPill value={item.status} />
+              </div>
+              <div className="status-line">
+                <span>{item.challengeTitle}</span>
+                <span className="score-chip">{item.latestScore == null ? "Pending" : `${item.latestScore}/${item.maxScore}`}</span>
+              </div>
+              <p>{item.feedback ?? "Candidate has not submitted code yet."}</p>
+              <pre className="code-preview">{(item.submittedCode ?? item.starterCode).slice(0, 360)}</pre>
+              <div className="tag-list">
+                {item.riskFlags.length ? item.riskFlags.map((flag) => (
+                  <span className="badge warn" key={flag}>{flag.replaceAll("-", " ")}</span>
+                )) : <span className="badge live">No high-risk flags</span>}
+              </div>
+              <div className="button-row">
+                <button className="button secondary" type="button" onClick={() => reviewCodeAssessment(item.id, "HOLD", item.latestScore)}>
+                  Hold
+                </button>
+                <button className="button primary" type="button" onClick={() => reviewCodeAssessment(item.id, "ADVANCE", item.latestScore ?? 85)}>
+                  Advance
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </section>

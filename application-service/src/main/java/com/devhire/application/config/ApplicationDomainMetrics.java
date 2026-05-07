@@ -35,6 +35,30 @@ public class ApplicationDomainMetrics {
                         .register(meterRegistry);
             }
         }
+        for (String status : new String[]{"ASSIGNED", "SUBMITTED", "AUTO_REVIEWED", "EMPLOYER_REVIEWED", "PASSED", "FAILED"}) {
+            Gauge.builder("devhire_code_assessments_total", () -> count("SELECT count(*) FROM code_assessment_assignments WHERE status = ?", status))
+                    .description("Current DevHire code assessment assignments by status")
+                    .tag("status", status)
+                    .register(meterRegistry);
+        }
+        for (String status : new String[]{"SUBMITTED", "AUTO_REVIEWED", "EMPLOYER_REVIEWED"}) {
+            Gauge.builder("devhire_code_submissions_total", () -> count("SELECT count(*) FROM code_submissions WHERE status = ?", status))
+                    .description("Current DevHire code submissions by grading status")
+                    .tag("language", "ALL")
+                    .tag("status", status)
+                    .register(meterRegistry);
+        }
+        Gauge.builder("devhire_code_grading_score", () -> count("SELECT COALESCE(avg(final_score), 0)::bigint FROM code_submissions"))
+                .description("Average deterministic code assessment score")
+                .register(meterRegistry);
+        Gauge.builder("devhire_code_review_risk_flags_total", () -> count("""
+                        SELECT count(*)
+                        FROM code_submissions
+                        WHERE risk_flags_csv IS NOT NULL AND risk_flags_csv <> ''
+                        """))
+                .description("Code submissions with static risk flags")
+                .tag("type", "any")
+                .register(meterRegistry);
     }
 
     private long countApplications(ApplicationStatus status) {

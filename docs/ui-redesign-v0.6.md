@@ -6,7 +6,7 @@ This document is the implementation bridge from the Stitch project to the produc
 
 - Stitch project: `projects/5421325194779586117`
 - Product split: Admin/Ops, Employer/Company, Client/Candidate
-- Frontend branches: `v0.6-stitch-client-admin-redesign`, `v0.6.1-stitch-fidelity-polish`, and stacked `v0.6.2-stitch-completion-polish`
+- Frontend branches: `v0.6-stitch-client-admin-redesign`, `v0.6.1-stitch-fidelity-polish`, `v0.6.2-stitch-completion-polish`, `v0.6.3-stitch-full-app-completion`, and stacked `v0.6.4-code-assessment-grading`
 - Goal: make the product feel like a recruitment operations platform instead of a static portfolio demo.
 
 ## Route Mapping
@@ -42,7 +42,12 @@ v0.6 keeps the existing public APIs backward compatible and adds read-model endp
 | application-service | `GET /candidate/applications/summary` | Candidate application status distribution |
 | application-service | `GET /candidate/offers` | Candidate offer review experience |
 | application-service | `GET /candidate/assessments` | Candidate assessment progress |
+| application-service | `GET /candidate/code-assessments` | Candidate code challenge queue and rubric evidence |
+| application-service | `POST /candidate/code-assessments/{id}/submissions` | Safe deterministic code grading without executing untrusted code |
 | application-service | `GET /employer/pipeline/summary` | Employer pipeline counters and recent activity |
+| application-service | `GET /employer/code-assessments` | Employer-owned code review queue |
+| application-service | `PATCH /employer/code-assessments/{id}/review` | Employer review decision and final score |
+| application-service | `GET /admin/code-assessments/summary` | Admin code assessment health and risk flags |
 | job-service | `GET /candidate/skill-analytics` | Skill, location, level, and salary demand signals |
 | ai-service | `GET /candidate/roadmap` | Candidate career roadmap recommendations |
 | ai-service | `GET /candidate/interview-prep` | Recent AI interview prep sessions |
@@ -62,8 +67,14 @@ The application service owns persisted candidate experience data:
 
 - `candidate_offers`
 - `candidate_assessments`
+- `code_challenges`
+- `code_assessment_assignments`
+- `code_submissions`
+- `code_review_events`
 
 These are seeded deterministically by Flyway so portfolio pages can render rich state without cross-reading another service database.
+
+v0.6.4 keeps code grading reviewer-safe: candidate code is stored and scored with a deterministic rubric, but it is not executed. The sandbox worker boundary is intentionally deferred to a later isolated-runtime phase.
 
 ## UX Acceptance Rules
 
@@ -85,21 +96,21 @@ These are seeded deterministically by Flyway so portfolio pages can render rich 
 | Candidate Dashboard | `/candidate` | Application service dashboard read model and notification read model | `stitch/candidate-dashboard.png`, candidate login E2E |
 | My Applications | `/candidate/applications` | Application summary read model with status distribution and timeline | `stitch/candidate-applications.png` |
 | Candidate Profile | `/candidate/profile` | `GET /api/users/me` when signed in, polished read-only sample when unauthenticated | `stitch/candidate-profile.png` |
-| Skill Assessment | `/candidate/assessments` | Application service assessment read model | `stitch/candidate-assessments.png` |
+| Skill Assessment | `/candidate/assessments` | Application service code assessment assignments, submissions, deterministic rubric scoring, and static risk flags | `stitch/candidate-assessments.png`, candidate code-submit E2E |
 | Offer Letter | `/candidate/offers` | Application service offer read model | `stitch/candidate-offers.png` |
 | AI Interview Prep | `/candidate/interview-prep` | AI service interview-prep read model | `stitch/candidate-interview-prep.png` |
 | Cloud Career Roadmap | `/candidate/roadmap` | AI service roadmap read model | `stitch/candidate-roadmap.png` |
 | Cloud Skill Analytics | `/candidate/skill-analytics` | Job service skill analytics read model | `stitch/candidate-skill-analytics.png` |
 | Engineering Community Hub | `/community` | Curated frontend content for v0.6 | `stitch/client-community.png` |
 | Company Profile & Jobs | `/companies/[slug]` | Approved company slug lookup and company-scoped public jobs | `stitch/company-profile.png` |
-| Recruitment Pipelines | `/employer` | Employer company list, employer pipeline summary, and applicant queue | `stitch/employer-pipeline.png`, employer login E2E |
-| Operations Dashboard | `/admin` | Company/job review queues, operations summary, audit logs, AI provider status | `stitch/admin-control-plane.png`, admin login E2E |
+| Recruitment Pipelines | `/employer` | Employer company list, employer pipeline summary, applicant queue, and code review queue | `stitch/employer-pipeline.png`, employer login E2E |
+| Operations Dashboard | `/admin` | Company/job review queues, operations summary, audit logs, AI provider status, and code assessment health | `stitch/admin-control-plane.png`, admin login E2E |
 | AI RAG Talent Intelligence | `/assistant`, `/admin/ai` | AI chat, citations, provider status, and knowledge reindex controls | `stitch/assistant.png`, `stitch/admin-ai-ops.png` |
 | Observability & Event Streaming | `/platform/observability` | Static operations evidence panels linked to Prometheus/Grafana/runbooks | `stitch/platform-observability.png` |
 | Infrastructure & K8s Control Plane | `/platform/cloud` | Static cloud evidence panels linked to Terraform/Helm/GitOps scripts | `stitch/platform-cloud.png` |
 | CI/CD & Deployment Registry | `/platform/releases` | Static release evidence panels linked to workflows, image metadata, and verification scripts | `stitch/platform-releases.png` |
 
-The v0.6.3 completion pass promotes these route-matrix screenshots into `docs/screenshots/stitch/` and tracks them in `docs/evidence-manifest.json` so reviewer-facing screenshots match the Stitch implementation, not only the legacy portfolio dashboard set.
+The v0.6.3 completion pass promotes these route-matrix screenshots into `docs/screenshots/stitch/`. v0.6.4 refreshes the candidate assessment, employer pipeline, and admin control-plane screenshots so code grading evidence appears in the primary Stitch surfaces.
 
 ## Verification
 

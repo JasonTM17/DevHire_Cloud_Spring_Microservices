@@ -8,6 +8,8 @@ import type {
   AuthResponse,
   CandidateApplicationsSummary,
   CandidateAssessment,
+  CodeAssessment,
+  CodeAssessmentSummary,
   CandidateDashboardSummary,
   CandidateOffer,
   CandidateRoadmap,
@@ -104,6 +106,13 @@ export const api = {
   candidateApplicationsSummary: () => request<CandidateApplicationsSummary>("/api/candidate/applications/summary"),
   candidateOffers: () => request<CandidateOffer[]>("/api/candidate/offers"),
   candidateAssessments: () => request<CandidateAssessment[]>("/api/candidate/assessments"),
+  candidateCodeAssessments: () => request<CodeAssessment[]>("/api/candidate/code-assessments"),
+  candidateCodeAssessment: (id: string) => request<CodeAssessment>(`/api/candidate/code-assessments/${id}`),
+  submitCodeAssessment: (id: string, language: string, code: string, notes?: string) =>
+    request<CodeAssessment>(`/api/candidate/code-assessments/${id}/submissions`, {
+      method: "POST",
+      body: JSON.stringify({ language, code, notes })
+    }),
   candidateRoadmap: () => request<CandidateRoadmap>("/api/candidate/roadmap"),
   candidateInterviewPrep: () => request<InterviewPrep[]>("/api/candidate/interview-prep"),
   candidateSkillAnalytics: () => request<SkillAnalytics>("/api/candidate/skill-analytics"),
@@ -129,6 +138,13 @@ export const api = {
   applicationsForJob: (jobId: string) =>
     request<PageResponse<Application>>(`/api/employer/jobs/${jobId}/applications`),
   employerPipelineSummary: () => request<EmployerPipelineSummary>("/api/employer/pipeline/summary"),
+  employerCodeAssessments: (params = new URLSearchParams()) =>
+    request<CodeAssessment[]>(`/api/employer/code-assessments${params.toString() ? `?${params}` : ""}`),
+  reviewCodeAssessment: (id: string, decision: string, note: string, finalScore?: number) =>
+    request<CodeAssessment>(`/api/employer/code-assessments/${id}/review`, {
+      method: "PATCH",
+      body: JSON.stringify({ decision, note, finalScore })
+    }),
   userProfileMe: () => request<UserProfile>("/api/users/me"),
   updateApplicationStatus: (id: string, status: string) =>
     request<Application>(`/api/applications/${id}/status`, {
@@ -137,6 +153,7 @@ export const api = {
     }),
   auditLogs: () => request<PageResponse<AuditLog>>("/api/admin/audit-logs"),
   operationsSummary: () => request<OperationsSummary>("/api/admin/operations/summary"),
+  codeAssessmentSummary: () => request<CodeAssessmentSummary>("/api/admin/code-assessments/summary"),
   aiProviderStatus: () => request<AiProviderStatus>("/api/admin/ai/provider/status"),
   reindexAiKnowledge: () =>
     request<AiReindexResponse>("/api/admin/ai/knowledge/reindex", { method: "POST" }),
