@@ -2,6 +2,33 @@
 
 This file records implementation progress, verification commands, and commit boundaries.
 
+## 2026-05-07 - v0.6.1 Stitch fidelity security hotfix
+
+- Resolved PR #44 security scan blockers after the Stitch fidelity implementation by moving Spring Boot to the latest `3.5.x` patch and pinning Netty at the repository level.
+- Confirmed Trivy no longer reports Spring Boot findings; the remaining image finding was the optional Reactor Netty native epoll transport.
+- Excluded `io.netty:netty-transport-native-epoll` from the reactive gateway and AI service dependency graphs so both services use the standard NIO transport in container images.
+- Kept business APIs, database schemas, and frontend behavior unchanged.
+
+Verification:
+
+- `mvn -T1 clean verify` passed before the native epoll exclusion.
+- `.\scripts\check-coverage.ps1` passed.
+- `cd frontend && npm run typecheck` passed.
+- `cd frontend && npm run build` passed.
+- `cd frontend && npm run e2e:all` passed.
+- `mvn -pl api-gateway dependency:tree "-Dincludes=io.netty:netty-transport-native-epoll"` confirmed no native epoll dependency remains.
+- `mvn -pl ai-service dependency:tree "-Dincludes=io.netty:netty-transport-native-epoll"` confirmed no native epoll dependency remains.
+- `mvn -T1 -pl api-gateway,ai-service -am clean verify` passed after the exclusion.
+- `.\scripts\api-compatibility.ps1 -ManifestOnly` passed.
+- `.\scripts\docs-quality.ps1` passed.
+- `.\scripts\docs-parity.ps1` passed.
+- `.\scripts\evidence-manifest-verify.ps1` passed.
+- `.\scripts\repo-hygiene.ps1` passed.
+- `.\scripts\visual-evidence-audit.ps1` passed.
+- `.\scripts\domain-placeholder-audit.ps1` passed.
+- `.\scripts\professionalism-audit.ps1` passed.
+- `.\scripts\portfolio-verify.ps1 -Docs -Docker -Cloud` passed after retrying a transient Terraform provider download failure.
+
 ## 2026-05-06 - v0.6 Stitch client/admin redesign implementation
 
 - Re-scanned Stitch project `projects/5421325194779586117` and mapped the expanded client screens plus admin/ops screens into product routes.
