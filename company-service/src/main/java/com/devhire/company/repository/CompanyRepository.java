@@ -14,5 +14,9 @@ public interface CompanyRepository extends JpaRepository<Company, UUID> {
 
     Optional<Company> findBySlug(String slug);
 
+    Optional<Company> findByIdAndStatus(UUID id, CompanyStatus status);
+
     Page<Company> findByStatus(CompanyStatus status, Pageable pageable);
+
+    Page<Company> findByEmployerId(UUID employerId, Pageable pageable);
 }

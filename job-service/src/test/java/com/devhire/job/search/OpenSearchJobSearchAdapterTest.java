@@ -58,7 +58,7 @@ class OpenSearchJobSearchAdapterTest {
         ArgumentCaptor<Map<String, Object>> request = ArgumentCaptor.forClass(Map.class);
         verify(client).search(eq("devhire_jobs"), request.capture());
         assertThat(request.getValue().toString())
-                .contains("companyId", companyId.toString(), "type", "Full-time");
+                .contains("companyId", companyId.toString(), "type", "full-time", "level", "senior");
     }
 
     @Test
@@ -101,7 +101,9 @@ class OpenSearchJobSearchAdapterTest {
         assertThat(document.getValue())
                 .containsEntry("publishedAt", job.getPublishedAt().toString())
                 .containsEntry("createdAt", "2026-05-02T00:00:00Z")
-                .containsEntry("updatedAt", "2026-05-02T00:00:00Z");
+                .containsEntry("updatedAt", "2026-05-02T00:00:00Z")
+                .containsEntry("level", "senior")
+                .containsEntry("type", "full-time");
     }
 
     @Test

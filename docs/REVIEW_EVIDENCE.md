@@ -34,6 +34,19 @@ See [status.md](status.md) for the single source of truth.
 | Gateway observability | `api-gateway` emits `devhire_gateway_requests_total`, `devhire_gateway_request_latency_seconds`, and `devhire_gateway_rate_limited_total` by route/status. |
 | Runtime observability smoke | `runtime-observability-smoke.ps1` now checks Gateway custom metrics together with recruitment, notification, audit, search, AI, and outbox metrics. |
 | SLO alerts | Prometheus rules include Gateway route p95 latency and route-level rate-limit spike alerts. |
+| Stitch visual QA | Playwright is the official visual evidence path while Browser Use is unavailable in this local environment. v0.6.2 adds route-matrix screenshots, mobile candidate checks, and a shared primary-evidence denylist. |
+
+## Visual Evidence
+
+The reviewer-facing screenshots are committed under `docs/screenshots/` and tracked by [evidence-manifest.json](evidence-manifest.json). The current set covers product, runtime, and operations evidence:
+
+| Category | Screenshots |
+|---|---|
+| Product | `jobs-page.png`, `job-detail.png`, `candidate-dashboard.png`, `employer-dashboard.png`, `admin-dashboard.png`, `assistant-page.png` |
+| Runtime | `docker-runtime-jobs.png`, `ops-openapi-job-service.png`, `ops-mailpit.png` |
+| Observability | `ops-prometheus-rules.png`, `ops-grafana-slo.png`, `ops-ai-provider.png` |
+
+Primary screenshots must not contain raw IDs, `UNKNOWN`, loading-only panels, offline/provider-backup banners, smoke labels, or mojibake. This is enforced by Playwright guards and `scripts/visual-evidence-audit.ps1`.
 
 ## Verification Commands
 

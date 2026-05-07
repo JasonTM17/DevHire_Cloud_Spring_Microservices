@@ -112,10 +112,10 @@ public class OpenSearchJobSearchAdapter implements JobSearchAdapter {
             must.add(Map.of("match", Map.of("location", criteria.location().trim())));
         }
         if (notBlank(criteria.level())) {
-            filter.add(Map.of("term", Map.of("level", criteria.level().trim())));
+            filter.add(Map.of("term", Map.of("level", normalizedKeyword(criteria.level()))));
         }
         if (notBlank(criteria.type())) {
-            filter.add(Map.of("term", Map.of("type", criteria.type().trim())));
+            filter.add(Map.of("term", Map.of("type", normalizedKeyword(criteria.type()))));
         }
         if (criteria.companyId() != null) {
             filter.add(Map.of("term", Map.of("companyId", criteria.companyId().toString())));
@@ -169,5 +169,9 @@ public class OpenSearchJobSearchAdapter implements JobSearchAdapter {
 
     private static boolean notBlank(String value) {
         return value != null && !value.isBlank();
+    }
+
+    private static String normalizedKeyword(String value) {
+        return value.trim().toLowerCase(Locale.ROOT);
     }
 }

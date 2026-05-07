@@ -24,8 +24,7 @@ export default function AdminPage() {
 
   function load() {
     setLoading(true);
-    const jobParams = new URLSearchParams({ page: "0", size: "12", sort: "publishedAt,desc" });
-    Promise.all([api.companies(), api.auditLogs(), api.aiProviderStatus(), api.jobs(jobParams), api.operationsSummary()])
+    Promise.all([api.adminCompanies("PENDING"), api.auditLogs(), api.aiProviderStatus(), api.adminJobs("PENDING_REVIEW"), api.operationsSummary()])
       .then(([companyPage, auditPage, providerStatus, jobPage, ops]) => {
         setCompanies(companyPage);
         setAudit(auditPage);

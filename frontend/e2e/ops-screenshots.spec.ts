@@ -1,5 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import path from "node:path";
+import { assertPrimaryEvidenceReady } from "./evidence-guards";
 
 const screenshotsDir = path.resolve(__dirname, "..", "..", "docs", "screenshots");
 
@@ -13,6 +14,7 @@ const urls = {
 };
 
 async function capture(page: Page, name: string) {
+  await assertPrimaryEvidenceReady(page);
   await page.screenshot({
     path: path.join(screenshotsDir, `${name}.png`),
     fullPage: true

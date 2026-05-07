@@ -91,6 +91,48 @@ class JobServiceTest {
     }
 
     @Test
+    void publicGetOnlyReturnsPublishedJobs() {
+        UUID jobId = UUID.randomUUID();
+        Job job = searchableJob(jobId);
+        when(repository.findByIdAndStatus(jobId, JobStatus.PUBLISHED)).thenReturn(Optional.of(job));
+
+        var response = service.get(jobId);
+
+        assertThat(response.status()).isEqualTo(JobStatus.PUBLISHED);
+    }
+
+    @Test
+    void publicGetHidesDraftAndReviewJobs() {
+        UUID jobId = UUID.randomUUID();
+        when(repository.findByIdAndStatus(jobId, JobStatus.PUBLISHED)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.get(jobId))
+                .isInstanceOf(DevHireException.class)
+                .hasMessageContaining("Published job not found");
+    }
+
+    @Test
+    void adminListsPendingReviewQueueByDefault() {
+        var pageable = PageRequest.of(0, 10);
+        Job job = new Job(UUID.randomUUID(), UUID.randomUUID());
+        job.updateContent("Senior Java", "Build APIs", "Java", "Budget", BigDecimal.ONE, BigDecimal.TEN,
+                "Remote", "Senior", "Full-time", "Java");
+        job.submitReview();
+        ReflectionTestUtils.setField(job, "id", UUID.randomUUID());
+        ReflectionTestUtils.setField(job, "createdAt", Instant.parse("2026-05-02T00:00:00Z"));
+        ReflectionTestUtils.setField(job, "updatedAt", Instant.parse("2026-05-02T00:00:00Z"));
+        when(repository.findByStatus(JobStatus.PENDING_REVIEW, pageable)).thenReturn(new PageImpl<>(List.of(job), pageable, 1));
+
+        var page = service.listForAdmin(
+                new AuthenticatedUser(UUID.randomUUID(), "admin@example.com", UserRole.ADMIN),
+                null,
+                pageable);
+
+        assertThat(page.getContent()).hasSize(1);
+        assertThat(page.getContent().getFirst().status()).isEqualTo(JobStatus.PENDING_REVIEW);
+    }
+
+    @Test
     void searchRecordsSuccessMetricsForPublishedJobs() {
         var criteria = new com.devhire.job.dto.request.JobSearchCriteria("java", "Java", "Remote",
                 BigDecimal.valueOf(3000), BigDecimal.valueOf(6000), "Senior", "Full-time", null);

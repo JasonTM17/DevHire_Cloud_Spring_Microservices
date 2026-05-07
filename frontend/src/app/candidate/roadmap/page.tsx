@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Bot, CheckCircle2, Map, Target } from "lucide-react";
+import { ArrowRight, Bot, CheckCircle2, Map, Target } from "lucide-react";
 import { MetricCard } from "@/components/MetricCard";
 import { StatusPill } from "@/components/StatusPill";
 import { api } from "@/lib/api";
@@ -56,7 +56,9 @@ export default function CandidateRoadmapPage() {
           <div className="stack">
             {roadmap.milestones.map((item) => (
               <div className="pipeline-step" key={item.nextAction}>
-                <span className="step-index">{item.status === "COMPLETED" ? "✓" : "→"}</span>
+                <span className="step-index" aria-hidden="true">
+                  {item.status === "COMPLETED" ? <CheckCircle2 size={14} /> : <ArrowRight size={14} />}
+                </span>
                 <span>{item.nextAction}</span>
               </div>
             ))}

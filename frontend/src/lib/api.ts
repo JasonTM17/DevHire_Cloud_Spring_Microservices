@@ -110,6 +110,8 @@ export const api = {
   notifications: () => request<PageResponse<Notification>>("/api/notifications"),
   readAllNotifications: () => request<Notification[]>("/api/notifications/read-all", { method: "PATCH" }),
   companies: () => request<PageResponse<Company>>("/api/companies"),
+  adminCompanies: (status = "PENDING") => request<PageResponse<Company>>(`/api/companies?status=${encodeURIComponent(status)}`),
+  employerCompanies: () => request<PageResponse<Company>>("/api/employer/companies"),
   companyBySlug: (slug: string) => request<Company>(`/api/companies/slug/${encodeURIComponent(slug)}`),
   createCompany: (payload: CompanyPayload) =>
     request<Company>("/api/companies", { method: "POST", body: JSON.stringify(payload) }),
@@ -122,6 +124,7 @@ export const api = {
   createJob: (payload: JobPayload) =>
     request<Job>("/api/jobs", { method: "POST", body: JSON.stringify(payload) }),
   submitJobReview: (id: string) => request<Job>(`/api/jobs/${id}/submit-review`, { method: "PATCH" }),
+  adminJobs: (status = "PENDING_REVIEW") => request<PageResponse<Job>>(`/api/admin/jobs?status=${encodeURIComponent(status)}`),
   approveJob: (id: string) => request<Job>(`/api/admin/jobs/${id}/approve`, { method: "PATCH" }),
   applicationsForJob: (jobId: string) =>
     request<PageResponse<Application>>(`/api/employer/jobs/${jobId}/applications`),

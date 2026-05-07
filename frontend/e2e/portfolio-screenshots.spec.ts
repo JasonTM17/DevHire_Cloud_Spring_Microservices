@@ -1,5 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import path from "node:path";
+import { assertPrimaryEvidenceReady } from "./evidence-guards";
 
 const screenshotsDir = path.resolve(__dirname, "..", "test-results", "portfolio-screenshots");
 
@@ -30,23 +31,6 @@ async function capture(page: Page, name: string) {
     path: path.join(screenshotsDir, `${name}.png`),
     fullPage: true
   });
-}
-
-async function assertPrimaryEvidenceReady(page: Page) {
-  const bodyText = await page.locator("body").innerText();
-  const forbidden = [
-    "UNKNOWN",
-    "Loading",
-    "Pending job ID",
-    "Job ID",
-    "Live API Gateway is offline",
-    "Fallback disabled",
-    "local-deterministic-fallback",
-    "Reviewer demo mode"
-  ];
-  for (const term of forbidden) {
-    expect(bodyText, `Primary screenshot must not contain rough evidence term: ${term}`).not.toContain(term);
-  }
 }
 
 async function login(page: Page, account: keyof typeof accounts) {
