@@ -6,7 +6,7 @@ This document is the implementation bridge from the Stitch project to the produc
 
 - Stitch project: `projects/5421325194779586117`
 - Product split: Admin/Ops, Employer/Company, Client/Candidate
-- Frontend branches: `v0.6-stitch-client-admin-redesign`, `v0.6.1-stitch-fidelity-polish`, `v0.6.2-stitch-completion-polish`, `v0.6.3-stitch-full-app-completion`, and stacked `v0.6.4-code-assessment-grading`
+- Frontend branches: `v0.6-stitch-client-admin-redesign`, `v0.6.1-stitch-fidelity-polish`, `v0.6.2-stitch-completion-polish`, `v0.6.3-stitch-full-app-completion`, stacked `v0.6.4-code-assessment-grading`, and stacked `v0.6.5-code-assessment-review-polish`
 - Goal: make the product feel like a recruitment operations platform instead of a static portfolio demo.
 
 ## Route Mapping
@@ -110,7 +110,7 @@ v0.6.4 keeps code grading reviewer-safe: candidate code is stored and scored wit
 | Infrastructure & K8s Control Plane | `/platform/cloud` | Static cloud evidence panels linked to Terraform/Helm/GitOps scripts | `stitch/platform-cloud.png` |
 | CI/CD & Deployment Registry | `/platform/releases` | Static release evidence panels linked to workflows, image metadata, and verification scripts | `stitch/platform-releases.png` |
 
-The v0.6.3 completion pass promotes these route-matrix screenshots into `docs/screenshots/stitch/`. v0.6.4 refreshes the candidate assessment, employer pipeline, and admin control-plane screenshots so code grading evidence appears in the primary Stitch surfaces.
+The v0.6.3 completion pass promotes these route-matrix screenshots into `docs/screenshots/stitch/`. v0.6.4 refreshes the candidate assessment, employer pipeline, and admin control-plane screenshots so code grading evidence appears in the primary Stitch surfaces. v0.6.5 tightens the employer review card state and E2E coverage so the staged flow proves candidate submission plus employer decision, not just a static rubric panel.
 
 ## Verification
 

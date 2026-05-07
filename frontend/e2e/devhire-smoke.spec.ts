@@ -86,6 +86,10 @@ test.describe("DevHire Cloud portfolio smoke", () => {
     await expect(page.getByRole("heading", { name: "Job workflow" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Code assessment review" })).toBeVisible();
     await expect(page.getByLabel("Applicant pipeline job")).toBeVisible();
+    const readyReview = page.locator(".review-card").filter({ hasText: "Ready for employer decision" }).first();
+    await expect(readyReview).toBeVisible();
+    await readyReview.getByRole("button", { name: /Advance/ }).click();
+    await expect(page.getByText(/Code review recorded/i)).toBeVisible();
     await expect(page.getByPlaceholder("Job ID")).toHaveCount(0);
   });
 

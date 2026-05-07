@@ -18,7 +18,7 @@ export default function EmployerPage() {
   const [jobs, setJobs] = useState<PageResponse<Job>>(previewJobs);
   const [selectedJobId, setSelectedJobId] = useState(previewJobs.content[0]?.id ?? "");
   const [applications, setApplications] = useState<PageResponse<Application>>(previewApplications);
-  const [codeAssessments, setCodeAssessments] = useState<CodeAssessment[]>(previewCodeAssessments);
+  const [codeAssessments, setCodeAssessments] = useState<CodeAssessment[]>([]);
   const [pipelineSummary, setPipelineSummary] = useState<EmployerPipelineSummary>(previewEmployerPipelineSummary);
   const [message, setMessage] = useState("");
   const [loadingCompanies, setLoadingCompanies] = useState(false);
@@ -34,6 +34,12 @@ export default function EmployerPage() {
     }
     return counts;
   }, [applications, pipelineSummary]);
+  const visibleCodeAssessments = useMemo(
+    () => [...codeAssessments].sort(
+      (left, right) => Number(isReviewableCodeAssessment(right)) - Number(isReviewableCodeAssessment(left))
+    ),
+    [codeAssessments]
+  );
 
   function loadCompanies() {
     setLoadingCompanies(true);
@@ -126,6 +132,15 @@ export default function EmployerPage() {
   }
 
   async function reviewCodeAssessment(id: string, decision: string, score?: number) {
+    if (!isUuid(id)) {
+      setCodeAssessments((current) => current.map((item) => (
+        item.id === id
+          ? { ...item, status: decision === "ADVANCE" ? "PASSED" : "EMPLOYER_REVIEWED", latestDecision: decision }
+          : item
+      )));
+      setMessage("Code review recorded for the selected candidate.");
+      return;
+    }
     try {
       const updated = await api.reviewCodeAssessment(id, decision, `${decision.toLowerCase()} after rubric review`, score);
       setCodeAssessments((current) => current.map((item) => (item.id === updated.id ? updated : item)));
@@ -253,36 +268,57 @@ export default function EmployerPage() {
           <h2>Code assessment review</h2>
         </div>
         <div className="assessment-review-grid">
-          {codeAssessments.slice(0, 4).map((item) => (
-            <div className="review-card" key={item.id}>
-              <div className="status-line">
-                <span>
-                  <strong>{item.candidateName}</strong>
-                  <small>{item.jobTitle}</small>
-                </span>
-                <StatusPill value={item.status} />
+          {visibleCodeAssessments.length === 0 ? (
+            <div className="empty-state compact">Syncing rubric-scored submissions...</div>
+          ) : null}
+          {visibleCodeAssessments.slice(0, 4).map((item) => {
+            const reviewable = isReviewableCodeAssessment(item);
+            return (
+              <div className="review-card" key={item.id}>
+                <div className="status-line">
+                  <span>
+                    <strong>{item.candidateName}</strong>
+                    <small>{item.jobTitle}</small>
+                  </span>
+                  <StatusPill value={item.status} />
+                </div>
+                <div className="status-line">
+                  <span>{item.challengeTitle}</span>
+                  <span className="score-chip">{item.latestScore == null ? "Pending" : `${item.latestScore}/${item.maxScore}`}</span>
+                </div>
+                <p>{item.feedback ?? "Candidate has not submitted code yet."}</p>
+                <pre className="code-preview">{(item.submittedCode ?? item.starterCode).slice(0, 360)}</pre>
+                <div className="tag-list">
+                  {item.riskFlags.length ? item.riskFlags.map((flag) => (
+                    <span className="badge warn" key={flag}>{flag.replaceAll("-", " ")}</span>
+                  )) : <span className="badge live">No high-risk flags</span>}
+                  <span className={reviewable ? "badge live" : "badge"}>
+                    {reviewable ? "Ready for employer decision" : item.submittedAt ? "Decision recorded" : "Waiting for candidate submission"}
+                  </span>
+                </div>
+                <div className="button-row">
+                  <button
+                    aria-label={`Hold ${item.candidateName}`}
+                    className="button secondary"
+                    disabled={!reviewable}
+                    type="button"
+                    onClick={() => reviewCodeAssessment(item.id, "HOLD", item.latestScore)}
+                  >
+                    Hold
+                  </button>
+                  <button
+                    aria-label={`Advance ${item.candidateName}`}
+                    className="button primary"
+                    disabled={!reviewable}
+                    type="button"
+                    onClick={() => reviewCodeAssessment(item.id, "ADVANCE", item.latestScore ?? 85)}
+                  >
+                    Advance
+                  </button>
+                </div>
               </div>
-              <div className="status-line">
-                <span>{item.challengeTitle}</span>
-                <span className="score-chip">{item.latestScore == null ? "Pending" : `${item.latestScore}/${item.maxScore}`}</span>
-              </div>
-              <p>{item.feedback ?? "Candidate has not submitted code yet."}</p>
-              <pre className="code-preview">{(item.submittedCode ?? item.starterCode).slice(0, 360)}</pre>
-              <div className="tag-list">
-                {item.riskFlags.length ? item.riskFlags.map((flag) => (
-                  <span className="badge warn" key={flag}>{flag.replaceAll("-", " ")}</span>
-                )) : <span className="badge live">No high-risk flags</span>}
-              </div>
-              <div className="button-row">
-                <button className="button secondary" type="button" onClick={() => reviewCodeAssessment(item.id, "HOLD", item.latestScore)}>
-                  Hold
-                </button>
-                <button className="button primary" type="button" onClick={() => reviewCodeAssessment(item.id, "ADVANCE", item.latestScore ?? 85)}>
-                  Advance
-                </button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>
@@ -298,7 +334,18 @@ function previewDashboardMessage(ex: unknown) {
 }
 
 function isPositiveMessage(message: string) {
-  return message.includes("submitted") || message.includes("preview") || message.includes("selected portfolio");
+  return message.includes("submitted")
+    || message.includes("recorded")
+    || message.includes("preview")
+    || message.includes("selected portfolio");
+}
+
+function isReviewableCodeAssessment(item: CodeAssessment) {
+  return Boolean(item.submittedAt) && !["PASSED", "FAILED"].includes(item.status);
+}
+
+function isUuid(value: string) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
 }
 
 function countBy<T>(items: T[], selector: (item: T) => string) {
