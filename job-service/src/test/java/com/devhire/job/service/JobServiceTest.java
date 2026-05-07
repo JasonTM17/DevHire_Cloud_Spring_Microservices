@@ -93,7 +93,7 @@ class JobServiceTest {
     @Test
     void searchRecordsSuccessMetricsForPublishedJobs() {
         var criteria = new com.devhire.job.dto.request.JobSearchCriteria("java", "Java", "Remote",
-                BigDecimal.valueOf(3000), BigDecimal.valueOf(6000), "Senior");
+                BigDecimal.valueOf(3000), BigDecimal.valueOf(6000), "Senior", "Full-time", null);
         var pageable = PageRequest.of(0, 10);
         Job job = searchableJob(UUID.randomUUID());
         when(searchAdapter.searchPublished(criteria, pageable)).thenReturn(new PageImpl<>(List.of(job), pageable, 1));
@@ -113,7 +113,7 @@ class JobServiceTest {
 
     @Test
     void searchRecordsErrorMetricsWhenAdapterFails() {
-        var criteria = new com.devhire.job.dto.request.JobSearchCriteria("java", null, null, null, null, null);
+        var criteria = new com.devhire.job.dto.request.JobSearchCriteria("java", null, null, null, null, null, null, null);
         var pageable = PageRequest.of(0, 10);
         when(searchAdapter.searchPublished(criteria, pageable)).thenThrow(new IllegalStateException("search down"));
 

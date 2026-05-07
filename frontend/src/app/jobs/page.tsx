@@ -31,6 +31,8 @@ export default function JobsPage() {
   const [skill, setSkill] = useState("");
   const [location, setLocation] = useState("");
   const [level, setLevel] = useState("");
+  const [jobType, setJobType] = useState("");
+  const [companyId, setCompanyId] = useState("");
   const [salaryMin, setSalaryMin] = useState("");
   const [pageNumber, setPageNumber] = useState(0);
   const [sortOrder, setSortOrder] = useState<"publishedAt,desc" | "salaryMax,desc">("publishedAt,desc");
@@ -44,9 +46,11 @@ export default function JobsPage() {
     if (skill.trim()) value.set("skill", skill.trim());
     if (location.trim()) value.set("location", location.trim());
     if (level.trim()) value.set("level", level.trim());
+    if (jobType.trim()) value.set("type", jobType.trim());
+    if (companyId.trim()) value.set("companyId", companyId.trim());
     if (salaryMin.trim()) value.set("salaryMin", salaryMin.trim());
     return value;
-  }, [keyword, skill, location, level, salaryMin, pageNumber, sortOrder]);
+  }, [keyword, skill, location, level, jobType, companyId, salaryMin, pageNumber, sortOrder]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -54,6 +58,8 @@ export default function JobsPage() {
     setSkill(params.get("skill") ?? "");
     setLocation(params.get("location") ?? "");
     setLevel(params.get("level") ?? "");
+    setJobType(params.get("type") ?? "");
+    setCompanyId(params.get("companyId") ?? "");
   }, []);
 
   useEffect(() => {
@@ -73,7 +79,9 @@ export default function JobsPage() {
   const visibleJobs = jobs?.content ?? [];
   const totalPages = Math.max(jobs?.totalPages ?? 1, 1);
   const currentPage = Math.min((jobs?.number ?? pageNumber) + 1, totalPages);
-  const hasFilters = Boolean(keyword.trim() || skill.trim() || location.trim() || level.trim() || salaryMin.trim());
+  const hasFilters = Boolean(
+    keyword.trim() || skill.trim() || location.trim() || level.trim() || jobType.trim() || companyId.trim() || salaryMin.trim()
+  );
 
   function updateFilter(next: () => void) {
     setPageNumber(0);
@@ -85,6 +93,8 @@ export default function JobsPage() {
     setSkill("");
     setLocation("");
     setLevel("");
+    setJobType("");
+    setCompanyId("");
     setSalaryMin("");
     setPageNumber(0);
   }
@@ -157,6 +167,20 @@ export default function JobsPage() {
         </label>
         <label>
           <BriefcaseBusiness size={16} />
+          <select
+            aria-label="Job type"
+            value={jobType}
+            onChange={(event) => updateFilter(() => setJobType(event.target.value))}
+          >
+            <option value="">Any type</option>
+            <option value="Full-time">Full-time</option>
+            <option value="Contract">Contract</option>
+            <option value="Part-time">Part-time</option>
+            <option value="Remote">Remote</option>
+          </select>
+        </label>
+        <label>
+          <BriefcaseBusiness size={16} />
           <input
             min="0"
             type="number"
@@ -175,6 +199,7 @@ export default function JobsPage() {
             setLevel("Senior");
             setLocation("");
           })}>Senior</button>
+          <button className={jobType === "Full-time" ? "tab active" : "tab"} type="button" onClick={() => updateFilter(() => setJobType("Full-time"))}>Full-time</button>
           <button className={skill === "Java" ? "tab active" : "tab"} type="button" onClick={() => updateFilter(() => setSkill("Java"))}>Java</button>
         </div>
         <div className="toolbar-actions">
@@ -210,7 +235,7 @@ export default function JobsPage() {
             {loading ? (
               <div className="empty-state">
                 <Loader2 className="spin" size={18} />
-                <strong>Loading published jobs</strong>
+                <strong>Syncing published jobs</strong>
                 <span>Calling Gateway, search adapter, and job-service.</span>
               </div>
             ) : null}

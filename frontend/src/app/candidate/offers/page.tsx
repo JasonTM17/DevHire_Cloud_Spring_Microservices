@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { BadgeCheck, CalendarClock, FileCheck2 } from "lucide-react";
 import { MetricCard } from "@/components/MetricCard";
-import { StatusPill } from "@/components/StatusPill";
+import { OfferCard } from "@/components/OfferCard";
 import { api } from "@/lib/api";
 import { previewCandidateOffers } from "@/lib/previewData";
 import type { CandidateOffer } from "@/types/domain";
@@ -37,22 +37,7 @@ export default function CandidateOffersPage() {
       </div>
       <div className="job-grid">
         {offers.map((offer) => (
-          <article className="job-card" key={offer.id}>
-            <div className="job-card-top">
-              <div>
-                <h2>{offer.jobTitle}</h2>
-                <span className="muted">{offer.companyName}</span>
-              </div>
-              <StatusPill value={offer.status} />
-            </div>
-            <p>{offer.compensation}</p>
-            <div className="tag-row">
-              {offer.highlights.map((item) => <span className="tag" key={item}>{item}</span>)}
-            </div>
-            <span className="muted">
-              Decision deadline {offer.expiresAt ? new Date(offer.expiresAt).toLocaleDateString() : "to be scheduled"}
-            </span>
-          </article>
+          <OfferCard offer={offer} key={offer.id} />
         ))}
       </div>
     </section>

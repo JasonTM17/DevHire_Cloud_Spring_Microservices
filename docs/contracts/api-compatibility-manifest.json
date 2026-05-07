@@ -41,6 +41,7 @@
         { "method": "POST", "localPath": "/companies", "gatewayPath": "/api/companies", "surface": "employer" },
         { "method": "GET", "localPath": "/companies", "gatewayPath": "/api/companies", "surface": "public" },
         { "method": "GET", "localPath": "/companies/{id}", "gatewayPath": "/api/companies/{id}", "surface": "public" },
+        { "method": "GET", "localPath": "/companies/slug/{slug}", "gatewayPath": "/api/companies/slug/{slug}", "surface": "public" },
         { "method": "PATCH", "localPath": "/admin/companies/{id}/approve", "gatewayPath": "/api/admin/companies/{id}/approve", "surface": "admin" },
         { "method": "PATCH", "localPath": "/admin/companies/{id}/reject", "gatewayPath": "/api/admin/companies/{id}/reject", "surface": "admin" },
         { "method": "GET", "localPath": "/internal/companies/{id}", "gatewayPath": null, "surface": "internal" }

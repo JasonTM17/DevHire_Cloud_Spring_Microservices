@@ -20,6 +20,7 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -72,5 +73,21 @@ class CompanyControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error", is("VALIDATION_ERROR")));
     }
-}
 
+    @Test
+    void getCompanyBySlugReturnsApprovedPublicProfile() throws Exception {
+        UUID companyId = UUID.randomUUID();
+        UUID employerId = UUID.randomUUID();
+        when(companyService.getApprovedBySlug("devhire-labs")).thenReturn(new CompanyResponse(
+                companyId, employerId, "DevHire Labs", "devhire-labs", null,
+                "https://devhire.local", "51-200", "HR Tech", "Hiring platform",
+                CompanyStatus.APPROVED, null, Instant.parse("2026-05-02T00:00:00Z"),
+                Instant.parse("2026-05-02T00:00:00Z")
+        ));
+
+        mockMvc.perform(get("/companies/slug/devhire-labs"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.slug", is("devhire-labs")))
+                .andExpect(jsonPath("$.data.status", is("APPROVED")));
+    }
+}

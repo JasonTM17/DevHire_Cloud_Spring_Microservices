@@ -114,6 +114,12 @@ public class OpenSearchJobSearchAdapter implements JobSearchAdapter {
         if (notBlank(criteria.level())) {
             filter.add(Map.of("term", Map.of("level", criteria.level().trim())));
         }
+        if (notBlank(criteria.type())) {
+            filter.add(Map.of("term", Map.of("type", criteria.type().trim())));
+        }
+        if (criteria.companyId() != null) {
+            filter.add(Map.of("term", Map.of("companyId", criteria.companyId().toString())));
+        }
         if (criteria.salaryMin() != null) {
             filter.add(range("salaryMax", "gte", criteria.salaryMin()));
         }

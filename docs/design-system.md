@@ -42,6 +42,9 @@ DevHire Cloud should read as a production SaaS recruitment operations platform, 
 - Secondary action: cobalt `#2563eb`.
 - Status chips: small, high-contrast, semantic colors.
 - Tables: fixed row rhythm, subtle background, clear right-aligned actions.
+- Reusable workflow components should carry the design language across routes: status distributions, candidate timelines, offer cards, assessment cards, roadmap milestones, and operations panels.
+- Company routes must render company name, industry, website, status, and open jobs from route-scoped data instead of generic list defaults.
+- Candidate profile routes must prefer user-service data and only fall back to a read-only sample when no session is available.
 
 ## v0.6 Stitch Redesign Direction
 

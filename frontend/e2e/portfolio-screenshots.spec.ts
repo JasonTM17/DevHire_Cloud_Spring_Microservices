@@ -69,7 +69,7 @@ test.describe("portfolio screenshots", () => {
     await expect(page.getByTestId("jobs-page")).toBeVisible();
     await expect(page.getByTestId("job-card").first()).toBeVisible();
     await expect(page.getByTestId("job-card").first()).toContainText(/Engineer|Architect|Developer/i);
-    await expect(page.getByText("Loading published jobs")).toHaveCount(0);
+    await expect(page.getByText("Syncing published jobs")).toHaveCount(0);
     await capture(page, "jobs-page");
 
     await page.getByTestId("job-card").first().click();
@@ -79,7 +79,7 @@ test.describe("portfolio screenshots", () => {
     await login(page, "candidate");
     await expect(page.getByText("Application tracker")).toBeVisible();
     await expect(page.getByText(/submitted|reviewing|interview|offer/i).first()).toBeVisible();
-    await expect(page.getByText("Loading candidate applications...")).toHaveCount(0);
+    await expect(page.getByText("Syncing candidate pipeline...")).toHaveCount(0);
     await capture(page, "candidate-dashboard");
 
     await page.goto("/assistant");
@@ -92,13 +92,13 @@ test.describe("portfolio screenshots", () => {
     await login(page, "employer");
     await expect(page.getByText("Company and pipeline")).toBeVisible();
     await expect(page.getByText("Job workflow")).toBeVisible();
-    await expect(page.getByText("Loading employer companies...")).toHaveCount(0);
+    await expect(page.getByText("Syncing employer companies...")).toHaveCount(0);
     await capture(page, "employer-dashboard");
 
     await login(page, "admin");
     await expect(page.getByText("Review console")).toBeVisible();
     await expect(page.getByText("AI provider operations")).toBeVisible();
-    await expect(page.getByText("Loading admin review queue...")).toHaveCount(0);
+    await expect(page.getByText("Syncing admin review queue...")).toHaveCount(0);
     await capture(page, "admin-dashboard");
   });
 });

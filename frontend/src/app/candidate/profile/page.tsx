@@ -1,27 +1,53 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { BadgeCheck, BriefcaseBusiness, UserRoundCheck } from "lucide-react";
 import { MetricCard } from "@/components/MetricCard";
+import { api } from "@/lib/api";
+import { getSession } from "@/lib/session";
+import type { UserProfile } from "@/types/domain";
 
-type Profile = {
-  name?: string;
-  title?: string;
-  skills?: string[];
-  experience?: string;
-  education?: string;
-  expectedSalary?: number;
-  avatarUrl?: string;
+const sampleProfile: UserProfile = {
+  userId: "sample-candidate",
+  email: "candidate@devhire.local",
+  role: "CANDIDATE",
+  name: "Linh Nguyen",
+  title: "Senior Java Backend Engineer",
+  skills: ["Java", "Spring Boot", "Kafka", "AWS", "OpenSearch"],
+  experience: "7 years building production microservices, event-driven systems, and cloud reliability tooling.",
+  education: "University of Science",
+  expectedSalary: 5200
 };
 
 export default function CandidateProfilePage() {
-  const profile: Profile = {
-    name: "Linh Nguyen",
-    title: "Senior Java Backend Engineer",
-    skills: ["Java", "Spring Boot", "Kafka", "AWS", "OpenSearch"],
-    experience: "7 years building production microservices, event-driven systems, and cloud reliability tooling.",
-    education: "University of Science",
-    expectedSalary: 5200
-  };
+  const [profile, setProfile] = useState<UserProfile>(sampleProfile);
+  const [profileMode, setProfileMode] = useState<"api" | "sample">("sample");
+
+  useEffect(() => {
+    if (!getSession()?.accessToken) {
+      setProfile(sampleProfile);
+      setProfileMode("sample");
+      return;
+    }
+    api.userProfileMe()
+      .then((value) => {
+        setProfile({
+          ...sampleProfile,
+          ...value,
+          name: value.name || sampleProfile.name,
+          title: value.title || sampleProfile.title,
+          skills: value.skills?.length ? value.skills : sampleProfile.skills,
+          experience: value.experience || sampleProfile.experience,
+          education: value.education || sampleProfile.education,
+          expectedSalary: value.expectedSalary ?? sampleProfile.expectedSalary
+        });
+        setProfileMode("api");
+      })
+      .catch(() => {
+        setProfile(sampleProfile);
+        setProfileMode("sample");
+      });
+  }, []);
 
   return (
     <section className="page-stack" data-testid="candidate-profile-page">
@@ -32,7 +58,7 @@ export default function CandidateProfilePage() {
           <p>{profile.title}</p>
         </div>
         <div className="hero-actions">
-          <span className="badge live">Candidate profile</span>
+          <span className={profileMode === "api" ? "badge live" : "badge"}>{profileMode === "api" ? "Live profile" : "Read-only sample"}</span>
           <span className="badge">Private by default</span>
         </div>
       </div>

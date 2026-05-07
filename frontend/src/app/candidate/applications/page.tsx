@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ClipboardList, FileCheck2, ShieldCheck } from "lucide-react";
+import { CandidateTimeline } from "@/components/CandidateTimeline";
 import { MetricCard } from "@/components/MetricCard";
-import { StatusPill } from "@/components/StatusPill";
+import { StatusDistributionList } from "@/components/StatusDistributionList";
 import { api } from "@/lib/api";
 import { previewCandidateApplicationsSummary } from "@/lib/previewData";
 import type { CandidateApplicationsSummary } from "@/types/domain";
@@ -39,28 +40,11 @@ export default function CandidateApplicationsPage() {
       <div className="split-grid">
         <div className="panel">
           <h2>Status distribution</h2>
-          <div className="insight-list compact">
-            {summary.statusDistribution.map((item) => (
-              <div className="insight-line" key={item.status}>
-                <span>{item.status.toLowerCase().replaceAll("_", " ")}</span>
-                <strong>{item.count}</strong>
-              </div>
-            ))}
-          </div>
+          <StatusDistributionList items={summary.statusDistribution} />
         </div>
         <div className="panel">
           <h2>Recent movement</h2>
-          <div className="table-list">
-            {summary.recentActivity.map((item) => (
-              <div className="table-row" key={`${item.applicationId}-${item.occurredAt}`}>
-                <span>
-                  <strong>{item.title}</strong>
-                  <small>{item.description}</small>
-                </span>
-                <StatusPill value={item.status} />
-              </div>
-            ))}
-          </div>
+          <CandidateTimeline items={summary.recentActivity} />
         </div>
       </div>
     </section>

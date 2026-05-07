@@ -63,7 +63,7 @@ export default function JobDetailPage() {
   }
 
   if (!job) {
-    return <section className="panel">Loading job...</section>;
+    return <section className="panel">Syncing job...</section>;
   }
 
   const brand = brandForJob(job);

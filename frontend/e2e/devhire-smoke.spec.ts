@@ -51,14 +51,27 @@ test.describe("DevHire Cloud portfolio smoke", () => {
     await expect(page.getByLabel("CV URL")).toHaveValue("");
     await expect(page.getByLabel("CV URL")).not.toHaveValue(/example\.com/);
     await expect(page.getByLabel("CV URL")).toHaveAttribute("placeholder", /storage\.devhire\.local/);
-    await expect(page.getByText(/Live API Gateway is offline/i)).toHaveCount(0);
+    await expect(page.getByText(/Live API Gateway is unavailable/i)).toHaveCount(0);
     await expect(page.getByRole("button", { name: "Submit application" })).toBeVisible();
+  });
+
+  test("company slug route resolves a company profile and scoped job board", async ({ page }) => {
+    await page.goto("/companies/portfolio-labs");
+
+    await expect(page.getByTestId("company-profile-page")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Portfolio Labs" })).toBeVisible();
+    await expect(page.getByText("Slug-backed profile")).toBeVisible();
+    await expect(page.getByRole("link", { name: "Open jobs" })).toHaveAttribute("href", /companyId=/);
   });
 
   test("candidate can sign in and view the application workspace", async ({ page }) => {
     await login(page, "candidate");
     await expect(page.getByRole("heading", { name: "Application tracker" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Notifications" })).toBeVisible();
+    await page.goto("/candidate/profile");
+    await expect(page.getByTestId("candidate-profile-page")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Linh Nguyen" })).toBeVisible();
+    await expect(page.getByText(/Live profile|Read-only sample/)).toBeVisible();
   });
 
   test("employer can sign in and view company and job workflow", async ({ page }) => {

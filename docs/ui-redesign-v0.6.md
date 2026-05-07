@@ -50,6 +50,11 @@ v0.6 keeps the existing public APIs backward compatible and adds read-model endp
 
 All read models are routed through the API Gateway under `/api/...` and still rely on gateway identity headers plus service-level role checks.
 
+The Stitch fidelity polish adds two production-facing refinements:
+
+- `GET /api/companies/slug/{slug}` resolves the company profile route by public slug instead of rendering the first company in the list.
+- `GET /api/jobs` now accepts optional `type` and `companyId` filters in addition to keyword, skill, location, salary, and level. PostgreSQL and OpenSearch adapters both honor the new filters.
+
 ## Data Additions
 
 The application service owns persisted candidate experience data:
@@ -66,6 +71,20 @@ These are seeded deterministically by Flyway so portfolio pages can render rich 
 - Primary screenshots avoid raw IDs, `UNKNOWN`, loading-only states, fallback/offline warnings, and smoke/test labels.
 - Controls that look interactive either call a read model or present a clear preview state.
 - The role-aware navigation groups Candidate, Employer, Admin/Ops, and Platform workspaces.
+- Company profile pages use the actual route slug and scope jobs to the resolved company.
+- Candidate profile pages use `GET /api/users/me` when signed in and a polished read-only sample when unauthenticated.
+- Repeated status distributions, timelines, offers, and pipeline rows use shared Stitch-aligned components so the UI reads as one product.
+
+## Implementation Status
+
+| Stitch area | Status |
+|---|---|
+| Client job discovery/detail | Implemented with filters, sorting, pagination, CV URL validation, and duplicate-protection copy. |
+| Client dashboard/applications | Implemented with application status distribution and reusable timeline components. |
+| Client profile/offers/assessments/roadmap/analytics/interview prep | Implemented; profile now prefers live user-service data. |
+| Employer pipeline/company | Implemented with selectable jobs and applicant queues. |
+| Company profile | Implemented with slug-backed lookup and company-scoped jobs. |
+| Admin/Ops/platform | Implemented with review queues, audit aggregates, AI provider status, observability, cloud, and release views. |
 
 ## Verification
 
