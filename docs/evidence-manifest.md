@@ -20,7 +20,7 @@ Run the audit:
 
 The script validates required files, checks that forbidden runtime/secret artifacts are not tracked by Git, and writes ignored reports under `reports/evidence-audit/`.
 
-v0.4.7 adds public credibility evidence for `scripts/dependabot-zero-noise.ps1` and `scripts/github-workflow-status.ps1` so dependency backlog and hosted workflow state are auditable rather than implied.
+v0.6.x adds Stitch route-matrix evidence for candidate, employer, admin, and platform surfaces while keeping dependency backlog and hosted workflow state auditable through `scripts/dependabot-zero-noise.ps1` and `scripts/github-workflow-status.ps1`.
 
 Use it with the reviewer verifier:
 

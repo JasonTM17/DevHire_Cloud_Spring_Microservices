@@ -73,6 +73,18 @@ function Assert-ManifestShape {
             if ($endpoint.gatewayPath -and -not $endpoint.gatewayPath.StartsWith("/api/")) {
                 throw "$($service.name) $method $($endpoint.localPath) gatewayPath must start with /api/"
             }
+
+            if ($endpoint.PSObject.Properties.Name -contains "queryParams") {
+                foreach ($queryParam in @($endpoint.queryParams)) {
+                    if (-not $queryParam -or $queryParam -notmatch "^[A-Za-z][A-Za-z0-9]*$") {
+                        throw "$($service.name) $method $($endpoint.localPath) has invalid query param contract: $queryParam"
+                    }
+                }
+            }
+
+            if ($endpoint.PSObject.Properties.Name -contains "responsePolicy" -and -not $endpoint.responsePolicy) {
+                throw "$($service.name) $method $($endpoint.localPath) has empty responsePolicy"
+            }
         }
     }
 

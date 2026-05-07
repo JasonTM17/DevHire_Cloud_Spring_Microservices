@@ -85,7 +85,7 @@ class AiAssistantServiceTest {
         var response = service.chat(user(), new AiChatRequest(null, "Find Java jobs"));
 
         assertThat(response.fallback()).isTrue();
-        assertThat(response.answer()).contains("deterministic portfolio fallback");
+        assertThat(response.answer()).contains("deterministic reviewer-safe answer mode");
         verify(repository).saveMessage(eq(conversationId), eq("ASSISTANT"), anyString(), eq(true), anyList(), anyList());
     }
 

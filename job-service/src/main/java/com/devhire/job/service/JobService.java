@@ -84,7 +84,15 @@ public class JobService {
 
     @Transactional(readOnly = true)
     public JobResponse get(UUID id) {
-        return mapper.toResponse(find(id));
+        return mapper.toResponse(repository.findByIdAndStatus(id, JobStatus.PUBLISHED)
+                .orElseThrow(() -> new DevHireException(ErrorCode.NOT_FOUND, "Published job not found")));
+    }
+
+    @Transactional(readOnly = true)
+    public Page<JobResponse> listForAdmin(AuthenticatedUser admin, JobStatus status, Pageable pageable) {
+        requireRole(admin, UserRole.ADMIN);
+        JobStatus reviewStatus = status == null ? JobStatus.PENDING_REVIEW : status;
+        return repository.findByStatus(reviewStatus, pageable).map(mapper::toResponse);
     }
 
     @Transactional(readOnly = true)

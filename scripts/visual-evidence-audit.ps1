@@ -97,10 +97,16 @@ if (-not $SkipSourceGuard) {
         "frontend/src/app/employer/page.tsx",
         "frontend/src/app/candidate/page.tsx",
         "frontend/src/app/candidate/profile/page.tsx",
+        "frontend/src/app/candidate/interview-prep/page.tsx",
+        "frontend/src/app/candidate/roadmap/page.tsx",
+        "frontend/src/app/candidate/skill-analytics/page.tsx",
         "frontend/src/app/companies/[slug]/page.tsx",
         "frontend/src/app/jobs/page.tsx",
         "frontend/src/app/jobs/[id]/page.tsx",
-        "frontend/src/app/assistant/page.tsx"
+        "frontend/src/app/assistant/page.tsx",
+        "frontend/src/app/platform/cloud/page.tsx",
+        "frontend/src/app/platform/observability/page.tsx",
+        "frontend/src/app/platform/releases/page.tsx"
     )
     $forbiddenText = @(
         "UNKNOWN",
@@ -111,7 +117,10 @@ if (-not $SkipSourceGuard) {
         "offline",
         "Fallback disabled",
         "local-deterministic-fallback",
+        "local_preview_fallback",
         "Smoke",
+        "â",
+        "�",
         "Job `$`{jobId.slice",
         "Candidate `$`{item.candidateId.slice",
         "Job submitted for review: `$`{job.id"
@@ -130,10 +139,10 @@ if (-not $SkipSourceGuard) {
         }
     }
 
-    $screenshotSpec = Get-Content -Raw -Encoding UTF8 (Join-Path $repoRoot "frontend/e2e/portfolio-screenshots.spec.ts")
-    foreach ($requiredAssertion in @("assertPrimaryEvidenceReady", "Reviewer demo mode", "local-deterministic-fallback")) {
-        if (-not $screenshotSpec.Contains($requiredAssertion)) {
-            throw "Visual evidence screenshot spec is missing required readiness assertion: $requiredAssertion"
+    $guardSpec = Get-Content -Raw -Encoding UTF8 (Join-Path $repoRoot "frontend/e2e/evidence-guards.ts")
+    foreach ($requiredAssertion in @("assertPrimaryEvidenceReady", "Reviewer demo mode", "local-deterministic-fallback", "Pending job ID", "Job ID")) {
+        if (-not $guardSpec.Contains($requiredAssertion)) {
+            throw "Visual evidence guard is missing required readiness assertion: $requiredAssertion"
         }
     }
 }

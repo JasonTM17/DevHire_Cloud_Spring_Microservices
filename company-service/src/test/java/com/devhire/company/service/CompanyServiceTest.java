@@ -10,9 +10,12 @@ import com.devhire.company.event.CompanyEventPublisher;
 import com.devhire.company.mapper.CompanyMapper;
 import com.devhire.company.repository.CompanyRepository;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -124,6 +127,59 @@ class CompanyServiceTest {
     }
 
     @Test
+    void pendingCompanyIsHiddenFromPublicIdLookup() {
+        UUID companyId = UUID.randomUUID();
+        when(repository.findByIdAndStatus(companyId, CompanyStatus.APPROVED)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.get(companyId))
+                .isInstanceOf(DevHireException.class)
+                .hasMessageContaining("Approved company not found");
+    }
+
+    @Test
+    void publicCompanyListOnlyReturnsApprovedCompanies() {
+        Company company = approvedCompany();
+        when(repository.findByStatus(CompanyStatus.APPROVED, PageRequest.of(0, 5)))
+                .thenReturn(new PageImpl<>(List.of(company), PageRequest.of(0, 5), 1));
+
+        var page = service.listPublic(PageRequest.of(0, 5));
+
+        assertThat(page.getContent()).hasSize(1);
+        assertThat(page.getContent().getFirst().status()).isEqualTo(CompanyStatus.APPROVED);
+    }
+
+    @Test
+    void employerCompanyListIsScopedToAuthenticatedEmployer() {
+        UUID employerId = UUID.randomUUID();
+        Company company = approvedCompany(employerId);
+        when(repository.findByEmployerId(employerId, PageRequest.of(0, 5)))
+                .thenReturn(new PageImpl<>(List.of(company), PageRequest.of(0, 5), 1));
+
+        var page = service.listForEmployer(
+                new AuthenticatedUser(employerId, "employer@example.com", UserRole.EMPLOYER),
+                PageRequest.of(0, 5));
+
+        assertThat(page.getContent()).hasSize(1);
+        assertThat(page.getContent().getFirst().employerId()).isEqualTo(employerId);
+    }
+
+    @Test
+    void adminCanListCompaniesByReviewStatus() {
+        Company company = new Company(UUID.randomUUID(), "DevHire Labs", "devhire-labs", null, null, null, null, null);
+        stamp(company, UUID.randomUUID());
+        when(repository.findByStatus(CompanyStatus.PENDING, PageRequest.of(0, 5)))
+                .thenReturn(new PageImpl<>(List.of(company), PageRequest.of(0, 5), 1));
+
+        var page = service.listForAdmin(
+                new AuthenticatedUser(UUID.randomUUID(), "admin@example.com", UserRole.ADMIN),
+                CompanyStatus.PENDING,
+                PageRequest.of(0, 5));
+
+        assertThat(page.getContent()).hasSize(1);
+        assertThat(page.getContent().getFirst().status()).isEqualTo(CompanyStatus.PENDING);
+    }
+
+    @Test
     void nonAdminCannotApproveCompany() {
         assertThatThrownBy(() -> service.approve(
                 new AuthenticatedUser(UUID.randomUUID(), "employer@example.com", UserRole.EMPLOYER),
@@ -150,5 +206,22 @@ class CompanyServiceTest {
         assertThat(response.rejectionReason()).isEqualTo("Missing company verification");
         verify(eventPublisher).publishAudit(any());
         verify(eventPublisher).publishCompanyReviewed(any());
+    }
+
+    private static Company approvedCompany() {
+        return approvedCompany(UUID.randomUUID());
+    }
+
+    private static Company approvedCompany(UUID employerId) {
+        Company company = new Company(employerId, "DevHire Labs", "devhire-labs", null, null, null, null, null);
+        stamp(company, UUID.randomUUID());
+        company.approve();
+        return company;
+    }
+
+    private static void stamp(Company company, UUID id) {
+        ReflectionTestUtils.setField(company, "id", id);
+        ReflectionTestUtils.setField(company, "createdAt", Instant.parse("2026-05-02T00:00:00Z"));
+        ReflectionTestUtils.setField(company, "updatedAt", Instant.parse("2026-05-02T00:00:00Z"));
     }
 }

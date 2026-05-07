@@ -37,7 +37,7 @@ export default function EmployerPage() {
   function loadCompanies() {
     setLoadingCompanies(true);
     const jobParams = new URLSearchParams({ page: "0", size: "12", sort: "publishedAt,desc" });
-    Promise.all([api.companies(), api.jobs(jobParams), api.employerPipelineSummary()])
+    Promise.all([api.employerCompanies(), api.jobs(jobParams), api.employerPipelineSummary()])
       .then(([page, jobPage, summary]) => {
         setCompanies(page);
         setJobs(jobPage.content.length ? jobPage : previewJobs);

@@ -43,6 +43,8 @@ DevHire Cloud should read as a production SaaS recruitment operations platform, 
 - Status chips: small, high-contrast, semantic colors.
 - Tables: fixed row rhythm, subtle background, clear right-aligned actions.
 - Reusable workflow components should carry the design language across routes: status distributions, candidate timelines, offer cards, assessment cards, roadmap milestones, and operations panels.
+- Navigation is organized into four Stitch product regions: Candidate, Employer, Admin/Ops, and Platform. Avoid mixing candidate journeys with platform evidence links.
+- Platform evidence panels must show the proof path, verification state, and owner action where relevant instead of static marketing copy.
 - Company routes must render company name, industry, website, status, and open jobs from route-scoped data instead of generic list defaults.
 - Candidate profile routes must prefer user-service data and only fall back to a read-only sample when no session is available.
 

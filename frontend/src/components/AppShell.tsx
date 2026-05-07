@@ -28,23 +28,40 @@ import { clearSession, getSession } from "@/lib/session";
 
 const navGroups = [
   {
-    label: "Client",
+    label: "Candidate",
     items: [
       { href: "/jobs", label: "Discover Jobs", icon: BriefcaseBusiness },
       { href: "/candidate", label: "Candidate Home", icon: ClipboardList },
       { href: "/candidate/applications", label: "Applications", icon: FileCheck2 },
+      { href: "/candidate/profile", label: "Profile", icon: UserRoundCheck },
       { href: "/candidate/assessments", label: "Assessments", icon: GraduationCap },
-      { href: "/candidate/roadmap", label: "Roadmap", icon: Map }
+      { href: "/candidate/offers", label: "Offers", icon: ShieldCheck },
+      { href: "/candidate/interview-prep", label: "Interview Prep", icon: Bot },
+      { href: "/candidate/roadmap", label: "Roadmap", icon: Map },
+      { href: "/candidate/skill-analytics", label: "Skill Analytics", icon: ChartSpline },
+      { href: "/community", label: "Community", icon: UsersRound }
     ]
   },
   {
-    label: "Operations",
+    label: "Employer",
     items: [
-      { href: "/employer", label: "Employer Pipeline", icon: Building2 },
+      { href: "/employer", label: "Hiring Pipeline", icon: Building2 }
+    ]
+  },
+  {
+    label: "Admin/Ops",
+    items: [
       { href: "/admin", label: "Admin Control", icon: ShieldCheck },
+      { href: "/admin/ai", label: "AI Operations", icon: Bot }
+    ]
+  },
+  {
+    label: "Platform",
+    items: [
       { href: "/assistant", label: "AI Assistant", icon: Bot },
       { href: "/platform/observability", label: "Observability", icon: ChartSpline },
-      { href: "/community", label: "Community", icon: UsersRound }
+      { href: "/platform/cloud", label: "Cloud Blueprint", icon: Cloud },
+      { href: "/platform/releases", label: "Releases", icon: GitBranch }
     ]
   }
 ];
@@ -97,6 +114,10 @@ const pageMeta: Record<string, { title: string; subtitle: string }> = {
   "/admin": {
     title: "Administrative Control Plane",
     subtitle: "Approve companies, promote jobs, and inspect audit events."
+  },
+  "/admin/ai": {
+    title: "AI Operations",
+    subtitle: "Provider posture, knowledge reindexing, safety controls, and assistant evidence."
   },
   "/platform/observability": {
     title: "Observability & Event Streaming",
@@ -157,7 +178,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <span className="nav-group-label">{group.label}</span>
               {group.items.map((item) => {
                 const Icon = item.icon;
-                const active = pathname === item.href || (item.href !== "/candidate" && pathname.startsWith(`${item.href}/`));
+                const expandsToNestedRoute = !["/candidate", "/admin"].includes(item.href);
+                const active = pathname === item.href || (expandsToNestedRoute && pathname.startsWith(`${item.href}/`));
                 return (
                   <Link key={item.href} href={item.href} className={active ? "nav-item active" : "nav-item"}>
                     <Icon size={18} />

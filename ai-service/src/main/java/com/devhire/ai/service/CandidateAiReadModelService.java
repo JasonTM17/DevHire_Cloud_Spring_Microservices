@@ -84,7 +84,7 @@ public class CandidateAiReadModelService {
             return List.of("Spring Boot services", "Kafka events", "OpenSearch search");
         }
         if (normalized.contains("safety")) {
-            return List.of("Prompt injection", "fallback behavior", "citation policy");
+            return List.of("Prompt injection", "provider backup behavior", "citation policy");
         }
         return List.of("Architecture narrative", "runtime evidence", "reviewer demo path");
     }

@@ -273,7 +273,7 @@ public class AiAssistantService {
 
     private String fallbackAnswer(String message, String jobsSummary, String healthSummary, List<AiCitation> citations) {
         StringBuilder answer = new StringBuilder();
-        answer.append("Claude Haiku is not configured in this runtime, so DevHire is using deterministic portfolio fallback mode.\n\n");
+        answer.append("Claude Haiku is not configured in this runtime, so DevHire is using deterministic reviewer-safe answer mode.\n\n");
         answer.append("For your question: ").append(message).append("\n\n");
         answer.append("- Job context: ").append(jobsSummary).append("\n");
         answer.append("- Platform context: ").append(healthSummary).append("\n");

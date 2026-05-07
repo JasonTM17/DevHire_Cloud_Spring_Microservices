@@ -54,6 +54,7 @@ public class GatewayRoutesConfig {
                 .route("candidate-skill-analytics", route -> route.path("/api/candidate/skill-analytics").filters(filters).uri(jobServiceUrl))
                 .route("candidate-ai-roadmap", route -> route.path("/api/candidate/roadmap", "/api/candidate/interview-prep").filters(filters).uri(aiServiceUrl))
                 .route("candidate-application-read-models", route -> route.path("/api/candidate/**").filters(filters).uri(applicationServiceUrl))
+                .route("employer-company-service", route -> route.path("/api/employer/companies", "/api/employer/companies/**").filters(filters).uri(companyServiceUrl))
                 .route("application-employer", route -> route.path("/api/employer/**").filters(filters).uri(applicationServiceUrl))
                 .route("application-service", route -> route.path("/api/applications/**").filters(filters).uri(applicationServiceUrl))
                 .route("admin-company-service", route -> route.path("/api/admin/companies/**").filters(filters).uri(companyServiceUrl))

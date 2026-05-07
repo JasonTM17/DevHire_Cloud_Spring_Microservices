@@ -3370,3 +3370,39 @@ Verification:
   - unexpected exceptions returning stable internal-error responses,
   - correlation id preservation, generation, response header propagation, and MDC cleanup.
 - Raised the `common-lib` coverage gate from 48% to 60% after coverage increased to 67.5%.
+
+## v0.6.2 Stitch completion polish
+
+- Continued on stacked branch `v0.6.2-stitch-completion-polish` from `v0.6.1-stitch-fidelity-polish`; PR #43/#44 remain protected by required review.
+- Tightened public/private API boundaries:
+  - public company id/list/slug surfaces expose approved companies only,
+  - employer company list is scoped by authenticated employer,
+  - admin company and job review queues use authenticated admin read models,
+  - public job detail now returns published jobs only,
+  - job search `type` and `companyId` filters are represented in the compatibility manifest.
+- Completed Stitch route fidelity checks across candidate, employer, admin/ops, and platform regions:
+  - role-aware navigation now separates Candidate, Employer, Admin/Ops, and Platform,
+  - `/admin/ai` adds an AI operations surface,
+  - platform evidence pages show verification proof without primary screenshot smoke/fallback copy,
+  - candidate roadmap mojibake was removed.
+- Added route-matrix Playwright coverage and mobile checks for the expanded candidate Stitch screens.
+- Updated visual evidence promotion so curated product and operations screenshots can be promoted together.
+- Updated README VI/EN/JA and review evidence so all languages surface the same screenshot/security/cloud proof.
+
+Verification:
+
+- `mvn -T1 -pl company-service,job-service,application-service,api-gateway -am test`
+- `mvn -T1 clean verify`
+- `.\scripts\check-coverage.ps1`
+- `cd frontend && npm run typecheck`
+- `cd frontend && npm run build`
+- `cd frontend && npm run e2e:all`
+- `.\scripts\api-compatibility.ps1 -ManifestOnly`
+- `.\scripts\docs-quality.ps1`
+- `.\scripts\docs-parity.ps1`
+- `.\scripts\evidence-manifest-verify.ps1`
+- `.\scripts\visual-evidence-audit.ps1`
+- `.\scripts\repo-hygiene.ps1`
+- `.\scripts\domain-placeholder-audit.ps1`
+- `.\scripts\professionalism-audit.ps1`
+- `.\scripts\portfolio-verify.ps1 -Docs -Docker -Cloud`

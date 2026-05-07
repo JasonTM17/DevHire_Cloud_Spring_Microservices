@@ -12,6 +12,7 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 @Component
@@ -73,8 +74,8 @@ public class OpenSearchJobSearchIndex implements JobSearchIndex {
         document.put("salaryMin", job.getSalaryMin());
         document.put("salaryMax", job.getSalaryMax());
         document.put("location", job.getLocation());
-        document.put("level", job.getLevel());
-        document.put("type", job.getType());
+        document.put("level", normalizedKeyword(job.getLevel()));
+        document.put("type", normalizedKeyword(job.getType()));
         document.put("skills", skills(job.getSkillsCsv()));
         document.put("status", job.getStatus().name());
         document.put("publishedAt", instant(job.getPublishedAt()));
@@ -95,5 +96,9 @@ public class OpenSearchJobSearchIndex implements JobSearchIndex {
                 .map(String::trim)
                 .filter(skill -> !skill.isBlank())
                 .toList();
+    }
+
+    private static String normalizedKeyword(String value) {
+        return value == null ? null : value.trim().toLowerCase(Locale.ROOT);
     }
 }

@@ -6,7 +6,7 @@ This document is the implementation bridge from the Stitch project to the produc
 
 - Stitch project: `projects/5421325194779586117`
 - Product split: Admin/Ops, Employer/Company, Client/Candidate
-- Frontend branch: `v0.6-stitch-client-admin-redesign`
+- Frontend branches: `v0.6-stitch-client-admin-redesign`, `v0.6.1-stitch-fidelity-polish`, and stacked `v0.6.2-stitch-completion-polish`
 - Goal: make the product feel like a recruitment operations platform instead of a static portfolio demo.
 
 ## Route Mapping
@@ -54,6 +54,7 @@ The Stitch fidelity polish adds two production-facing refinements:
 
 - `GET /api/companies/slug/{slug}` resolves the company profile route by public slug instead of rendering the first company in the list.
 - `GET /api/jobs` now accepts optional `type` and `companyId` filters in addition to keyword, skill, location, salary, and level. PostgreSQL and OpenSearch adapters both honor the new filters.
+- Public `GET /api/companies`, `GET /api/companies/{id}`, and `GET /api/jobs/{id}` are constrained to approved/published records; admin and employer workspaces use scoped read-model endpoints.
 
 ## Data Additions
 
@@ -85,6 +86,7 @@ These are seeded deterministically by Flyway so portfolio pages can render rich 
 | Employer pipeline/company | Implemented with selectable jobs and applicant queues. |
 | Company profile | Implemented with slug-backed lookup and company-scoped jobs. |
 | Admin/Ops/platform | Implemented with review queues, audit aggregates, AI provider status, observability, cloud, and release views. |
+| Stitch route evidence | v0.6.2 adds a route-matrix screenshot spec for all mapped client, employer, admin, and platform pages. |
 
 ## Verification
 

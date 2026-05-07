@@ -61,7 +61,8 @@ public class CompanyService {
 
     @Transactional(readOnly = true)
     public CompanyResponse get(UUID id) {
-        return mapper.toResponse(find(id));
+        return mapper.toResponse(repository.findByIdAndStatus(id, CompanyStatus.APPROVED)
+                .orElseThrow(() -> new DevHireException(ErrorCode.NOT_FOUND, "Approved company not found")));
     }
 
     @Transactional(readOnly = true)
@@ -78,7 +79,19 @@ public class CompanyService {
     }
 
     @Transactional(readOnly = true)
-    public Page<CompanyResponse> list(CompanyStatus status, Pageable pageable) {
+    public Page<CompanyResponse> listPublic(Pageable pageable) {
+        return repository.findByStatus(CompanyStatus.APPROVED, pageable).map(mapper::toResponse);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<CompanyResponse> listForEmployer(AuthenticatedUser user, Pageable pageable) {
+        requireRole(user, UserRole.EMPLOYER);
+        return repository.findByEmployerId(user.id(), pageable).map(mapper::toResponse);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<CompanyResponse> listForAdmin(AuthenticatedUser user, CompanyStatus status, Pageable pageable) {
+        requireRole(user, UserRole.ADMIN);
         Page<Company> page = status == null ? repository.findAll(pageable) : repository.findByStatus(status, pageable);
         return page.map(mapper::toResponse);
     }

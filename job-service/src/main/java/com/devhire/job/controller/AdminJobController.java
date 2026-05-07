@@ -6,13 +6,18 @@ import com.devhire.common.security.AuthenticatedUser;
 import com.devhire.common.security.UserRole;
 import com.devhire.job.dto.request.JobRejectRequest;
 import com.devhire.job.dto.response.JobResponse;
+import com.devhire.job.entity.JobStatus;
 import com.devhire.job.service.JobService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
@@ -24,6 +29,15 @@ public class AdminJobController {
 
     public AdminJobController(JobService jobService) {
         this.jobService = jobService;
+    }
+
+    @GetMapping
+    public ApiResponse<Page<JobResponse>> listForReview(@RequestHeader(AppHeaders.USER_ID) UUID userId,
+                                                        @RequestHeader(AppHeaders.USER_EMAIL) String email,
+                                                        @RequestHeader(AppHeaders.USER_ROLE) UserRole role,
+                                                        @RequestParam(required = false) JobStatus status,
+                                                        Pageable pageable) {
+        return ApiResponse.ok(jobService.listForAdmin(new AuthenticatedUser(userId, email, role), status, pageable));
     }
 
     @PatchMapping("/{id}/approve")
@@ -43,4 +57,3 @@ public class AdminJobController {
         return ApiResponse.ok(jobService.reject(new AuthenticatedUser(userId, email, role), id, request.reason()));
     }
 }
-

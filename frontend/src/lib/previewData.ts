@@ -22,7 +22,7 @@ export const previewJobs: PageResponse<Job> = {
     previewJob("preview-java-platform", "Senior Java Platform Engineer", "Build event-driven Spring Boot services for high-volume hiring workflows.", "Ho Chi Minh City / Remote", "Senior", ["Java", "Spring Boot", "Kafka", "PostgreSQL"]),
     previewJob("preview-cloud-search", "Search Platform Engineer", "Own OpenSearch relevance, indexing pipelines, and recruitment search latency targets.", "Singapore / Hybrid", "Senior", ["OpenSearch", "Java", "Kubernetes", "Terraform"]),
     previewJob("preview-sre", "Backend SRE Engineer", "Improve gateway reliability, outbox delivery, tracing, and production SLO operations.", "Remote APAC", "Mid-Senior", ["Prometheus", "Grafana", "Kafka", "AWS"]),
-    previewJob("preview-ai-platform", "AI Platform Backend Engineer", "Build Claude assistant guardrails, citations, tool traces, and deterministic fallback flows.", "Tokyo / Remote", "Senior", ["Claude", "RAG", "Java", "Security"]),
+    previewJob("preview-ai-platform", "AI Platform Backend Engineer", "Build Claude assistant guardrails, citations, tool traces, and deterministic provider-backup flows.", "Tokyo / Remote", "Senior", ["Claude", "RAG", "Java", "Security"]),
     previewJob("preview-cloud-apply", "Cloud Infrastructure Engineer", "Prepare EKS, RDS, Redis, MSK, OpenSearch, Helm, and GitOps delivery for AWS staging.", "Bangkok / Hybrid", "Lead", ["AWS", "Terraform", "EKS", "Helm"]),
     previewJob("preview-security-gateway", "Gateway Security Engineer", "Harden JWT validation, Redis rate limiting, CORS, security headers, and audit evidence.", "Hanoi", "Senior", ["Gateway", "JWT", "Redis", "Security"]),
     previewJob("preview-observability", "Observability Platform Engineer", "Own SLO dashboards, Prometheus rules, tracing, logs, and runtime evidence automation.", "Da Nang", "Senior", ["Prometheus", "Grafana", "Tempo", "Loki"]),
@@ -413,7 +413,7 @@ export const previewInterviewPrep: InterviewPrep[] = [
     model: "claude-haiku-4-5-20251001",
     fallback: false,
     lastMessageAt: daysAgo(2),
-    focusAreas: ["Prompt injection", "Citations", "Fallback behavior"]
+    focusAreas: ["Prompt injection", "Citations", "Provider backup behavior"]
   }
 ];
 
