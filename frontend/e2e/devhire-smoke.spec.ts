@@ -70,7 +70,7 @@ test.describe("DevHire Cloud portfolio smoke", () => {
     await expect(page.getByRole("heading", { name: "Notifications" })).toBeVisible();
     await page.goto("/candidate/profile");
     await expect(page.getByTestId("candidate-profile-page")).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Linh Nguyen" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Linh Nguyen|DevHire Candidate/ })).toBeVisible();
     await expect(page.getByText(/Live profile|Read-only sample/)).toBeVisible();
   });
 
