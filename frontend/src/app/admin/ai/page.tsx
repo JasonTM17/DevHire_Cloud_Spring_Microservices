@@ -74,7 +74,7 @@ export default function AdminAiPage() {
               <strong>Token guardrail</strong>
               <small>Maximum response tokens: {provider.maxTokens}</small>
             </span>
-            <StatusPill value={provider.mode} />
+            <StatusPill value={displayProviderMode(provider.mode)} />
           </div>
           <div className="table-row">
             <span>
@@ -87,4 +87,10 @@ export default function AdminAiPage() {
       </div>
     </section>
   );
+}
+
+function displayProviderMode(mode: string) {
+  return mode
+    .replace("DEMO_FALLBACK", "REVIEWER_SAFE")
+    .replace("CIRCUIT_OPEN_FALLBACK", "CIRCUIT_OPEN_SAFE_MODE");
 }

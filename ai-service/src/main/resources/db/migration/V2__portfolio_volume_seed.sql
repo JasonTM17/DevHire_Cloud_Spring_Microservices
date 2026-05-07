@@ -79,7 +79,7 @@ WITH conversation_seed AS (
             'Senior Java roles with Kafka are available across the portfolio dataset; use the job search page to filter by Kafka, Spring Boot, and cloud platform ownership.',
             'The 10-minute demo path starts with job search, job detail, candidate apply, employer pipeline review, admin audit, notification delivery, and AI assistant evidence.',
             'The AWS blueprint is apply-ready but not applied locally: VPC, EKS, RDS, Redis, MSK, OpenSearch, ECR, Secrets Manager, External Secrets, Helm, and Argo CD are verified without credentials.',
-            'The AI assistant does not need provider secrets for review: deterministic fallback, citations, tool traces, prompt-injection refusal tests, and audit events are included.'
+            'The AI assistant does not need provider secrets for review: deterministic reviewer-safe answers, citations, tool traces, prompt-injection refusal tests, and audit events are included.'
         ])[((i - 1) % 5) + 1] AS answer
     FROM generate_series(1, 20) AS i
 )

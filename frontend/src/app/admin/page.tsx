@@ -102,7 +102,7 @@ export default function AdminPage() {
         <MetricCard icon={Building2} label="Companies" value={companies?.totalElements ?? 0} helper="Review queue" />
         <MetricCard icon={Activity} label="Audit events" value={operationsSummary.auditEvents} helper="Kafka ingested" />
         <MetricCard icon={ShieldCheck} label="Pending" value={companies?.content.filter((item) => item.status === "PENDING").length ?? 0} helper="Needs admin action" />
-        <MetricCard icon={Bot} label="AI mode" value={aiProvider?.mode ?? "REVIEWER_SAFE"} helper={aiProvider?.apiKeyConfigured ? "Claude API" : "Reviewer-safe preview"} />
+        <MetricCard icon={Bot} label="AI mode" value={displayProviderMode(aiProvider?.mode ?? "REVIEWER_SAFE")} helper={aiProvider?.apiKeyConfigured ? "Claude API" : "Reviewer-safe preview"} />
       </div>
       {message && positiveMessage ? <p className="success">{message}</p> : null}
       {message && !positiveMessage ? <DemoModeNotice message={message} /> : null}
@@ -243,4 +243,10 @@ function countBy<T>(items: T[], selector: (item: T) => string) {
     acc[key] = (acc[key] ?? 0) + 1;
     return acc;
   }, {});
+}
+
+function displayProviderMode(mode: string) {
+  return mode
+    .replace("DEMO_FALLBACK", "REVIEWER_SAFE")
+    .replace("CIRCUIT_OPEN_FALLBACK", "CIRCUIT_OPEN_SAFE_MODE");
 }
