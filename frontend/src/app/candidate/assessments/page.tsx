@@ -84,7 +84,7 @@ export default function CandidateAssessmentsPage() {
   const [selectedId, setSelectedId] = useState(previewCodeAssessments[0]?.id ?? "");
   const [language, setLanguage] = useState(previewCodeAssessments[0]?.language ?? "Java");
   const [code, setCode] = useState(previewCodeAssessments[0]?.submittedCode ?? DEFAULT_CODE);
-  const [notes, setNotes] = useState("I focused on idempotency, transaction boundaries, and reviewer-safe evidence.");
+  const [notes, setNotes] = useState("I focused on strict production resource validation and reviewer-safe evidence.");
   const [message, setMessage] = useState("");
   const [analysisMessage, setAnalysisMessage] = useState("");
   const [analysisResults, setAnalysisResults] = useState<AnalysisResult[]>([]);
@@ -290,7 +290,7 @@ export default function CandidateAssessmentsPage() {
 
   if (!selected) {
     return (
-      <main className="assessment-ide-shell" data-testid="candidate-assessments-page">
+      <main className="assessment-ide-shell" data-testid="candidate-assessments-page" data-assessment-source="empty">
         <section className="assessment-empty-state">
           <h1>Code Interview Studio</h1>
           <p>No assessment is assigned to this candidate yet.</p>
@@ -300,7 +300,11 @@ export default function CandidateAssessmentsPage() {
   }
 
   return (
-    <main className="assessment-ide-shell" data-testid="candidate-assessments-page">
+    <main
+      className="assessment-ide-shell"
+      data-testid="candidate-assessments-page"
+      data-assessment-source={isUuid(selected.id) ? "api" : "preview"}
+    >
       <header className="assessment-topbar">
         <div className="assessment-brandline">
           <span className="assessment-brand">DevHire Cloud</span>

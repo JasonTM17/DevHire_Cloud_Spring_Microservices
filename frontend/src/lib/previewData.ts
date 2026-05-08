@@ -328,7 +328,7 @@ export const previewCandidateAssessments: CandidateAssessment[] = [
 
 export const previewCodeAssessments: CodeAssessment[] = [
   {
-    id: "preview-code-outbox",
+    id: "preview-code-cloud-architecture",
     applicationId: "preview-application-java",
     candidateName: "Linh Nguyen",
     jobTitle: "Senior Java Platform Engineer",
@@ -366,10 +366,10 @@ export const previewCodeAssessments: CodeAssessment[] = [
       { id: "preview-case-resource-visible-3", name: "Tag Filtering", visibility: "VISIBLE", input: "production resources only", weight: 10 }
     ],
     latestRun: {
-      id: "preview-run-outbox",
+      id: "preview-run-cloud-architecture",
       status: "COMPLETED",
       sandboxStatus: "JUDGE0_COMPATIBLE_LOCAL_SANDBOX",
-      visiblePassed: 1,
+      visiblePassed: 3,
       visibleTotal: 3,
       hiddenPassed: 0,
       hiddenTotal: 2,
@@ -378,9 +378,9 @@ export const previewCodeAssessments: CodeAssessment[] = [
       integrityRiskScore: 8.5,
       similarityScore: 4.2,
       results: [
-        { caseId: "preview-case-resource-visible-1", name: "Bean Initialization", visibility: "VISIBLE", passed: true, output: "matched:@Bean", executionTimeMs: 62, memoryKb: 18432 },
-        { caseId: "preview-case-resource-visible-2", name: "Policy Enforcement", visibility: "VISIBLE", passed: false, error: "Strict policy evidence needs one more assertion.", executionTimeMs: 84, memoryKb: 24576 },
-        { caseId: "preview-case-resource-visible-3", name: "Tag Filtering", visibility: "VISIBLE", passed: false, error: "Awaiting production tag test.", executionTimeMs: 0, memoryKb: 0 }
+        { caseId: "preview-case-resource-visible-1", name: "Bean Initialization", visibility: "VISIBLE", passed: true, output: "matched:@Bean ResourceValidator", executionTimeMs: 62, memoryKb: 18432 },
+        { caseId: "preview-case-resource-visible-2", name: "Policy Enforcement", visibility: "VISIBLE", passed: true, output: "matched:EnterpriseSecurityPolicy.STRICT", executionTimeMs: 84, memoryKb: 24576 },
+        { caseId: "preview-case-resource-visible-3", name: "Tag Filtering", visibility: "VISIBLE", passed: true, output: "matched:production", executionTimeMs: 68, memoryKb: 22528 }
       ],
       createdAt: daysAgo(1),
       completedAt: daysAgo(1)

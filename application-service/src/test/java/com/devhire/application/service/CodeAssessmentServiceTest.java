@@ -88,7 +88,7 @@ class CodeAssessmentServiceTest {
         assertThat(response.status()).isEqualTo("PASSED");
         assertThat(jdbcTemplate.updates).anySatisfy(update -> {
             assertThat(update.sql()).contains("UPDATE code_submissions");
-            assertThat(update.args()).contains("ADVANCE", 91, "Strong production reasoning.", ASSIGNMENT_ID);
+            assertThat(update.args()).contains("ADVANCE", 78, "Strong production reasoning.", ASSIGNMENT_ID);
         });
         assertThat(jdbcTemplate.updates).anySatisfy(update -> {
             assertThat(update.sql()).contains("INSERT INTO code_review_events");

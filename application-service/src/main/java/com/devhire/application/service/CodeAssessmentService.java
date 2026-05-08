@@ -329,9 +329,7 @@ public class CodeAssessmentService {
             throw new DevHireException(ErrorCode.BAD_REQUEST, "Assessment has no submitted code to review");
         }
         String decision = normalizeDecision(request.decision());
-        int finalScore = request.finalScore() == null
-                ? (assessment.latestScore() == null ? 0 : assessment.latestScore())
-                : request.finalScore();
+        int finalScore = assessment.latestScore() == null ? 0 : assessment.latestScore();
         String status = switch (decision) {
             case "ADVANCE" -> "PASSED";
             case "REJECT" -> "FAILED";
@@ -949,11 +947,11 @@ public class CodeAssessmentService {
     private static boolean matchesExpectedSignal(String code, String expectedOutput) {
         String normalizedCode = normalizeRunnerSignal(code);
         for (String token : normalizeExpected(expectedOutput).split("\\|")) {
-            if (!token.isBlank() && normalizedCode.contains(token)) {
-                return true;
+            if (!token.isBlank() && !normalizedCode.contains(token)) {
+                return false;
             }
         }
-        return false;
+        return true;
     }
 
     private static String normalizeExpected(String value) {

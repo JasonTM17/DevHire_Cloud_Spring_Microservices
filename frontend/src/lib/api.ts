@@ -166,10 +166,10 @@ export const api = {
     request<CodeAssessment[]>(`/api/employer/code-assessments${params.toString() ? `?${params}` : ""}`),
   employerCodeAssessment: (id: string) =>
     request<CodeAssessment>(`/api/employer/code-assessments/${id}`),
-  reviewCodeAssessment: (id: string, decision: string, note: string, finalScore?: number) =>
+  reviewCodeAssessment: (id: string, decision: string, note: string) =>
     request<CodeAssessment>(`/api/employer/code-assessments/${id}/review`, {
       method: "PATCH",
-      body: JSON.stringify({ decision, note, finalScore })
+      body: JSON.stringify({ decision, note })
     }),
   userProfileMe: () => request<UserProfile>("/api/users/me"),
   updateApplicationStatus: (id: string, status: string) =>

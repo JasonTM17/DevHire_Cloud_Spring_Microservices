@@ -19,7 +19,7 @@ This page is the 5-minute reviewer path for the flagship DevHire Cloud code asse
 ## 5-Minute Demo Path
 
 1. Sign in as `candidate@devhire.local` and open `/candidate/assessments`.
-2. Select `Java outbox retry reviewer`.
+2. Select `Cloud Architecture Challenge`.
 3. Review the problem statement, examples, visible judge cases, complexity target, and scoring signals.
 4. Edit the code and run visible judge analysis.
 5. Submit for rubric score and confirm rubric rows, risk flags, attempt metadata, hash, and submission history without exposing hidden-test payloads to the candidate.

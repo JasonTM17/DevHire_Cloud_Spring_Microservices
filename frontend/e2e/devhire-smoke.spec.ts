@@ -74,6 +74,9 @@ test.describe("DevHire Cloud portfolio smoke", () => {
     await expect(page.getByText(/Live profile|Read-only sample/)).toBeVisible();
     await page.goto("/candidate/assessments");
     await expect(page.getByTestId("candidate-assessments-page")).toBeVisible();
+    if (process.env.E2E_REQUIRE_LIVE_API === "1") {
+      await expect(page.getByTestId("candidate-assessments-page")).toHaveAttribute("data-assessment-source", "api");
+    }
     await expect(page.getByRole("heading", { name: "Cloud Architecture Challenge" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Submission history" })).toBeVisible();
     await expect(page.getByLabel("Candidate code submission")).toBeVisible();

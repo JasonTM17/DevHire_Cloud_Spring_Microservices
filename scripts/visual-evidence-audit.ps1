@@ -171,6 +171,26 @@ if (-not $SkipSourceGuard) {
             throw "Visual evidence guard is missing required readiness assertion: $requiredAssertion"
         }
     }
+
+    $assessmentFiles = @(
+        "frontend/src/app/candidate/assessments/page.tsx",
+        "frontend/src/lib/previewData.ts"
+    )
+    foreach ($relativePath in $assessmentFiles) {
+        $sourcePath = Join-Path $repoRoot $relativePath
+        $content = Get-Content -Raw -Encoding UTF8 -LiteralPath $sourcePath
+        if ($relativePath -like "*previewData.ts" -and -not $content.Contains("Cloud Architecture Challenge")) {
+            throw "Assessment evidence source guard failed: $relativePath must contain Cloud Architecture Challenge."
+        }
+        if ($relativePath -like "*assessments/page.tsx" -and (-not $content.Contains("challengeTitle") -or -not $content.Contains("data-assessment-source"))) {
+            throw "Assessment evidence source guard failed: $relativePath must render challengeTitle and data-assessment-source."
+        }
+        foreach ($term in @("Java outbox retry reviewer", "OutboxRetryReviewer", "preview-run-outbox")) {
+            if ($content.Contains($term)) {
+                throw "Assessment evidence source guard failed: $relativePath contains stale assessment term '$term'."
+            }
+        }
+    }
 }
 
 Write-Host "Visual evidence audit passed."

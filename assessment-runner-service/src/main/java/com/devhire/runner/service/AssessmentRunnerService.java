@@ -80,11 +80,11 @@ public class AssessmentRunnerService {
     private static boolean matchesExpectedSignal(String code, String expectedOutput) {
         String normalizedCode = normalize(code);
         for (String token : normalizeExpected(expectedOutput).split("\\|")) {
-            if (!token.isBlank() && normalizedCode.contains(token)) {
-                return true;
+            if (!token.isBlank() && !normalizedCode.contains(token)) {
+                return false;
             }
         }
-        return false;
+        return true;
     }
 
     private static String normalizeLanguage(String language) {

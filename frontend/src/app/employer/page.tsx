@@ -178,7 +178,7 @@ export default function EmployerPage() {
     await loadApplications();
   }
 
-  async function reviewCodeAssessment(id: string, decision: string, score?: number) {
+  async function reviewCodeAssessment(id: string, decision: string) {
     if (!isUuid(id)) {
       setCodeAssessments((current) => current.map((item) => (
         item.id === id
@@ -192,7 +192,7 @@ export default function EmployerPage() {
       return;
     }
     try {
-      const updated = await api.reviewCodeAssessment(id, decision, reviewNote, score);
+      const updated = await api.reviewCodeAssessment(id, decision, reviewNote);
       setCodeAssessments((current) => current.map((item) => (item.id === updated.id ? updated : item)));
       setSelectedReviewDetail(updated);
       setMessage(`Code review recorded for ${updated.candidateName}.`);
@@ -420,7 +420,7 @@ export default function EmployerPage() {
                     className="button secondary"
                     disabled={!reviewable}
                     type="button"
-                    onClick={() => reviewCodeAssessment(item.id, "HOLD", item.latestScore)}
+                    onClick={() => reviewCodeAssessment(item.id, "HOLD")}
                   >
                     Hold
                   </button>
@@ -429,7 +429,7 @@ export default function EmployerPage() {
                     className="button primary"
                     disabled={!reviewable}
                     type="button"
-                    onClick={() => reviewCodeAssessment(item.id, "ADVANCE", item.latestScore ?? 85)}
+                    onClick={() => reviewCodeAssessment(item.id, "ADVANCE")}
                   >
                     Advance
                   </button>
@@ -485,7 +485,7 @@ export default function EmployerPage() {
                   className="button secondary"
                   disabled={!isReviewableCodeAssessment(selectedReview)}
                   type="button"
-                  onClick={() => reviewCodeAssessment(selectedReview.id, "HOLD", selectedReview.latestScore)}
+                  onClick={() => reviewCodeAssessment(selectedReview.id, "HOLD")}
                 >
                   Hold for follow-up
                 </button>
@@ -493,7 +493,7 @@ export default function EmployerPage() {
                   className="button primary"
                   disabled={!isReviewableCodeAssessment(selectedReview)}
                   type="button"
-                  onClick={() => reviewCodeAssessment(selectedReview.id, "ADVANCE", selectedReview.latestScore ?? 85)}
+                  onClick={() => reviewCodeAssessment(selectedReview.id, "ADVANCE")}
                 >
                   Advance candidate
                 </button>

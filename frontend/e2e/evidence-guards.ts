@@ -23,6 +23,10 @@ export async function assertPrimaryEvidenceReady(page: Page) {
   for (const pattern of forbiddenPrimaryEvidencePatterns) {
     expect(bodyText, `Primary evidence must not contain rough term: ${pattern}`).not.toMatch(pattern);
   }
+  if (new URL(page.url()).pathname === "/candidate/assessments") {
+    expect(bodyText, "Assessment evidence must use the Stitch flagship challenge").toContain("Cloud Architecture Challenge");
+    expect(bodyText, "Assessment evidence must not show stale outbox copy").not.toMatch(/Java outbox|OutboxRetryReviewer|pending outbox|retry reviewer/i);
+  }
 }
 
 export async function expectNoHorizontalOverflow(page: Page) {
