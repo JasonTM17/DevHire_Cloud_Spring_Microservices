@@ -279,7 +279,7 @@ export default function CandidateAssessmentsPage() {
       );
       setAssessments((current) => current.map((item) => (item.id === updated.id ? updated : item)));
       setLatestRun(updated.latestRun);
-      setMessage(`Rubric score ready: ${updated.latestScore ?? 0}/${updated.maxScore}; hidden tests were scored server-side.`);
+      setMessage(`Server-side grading complete: rubric score ${updated.latestScore ?? 0}/${updated.maxScore}; hidden tests were scored server-side.`);
     } catch (ex) {
       setMessage(ex instanceof Error && ex.message !== "Failed to fetch"
         ? ex.message

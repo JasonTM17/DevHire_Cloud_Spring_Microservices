@@ -15,7 +15,49 @@ SET challenge_id = '52000000-0000-0000-0001-000000000001',
     due_at = GREATEST(due_at, now() + interval '6 days'),
     updated_at = now()
 WHERE application_id = '40000000-0000-0000-0000-000000000001'
-  AND candidate_id = '00000000-0000-0000-0000-000000000003';
+  AND candidate_id = '00000000-0000-0000-0000-000000000003'
+  AND NOT EXISTS (
+      SELECT 1
+      FROM code_assessment_assignments existing
+      WHERE existing.application_id = '40000000-0000-0000-0000-000000000001'
+        AND existing.challenge_id = '52000000-0000-0000-0001-000000000001'
+  );
+
+INSERT INTO code_assessment_assignments (
+    id,
+    application_id,
+    candidate_id,
+    employer_id,
+    job_id,
+    challenge_id,
+    candidate_name,
+    job_title,
+    status,
+    due_at,
+    assigned_at,
+    updated_at
+)
+SELECT
+    '53000000-0000-0000-0001-000000009999'::uuid,
+    ja.id,
+    ja.candidate_id,
+    ja.employer_id,
+    ja.job_id,
+    '52000000-0000-0000-0001-000000000001'::uuid,
+    'DevHire Candidate',
+    ja.job_title,
+    'ASSIGNED',
+    now() + interval '6 days',
+    now() - interval '1 day',
+    now()
+FROM job_applications ja
+WHERE ja.id = '40000000-0000-0000-0000-000000000001'
+  AND ja.candidate_id = '00000000-0000-0000-0000-000000000003'
+ON CONFLICT (application_id, challenge_id) DO UPDATE
+SET status = 'ASSIGNED',
+    candidate_name = 'DevHire Candidate',
+    due_at = GREATEST(code_assessment_assignments.due_at, EXCLUDED.due_at),
+    updated_at = now();
 
 UPDATE code_challenge_test_cases
 SET name = 'Bean Initialization',
