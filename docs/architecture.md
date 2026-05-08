@@ -9,7 +9,8 @@ DevHire Cloud is a Java Spring Boot microservices recruitment platform for portf
 - `user-service`: candidate and employer profile APIs.
 - `company-service`: employer company onboarding and admin approval/rejection.
 - `job-service`: job posting workflow, OpenSearch-backed published job search, and PostgreSQL fallback search.
-- `application-service`: candidate applications, duplicate prevention, status workflow, and status history.
+- `application-service`: candidate applications, duplicate prevention, status workflow, status history, and code assessment domain ownership.
+- `assessment-runner-service`: internal Judge0-compatible boundary for isolated visible/hidden code test execution; it does not own candidate assessment data.
 - `notification-service`: internal notification persistence from application events and optional SMTP email delivery after resolving recipient email from `user-service`.
 - `audit-service`: audit event ingestion and admin audit log search.
 - `ai-service`: Claude Haiku assistant, conversation persistence, curated knowledge retrieval, job/platform tools, metrics, and audit events.
@@ -36,6 +37,7 @@ Services do not share JPA entities and do not read another service's database.
 - Synchronous service-to-service queries use OpenFeign:
   - `job-service` calls `company-service` for approved company ownership.
   - `application-service` calls `job-service` for published job and employer ownership facts.
+  - `application-service` calls `assessment-runner-service` for isolated code test execution while keeping hidden cases and final scoring server-owned.
 - `ai-service` uses WebClient for provider calls and job/platform context tools; it never reads another service database directly.
 - Asynchronous communication uses Kafka topics:
   - `audit.events`
@@ -75,3 +77,4 @@ Local development uses Docker Compose. Kubernetes deployment assets include raw 
 - Trace/span ids are included in log patterns.
 - OTLP traces are exported to OpenTelemetry Collector and then Tempo.
 - Grafana dashboard is provisioned under `infra/grafana/dashboards`.
+- Code assessment metrics cover grading failures, review backlog, risk flags, runner requests, and runner latency.
