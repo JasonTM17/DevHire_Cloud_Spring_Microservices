@@ -14,7 +14,10 @@ import org.springframework.data.redis.core.ReactiveStringRedisTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
@@ -37,13 +40,23 @@ public class JwtAuthenticationGatewayFilter implements GlobalFilter, Ordered {
     private final SecretKey secretKey;
     private final ReactiveStringRedisTemplate redisTemplate;
     private final GatewayErrorWriter errorWriter;
+    private final String internalGatewayToken;
 
     public JwtAuthenticationGatewayFilter(GatewayJwtProperties properties,
                                           ReactiveStringRedisTemplate redisTemplate,
                                           GatewayErrorWriter errorWriter) {
+        this(properties, redisTemplate, errorWriter, "");
+    }
+
+    @Autowired
+    public JwtAuthenticationGatewayFilter(GatewayJwtProperties properties,
+                                          ReactiveStringRedisTemplate redisTemplate,
+                                          GatewayErrorWriter errorWriter,
+                                          @Value("${devhire.gateway.internal-token:}") String internalGatewayToken) {
         this.secretKey = Keys.hmacShaKeyFor(properties.secret().getBytes(StandardCharsets.UTF_8));
         this.redisTemplate = redisTemplate;
         this.errorWriter = errorWriter;
+        this.internalGatewayToken = internalGatewayToken == null ? "" : internalGatewayToken.trim();
     }
 
     @Override
@@ -66,7 +79,20 @@ public class JwtAuthenticationGatewayFilter implements GlobalFilter, Ordered {
         return redisTemplate.hasKey(BLACKLIST_PREFIX + sha256(token))
                 .flatMap(blacklisted -> Boolean.TRUE.equals(blacklisted)
                         ? unauthorized(exchange, "Token has been revoked")
-                        : chain.filter(withIdentityHeaders(exchange, claims)));
+                        : filterAuthorized(exchange, chain, claims, method, path));
+    }
+
+    private Mono<Void> filterAuthorized(ServerWebExchange exchange,
+                                        GatewayFilterChain chain,
+                                        Claims claims,
+                                        HttpMethod method,
+                                        String path) {
+        String requiredRole = requiredRole(method, path, exchange.getRequest().getQueryParams());
+        String tokenRole = claims.get("role", String.class);
+        if (requiredRole != null && !requiredRole.equals(tokenRole)) {
+            return forbidden(exchange, "Required role: " + requiredRole);
+        }
+        return chain.filter(withIdentityHeaders(exchange, claims));
     }
 
     private ServerWebExchange withIdentityHeaders(ServerWebExchange exchange, Claims claims) {
@@ -78,6 +104,7 @@ public class JwtAuthenticationGatewayFilter implements GlobalFilter, Ordered {
                     headers.set(AppHeaders.USER_ID, claims.getSubject());
                     headers.set(AppHeaders.USER_EMAIL, claims.get("email", String.class));
                     headers.set(AppHeaders.USER_ROLE, claims.get("role", String.class));
+                    applyInternalGatewayToken(headers);
                 }))
                 .build();
     }
@@ -88,8 +115,16 @@ public class JwtAuthenticationGatewayFilter implements GlobalFilter, Ordered {
                     headers.remove(AppHeaders.USER_ID);
                     headers.remove(AppHeaders.USER_EMAIL);
                     headers.remove(AppHeaders.USER_ROLE);
+                    applyInternalGatewayToken(headers);
                 }))
                 .build();
+    }
+
+    private void applyInternalGatewayToken(HttpHeaders headers) {
+        headers.remove(AppHeaders.INTERNAL_GATEWAY_TOKEN);
+        if (!internalGatewayToken.isBlank()) {
+            headers.set(AppHeaders.INTERNAL_GATEWAY_TOKEN, internalGatewayToken);
+        }
     }
 
     private Claims parseClaims(String token) {
@@ -142,6 +177,47 @@ public class JwtAuthenticationGatewayFilter implements GlobalFilter, Ordered {
 
     private Mono<Void> unauthorized(ServerWebExchange exchange, String message) {
         return errorWriter.write(exchange, HttpStatus.UNAUTHORIZED, ErrorCode.UNAUTHORIZED, message);
+    }
+
+    private Mono<Void> forbidden(ServerWebExchange exchange, String message) {
+        return errorWriter.write(exchange, HttpStatus.FORBIDDEN, ErrorCode.FORBIDDEN, message);
+    }
+
+    private static String requiredRole(HttpMethod method, String path, MultiValueMap<String, String> queryParams) {
+        if (path.equals("/api/admin") || path.startsWith("/api/admin/")) {
+            return "ADMIN";
+        }
+        if (path.equals("/api/employer") || path.startsWith("/api/employer/")) {
+            return "EMPLOYER";
+        }
+        if (path.equals("/api/candidate") || path.startsWith("/api/candidate/")) {
+            return "CANDIDATE";
+        }
+        if (path.equals("/api/companies")) {
+            if (method == HttpMethod.POST) {
+                return "EMPLOYER";
+            }
+            if (queryParams.containsKey("status")) {
+                return "ADMIN";
+            }
+        }
+        if (path.equals("/api/jobs") && method != HttpMethod.GET) {
+            return "EMPLOYER";
+        }
+        if (path.matches("^/api/jobs/[^/]+/applications(?:/.*)?$")) {
+            return "CANDIDATE";
+        }
+        if (path.matches("^/api/jobs/[^/]+(?:/.*)?$") && method != HttpMethod.GET) {
+            return "EMPLOYER";
+        }
+        if (path.equals("/api/applications/me")
+                || path.matches("^/api/applications/[^/]+/withdraw$")) {
+            return "CANDIDATE";
+        }
+        if (path.matches("^/api/applications/[^/]+/status$")) {
+            return "EMPLOYER";
+        }
+        return null;
     }
 
     private static String sha256(String value) {

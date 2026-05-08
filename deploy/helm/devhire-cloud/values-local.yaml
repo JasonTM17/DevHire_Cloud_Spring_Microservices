@@ -20,6 +20,7 @@ secrets:
   createExample: true
   stringData:
     JWT_SECRET: local-dev-only-change-me-change-me-change-me-change-me
+    DEVHIRE_GATEWAY_INTERNAL_TOKEN: local-devhire-gateway-boundary-token
     POSTGRES_USER: devhire
     POSTGRES_PASSWORD: devhire_local_password
     SPRING_MAIL_USERNAME: ""

@@ -49,9 +49,9 @@ const stitchRoutes = [
   { route: "/admin", name: "admin-control-plane", role: "admin" },
   { route: "/admin/ai", name: "admin-ai-ops", role: "admin" },
   { route: "/assistant", name: "assistant" },
-  { route: "/platform/observability", name: "platform-observability" },
-  { route: "/platform/cloud", name: "platform-cloud" },
-  { route: "/platform/releases", name: "platform-releases" }
+  { route: "/platform/observability", name: "platform-observability", role: "admin" },
+  { route: "/platform/cloud", name: "platform-cloud", role: "admin" },
+  { route: "/platform/releases", name: "platform-releases", role: "admin" }
 ] satisfies StitchRoute[];
 
 async function login(page: Page, role: Role) {

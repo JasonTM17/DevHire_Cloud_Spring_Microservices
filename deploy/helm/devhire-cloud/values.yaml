@@ -83,6 +83,9 @@ externalSecrets:
     - secretKey: JWT_SECRET
       remoteKey: /devhire/example/runtime
       property: JWT_SECRET
+    - secretKey: DEVHIRE_GATEWAY_INTERNAL_TOKEN
+      remoteKey: /devhire/example/runtime
+      property: DEVHIRE_GATEWAY_INTERNAL_TOKEN
     - secretKey: POSTGRES_USER
       remoteKey: /devhire/example/runtime
       property: POSTGRES_USER
@@ -209,7 +212,7 @@ services:
     enabled: true
     image: assessment-runner-service
     port: 8089
-    secretRef: false
+    secretRef: true
 
 ingress:
   enabled: true

@@ -22,11 +22,16 @@ export function getSession(): Session | null {
   if (!accessToken || !refreshToken || !rawUser) {
     return null;
   }
-  return {
-    accessToken,
-    refreshToken,
-    user: JSON.parse(rawUser) as CurrentUser
-  };
+  try {
+    return {
+      accessToken,
+      refreshToken,
+      user: JSON.parse(rawUser) as CurrentUser
+    };
+  } catch {
+    clearSession();
+    return null;
+  }
 }
 
 export function saveSession(response: AuthResponse) {

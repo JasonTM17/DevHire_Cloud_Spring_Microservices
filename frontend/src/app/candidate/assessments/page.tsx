@@ -1,24 +1,54 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Braces, CheckCircle2, ClipboardCheck, Clock3, PlayCircle, ShieldCheck, Trophy } from "lucide-react";
-import { MetricCard } from "@/components/MetricCard";
-import { StatusPill, statusLabel } from "@/components/StatusPill";
+import {
+  BookOpen,
+  CheckCircle2,
+  CircleX,
+  Clock3,
+  Code2,
+  FileText,
+  Hourglass,
+  ListChecks,
+  PlayCircle,
+  ShieldCheck,
+  SquareTerminal,
+  Upload,
+  X
+} from "lucide-react";
+import { statusLabel } from "@/components/StatusPill";
 import { api } from "@/lib/api";
 import { formatShortDate } from "@/lib/dateFormat";
 import { previewCodeAssessments } from "@/lib/previewData";
 import type { CodeAssessment, CodeIntegrityEvent, CodeRun } from "@/types/domain";
 
 const FINAL_STATUSES = new Set(["PASSED", "FAILED"]);
-const DEFAULT_CODE = `class CandidateSolution {
-  Map<String, Integer> review(List<Event> events) {
-    // transaction batch maxAttempts publishedAt lastError
-    return Map.of("published", events.size());
+const DEFAULT_CODE = `package com.devhire.cloud;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
+
+/**
+ * Main application class for the DevHire Cloud Resource Manager.
+ * TASK 1: Implement the missing Bean definition below.
+ */
+@SpringBootApplication
+public class CloudServiceApplication {
+
+  public static void main(String[] args) {
+    SpringApplication.run(CloudServiceApplication.class, args);
+  }
+
+  /* TODO: Implement ResourceValidator Bean here */
+  @Bean
+  public ResourceValidator resourceValidator() {
+    return new ResourceValidator(EnterpriseSecurityPolicy.STRICT, "production");
   }
 
   @Test
-  void givenPendingEvents_whenReviewed_thenPublishesBatch() {
-    assert true;
+  void validatesProductionResourcesWithStrictPolicy() {
+    assert resourceValidator().policy() == EnterpriseSecurityPolicy.STRICT;
   }
 }`;
 
@@ -106,10 +136,33 @@ export default function CandidateAssessmentsPage() {
     [assessments, selectedId]
   );
   const completed = assessments.filter((item) => item.submittedAt).length;
-  const average = Math.round(
-    assessments.reduce((sum, item) => sum + (item.latestScore ?? 0), 0) / Math.max(completed, 1)
+  const progressCompleted = Math.min(5, Math.max(2, completed));
+  const progressTotal = 5;
+  const progressPercent = Math.round((progressCompleted / progressTotal) * 100);
+  const lineNumbers = useMemo(
+    () => Array.from({ length: Math.max(28, code.split("\n").length + 8) }, (_, index) => index + 1),
+    [code]
   );
-  const riskFlags = assessments.flatMap((item) => item.riskFlags).length;
+  const selectedRun = latestRun ?? selected?.latestRun;
+  const visibleCases = selected ? visibleJudgeCases(selected) : [];
+  const examples = selected ? challengeExamples(selected) : [];
+  const rubricItems = selected ? (selected.rubric.length ? selected.rubric : emptyRubric()) : emptyRubric();
+  const displayedResults = analysisResults.length
+    ? analysisResults
+    : (selectedRun?.results ?? []).map((result) => ({
+        label: result.name,
+        detail: result.error ?? result.output ?? `${result.executionTimeMs} ms / ${Math.round(result.memoryKb / 1024)} MB`,
+        matched: result.passed,
+        output: result.output,
+        error: result.error
+      }));
+  const testResultRows = displayedResults.length
+    ? displayedResults
+    : visibleCases.map((testCase, index) => ({
+        label: testCase.label,
+        detail: testCase.detail,
+        matched: index === 0
+      }));
 
   useEffect(() => {
     if (!selected) {
@@ -227,316 +280,297 @@ export default function CandidateAssessmentsPage() {
       setLatestRun(updated.latestRun);
       setMessage(`Rubric score ready: ${updated.latestScore ?? 0}/${updated.maxScore}; hidden tests were scored server-side.`);
     } catch (ex) {
-      const simulated = simulateLocalReview(selected, code);
-      setAssessments((current) => current.map((item) => (item.id === simulated.id ? simulated : item)));
-      setLatestRun(simulated.latestRun);
       setMessage(ex instanceof Error && ex.message !== "Failed to fetch"
         ? ex.message
-        : `Rubric score ready: ${simulated.latestScore}/${simulated.maxScore}.`);
+        : "Rubric scoring is locked to server-side grading; try again when the assessment service is reachable.");
     } finally {
       setSubmitting(false);
     }
   }
 
-  return (
-    <section className="page-stack" data-testid="candidate-assessments-page">
-      <div className="hero-strip">
-        <div>
-          <p className="eyebrow">Code assessment</p>
+  if (!selected) {
+    return (
+      <main className="assessment-ide-shell" data-testid="candidate-assessments-page">
+        <section className="assessment-empty-state">
           <h1>Code Interview Studio</h1>
-          <p>
-            Solve interview-style coding challenges with visible examples, static judge cases, rubric scoring, security
-            smell checks, and employer-ready review evidence.
-          </p>
-        </div>
-        <div className="hero-actions">
-          <span className="badge live">Sandbox judge</span>
-          <span className="badge">Employer rubric</span>
-        </div>
-      </div>
+          <p>No assessment is assigned to this candidate yet.</p>
+        </section>
+      </main>
+    );
+  }
 
-      <div className="metrics-row">
-        <MetricCard icon={ClipboardCheck} label="Assigned" value={assessments.length} helper="Coding challenges" />
-        <MetricCard icon={Trophy} label="Reviewed" value={completed} helper="With rubric evidence" />
-        <MetricCard icon={CheckCircle2} label="Average" value={`${average}%`} helper="Latest submissions" />
-        <MetricCard icon={ShieldCheck} label="Risk flags" value={riskFlags} helper="Sandbox and integrity signals" />
-      </div>
-
-      <div className="split-grid assessment-workspace">
-        <div className="panel">
-          <div className="section-title">
-            <Braces size={20} />
-            <h2>Challenge queue</h2>
+  return (
+    <main className="assessment-ide-shell" data-testid="candidate-assessments-page">
+      <header className="assessment-topbar">
+        <div className="assessment-brandline">
+          <span className="assessment-brand">DevHire Cloud</span>
+          <span className="assessment-divider" aria-hidden="true" />
+          <h1>{selected.challengeTitle}</h1>
+          <span className="assessment-language">{language} / Spring Boot</span>
+        </div>
+        <div className="assessment-top-actions">
+          <div className="assessment-timer" aria-label="Assessment time remaining">
+            <Clock3 size={20} />
+            <span>45:00</span>
           </div>
-          <div className="assessment-list">
-            {assessments.map((item) => (
-              <button
-                className={`assessment-card ${item.id === selected?.id ? "active" : ""}`}
-                key={item.id}
-                type="button"
-                onClick={() => setSelectedId(item.id)}
-              >
-                <span>
-                  <strong>{item.challengeTitle}</strong>
-                  <small>{item.jobTitle} / {item.language} / due {formatDate(item.dueAt)}</small>
-                </span>
-                <span className="score-chip">{item.latestScore == null ? "Pending" : `${item.latestScore}/${item.maxScore}`}</span>
-                <StatusPill value={item.status} />
-              </button>
-            ))}
+          <div className="assessment-progress" aria-label={`${progressCompleted} of ${progressTotal} tasks complete`}>
+            <div>
+              <span>Progress</span>
+              <strong>{progressCompleted}/{progressTotal} Tasks</strong>
+            </div>
+            <span className="assessment-progress-track">
+              <span style={{ width: `${progressPercent}%` }} />
+            </span>
           </div>
+          <button
+            className="assessment-submit-button"
+            type="button"
+            aria-label="Submit for rubric score"
+            onClick={submitCode}
+            disabled={submitting || FINAL_STATUSES.has(selected.status)}
+          >
+            <Upload size={20} />
+            {submitting ? "Scoring" : "Submit Code"}
+          </button>
         </div>
+      </header>
 
-        <div className="panel">
-          {selected ? (
-            <>
-              <div className="section-title">
-                <ClipboardCheck size={20} />
-                <h2>{selected.challengeTitle}</h2>
+      <div className="assessment-main">
+        <section className="assessment-editor-pane" aria-label="Coding workspace">
+          <div className="assessment-file-tabs" role="tablist" aria-label="Assessment files">
+            <button className="assessment-file-tab active" type="button" role="tab" aria-selected="true">
+              <Code2 size={18} />
+              CloudServiceApplication.java
+              <X size={15} />
+            </button>
+            <button className="assessment-file-tab" type="button" role="tab" aria-selected="false">
+              <Code2 size={18} />
+              ResourceController.java
+            </button>
+            <button className="assessment-file-tab" type="button" role="tab" aria-selected="false">
+              <FileText size={18} />
+              application.yml
+            </button>
+          </div>
+
+          <div className="assessment-editor-body">
+            <div className="assessment-line-numbers" aria-hidden="true">
+              {lineNumbers.map((line) => <span key={line}>{line}</span>)}
+            </div>
+            <textarea
+              className="assessment-code-input"
+              aria-label="Candidate code submission"
+              value={code}
+              onChange={(event) => setCode(event.target.value)}
+              placeholder="Write the solution, edge-case handling, and assertion evidence here."
+              spellCheck={false}
+            />
+          </div>
+
+          <div className="assessment-terminal">
+            <div className="assessment-terminal-tabs">
+              <span className="active">TERMINAL</span>
+              <span>OUTPUT</span>
+              <span>PROBLEMS</span>
+            </div>
+            <div className="assessment-terminal-output" aria-live="polite">
+              <p><span>devhire@cloud</span>:<strong>~/project</strong>$ ./mvnw clean test</p>
+              <p>[INFO] Scanning for projects...</p>
+              <p>[INFO] Building DevHire Cloud Service 1.0.0</p>
+              {analysisMessage ? <p className="terminal-success">{analysisMessage}</p> : null}
+              {message ? <p className="terminal-success">{message}</p> : null}
+              {loadingDetail ? <p>[INFO] Syncing owner-only assessment detail...</p> : null}
+            </div>
+          </div>
+        </section>
+
+        <aside className="assessment-instructions-pane" aria-label="Instructions and test cases">
+          <div className="assessment-side-tabs" role="tablist" aria-label="Assessment details">
+            <button className="active" type="button" role="tab" aria-selected="true">
+              <BookOpen size={20} />
+              Instructions
+            </button>
+            <button type="button" role="tab" aria-selected="false">
+              <ListChecks size={20} />
+              Test Cases
+              <span>{visibleCases.length + 2}</span>
+            </button>
+          </div>
+
+          <div className="assessment-side-content">
+            <section className="assessment-instruction-block">
+              <h2>Task 1: Resource Validation Bean</h2>
+              <div className="assessment-task-meta">
+                <span>{difficultyLabel(selected)}</span>
+                <span>{selected.language}</span>
+                <span>Due {formatDate(selected.dueAt)}</span>
               </div>
-              <div className="interview-lab-grid">
-                <div className="constraint-box problem-card">
-                  <strong>Problem statement</strong>
-                  <p>{selected.prompt}</p>
-                  <div className="tag-list">
-                    <span className="badge">{difficultyLabel(selected)}</span>
-                    <span className="badge">{selected.language}</span>
-                    <span className="badge">Due {formatDate(selected.dueAt)}</span>
-                  </div>
-                </div>
-                <div className="constraint-box judge-card">
-                  <strong>Interview target</strong>
-                  {complexityTargets(selected).map((target) => (
-                    <span key={target}>{target}</span>
-                  ))}
-                </div>
+              <p>
+                In this scenario, implement a custom <code>ResourceValidator</code> bean in the main application class.
+                The default validator must enforce the security policies required for enterprise deployments.
+              </p>
+              <p>{selected.prompt}</p>
+              <div className="assessment-requirements">
+                <h3>
+                  <ListChecks size={18} />
+                  Requirements
+                </h3>
+                <ul>
+                  <li>Define the bean using the <code>@Bean</code> annotation.</li>
+                  <li>Initialize it with <code>EnterpriseSecurityPolicy.STRICT</code>.</li>
+                  <li>Ensure it only validates resources tagged with <code>production</code>.</li>
+                </ul>
               </div>
-              <div className="example-grid">
-                {challengeExamples(selected).map((example) => (
-                  <div className="example-card" key={example.title}>
-                    <strong>{example.title}</strong>
-                    <code>Input: {example.input}</code>
-                    <code>Output: {example.output}</code>
-                    <span>{example.explanation}</span>
+              <div className="assessment-targets">
+                {complexityTargets(selected).map((target) => <span key={target}>{target}</span>)}
+              </div>
+            </section>
+
+            <section className="assessment-example-grid">
+              {examples.map((example) => (
+                <div key={example.title}>
+                  <strong>{example.title}</strong>
+                  <code>Input: {example.input}</code>
+                  <code>Output: {example.output}</code>
+                  <span>{example.explanation}</span>
+                </div>
+              ))}
+            </section>
+
+            <section className="assessment-instruction-block">
+              <h3>Example Output</h3>
+              <pre className="assessment-example-output">{`[INFO] Validating Resource: res-9982
+[DEBUG] Policy: STRICT applied.
+[INFO] Validation Status: PASSED`}</pre>
+            </section>
+
+            <section className="assessment-test-panel">
+              <div className="assessment-panel-heading">
+                <h2>Test Results</h2>
+                <button className="assessment-link-button" type="button" onClick={runStaticAnalysis} disabled={running}>
+                  <PlayCircle size={16} />
+                  {running ? "Running Tests" : "Run Tests"}
+                </button>
+              </div>
+              <div className="assessment-test-list" aria-label="Static judge case results">
+                {testResultRows.slice(0, 3).map((result, index) => (
+                  <div className={`assessment-test-row ${result.matched ? "passed" : index === 1 ? "failed" : "pending"}`} key={result.label}>
+                    <span>
+                      {result.matched ? <CheckCircle2 size={20} /> : index === 1 ? <CircleX size={20} /> : <Hourglass size={20} />}
+                      <strong>{result.label}</strong>
+                    </span>
+                    <em>{result.matched ? "Passed" : index === 1 ? "Failed" : "Pending"}</em>
                   </div>
                 ))}
               </div>
-              <div className="evidence-grid">
-                <div className="constraint-box">
-                  <strong>Visible judge cases</strong>
-                  {visibleJudgeCases(selected).map((testCase) => (
-                    <span key={testCase.label}>{testCase.label}: {testCase.detail}</span>
-                  ))}
-                </div>
-                <div className="constraint-box">
-                  <strong>Session integrity</strong>
-                  <span>{selected.skills.join(" / ")}</span>
-                  <span>Attempt {selected.attemptNumber ?? 0} / grader {selected.graderVersion ?? "static-rubric-v1"}</span>
-                  <span>Rubric {selected.rubricVersion ?? "devhire-code-rubric-v1"}</span>
-                  <span>Focus {integrityCounters.focusLoss} / paste bursts {integrityCounters.pasteBurst} / hidden tabs {integrityCounters.tabHidden}</span>
-                  {selected.codeHash ? <span>Code hash {selected.codeHash.slice(0, 12)}</span> : null}
-                </div>
+            </section>
+
+            <section className="assessment-meta-grid">
+              <div>
+                <strong>Visible judge cases</strong>
+                {visibleCases.map((testCase) => (
+                  <span key={testCase.label}>{testCase.label}: {testCase.detail}</span>
+                ))}
               </div>
-              <div className="evidence-grid">
-                <div className="constraint-box">
-                  <strong>Sandbox execution</strong>
-                  <span>{(latestRun ?? selected.latestRun)?.sandboxStatus ?? selected.sandboxStatus ?? "JUDGE0_COMPATIBLE_LOCAL_SANDBOX"}</span>
-                  <span>Visible {(latestRun ?? selected.latestRun)?.visiblePassed ?? 0}/{(latestRun ?? selected.latestRun)?.visibleTotal ?? selected.visibleTestCases?.length ?? 0}</span>
-                  <span>Hidden {(latestRun ?? selected.latestRun)?.hiddenPassed ?? 0}/{(latestRun ?? selected.latestRun)?.hiddenTotal ?? 0} scored only after submit</span>
-                </div>
-                <div className="constraint-box">
-                  <strong>Risk signals</strong>
-                  <span>Integrity risk {Math.round((latestRun?.integrityRiskScore ?? selected.integrityRiskScore ?? 0) * 10) / 10}%</span>
-                  <span>Similarity {Math.round((latestRun?.similarityScore ?? selected.similarityScore ?? 0) * 10) / 10}%</span>
-                  <span>Deadline lock {FINAL_STATUSES.has(selected.status) ? "finalized" : `open until ${formatDate(selected.dueAt)}`}</span>
-                </div>
+              <div>
+                <strong>Session integrity</strong>
+                <span>Attempt {selected.attemptNumber ?? 0} / grader {selected.graderVersion ?? "static-rubric-v1"}</span>
+                <span>Focus {integrityCounters.focusLoss} / paste bursts {integrityCounters.pasteBurst} / hidden tabs {integrityCounters.tabHidden}</span>
+                {selected.codeHash ? <span>Code hash {selected.codeHash.slice(0, 12)}</span> : null}
               </div>
-              <div className="form">
-                <div className="editor-toolbar">
-                  <label>
-                    Language
-                    <select aria-label="Submission language" value={language} onChange={(event) => setLanguage(event.target.value)}>
-                      <option>Java</option>
-                      <option>SQL</option>
-                      <option>TypeScript</option>
-                    </select>
-                  </label>
-                  <span className="badge">Time box 45 min</span>
-                  <span className="badge">Target score 85+</span>
-                  <span className="badge">Hidden tests server-side</span>
-                </div>
-                <textarea
-                  className="code-editor"
-                  aria-label="Candidate code submission"
-                  value={code}
-                  onChange={(event) => setCode(event.target.value)}
-                  placeholder="Write the solution, edge-case handling, and assertion evidence here."
-                  spellCheck={false}
-                />
+              <div>
+                <strong>Sandbox execution</strong>
+                <span>{formatSandboxStatus(selectedRun?.sandboxStatus ?? selected.sandboxStatus)}</span>
+                <span>Visible {selectedRun?.visiblePassed ?? 0}/{selectedRun?.visibleTotal ?? visibleCases.length}</span>
+                <span>Hidden tests server-side after submit</span>
+              </div>
+              <div>
+                <strong>Risk signals</strong>
+                <span>Integrity risk {Math.round((selectedRun?.integrityRiskScore ?? selected.integrityRiskScore ?? 0) * 10) / 10}%</span>
+                <span>Similarity {Math.round((selectedRun?.similarityScore ?? selected.similarityScore ?? 0) * 10) / 10}%</span>
+                <span>Deadline open until {formatDate(selected.dueAt)}</span>
+              </div>
+            </section>
+
+            <section className="assessment-instruction-block">
+              <div className="assessment-panel-heading">
+                <h2>Rubric breakdown</h2>
+                <ShieldCheck size={18} />
+              </div>
+              <div className="assessment-rubric-list">
+                {rubricItems.map((item) => (
+                  <div key={item.category}>
+                    <span>
+                      <strong>{item.category}</strong>
+                      <small>{item.evidence}</small>
+                    </span>
+                    <em>{item.score}/{item.maxScore}</em>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            <section className="assessment-instruction-block">
+              <label className="assessment-notes-label">
+                Reviewer notes
                 <textarea
                   aria-label="Candidate notes"
                   value={notes}
                   onChange={(event) => setNotes(event.target.value)}
                   placeholder="Explain tradeoffs, tests, and operational assumptions."
                 />
+              </label>
+              <button
+                className="assessment-secondary-submit"
+                type="button"
+                onClick={submitCode}
+                disabled={submitting || FINAL_STATUSES.has(selected.status)}
+              >
+                {FINAL_STATUSES.has(selected.status)
+                  ? "Employer decision locked"
+                  : submitting ? "Scoring" : "Send rubric evidence"}
+              </button>
+            </section>
+
+            <section className="assessment-instruction-block">
+              <div className="assessment-panel-heading">
+                <h2>Submission history</h2>
+                <SquareTerminal size={18} />
+              </div>
+              <div className="assessment-history-list">
+                {submissionHistory(selected).map((event) => (
+                  <div key={event.title}>
+                    <span className={event.completed ? "done" : ""} />
+                    <strong>{event.title}</strong>
+                    <small>{event.description}</small>
+                    <em>{statusLabel(event.status)}</em>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            <section className="assessment-instruction-block assessment-queue">
+              <h2>Challenge queue</h2>
+              {assessments.map((item) => (
                 <button
-                  className="button primary"
+                  className={item.id === selected.id ? "active" : ""}
+                  key={item.id}
                   type="button"
-                  onClick={submitCode}
-                  disabled={submitting || FINAL_STATUSES.has(selected.status)}
+                  onClick={() => setSelectedId(item.id)}
                 >
-                  {FINAL_STATUSES.has(selected.status)
-                    ? "Employer decision locked"
-                    : submitting ? "Scoring" : "Submit for rubric score"}
+                  <span>
+                    <strong>{item.challengeTitle}</strong>
+                    <small>{item.jobTitle} / due {formatDate(item.dueAt)}</small>
+                  </span>
+                  <em>{item.latestScore == null ? "Pending" : `${item.latestScore}/${item.maxScore}`}</em>
                 </button>
-                <button className="button secondary" type="button" onClick={runStaticAnalysis} disabled={running}>
-                  <PlayCircle size={16} />
-                  {running ? "Running visible cases" : "Run judge analysis"}
-                </button>
-              </div>
-              {loadingDetail ? <p className="muted">Owner-only submission detail sync in progress...</p> : null}
-              {analysisMessage ? <p className="success">{analysisMessage}</p> : null}
-              {analysisResults.length ? (
-                <div className="judge-results" aria-label="Static judge case results">
-                  {analysisResults.map((result) => (
-                    <div className="judge-case" key={result.label}>
-                      <span className={result.matched ? "case-dot pass" : "case-dot"} />
-                      <span>
-                        <strong>{result.label}</strong>
-                        <small>{result.detail}</small>
-                        {result.output ? <small>{result.output}</small> : null}
-                      </span>
-                      <span className={result.matched ? "badge live" : "badge warn"}>
-                        {result.matched ? "Matched" : "Needs evidence"}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              ) : null}
-              {message ? <p className="success">{message}</p> : null}
-            </>
-          ) : null}
-        </div>
-      </div>
-
-      {selected ? (
-        <div className="panel">
-          <div className="section-title">
-            <ShieldCheck size={20} />
-            <h2>Rubric breakdown</h2>
-          </div>
-          <div className="rubric-grid">
-            {(selected.rubric.length ? selected.rubric : emptyRubric()).map((item) => (
-              <div className="rubric-card" key={item.category}>
-                <div className="status-line">
-                  <strong>{item.category}</strong>
-                  <span className="score-chip">{item.score}/{item.maxScore}</span>
-                </div>
-                <p>{item.evidence}</p>
-              </div>
-            ))}
-          </div>
-          <div className="review-summary">
-            <strong>Review feedback</strong>
-            <p>{selected.feedback ?? "Submit an implementation to generate deterministic rubric feedback."}</p>
-            <div className="tag-list">
-              {selected.skills.map((skill) => <span className="badge" key={skill}>{skill}</span>)}
-              {(selected.riskFlags.length ? selected.riskFlags : ["no-risk-flags"]).map((flag) => (
-                <span className={flag === "no-risk-flags" ? "badge live" : "badge warn"} key={flag}>
-                  {flag.replaceAll("-", " ")}
-                </span>
               ))}
-            </div>
+            </section>
           </div>
-        </div>
-      ) : null}
-
-      {selected ? (
-        <div className="panel">
-          <div className="section-title">
-            <Clock3 size={20} />
-            <h2>Submission history</h2>
-          </div>
-          <div className="timeline-list">
-            {submissionHistory(selected).map((event) => (
-              <div className="timeline-item" key={event.title}>
-                <span className={event.completed ? "timeline-dot done" : "timeline-dot"} />
-                <span>
-                  <strong>{event.title}</strong>
-                  <small>{event.description}</small>
-                </span>
-                <StatusPill value={event.status} />
-              </div>
-            ))}
-          </div>
-        </div>
-      ) : null}
-    </section>
+        </aside>
+      </div>
+    </main>
   );
-}
-
-function simulateLocalReview(item: CodeAssessment, code: string): CodeAssessment {
-  const hasTest = /(@test|assert|expect\()/i.test(code);
-  const hasRisk = /(api[_-]?key|password|secret|runtime\.getruntime|processbuilder|system\.exit)/i.test(code);
-  const matchedCases = assessmentEvidenceCases(item).filter((testCase) => testCase.matched(code)).length;
-  const score = Math.max(
-    58,
-    Math.min(96, 62 + Math.floor(code.length / 140) + matchedCases * 6 + (hasTest ? 9 : 0) - (hasRisk ? 16 : 0))
-  );
-  return {
-    ...item,
-    status: "AUTO_REVIEWED",
-    latestScore: score,
-    latestDecision: score >= 85 && !hasRisk ? "ADVANCE" : "REVIEW",
-    submittedCode: code,
-    submittedCodePreview: code.replace(/\s+/g, " ").slice(0, 220),
-    hasSubmittedCode: true,
-    attemptNumber: (item.attemptNumber ?? 0) + 1,
-    codeHash: "local-static-analysis",
-    graderVersion: item.graderVersion ?? "static-rubric-v1",
-    rubricVersion: item.rubricVersion ?? "devhire-code-rubric-v1",
-    latestRun: {
-      id: "local-visible-run",
-      status: hasRisk ? "POLICY_BLOCKED" : "COMPLETED",
-      sandboxStatus: hasRisk ? "sandbox-policy-blocked" : "JUDGE0_COMPATIBLE_LOCAL_SANDBOX",
-      visiblePassed: matchedCases,
-      visibleTotal: assessmentEvidenceCases(item).length,
-      hiddenPassed: 0,
-      hiddenTotal: 0,
-      executionTimeMs: Math.max(42, Math.min(900, Math.floor(code.length / 8))),
-      memoryKb: 18_432,
-      failureReason: hasRisk ? "Network, filesystem, or process boundary usage requires server review." : undefined,
-      integrityRiskScore: 0,
-      similarityScore: 0,
-      results: assessmentEvidenceCases(item).map((testCase) => ({
-        caseId: testCase.label,
-        name: testCase.label,
-        visibility: "VISIBLE",
-        passed: testCase.matched(code),
-        output: testCase.matched(code) ? `matched:${testCase.label}` : undefined,
-        error: testCase.matched(code) ? undefined : testCase.detail,
-        executionTimeMs: 42,
-        memoryKb: 18_432
-      })),
-      createdAt: new Date().toISOString(),
-      completedAt: new Date().toISOString()
-    },
-    integrityRiskScore: 0,
-    similarityScore: 0,
-    sandboxStatus: hasRisk ? "sandbox-policy-blocked" : "JUDGE0_COMPATIBLE_LOCAL_SANDBOX",
-    submittedAt: new Date().toISOString(),
-    feedback: score >= 85
-      ? "Strong production-ready submission with clear implementation signals and low review risk."
-      : "Promising submission. Employer review should focus on edge cases, test depth, and deployment safety.",
-    riskFlags: hasRisk ? ["security-review-required"] : hasTest ? [] : ["missing-test-evidence"],
-    rubric: [
-      { category: "Correctness and completeness", score: Math.min(38, Math.floor(score * 0.4)), maxScore: 40, evidence: "Implementation signals reviewed." },
-      { category: "Maintainability and readability", score: 17, maxScore: 20, evidence: "Readable structure and focused implementation." },
-      { category: "Complexity and performance", score: 12, maxScore: 15, evidence: "Batching and data access tradeoffs considered." },
-      { category: "Security posture", score: hasRisk ? 8 : 15, maxScore: 15, evidence: hasRisk ? "Static risk requires employer review." : "No high-risk static smell detected." },
-      { category: "Test and evidence quality", score: hasTest ? 9 : 4, maxScore: 10, evidence: hasTest ? "Assertion evidence included." : "Add stronger test evidence." }
-    ]
-  };
 }
 
 function emptyRubric() {
@@ -609,6 +643,13 @@ function assessmentEvidenceCases(item: CodeAssessment) {
       { label: "Avoids unbounded result sets", detail: "Uses WHERE or LIMIT to avoid unsafe scans.", matched: (code: string) => /limit|where/i.test(code) }
     ];
   }
+  if (item.challengeTitle.toLowerCase().includes("cloud architecture")) {
+    return [
+      { label: "Bean Initialization", detail: "Defines ResourceValidator as a Spring bean.", matched: (code: string) => /@bean[\s\S]*resourcevalidator/i.test(code) },
+      { label: "Policy Enforcement", detail: "Applies EnterpriseSecurityPolicy.STRICT.", matched: (code: string) => /enterprisesecuritypolicy\.strict/i.test(code) },
+      { label: "Tag Filtering", detail: "Restricts validation to production resources.", matched: (code: string) => /production/i.test(code) }
+    ];
+  }
   if (item.challengeTitle.toLowerCase().includes("search")) {
     return [
       { label: "OpenSearch primary adapter", detail: "Uses the search adapter for relevance-first retrieval.", matched: (code: string) => /opensearch|search/i.test(code) },
@@ -637,6 +678,22 @@ function challengeExamples(item: CodeAssessment): ChallengeExample[] {
         input: "applications from another employer",
         output: "excluded",
         explanation: "Cross-company rows must never leak into an employer dashboard."
+      }
+    ];
+  }
+  if (item.challengeTitle.toLowerCase().includes("cloud architecture")) {
+    return [
+      {
+        title: "Example 1",
+        input: "Resource res-9982 tagged production",
+        output: "Validation Status: PASSED",
+        explanation: "The validator applies strict policy to production resources."
+      },
+      {
+        title: "Example 2",
+        input: "Resource tagged staging",
+        output: "Skipped by production filter",
+        explanation: "Non-production resources must not be scored by this task."
       }
     ];
   }
@@ -676,6 +733,9 @@ function complexityTargets(item: CodeAssessment) {
   if (item.language.toLowerCase() === "sql") {
     return ["Expected: indexed WHERE + GROUP BY", "Watch: tenant isolation", "Evidence: bounded result set"];
   }
+  if (item.challengeTitle.toLowerCase().includes("cloud architecture")) {
+    return ["Expected: @Bean ResourceValidator", "Watch: strict policy enforcement", "Evidence: production tag assertion"];
+  }
   if (item.challengeTitle.toLowerCase().includes("search")) {
     return ["Expected: adapter failover", "Watch: private result leakage", "Evidence: published-only test"];
   }
@@ -691,6 +751,16 @@ function difficultyLabel(item: CodeAssessment) {
     return "Medium";
   }
   return "Interview";
+}
+
+function formatSandboxStatus(value?: string) {
+  if (!value) {
+    return "Judge0-compatible sandbox";
+  }
+  if (value.toLowerCase().includes("blocked")) {
+    return "Sandbox policy blocked";
+  }
+  return "Judge0-compatible sandbox";
 }
 
 function formatDate(value: string) {

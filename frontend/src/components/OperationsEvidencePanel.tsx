@@ -7,6 +7,7 @@ export type OperationsEvidenceItem = {
   status: string;
   source: string;
   displaySource?: string;
+  ownerAction?: string;
   href?: string;
 };
 
@@ -28,6 +29,7 @@ export function OperationsEvidencePanel({ title, items }: OperationsEvidencePane
             <span>
               <strong>{item.label}</strong>
               <small title={item.source}>{item.displaySource ?? item.source}</small>
+              {item.ownerAction ? <small className="evidence-owner">Owner action: {item.ownerAction}</small> : null}
             </span>
             {item.href ? (
               <Link className="button ghost" href={item.href}>

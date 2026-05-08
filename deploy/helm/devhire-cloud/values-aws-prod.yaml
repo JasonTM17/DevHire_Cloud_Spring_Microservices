@@ -56,6 +56,9 @@ externalSecrets:
     - secretKey: JWT_SECRET
       remoteKey: /devhire/prod/runtime
       property: JWT_SECRET
+    - secretKey: DEVHIRE_GATEWAY_INTERNAL_TOKEN
+      remoteKey: /devhire/prod/runtime
+      property: DEVHIRE_GATEWAY_INTERNAL_TOKEN
     - secretKey: POSTGRES_USER
       remoteKey: /devhire/prod/runtime
       property: POSTGRES_USER

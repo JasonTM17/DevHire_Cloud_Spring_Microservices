@@ -17,51 +17,60 @@ import {
   Map,
   Search,
   ShieldCheck,
+  type LucideIcon,
   UserRoundCheck,
   UsersRound
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { clearSession, getSession } from "@/lib/session";
+import type { UserRole } from "@/types/domain";
 
-const navGroups = [
+type NavItem = {
+  href: string;
+  label: string;
+  icon: LucideIcon;
+  roles?: UserRole[];
+};
+
+const navGroups: { label: string; items: NavItem[] }[] = [
   {
     label: "Candidate",
     items: [
       { href: "/jobs", label: "Discover Jobs", icon: BriefcaseBusiness },
-      { href: "/candidate", label: "Candidate Home", icon: ClipboardList },
-      { href: "/candidate/applications", label: "Applications", icon: FileCheck2 },
-      { href: "/candidate/profile", label: "Profile", icon: UserRoundCheck },
-      { href: "/candidate/assessments", label: "Code Studio", icon: GraduationCap },
-      { href: "/candidate/offers", label: "Offers", icon: ShieldCheck },
-      { href: "/candidate/interview-prep", label: "Interview Prep", icon: Bot },
-      { href: "/candidate/roadmap", label: "Roadmap", icon: Map },
-      { href: "/candidate/skill-analytics", label: "Skill Analytics", icon: ChartSpline },
+      { href: "/candidate", label: "Candidate Home", icon: ClipboardList, roles: ["CANDIDATE"] },
+      { href: "/candidate/applications", label: "Applications", icon: FileCheck2, roles: ["CANDIDATE"] },
+      { href: "/candidate/profile", label: "Profile", icon: UserRoundCheck, roles: ["CANDIDATE"] },
+      { href: "/candidate/assessments", label: "Code Studio", icon: GraduationCap, roles: ["CANDIDATE"] },
+      { href: "/candidate/offers", label: "Offers", icon: ShieldCheck, roles: ["CANDIDATE"] },
+      { href: "/candidate/interview-prep", label: "Interview Prep", icon: Bot, roles: ["CANDIDATE"] },
+      { href: "/candidate/roadmap", label: "Roadmap", icon: Map, roles: ["CANDIDATE"] },
+      { href: "/candidate/skill-analytics", label: "Skill Analytics", icon: ChartSpline, roles: ["CANDIDATE"] },
       { href: "/community", label: "Community", icon: UsersRound }
     ]
   },
   {
     label: "Employer",
     items: [
-      { href: "/employer", label: "Hiring Pipeline", icon: Building2 }
+      { href: "/employer", label: "Hiring Pipeline", icon: Building2, roles: ["EMPLOYER"] }
     ]
   },
   {
     label: "Admin/Ops",
     items: [
-      { href: "/admin", label: "Admin Control", icon: ShieldCheck },
-      { href: "/admin/ai", label: "AI Operations", icon: Bot }
+      { href: "/admin", label: "Admin Control", icon: ShieldCheck, roles: ["ADMIN"] },
+      { href: "/admin/ai", label: "AI Operations", icon: Bot, roles: ["ADMIN"] }
     ]
   },
   {
     label: "Platform",
     items: [
       { href: "/assistant", label: "AI Assistant", icon: Bot },
-      { href: "/platform/observability", label: "Observability", icon: ChartSpline },
-      { href: "/platform/cloud", label: "Cloud Blueprint", icon: Cloud },
-      { href: "/platform/releases", label: "Releases", icon: GitBranch }
+      { href: "/platform/observability", label: "Observability", icon: ChartSpline, roles: ["ADMIN"] },
+      { href: "/platform/cloud", label: "Cloud Blueprint", icon: Cloud, roles: ["ADMIN"] },
+      { href: "/platform/releases", label: "Releases", icon: GitBranch, roles: ["ADMIN"] }
     ]
   }
 ];
@@ -149,11 +158,28 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const [globalSearch, setGlobalSearch] = useState("");
-  const session = typeof window === "undefined" ? null : getSession();
+  const [isMounted, setIsMounted] = useState(false);
+  const [session, setSession] = useState<ReturnType<typeof getSession>>(null);
   const meta = resolvePageMeta(pathname);
-  const workspaceHref = session?.user.role === "ADMIN"
+  const routeAccess = resolveRouteAccess(pathname);
+  const routeAllowed = !routeAccess || Boolean(session && routeAccess.roles.includes(session.user.role));
+  const assessmentFullscreen = isMounted && pathname === "/candidate/assessments" && routeAllowed;
+  const visibleNavGroups = navGroups
+    .map((group) => ({
+      ...group,
+      items: group.items.filter((item) => canSeeNavItem(item, session?.user.role))
+    }))
+    .filter((group) => group.items.length > 0);
+  const workspaceHref = !session
+    ? "/login"
+    : session.user.role === "ADMIN"
     ? "/admin"
-    : session?.user.role === "EMPLOYER" ? "/employer" : "/candidate";
+    : session.user.role === "EMPLOYER" ? "/employer" : "/candidate";
+
+  useEffect(() => {
+    setSession(getSession());
+    setIsMounted(true);
+  }, [pathname]);
 
   function submitGlobalSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -163,6 +189,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       return;
     }
     router.push(`/jobs?keyword=${encodeURIComponent(keyword)}`);
+  }
+
+  if (assessmentFullscreen) {
+    return <>{children}</>;
   }
 
   return (
@@ -176,7 +206,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </span>
         </Link>
         <nav className="nav-list" aria-label="Primary">
-          {navGroups.map((group) => (
+          {visibleNavGroups.map((group) => (
             <div className="nav-group" key={group.label}>
               <span className="nav-group-label">{group.label}</span>
               {group.items.map((item) => {
@@ -233,6 +263,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 type="button"
                 onClick={() => {
                   clearSession();
+                  setSession(null);
                   router.push("/login");
                 }}
               >
@@ -282,6 +313,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 type="button"
                 onClick={() => {
                   clearSession();
+                  setSession(null);
                   router.push("/login");
                 }}
               >
@@ -296,10 +328,83 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             )}
           </div>
         </header>
-        <main className="workspace">{children}</main>
+        <main className="workspace">
+          {routeAllowed ? children : (
+            <AccessRestricted
+              requiredRoles={routeAccess?.roles ?? []}
+              sessionRole={session?.user.role}
+              workspaceHref={workspaceHref}
+            />
+          )}
+        </main>
       </div>
     </div>
   );
+}
+
+function AccessRestricted({
+  requiredRoles,
+  sessionRole,
+  workspaceHref
+}: {
+  requiredRoles: UserRole[];
+  sessionRole?: UserRole;
+  workspaceHref: string;
+}) {
+  return (
+    <section className="panel access-denied" data-testid="access-denied">
+      <span className="badge warn">RBAC enforced</span>
+      <h2>Access restricted</h2>
+      <p>
+        This Admin/Ops workspace is protected by role-based access control. The page content is not rendered unless
+        the signed-in JWT session has the required role.
+      </p>
+      <div className="table-list">
+        <div className="table-row">
+          <span>
+            <strong>Required role</strong>
+            <small>{requiredRoles.join(" or ")}</small>
+          </span>
+          <span className="badge">Policy</span>
+        </div>
+        <div className="table-row">
+          <span>
+            <strong>Current session</strong>
+            <small>{sessionRole ?? "Not signed in"}</small>
+          </span>
+          <span className={sessionRole ? "badge warn" : "badge"}>{sessionRole ? "Forbidden" : "Unauthorized"}</span>
+        </div>
+      </div>
+      <div className="button-row">
+        <Link className="button primary" href={sessionRole ? workspaceHref : "/login"}>
+          {sessionRole ? "Go to my workspace" : "Sign in"}
+        </Link>
+        <Link className="button secondary" href="/jobs">
+          Back to public jobs
+        </Link>
+      </div>
+    </section>
+  );
+}
+
+function canSeeNavItem(item: NavItem, role?: UserRole) {
+  return !item.roles || Boolean(role && item.roles.includes(role));
+}
+
+function resolveRouteAccess(pathname: string): { roles: UserRole[] } | null {
+  if (pathname === "/admin" || pathname.startsWith("/admin/")) {
+    return { roles: ["ADMIN"] };
+  }
+  if (pathname.startsWith("/platform/")) {
+    return { roles: ["ADMIN"] };
+  }
+  if (pathname === "/employer" || pathname.startsWith("/employer/")) {
+    return { roles: ["EMPLOYER"] };
+  }
+  if (pathname === "/candidate" || pathname.startsWith("/candidate/")) {
+    return { roles: ["CANDIDATE"] };
+  }
+  return null;
 }
 
 function resolvePageMeta(pathname: string) {

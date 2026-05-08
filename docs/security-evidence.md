@@ -40,6 +40,7 @@ Trivy filesystem scanning blocks critical repository vulnerabilities. Trivy imag
 ## Runtime Security Controls
 
 - Gateway JWT validation strips spoofed identity headers before forwarding to services.
+- Gateway forwards an internal boundary token to downstream services, and services reject `/internal/**` calls plus any identity-bearing request missing that token. If `DEVHIRE_GATEWAY_INTERNAL_TOKEN` is omitted, protected routes fail closed instead of accepting spoofed `X-User-*` headers or internal runner/read-model calls.
 - Redis-backed logout blacklist blocks revoked access tokens at the gateway.
 - Role and ownership checks remain in service controllers and service layers.
 - Gateway responses include common security headers: `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`, and a restrictive API content security policy.

@@ -29,7 +29,7 @@ helm upgrade --install devhire-cloud .\deploy\helm\devhire-cloud -f .\deploy\hel
 Production notes:
 
 - Set `global.publicDomain`, `global.publicBaseUrl`, `global.smtpFrom`, and `global.smtpReplyTo` for each real environment. The chart derives CORS, frontend API base URL, notification dashboard URL, and default sender values from those globals unless explicitly overridden.
-- `values-prod.yaml` does not create the example secret. Create `devhire-secrets` with a secret manager, SealedSecrets, External Secrets, or your cluster's native secret flow.
+- `values-prod.yaml` does not create the example secret. Create `devhire-secrets` with a secret manager, SealedSecrets, External Secrets, or your cluster's native secret flow. The secret must include `DEVHIRE_GATEWAY_INTERNAL_TOKEN`; services fail closed for `/internal/**` and identity-bearing requests if it is missing.
 - `values-aws-staging.yaml` and `values-aws-prod.yaml` render External Secrets Operator resources that sync `devhire-aws-runtime-secrets` from AWS Secrets Manager placeholders.
 - Install External Secrets Operator first, or use the Argo CD sample at `deploy/gitops/argocd-aws-staging-externalsecrets.yaml`.
 - The runtime secret should include `ANTHROPIC_API_KEY` when `ai-service` should call Claude instead of deterministic fallback mode.

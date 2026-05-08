@@ -10,7 +10,7 @@ This page is the 5-minute reviewer path for the flagship DevHire Cloud code asse
 | Backend owns the domain | `application-service` persists challenges, assignments, test cases, runs, submissions, integrity events, similarity reports, and review events with Flyway migrations |
 | List/detail boundaries are safe | list endpoints redact raw code; detail endpoints expose code only to the owning candidate or employer |
 | Scoring is server-owned | final score blends deterministic rubric evidence with server-side visible/hidden test execution; candidates cannot set score from the client |
-| Hidden tests stay hidden | visible runs return visible cases only; submissions execute hidden cases server-side and expose counts/results summary without hidden payloads |
+| Hidden tests stay hidden | visible runs return visible cases only; submissions execute hidden cases server-side; candidate-facing payloads redact hidden results and counts while employer/admin evidence keeps aggregate review posture |
 | Review is auditable | submissions and employer decisions publish audit metadata including attempt number, code hash, grader version, rubric version, score, risk flags, run id, hidden counts, integrity risk, similarity score, and decision |
 | Operations can see health | `/admin` and `/admin/ai` surface submitted, reviewed, passed, failed, average score, risk flags, runner queue, sandbox failures, integrity risk, and similarity posture |
 | Attempts are production-guarded | assignment rows are locked before attempt allocation, `(assignment_id, attempt_number)` is unique, language/code length/review timestamp and score/hash/version constraints are enforced in the database |
@@ -22,7 +22,7 @@ This page is the 5-minute reviewer path for the flagship DevHire Cloud code asse
 2. Select `Java outbox retry reviewer`.
 3. Review the problem statement, examples, visible judge cases, complexity target, and scoring signals.
 4. Edit the code and run visible judge analysis.
-5. Submit for rubric score and confirm hidden-test counts, rubric rows, risk flags, attempt metadata, hash, and submission history.
+5. Submit for rubric score and confirm rubric rows, risk flags, attempt metadata, hash, and submission history without exposing hidden-test payloads to the candidate.
 6. Sign in as `employer@devhire.local` and open `/employer`.
 7. Open the code assessment review dossier, inspect the redacted list preview plus owner detail code, add reviewer notes, and advance or hold the candidate.
 8. Sign in as `admin@devhire.local` and open `/admin` or `/admin/ai` to verify assessment health and audit posture.
@@ -53,7 +53,7 @@ List endpoints intentionally return a secret-redacted `submittedCodePreview` and
 | Security posture | 15 |
 | Test and evidence quality | 10 |
 
-The candidate UI mirrors a safe LeetCode-style interview loop: read the prompt, inspect examples, run visible judge analysis, submit, then review deterministic rubric evidence and server-side hidden-test counts. The runner adapter blocks process, filesystem, and network boundary smells before scoring. The static grader flags starter-code-only submissions, hardcoded secrets, unsafe process execution, I/O boundary risks, and missing test evidence. Signals found only in comments are treated as weaker evidence than implementation signals.
+The candidate UI mirrors a safe LeetCode-style interview loop: read the prompt, inspect examples, run visible judge analysis, submit, then review deterministic rubric evidence without receiving hidden-test payloads or hidden pass counts. The runner adapter blocks process, filesystem, and network boundary smells before scoring; if the configured runner is unavailable, scoring fails closed instead of trusting a local pass. The static grader flags starter-code-only submissions, hardcoded secrets, unsafe process execution, I/O boundary risks, and missing test evidence. Signals found only in comments are treated as weaker evidence than implementation signals.
 
 The server-side score remains the source of truth. AI feedback can be layered in later as an advisory explanation path, but it does not override rubric, runner, integrity, or similarity decisions.
 

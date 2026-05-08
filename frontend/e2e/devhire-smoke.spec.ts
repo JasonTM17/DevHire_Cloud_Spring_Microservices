@@ -74,11 +74,11 @@ test.describe("DevHire Cloud portfolio smoke", () => {
     await expect(page.getByText(/Live profile|Read-only sample/)).toBeVisible();
     await page.goto("/candidate/assessments");
     await expect(page.getByTestId("candidate-assessments-page")).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Code Interview Studio" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Cloud Architecture Challenge" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Submission history" })).toBeVisible();
     await expect(page.getByLabel("Candidate code submission")).toBeVisible();
     await page.getByRole("button", { name: "Submit for rubric score" }).click();
-    await expect(page.getByText(/Rubric score ready/i)).toBeVisible();
+    await expect(page.getByText(/server-side grading/i)).toBeVisible();
   });
 
   test("employer can sign in and view company and job workflow", async ({ page }) => {
@@ -118,5 +118,23 @@ test.describe("DevHire Cloud portfolio smoke", () => {
     await expect(page.getByPlaceholder("Pending job ID")).toHaveCount(0);
     await expect(page.getByText("UNKNOWN")).toHaveCount(0);
     await expect(page.getByRole("button", { name: "Reindex knowledge" })).toBeVisible();
+  });
+
+  test("non-admin roles cannot open Admin/Ops direct routes", async ({ page }) => {
+    await login(page, "candidate");
+    await page.goto("/admin");
+    await expect(page.getByTestId("access-denied")).toBeVisible();
+    await expect(page.getByText("Required role", { exact: true })).toBeVisible();
+    await expect(page.getByText("ADMIN").first()).toBeVisible();
+    await expect(page.getByTestId("admin-dashboard")).toHaveCount(0);
+
+    await page.goto("/platform/observability");
+    await expect(page.getByTestId("access-denied")).toBeVisible();
+    await expect(page.getByTestId("platform-observability-page")).toHaveCount(0);
+
+    await login(page, "employer");
+    await page.goto("/admin/ai");
+    await expect(page.getByTestId("access-denied")).toBeVisible();
+    await expect(page.getByTestId("admin-ai-page")).toHaveCount(0);
   });
 });

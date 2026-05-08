@@ -1,8 +1,61 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import path from "node:path";
 import { assertPrimaryEvidenceReady, expectNoHorizontalOverflow } from "./evidence-guards";
 
 const mobileScreenshotsDir = path.resolve(__dirname, "..", "test-results", "mobile-screenshots");
+const accounts = {
+  admin: {
+    email: "admin@devhire.local",
+    password: "Admin@123456",
+    dashboard: "/admin",
+    testId: "admin-dashboard"
+  },
+  employer: {
+    email: "employer@devhire.local",
+    password: "Employer@123456",
+    dashboard: "/employer",
+    testId: "employer-dashboard"
+  },
+  candidate: {
+    email: "candidate@devhire.local",
+    password: "Candidate@123456",
+    dashboard: "/candidate",
+    testId: "candidate-dashboard"
+  }
+} as const;
+
+type Role = keyof typeof accounts;
+
+const mobileRoutes: { route: string; role?: Role }[] = [
+  { route: "/login" },
+  { route: "/register" },
+  { route: "/candidate", role: "candidate" },
+  { route: "/candidate/applications", role: "candidate" },
+  { route: "/candidate/profile", role: "candidate" },
+  { route: "/candidate/offers", role: "candidate" },
+  { route: "/candidate/assessments", role: "candidate" },
+  { route: "/candidate/interview-prep", role: "candidate" },
+  { route: "/candidate/roadmap", role: "candidate" },
+  { route: "/candidate/skill-analytics", role: "candidate" },
+  { route: "/companies/portfolio-labs" },
+  { route: "/employer", role: "employer" },
+  { route: "/admin", role: "admin" },
+  { route: "/admin/ai", role: "admin" },
+  { route: "/platform/observability", role: "admin" },
+  { route: "/platform/cloud", role: "admin" },
+  { route: "/platform/releases", role: "admin" }
+];
+
+async function login(page: Page, role: Role) {
+  const user = accounts[role];
+  await page.goto("/login");
+  await expect(page.getByTestId("login-page")).toBeVisible();
+  await page.getByLabel("Email").fill(user.email);
+  await page.getByLabel("Password").fill(user.password);
+  await page.getByRole("button", { name: "Sign in" }).click();
+  await expect(page).toHaveURL(new RegExp(`${user.dashboard}$`));
+  await expect(page.getByTestId(user.testId)).toBeVisible();
+}
 
 test.describe("Mobile recruiter demo smoke", () => {
   test("jobs workspace remains usable on a phone viewport", async ({ page }) => {
@@ -32,26 +85,11 @@ test.describe("Mobile recruiter demo smoke", () => {
     await page.screenshot({ path: path.join(mobileScreenshotsDir, "assistant-mobile.png"), fullPage: true });
   });
 
-  for (const route of [
-    "/login",
-    "/register",
-    "/candidate",
-    "/candidate/applications",
-    "/candidate/profile",
-    "/candidate/offers",
-    "/candidate/assessments",
-    "/candidate/interview-prep",
-    "/candidate/roadmap",
-    "/candidate/skill-analytics",
-    "/companies/portfolio-labs",
-    "/employer",
-    "/admin",
-    "/admin/ai",
-    "/platform/observability",
-    "/platform/cloud",
-    "/platform/releases"
-  ]) {
+  for (const { route, role } of mobileRoutes) {
     test(`primary route ${route} has no mobile overflow`, async ({ page }) => {
+      if (role) {
+        await login(page, role);
+      }
       await page.goto(route);
       await expect(page.locator("main")).toBeVisible();
       await expect(page.getByText(/Syncing|Loading/i)).toHaveCount(0, { timeout: 10_000 });

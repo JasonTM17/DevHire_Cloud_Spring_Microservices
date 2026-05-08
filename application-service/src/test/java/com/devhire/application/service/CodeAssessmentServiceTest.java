@@ -1,5 +1,6 @@
 package com.devhire.application.service;
 
+import com.devhire.application.client.AssessmentRunnerClient;
 import com.devhire.application.dto.request.CodeReviewRequest;
 import com.devhire.application.dto.request.CodeSubmissionRequest;
 import com.devhire.application.dto.response.CodeAssessmentResponse;
@@ -71,6 +72,9 @@ class CodeAssessmentServiceTest {
             assertThat(update.args()).contains(ASSIGNMENT_ID, CANDIDATE_ID);
         });
         verify(eventPublisher, times(2)).publishAudit(any(AuditEvent.class));
+        assertThat(response.latestRun()).isNotNull();
+        assertThat(response.latestRun().hiddenPassed()).isZero();
+        assertThat(response.latestRun().hiddenTotal()).isZero();
     }
 
     @Test
@@ -137,6 +141,29 @@ class CodeAssessmentServiceTest {
     }
 
     @Test
+    void runnerClientFailureFailsClosedInsteadOfTrustingLocalFallback() {
+        AssessmentRunnerClient runnerClient = mock(AssessmentRunnerClient.class);
+        when(runnerClient.run(any())).thenThrow(new IllegalStateException("runner down"));
+        CodeAssessmentService serviceWithRunner = new CodeAssessmentService(
+                jdbcTemplate, new ObjectMapper(), new CodeAssessmentGrader(),
+                eventPublisher, new SimpleMeterRegistry(), runnerClient);
+        jdbcTemplate.assessments.add(assessment("ASSIGNED", null, null, null));
+        jdbcTemplate.assessments.add(assessment("AUTO_REVIEWED", 42, "REVIEW", Instant.parse("2026-05-06T10:00:00Z")));
+
+        serviceWithRunner.submit(candidate(), ASSIGNMENT_ID, new CodeSubmissionRequest("Java", """
+                public class RetryReview {
+                    @Test void givenOutboxWhenRetryThenDeduplicates() { assert true; }
+                    void handle() { /* outbox retry page */ }
+                }
+                """, "Runner outage should not create a trusted local pass."));
+
+        assertThat(jdbcTemplate.updates).anySatisfy(update -> {
+            assertThat(update.sql()).contains("INSERT INTO code_assessment_runs");
+            assertThat(update.args()).contains("FAILED", "sandbox-runner-unavailable");
+        });
+    }
+
+    @Test
     void listResponsesRemoveRawCodeAndRedactSecretLikePreview() {
         jdbcTemplate.assessments.add(assessmentWithCode("""
                 class CandidateSolution {
@@ -155,6 +182,25 @@ class CodeAssessmentServiceTest {
                 .contains("token=<redacted>")
                 .doesNotContain("super-secret-demo-value")
                 .doesNotContain("eyJhbGci");
+    }
+
+    @Test
+    void candidateDetailKeepsOwnSubmittedCodeButRedactsHiddenRunCounts() {
+        jdbcTemplate.assessments.add(assessmentWithCode("""
+                class CandidateSolution {
+                    @Test void provesRetry() { assert true; }
+                }
+                """));
+
+        var response = service.candidateAssessment(candidate(), ASSIGNMENT_ID);
+
+        assertThat(response.submittedCode()).contains("CandidateSolution");
+        assertThat(response.latestRun()).isNotNull();
+        assertThat(response.latestRun().visiblePassed()).isEqualTo(2);
+        assertThat(response.latestRun().visibleTotal()).isEqualTo(2);
+        assertThat(response.latestRun().hiddenPassed()).isZero();
+        assertThat(response.latestRun().hiddenTotal()).isZero();
+        assertThat(response.latestRun().results()).allSatisfy(result -> assertThat(result.visibility()).isEqualTo("VISIBLE"));
     }
 
     @Test

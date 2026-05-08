@@ -180,6 +180,11 @@ spec:
             - configMapRef:
                 name: devhire-config
           env:
+            - name: DEVHIRE_GATEWAY_INTERNAL_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: devhire-secrets
+                  key: DEVHIRE_GATEWAY_INTERNAL_TOKEN
             - name: SPRING_DATASOURCE_URL
               valueFrom:
                 secretKeyRef:
@@ -274,6 +279,11 @@ spec:
             - configMapRef:
                 name: devhire-config
           env:
+            - name: DEVHIRE_GATEWAY_INTERNAL_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: devhire-secrets
+                  key: DEVHIRE_GATEWAY_INTERNAL_TOKEN
             - name: SPRING_DATASOURCE_URL
               valueFrom:
                 secretKeyRef:
@@ -363,6 +373,11 @@ spec:
             - configMapRef:
                 name: devhire-config
           env:
+            - name: DEVHIRE_GATEWAY_INTERNAL_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: devhire-secrets
+                  key: DEVHIRE_GATEWAY_INTERNAL_TOKEN
             - name: SPRING_DATASOURCE_URL
               valueFrom:
                 secretKeyRef:
@@ -452,6 +467,11 @@ spec:
             - configMapRef:
                 name: devhire-config
           env:
+            - name: DEVHIRE_GATEWAY_INTERNAL_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: devhire-secrets
+                  key: DEVHIRE_GATEWAY_INTERNAL_TOKEN
             - name: SPRING_DATASOURCE_URL
               valueFrom:
                 secretKeyRef:
@@ -541,6 +561,11 @@ spec:
             - configMapRef:
                 name: devhire-config
           env:
+            - name: DEVHIRE_GATEWAY_INTERNAL_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: devhire-secrets
+                  key: DEVHIRE_GATEWAY_INTERNAL_TOKEN
             - name: SPRING_DATASOURCE_URL
               valueFrom:
                 secretKeyRef:
@@ -630,6 +655,11 @@ spec:
             - configMapRef:
                 name: devhire-config
           env:
+            - name: DEVHIRE_GATEWAY_INTERNAL_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: devhire-secrets
+                  key: DEVHIRE_GATEWAY_INTERNAL_TOKEN
             - name: SPRING_DATASOURCE_URL
               valueFrom:
                 secretKeyRef:
@@ -729,6 +759,11 @@ spec:
             - configMapRef:
                 name: devhire-config
           env:
+            - name: DEVHIRE_GATEWAY_INTERNAL_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: devhire-secrets
+                  key: DEVHIRE_GATEWAY_INTERNAL_TOKEN
             - name: SPRING_DATASOURCE_URL
               valueFrom:
                 secretKeyRef:
@@ -818,6 +853,11 @@ spec:
             - configMapRef:
                 name: devhire-config
           env:
+            - name: DEVHIRE_GATEWAY_INTERNAL_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: devhire-secrets
+                  key: DEVHIRE_GATEWAY_INTERNAL_TOKEN
             - name: SPRING_DATASOURCE_URL
               valueFrom:
                 secretKeyRef:

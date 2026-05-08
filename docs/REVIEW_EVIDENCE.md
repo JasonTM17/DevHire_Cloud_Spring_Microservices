@@ -46,7 +46,7 @@ The reviewer-facing screenshots are committed under `docs/screenshots/` and trac
 | Category | Screenshots |
 |---|---|
 | Product | `jobs-page.png`, `job-detail.png`, `candidate-dashboard.png`, `employer-dashboard.png`, `admin-dashboard.png`, `assistant-page.png` |
-| Stitch full app | `stitch/client-jobs.png`, `stitch/client-job-detail.png`, `stitch/company-profile.png`, `stitch/candidate-assessments.png`, `stitch/employer-pipeline.png`, `stitch/admin-control-plane.png`, `stitch/admin-ai-ops.png`, `stitch/platform-cloud.png`, `stitch/platform-releases.png` |
+| Stitch full app | `stitch/client-jobs.png`, `stitch/client-job-detail.png`, `stitch/company-profile.png`, `stitch/candidate-assessments.png`, `stitch/employer-pipeline.png`, `stitch/admin-control-plane.png`, `stitch/admin-ai-ops.png`, `stitch/platform-observability.png`, `stitch/platform-cloud.png`, `stitch/platform-releases.png` |
 | Runtime | `docker-runtime-jobs.png`, `ops-openapi-job-service.png`, `ops-mailpit.png` |
 | Observability | `ops-prometheus-rules.png`, `ops-grafana-slo.png`, `ops-ai-provider.png` |
 

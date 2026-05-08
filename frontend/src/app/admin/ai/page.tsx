@@ -37,7 +37,7 @@ export default function AdminAiPage() {
       <div className="hero-strip">
         <div>
           <p className="eyebrow">AI RAG talent intelligence</p>
-          <h1>Assistant operations and safety posture</h1>
+          <h1>AI provider operations and safety posture</h1>
           <p>Review Claude Haiku configuration, circuit breaker state, knowledge indexing, citations, and safety controls.</p>
         </div>
         <div className="hero-actions">

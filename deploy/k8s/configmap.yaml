@@ -26,6 +26,7 @@ data:
   NOTIFICATION_SERVICE_URL: http://notification-service:8086
   AUDIT_SERVICE_URL: http://audit-service:8087
   AI_SERVICE_URL: http://ai-service:8088
+  ASSESSMENT_RUNNER_SERVICE_URL: http://assessment-runner-service:8089
   DEVHIRE_SEARCH_PROVIDER: opensearch
   DEVHIRE_SEARCH_OPENSEARCH_URL: http://opensearch.devhire-platform.svc.cluster.local:9200
   DEVHIRE_SEARCH_OPENSEARCH_INDEX: devhire_jobs

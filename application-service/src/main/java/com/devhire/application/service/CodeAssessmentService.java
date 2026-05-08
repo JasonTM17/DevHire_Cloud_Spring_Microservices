@@ -139,7 +139,7 @@ public class CodeAssessmentService {
     @Transactional(readOnly = true)
     public CodeAssessmentResponse candidateAssessment(AuthenticatedUser candidate, UUID assignmentId) {
         requireRole(candidate, UserRole.CANDIDATE);
-        return findForOwner(assignmentId, "a.candidate_id = ?", candidate.id());
+        return withoutHiddenRunResults(findForOwner(assignmentId, "a.candidate_id = ?", candidate.id()));
     }
 
     @Transactional
@@ -173,7 +173,7 @@ public class CodeAssessmentService {
         requireRole(candidate, UserRole.CANDIDATE);
         candidateAssessment(candidate, assignmentId);
         try {
-            return jdbcTemplate.queryForObject("""
+            CodeRunResponse response = jdbcTemplate.queryForObject("""
                             SELECT id, status, sandbox_status, visible_case_count, visible_passed_count,
                                    hidden_case_count, hidden_passed_count, execution_time_ms, memory_kb, failure_reason,
                                    integrity_risk_score, similarity_score, created_at, completed_at
@@ -182,6 +182,7 @@ public class CodeAssessmentService {
                             """,
                     (rs, rowNum) -> runFromResultSet(rs, runResults(runId, false)),
                     runId, assignmentId, candidate.id());
+            return withoutHiddenResults(response);
         } catch (EmptyResultDataAccessException ex) {
             throw new DevHireException(ErrorCode.NOT_FOUND, "Code assessment run not found");
         }
@@ -594,9 +595,32 @@ public class CodeAssessmentService {
             } catch (RuntimeException ex) {
                 meterRegistry.counter("devhire_code_runner_client_failures_total",
                         "language", language).increment();
+                return runnerUnavailable(request, ex);
             }
+            meterRegistry.counter("devhire_code_runner_client_failures_total",
+                    "language", language).increment();
+            return runnerUnavailable(request, null);
         }
         return localSandboxRun(request);
+    }
+
+    private RunnerRunResponse runnerUnavailable(RunnerRunRequest request, RuntimeException ex) {
+        var results = request.testCases().stream()
+                .map(testCase -> new com.devhire.application.client.dto.RunnerTestCaseResultResponse(
+                        testCase.id(),
+                        testCase.name(),
+                        normalizeVisibility(testCase.visibility()),
+                        false,
+                        "",
+                        "Assessment runner was unavailable; server-side scoring did not trust a local fallback.",
+                        0,
+                        0))
+                .toList();
+        String reason = ex == null || ex.getMessage() == null
+                ? "Assessment runner returned no successful result"
+                : ex.getMessage();
+        return new RunnerRunResponse("FAILED", "sandbox-runner-unavailable", 0, results.size(),
+                0, 0, reason, results, Instant.now());
     }
 
     private RunnerRunResponse localSandboxRun(RunnerRunRequest request) {
@@ -901,8 +925,8 @@ public class CodeAssessmentService {
                 response.sandboxStatus(),
                 response.visiblePassed(),
                 response.visibleTotal(),
-                response.hiddenPassed(),
-                response.hiddenTotal(),
+                0,
+                0,
                 response.executionTimeMs(),
                 response.memoryKb(),
                 response.failureReason(),
@@ -1070,6 +1094,45 @@ public class CodeAssessmentService {
     }
 
     private CodeAssessmentResponse withoutRawCode(CodeAssessmentResponse response) {
+        CodeAssessmentResponse safe = withoutHiddenRunResults(response);
+        return new CodeAssessmentResponse(
+                safe.id(),
+                safe.applicationId(),
+                safe.candidateName(),
+                safe.jobTitle(),
+                safe.challengeTitle(),
+                safe.level(),
+                safe.language(),
+                safe.prompt(),
+                safe.constraints(),
+                safe.starterCode(),
+                safe.status(),
+                safe.maxScore(),
+                safe.latestScore(),
+                safe.latestDecision(),
+                safe.skills(),
+                safe.rubric(),
+                safe.riskFlags(),
+                safe.feedback(),
+                safe.aiFeedbackFallback(),
+                null,
+                safe.attemptNumber(),
+                safe.codeHash(),
+                safe.graderVersion(),
+                safe.rubricVersion(),
+                redactSensitiveLiterals(safe.submittedCodePreview()),
+                safe.hasSubmittedCode(),
+                safe.visibleTestCases(),
+                safe.latestRun(),
+                safe.integrityRiskScore(),
+                safe.similarityScore(),
+                safe.sandboxStatus(),
+                safe.dueAt(),
+                safe.assignedAt(),
+                safe.submittedAt());
+    }
+
+    private CodeAssessmentResponse withoutHiddenRunResults(CodeAssessmentResponse response) {
         return new CodeAssessmentResponse(
                 response.id(),
                 response.applicationId(),
@@ -1090,12 +1153,12 @@ public class CodeAssessmentService {
                 response.riskFlags(),
                 response.feedback(),
                 response.aiFeedbackFallback(),
-                null,
+                response.submittedCode(),
                 response.attemptNumber(),
                 response.codeHash(),
                 response.graderVersion(),
                 response.rubricVersion(),
-                redactSensitiveLiterals(response.submittedCodePreview()),
+                response.submittedCodePreview(),
                 response.hasSubmittedCode(),
                 response.visibleTestCases(),
                 response.latestRun() == null ? null : withoutHiddenResults(response.latestRun()),

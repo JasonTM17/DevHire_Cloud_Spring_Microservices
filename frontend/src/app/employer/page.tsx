@@ -228,7 +228,7 @@ export default function EmployerPage() {
     <section className="page-stack" data-testid="employer-dashboard">
       <div className="hero-strip">
         <div>
-        <p className="eyebrow">Employer workspace</p>
+        <p className="eyebrow">Employer reviewer workspace</p>
         <h1>Company and pipeline</h1>
           <p>
             Operate company approval, job submission, and applicant review as one workflow backed by separate services,
@@ -237,7 +237,9 @@ export default function EmployerPage() {
         </div>
         <div className="hero-actions">
           <span className="badge live">Company approval required</span>
-          <span className="badge">Job review workflow</span>
+          <span className="badge">Reviewer workspace</span>
+          <span className="badge">Similarity checks</span>
+          <span className="badge">Hidden tests server-side</span>
         </div>
       </div>
       <div className="metrics-row">

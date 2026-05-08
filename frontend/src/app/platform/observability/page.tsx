@@ -65,11 +65,27 @@ export default function PlatformObservabilityPage() {
             label: "Domain metrics verification",
             status: "SCRIPTED",
             source: "scripts/runtime-observability-smoke.ps1",
-            displaySource: "runtime observability verification script"
+            displaySource: "runtime observability verification script",
+            ownerAction: "Platform ops reruns before release approval"
           },
-          { label: "SLO rules", status: "CATALOGED", source: "infra/prometheus/rules/devhire-alerts.yml" },
-          { label: "Grafana dashboard", status: "PROVISIONED", source: "infra/grafana/dashboards/devhire-slo-overview.json" },
-          { label: "Operations runbooks", status: "LINKED", source: "docs/runbooks/" }
+          {
+            label: "SLO rules",
+            status: "CATALOGED",
+            source: "infra/prometheus/rules/devhire-slo.yml",
+            ownerAction: "SRE reviews burn-rate thresholds"
+          },
+          {
+            label: "Grafana dashboard",
+            status: "PROVISIONED",
+            source: "infra/grafana/dashboards/devhire-slo-overview.json",
+            ownerAction: "On-call checks panels after deploy"
+          },
+          {
+            label: "Operations runbooks",
+            status: "LINKED",
+            source: "docs/runbooks/",
+            ownerAction: "Incident commander follows linked playbook"
+          }
         ]}
       />
     </section>

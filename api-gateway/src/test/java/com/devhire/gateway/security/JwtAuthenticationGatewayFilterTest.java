@@ -126,6 +126,65 @@ class JwtAuthenticationGatewayFilterTest {
         verifyNoInteractions(redisTemplate);
     }
 
+    @Test
+    void candidateJwtCannotReachAdminApiAtGateway() {
+        when(redisTemplate.hasKey(anyString())).thenReturn(Mono.just(false));
+        MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest
+                .get("/api/admin/audit-logs")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token(UUID.randomUUID(), "candidate@example.com", "CANDIDATE")));
+        GatewayFilterChain chain = mutated -> Mono.error(new AssertionError("chain should not be called"));
+
+        filter.filter(exchange, chain).block();
+
+        assertThat(exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    }
+
+    @Test
+    void employerJwtCannotReachAdminAiApiAtGateway() {
+        when(redisTemplate.hasKey(anyString())).thenReturn(Mono.just(false));
+        MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest
+                .post("/api/admin/ai/knowledge/reindex")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token(UUID.randomUUID(), "employer@example.com", "EMPLOYER")));
+        GatewayFilterChain chain = mutated -> Mono.error(new AssertionError("chain should not be called"));
+
+        filter.filter(exchange, chain).block();
+
+        assertThat(exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    }
+
+    @Test
+    void adminJwtCanReachAdminApiAtGateway() {
+        UUID userId = UUID.randomUUID();
+        when(redisTemplate.hasKey(anyString())).thenReturn(Mono.just(false));
+        MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest
+                .get("/api/admin/operations/summary")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token(userId, "admin@example.com", "ADMIN")));
+        AtomicReference<ServerWebExchange> downstreamExchange = new AtomicReference<>();
+        GatewayFilterChain chain = mutated -> {
+            downstreamExchange.set(mutated);
+            return Mono.empty();
+        };
+
+        filter.filter(exchange, chain).block();
+
+        assertThat(exchange.getResponse().getStatusCode()).isNull();
+        assertThat(downstreamExchange.get().getRequest().getHeaders().getFirst(AppHeaders.USER_ROLE))
+                .isEqualTo("ADMIN");
+    }
+
+    @Test
+    void adminFilteringRequiresAdminRoleAtGateway() {
+        when(redisTemplate.hasKey(anyString())).thenReturn(Mono.just(false));
+        MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest
+                .get("/api/companies?status=PENDING")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token(UUID.randomUUID(), "candidate@example.com", "CANDIDATE")));
+        GatewayFilterChain chain = mutated -> Mono.error(new AssertionError("chain should not be called"));
+
+        filter.filter(exchange, chain).block();
+
+        assertThat(exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    }
+
     private static String token(UUID userId, String email, String role) {
         Instant now = Instant.now();
         return Jwts.builder()

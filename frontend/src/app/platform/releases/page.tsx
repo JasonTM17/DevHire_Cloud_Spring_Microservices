@@ -33,10 +33,30 @@ export default function PlatformReleasesPage() {
       <OperationsEvidencePanel
         title="Reviewer release trail"
         items={[
-          { label: "Protected branch checks", status: "ENFORCED", source: ".github/settings.yml" },
-          { label: "Release notes", status: "CURRENT", source: "docs/release-notes/v0.5.1.md" },
-          { label: "v0.6 Stitch evidence", status: "IN_REVIEW", source: "docs/ui-redesign-v0.6.md" },
-          { label: "Security evidence", status: "GREEN", source: "docs/security-evidence.md" }
+          {
+            label: "Protected branch checks",
+            status: "ENFORCED",
+            source: ".github/settings.yml",
+            ownerAction: "Reviewer approval unlocks auto-merge"
+          },
+          {
+            label: "Release notes",
+            status: "CURRENT",
+            source: "docs/release-notes/v0.5.1.md",
+            ownerAction: "Maintainer updates notes when v0.6 lands"
+          },
+          {
+            label: "v0.6 Stitch evidence",
+            status: "IN_REVIEW",
+            source: "docs/ui-redesign-v0.6.md",
+            ownerAction: "Design reviewer checks promoted route screenshots"
+          },
+          {
+            label: "Security evidence",
+            status: "GREEN",
+            source: "docs/security-evidence.md",
+            ownerAction: "Security reviewer confirms scan evidence"
+          }
         ]}
       />
     </section>
