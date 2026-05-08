@@ -11,7 +11,7 @@ This runbook describes the production-style deployment assets included in the po
 - `deploy/k8s-overlays/prod`: production overlay with higher replicas and TLS ingress sample.
 - `deploy/helm/devhire-cloud`: Helm chart for local, staging, and production values.
 - `deploy/gitops/argocd-application.yaml`: Argo CD sample for GitOps delivery.
-- `.github/workflows/release.yml`: GHCR publishing workflow for version tags.
+- `.github/workflows/release.yml`: GHCR publishing workflow for version tags plus optional Docker Hub mirroring.
 - `frontend`: Next.js standalone Docker image served separately from the API Gateway.
 
 ## Kubernetes Prerequisites
@@ -62,6 +62,8 @@ Patch an image tag after a release:
 kubectl -n devhire set image deployment/api-gateway api-gateway=ghcr.io/jasontm17/devhire/api-gateway:v1.0.0
 ```
 
+Container image inventory and Docker Hub mirror names are documented in [container-images.md](container-images.md).
+
 ## Helm And GitOps
 
 The Helm chart lives in `deploy/helm/devhire-cloud` and is the preferred path for environment-specific deployments.
@@ -97,7 +99,7 @@ git tag v1.0.0
 git push origin v1.0.0
 ```
 
-The release workflow builds all service images and publishes them to GHCR with both the version tag and commit SHA tag.
+The release workflow builds all service images and publishes them to GHCR with both the version tag and commit SHA tag. When `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` repository secrets are present, the same workflow also mirrors images to Docker Hub as `devhire-cloud-<service>` repositories under `DOCKERHUB_NAMESPACE` or the Docker Hub username.
 
 ## Post-Deploy Checks
 

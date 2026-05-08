@@ -2,6 +2,7 @@
 
 [![CI](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/ci.yml/badge.svg)](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/ci.yml)
 [![Docker](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/docker.yml/badge.svg)](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/docker.yml)
+[![Release Images](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/release.yml/badge.svg)](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/release.yml)
 [![Security](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/security.yml/badge.svg)](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/security.yml)
 [![Terraform](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/terraform.yml/badge.svg)](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/terraform.yml)
 [![Docs](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/docs.yml/badge.svg)](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/docs.yml)
@@ -31,6 +32,7 @@ DevHire Cloud là portfolio production engineering cho một nền tảng tuyể
 | v0.6 Stitch redesign | [docs/ui-redesign-v0.6.md](docs/ui-redesign-v0.6.md) |
 | Architecture | [docs/architecture-review-index.md](docs/architecture-review-index.md) |
 | Service catalog | [docs/service-catalog.md](docs/service-catalog.md) |
+| Container images | [docs/container-images.md](docs/container-images.md) |
 | Security evidence | [docs/security-evidence.md](docs/security-evidence.md) |
 | Cloud readiness | [docs/cloud-readiness-review.md](docs/cloud-readiness-review.md) |
 | Production scorecard | [docs/production-engineering-scorecard.md](docs/production-engineering-scorecard.md) |
@@ -48,7 +50,7 @@ DevHire Cloud là portfolio production engineering cho một nền tảng tuyể
 | Code assessment | Deterministic rubric grading plus Judge0-compatible internal runner boundary, hidden/visible cases, integrity signals, employer review, admin health metrics |
 | Observability | Actuator, Prometheus, Grafana, Loki, Tempo, OpenTelemetry, domain KPI dashboards |
 | Security | JWT/RBAC, refresh token rotation, Gitleaks, Trivy, CodeQL, SBOM, protected `master` |
-| Delivery | Maven, Docker matrix, GitHub Actions, Helm, raw K8s, Argo CD, Terraform AWS blueprint |
+| Delivery | Maven, Docker matrix, GHCR/Docker Hub image publishing, GitHub Actions, Helm, raw K8s, Argo CD, Terraform AWS blueprint |
 
 ## v0.6 Full-App Product Surface
 
@@ -70,6 +72,10 @@ The v0.6 work follows Stitch project `projects/5421325194779586117`. Primary scr
 | Helm | Local/staging/prod/AWS values | `.\scripts\cloud-verify.ps1` |
 | Terraform AWS | Blueprint validate only, no AWS credentials required | `.\scripts\terraform-validate.ps1` |
 | GitOps | Argo CD samples targeting `master` | [deploy/gitops](deploy/gitops) |
+
+## Container Images
+
+Release images publish to GHCR as `ghcr.io/jasontm17/devhire/<service>:<tag>` with commit SHA tags, OCI labels, SBOM, and BuildKit provenance. Docker Hub mirroring is supported as `docker.io/<namespace>/devhire-cloud-<service>:<tag>` when `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` repository secrets are configured. See [container images](docs/container-images.md).
 
 ## Run Locally
 
