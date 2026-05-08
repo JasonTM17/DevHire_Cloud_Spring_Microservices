@@ -111,6 +111,10 @@ public class CodeAssessmentService {
             throw new DevHireException(ErrorCode.CONFLICT, "Assessment submission window has closed");
         }
         String normalizedLanguage = normalizeLanguage(request.language());
+        if (!normalizedLanguage.equalsIgnoreCase(assessment.language())) {
+            throw new DevHireException(ErrorCode.BAD_REQUEST,
+                    "Submission language must match the assigned challenge language");
+        }
         String normalizedCode = request.code().trim();
         lockAssignmentForSubmission(candidate, assignmentId);
         int attemptNumber = nextAttemptNumber(assignmentId);
@@ -472,7 +476,18 @@ public class CodeAssessmentService {
             return null;
         }
         String normalized = code.replaceAll("\\s+", " ").trim();
-        return normalized.length() <= 220 ? normalized : normalized.substring(0, 220) + "...";
+        String preview = normalized.length() <= 220 ? normalized : normalized.substring(0, 220) + "...";
+        return redactSensitiveLiterals(preview);
+    }
+
+    private static String redactSensitiveLiterals(String value) {
+        if (value == null || value.isBlank()) {
+            return value;
+        }
+        return value
+                .replaceAll("(?i)(api[_-]?key|password|secret|token)\\s*[:=]\\s*['\\\"]?[^\\s,'\\\";)}]+", "$1=<redacted>")
+                .replaceAll("(?i)Bearer\\s+[A-Za-z0-9._~+/=-]{10,}", "Bearer <redacted>")
+                .replaceAll("AKIA[0-9A-Z]{16}", "AKIA<redacted>");
     }
 
     private CodeAssessmentResponse withoutRawCode(CodeAssessmentResponse response) {
@@ -501,7 +516,7 @@ public class CodeAssessmentService {
                 response.codeHash(),
                 response.graderVersion(),
                 response.rubricVersion(),
-                response.submittedCodePreview(),
+                redactSensitiveLiterals(response.submittedCodePreview()),
                 response.hasSubmittedCode(),
                 response.dueAt(),
                 response.assignedAt(),

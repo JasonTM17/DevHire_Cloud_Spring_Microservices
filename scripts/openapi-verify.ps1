@@ -84,17 +84,17 @@ $services = @(
     @{
         name = "company-service"
         portOffset = 3
-        expectedPaths = @("/companies", "/companies/{id}", "/admin/companies/{id}/approve", "/admin/companies/{id}/reject")
+        expectedPaths = @("/companies", "/companies/{id}", "/companies/slug/{slug}", "/employer/companies", "/admin/companies/{id}/approve", "/admin/companies/{id}/reject")
     },
     @{
         name = "job-service"
         portOffset = 4
-        expectedPaths = @("/jobs", "/jobs/{id}", "/jobs/{id}/submit-review", "/admin/jobs/{id}/approve", "/admin/jobs/{id}/reject", "/jobs/{id}/close")
+        expectedPaths = @("/jobs", "/jobs/{id}", "/jobs/{id}/submit-review", "/admin/jobs", "/admin/jobs/{id}/approve", "/admin/jobs/{id}/reject", "/jobs/{id}/close")
     },
     @{
         name = "application-service"
         portOffset = 5
-        expectedPaths = @("/jobs/{jobId}/applications", "/applications/me", "/employer/jobs/{jobId}/applications", "/applications/{id}/status", "/applications/{id}/withdraw")
+        expectedPaths = @("/jobs/{jobId}/applications", "/applications/me", "/employer/jobs/{jobId}/applications", "/applications/{id}/status", "/applications/{id}/withdraw", "/candidate/code-assessments", "/candidate/code-assessments/{id}", "/candidate/code-assessments/{id}/submissions", "/employer/code-assessments", "/employer/code-assessments/{id}", "/employer/code-assessments/{id}/review", "/admin/code-assessments/summary")
     },
     @{
         name = "notification-service"

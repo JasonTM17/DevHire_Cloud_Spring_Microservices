@@ -37,7 +37,7 @@ See [status.md](status.md) for the single source of truth.
 | Gateway observability | `api-gateway` emits `devhire_gateway_requests_total`, `devhire_gateway_request_latency_seconds`, and `devhire_gateway_rate_limited_total` by route/status. |
 | Runtime observability smoke | `runtime-observability-smoke.ps1` now checks Gateway custom metrics together with recruitment, notification, audit, search, AI, and outbox metrics. |
 | SLO alerts | Prometheus rules include Gateway route p95 latency and route-level rate-limit spike alerts. |
-| Stitch visual QA | Playwright is the official visual evidence path while Browser Use is unavailable in this local environment. v0.6.2 adds route-matrix screenshots, mobile candidate checks, and a shared primary-evidence denylist. |
+| Stitch visual QA | Playwright is the official visual evidence path; Browser Use is optional for local visual inspection when the in-app browser runtime is available. v0.6.7 adds route-matrix screenshots, broader mobile checks, refreshed Stitch evidence, and a shared primary-evidence denylist. |
 
 ## Visual Evidence
 
@@ -46,6 +46,7 @@ The reviewer-facing screenshots are committed under `docs/screenshots/` and trac
 | Category | Screenshots |
 |---|---|
 | Product | `jobs-page.png`, `job-detail.png`, `candidate-dashboard.png`, `employer-dashboard.png`, `admin-dashboard.png`, `assistant-page.png` |
+| Stitch full app | `stitch/client-jobs.png`, `stitch/client-job-detail.png`, `stitch/company-profile.png`, `stitch/candidate-assessments.png`, `stitch/employer-pipeline.png`, `stitch/admin-control-plane.png`, `stitch/admin-ai-ops.png`, `stitch/platform-cloud.png`, `stitch/platform-releases.png` |
 | Runtime | `docker-runtime-jobs.png`, `ops-openapi-job-service.png`, `ops-mailpit.png` |
 | Observability | `ops-prometheus-rules.png`, `ops-grafana-slo.png`, `ops-ai-provider.png` |
 

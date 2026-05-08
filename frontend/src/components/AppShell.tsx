@@ -34,7 +34,7 @@ const navGroups = [
       { href: "/candidate", label: "Candidate Home", icon: ClipboardList },
       { href: "/candidate/applications", label: "Applications", icon: FileCheck2 },
       { href: "/candidate/profile", label: "Profile", icon: UserRoundCheck },
-      { href: "/candidate/assessments", label: "Assessments", icon: GraduationCap },
+      { href: "/candidate/assessments", label: "Code Studio", icon: GraduationCap },
       { href: "/candidate/offers", label: "Offers", icon: ShieldCheck },
       { href: "/candidate/interview-prep", label: "Interview Prep", icon: Bot },
       { href: "/candidate/roadmap", label: "Roadmap", icon: Map },
@@ -88,8 +88,8 @@ const pageMeta: Record<string, { title: string; subtitle: string }> = {
     subtitle: "Portfolio-grade profile and preferences for job matching."
   },
   "/candidate/assessments": {
-    title: "Skill Assessment",
-    subtitle: "Verified skill evidence for Java, cloud, event reliability, and production operations."
+    title: "Code Assessment Studio",
+    subtitle: "Reviewer-safe grading, rubric evidence, attempt metadata, and employer decision support."
   },
   "/candidate/offers": {
     title: "Offer Review",
@@ -150,7 +150,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [globalSearch, setGlobalSearch] = useState("");
   const session = typeof window === "undefined" ? null : getSession();
-  const meta = pageMeta[pathname] ?? pageMeta["/jobs"];
+  const meta = resolvePageMeta(pathname);
   const workspaceHref = session?.user.role === "ADMIN"
     ? "/admin"
     : session?.user.role === "EMPLOYER" ? "/employer" : "/candidate";
@@ -300,4 +300,23 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </div>
     </div>
   );
+}
+
+function resolvePageMeta(pathname: string) {
+  if (pageMeta[pathname]) {
+    return pageMeta[pathname];
+  }
+  if (pathname.startsWith("/jobs/")) {
+    return {
+      title: "Job Detail",
+      subtitle: "Role requirements, company signals, application status, and assessment readiness."
+    };
+  }
+  if (pathname.startsWith("/companies/")) {
+    return {
+      title: "Company Profile",
+      subtitle: "Approved employer profile, published roles, hiring signals, and code-review readiness."
+    };
+  }
+  return pageMeta["/jobs"];
 }

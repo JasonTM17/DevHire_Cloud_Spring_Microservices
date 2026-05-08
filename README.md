@@ -47,6 +47,7 @@ DevHire Cloud là portfolio production engineering cho một nền tảng tuyể
 | AI | Claude Haiku assistant with citations, tool traces, safety guardrails, metrics |
 | Code assessment | Deterministic rubric grading for candidate submissions, employer review, admin health metrics |
 | Observability | Actuator, Prometheus, Grafana, Loki, Tempo, OpenTelemetry, domain KPI dashboards |
+| Security | JWT/RBAC, refresh token rotation, Gitleaks, Trivy, CodeQL, SBOM, protected `master` |
 | Delivery | Maven, Docker matrix, GitHub Actions, Helm, raw K8s, Argo CD, Terraform AWS blueprint |
 
 ## v0.6 Full-App Product Surface
@@ -58,7 +59,7 @@ DevHire Cloud là portfolio production engineering cho một nền tảng tuyể
 | Admin/Ops | `/admin`, `/admin/ai`, code assessment health |
 | Platform | `/assistant`, `/platform/observability`, `/platform/cloud`, `/platform/releases` |
 
-The v0.6 work follows Stitch project `projects/5421325194779586117`. Primary screenshots are checked to avoid raw UUIDs, `UNKNOWN`, loading-only states, smoke labels, offline banners and fallback banners. The stacked v0.6.7 work turns Skill Assessment into the flagship product feature: candidate Assessment Studio, deterministic static scoring, attempt metadata, code hash, rubric versioning, employer review dossier, and admin assessment health. Sandbox execution is intentionally reserved for a later isolated-worker phase.
+The v0.6 work follows Stitch project `projects/5421325194779586117`. Primary screenshots are checked to avoid raw UUIDs, `UNKNOWN`, loading-only states, smoke labels, offline banners and fallback banners. The stacked v0.6.7 work turns Code Assessment Studio into the flagship product feature: candidate coding workspace, deterministic static scoring, redacted list/detail boundaries, attempt metadata, code hash, rubric versioning, employer review dossier, and admin assessment health. Sandbox execution is intentionally reserved for a later isolated-worker phase.
 
 ## Cloud State Matrix
 
@@ -119,9 +120,9 @@ Portfolio verification:
 |---|---|---|
 | ![Candidate applications](docs/screenshots/stitch/candidate-applications.png) | ![Cloud](docs/screenshots/stitch/platform-cloud.png) | ![Releases](docs/screenshots/stitch/platform-releases.png) |
 
-| AI Assistant | Grafana SLO |
-|---|---|
-| ![Assistant](docs/screenshots/assistant-page.png) | ![Grafana SLO](docs/screenshots/ops-grafana-slo.png) |
+| AI Assistant | Grafana SLO | Prometheus Rules |
+|---|---|---|
+| ![Assistant](docs/screenshots/assistant-page.png) | ![Grafana SLO](docs/screenshots/ops-grafana-slo.png) | ![Prometheus rules](docs/screenshots/ops-prometheus-rules.png) |
 
 The full visual evidence set is machine-checked in [docs/evidence-manifest.json](docs/evidence-manifest.json).
 

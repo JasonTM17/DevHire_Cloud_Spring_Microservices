@@ -33,6 +33,8 @@ test.describe("Mobile recruiter demo smoke", () => {
   });
 
   for (const route of [
+    "/login",
+    "/register",
     "/candidate",
     "/candidate/applications",
     "/candidate/profile",
@@ -40,9 +42,16 @@ test.describe("Mobile recruiter demo smoke", () => {
     "/candidate/assessments",
     "/candidate/interview-prep",
     "/candidate/roadmap",
-    "/candidate/skill-analytics"
+    "/candidate/skill-analytics",
+    "/companies/portfolio-labs",
+    "/employer",
+    "/admin",
+    "/admin/ai",
+    "/platform/observability",
+    "/platform/cloud",
+    "/platform/releases"
   ]) {
-    test(`candidate route ${route} has no mobile overflow`, async ({ page }) => {
+    test(`primary route ${route} has no mobile overflow`, async ({ page }) => {
       await page.goto(route);
       await expect(page.locator("main")).toBeVisible();
       await expect(page.getByText(/Syncing|Loading/i)).toHaveCount(0, { timeout: 10_000 });
@@ -50,4 +59,14 @@ test.describe("Mobile recruiter demo smoke", () => {
       await expectNoHorizontalOverflow(page);
     });
   }
+
+  test("job detail route has no mobile overflow after opening a published role", async ({ page }) => {
+    await page.goto("/jobs");
+    await expect(page.getByTestId("job-card").first()).toBeVisible();
+    await page.getByTestId("job-card").first().click();
+    await expect(page.getByTestId("job-detail-page")).toBeVisible();
+    await expect(page.getByText(/Syncing|Loading/i)).toHaveCount(0, { timeout: 10_000 });
+    await assertPrimaryEvidenceReady(page);
+    await expectNoHorizontalOverflow(page);
+  });
 });

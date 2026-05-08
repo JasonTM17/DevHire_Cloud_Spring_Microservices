@@ -92,6 +92,18 @@ class ApplicationRepositoryIT {
                   AND tablename = 'code_submissions'
                   AND indexname = 'uq_code_submissions_assignment_attempt'
                 """, Integer.class);
+        Integer reviewGuardrails = jdbcTemplate.queryForObject("""
+                SELECT count(*)
+                FROM information_schema.table_constraints
+                WHERE table_schema = 'public'
+                  AND constraint_name IN (
+                    'chk_code_challenge_language_supported',
+                    'chk_code_assessment_due_after_assigned',
+                    'chk_code_submission_language_supported',
+                    'chk_code_submission_text_length',
+                    'chk_code_submission_reviewed_after_submitted'
+                  )
+                """, Integer.class);
 
         assertThat(challengeCount).isGreaterThanOrEqualTo(3);
         assertThat(assignmentCount).isGreaterThanOrEqualTo(18);
@@ -99,6 +111,7 @@ class ApplicationRepositoryIT {
         assertThat(completeMetadata).isEqualTo(submissionCount);
         assertThat(hardeningConstraints).isEqualTo(6);
         assertThat(uniqueAttemptIndex).isEqualTo(1);
+        assertThat(reviewGuardrails).isEqualTo(5);
     }
 
     @Test

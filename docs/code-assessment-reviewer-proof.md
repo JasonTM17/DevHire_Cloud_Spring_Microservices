@@ -12,7 +12,7 @@ This page is the 5-minute reviewer path for the flagship DevHire Cloud code asse
 | Scoring is deterministic | final score comes from `static-rubric-v1`; optional AI feedback is advisory and cannot overwrite the score |
 | Review is auditable | submissions and employer decisions publish audit metadata including attempt number, code hash, grader version, rubric version, score, risk flags, and decision |
 | Operations can see health | `/admin` and `/admin/ai` surface submitted, reviewed, passed, failed, average score, and risk flag posture |
-| Attempts are production-guarded | assignment rows are locked before attempt allocation, `(assignment_id, attempt_number)` is unique, score/hash/version constraints are enforced in the database |
+| Attempts are production-guarded | assignment rows are locked before attempt allocation, `(assignment_id, attempt_number)` is unique, language/code length/review timestamp and score/hash/version constraints are enforced in the database |
 | SLOs include the flagship feature | Prometheus alerts cover grading failures, review backlog, risky-submission backlog, and grading latency |
 
 ## 5-Minute Demo Path
@@ -32,13 +32,13 @@ This page is the 5-minute reviewer path for the flagship DevHire Cloud code asse
 |---|---|---|
 | Candidate | `GET /api/candidate/code-assessments` | Lists own assignments with code preview metadata, no full raw code |
 | Candidate | `GET /api/candidate/code-assessments/{id}` | Reads own assignment detail with submitted code |
-| Candidate | `POST /api/candidate/code-assessments/{id}/submissions` | Normalizes language, enforces deadline/final-status rules, scores code, stores attempt metadata |
+| Candidate | `POST /api/candidate/code-assessments/{id}/submissions` | Normalizes language, enforces challenge-language/deadline/final-status rules, scores code, stores attempt metadata |
 | Employer | `GET /api/employer/code-assessments` | Lists employer-owned review queue with filters and redacted code preview |
 | Employer | `GET /api/employer/code-assessments/{id}` | Reads employer-owned detail with submitted code |
 | Employer | `PATCH /api/employer/code-assessments/{id}/review` | Records advance, hold, or reject with reviewer notes and final score |
 | Admin | `GET /api/admin/code-assessments/summary` | Aggregates assessment health for operations dashboard |
 
-List endpoints intentionally return `submittedCodePreview` and `hasSubmittedCode`, not the full raw submission. Full code is limited to owner detail endpoints for the candidate and employer review flow.
+List endpoints intentionally return a secret-redacted `submittedCodePreview` and `hasSubmittedCode`, not the full raw submission. Full code is limited to owner detail endpoints for the candidate and employer review flow.
 
 ## Scoring Rubric
 
@@ -59,11 +59,11 @@ The deterministic score remains the source of truth. AI feedback can be layered 
 | Signal | Purpose |
 |---|---|
 | `devhire_code_assessments_total{status}` | Current assessment queue by status |
-| `devhire_code_submissions_total{language,status}` | Submitted code volume by language and grading status |
+| `devhire_code_submissions_total{language,status}` | Submitted code volume by grading status; current portfolio gauges use `language=ALL` while request counters track the submitted language |
 | `devhire_code_grading_requests_total{language,status}` | Deterministic grading success/failure count |
 | `devhire_code_grading_latency_seconds` | Grading latency histogram |
 | `devhire_code_grading_score` | Average deterministic rubric score |
-| `devhire_code_review_risk_flags_total{type}` | Submissions with static risk flags |
+| `devhire_code_review_risk_flags_total{type}` | Submissions with static risk flags; current portfolio gauge uses `type=any` for backlog posture |
 | `devhire_code_review_decisions_total{decision,status}` | Employer review decisions |
 
 ## Verification

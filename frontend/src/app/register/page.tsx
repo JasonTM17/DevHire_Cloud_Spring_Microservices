@@ -27,7 +27,7 @@ export default function RegisterPage() {
   }
 
   return (
-    <section className="auth-grid">
+    <section className="auth-grid" data-testid="register-page">
       <div className="panel auth-panel narrow">
         <div className="section-title">
           <UserPlus size={16} />

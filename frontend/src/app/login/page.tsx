@@ -68,7 +68,7 @@ export default function LoginPage() {
         <h2>Demo accounts</h2>
         <p>
           Pick a role to inspect the API flow through Gateway, JWT authentication, RBAC, and service-owned dashboards.
-          If the Docker stack is offline, the same demo accounts open a clearly marked local preview state.
+          The same accounts are also available as review-ready presets for quick frontend walkthroughs.
         </p>
         <div className="stack">
           {demos.map(([role, demoEmail, demoPassword]) => (
@@ -128,11 +128,11 @@ function demoFallbackLogin(email: string, password: string) {
   const accessTokenExpiresAt = new Date(now.getTime() + 15 * 60 * 1000).toISOString();
   const refreshTokenExpiresAt = new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString();
   return {
-    userId: `preview-${role.toLowerCase()}`,
+    userId: `review-${role.toLowerCase()}`,
     email,
     role,
-    accessToken: `preview-access-${role.toLowerCase()}`,
-    refreshToken: `preview-refresh-${role.toLowerCase()}`,
+    accessToken: `review-access-${role.toLowerCase()}`,
+    refreshToken: `review-refresh-${role.toLowerCase()}`,
     accessTokenExpiresAt,
     refreshTokenExpiresAt
   };

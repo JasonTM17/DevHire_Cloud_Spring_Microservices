@@ -23,7 +23,7 @@ The script validates required files, checks that forbidden runtime/secret artifa
 
 v0.6.x adds Stitch route-matrix evidence for candidate, employer, admin, AI, and platform surfaces while keeping dependency backlog and hosted workflow state auditable through `scripts/dependabot-zero-noise.ps1` and `scripts/github-workflow-status.ps1`.
 
-v0.6.6 specifically turns the Skill Assessment surface into a code grading workflow: candidate submissions, deterministic rubric scoring, submission history, employer review filters, admin assessment health, and static risk flags are visible in the primary Stitch screenshots.
+v0.6.7 specifically turns Code Assessment Studio into the flagship code grading workflow: candidate submissions, deterministic rubric scoring, secret-safe code previews, submission history, employer review filters, admin assessment health, and static risk flags are visible in the primary Stitch screenshots.
 
 Promote the full-app Stitch screenshots after a successful Playwright capture:
 
@@ -38,7 +38,7 @@ cd ..
 Use it with the reviewer verifier:
 
 ```powershell
-.\scripts\portfolio-verify.ps1 -Docs -Docker
+.\scripts\portfolio-verify.ps1 -Docs -Docker -Cloud
 .\scripts\evidence-audit.ps1
 ```
 

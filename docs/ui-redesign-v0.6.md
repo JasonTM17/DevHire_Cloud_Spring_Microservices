@@ -25,7 +25,7 @@ This document is the implementation bridge from the Stitch project to the produc
 | Client | Candidate Dashboard | `/candidate` |
 | Client | My Applications | `/candidate/applications` |
 | Client | Candidate Profile | `/candidate/profile` |
-| Client | Skill Assessment | `/candidate/assessments` |
+| Client | Code Assessment Studio | `/candidate/assessments` |
 | Client | Offer Letter | `/candidate/offers` |
 | Client | AI Interview Prep Hub | `/candidate/interview-prep` |
 | Client | Cloud Career Roadmap | `/candidate/roadmap` |
@@ -98,7 +98,7 @@ v0.6.7 keeps code grading reviewer-safe: candidate code is stored and scored wit
 | Candidate Dashboard | `/candidate` | Application service dashboard read model and notification read model | `stitch/candidate-dashboard.png`, candidate login E2E |
 | My Applications | `/candidate/applications` | Application summary read model with status distribution and timeline | `stitch/candidate-applications.png` |
 | Candidate Profile | `/candidate/profile` | `GET /api/users/me` when signed in, polished read-only sample when unauthenticated | `stitch/candidate-profile.png` |
-| Skill Assessment | `/candidate/assessments` | Application service code assessment assignments, owner detail fetch, static cases, deterministic rubric scoring, code hash metadata, static risk flags, and submission history | `stitch/candidate-assessments.png`, candidate code-submit E2E |
+| Code Assessment Studio | `/candidate/assessments` | Application service code assessment assignments, owner detail fetch, static cases, deterministic rubric scoring, redacted previews, challenge-language guard, code hash metadata, static risk flags, and submission history | `stitch/candidate-assessments.png`, candidate code-submit E2E |
 | Offer Letter | `/candidate/offers` | Application service offer read model | `stitch/candidate-offers.png` |
 | AI Interview Prep | `/candidate/interview-prep` | AI service interview-prep read model | `stitch/candidate-interview-prep.png` |
 | Cloud Career Roadmap | `/candidate/roadmap` | AI service roadmap read model | `stitch/candidate-roadmap.png` |

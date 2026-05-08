@@ -10,7 +10,7 @@ These actions require repository owner permissions and are intentionally not for
 | Homepage | `https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.5.1` |
 | Default branch | `master` |
 | Branch protection | Required |
-| Wiki | Disabled |
+| Wiki | Target disabled; run owner-authenticated governance apply if public dry-run still reports enabled |
 | Merge commits | Disabled |
 | Delete merged branches | Enabled |
 

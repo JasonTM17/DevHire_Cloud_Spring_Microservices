@@ -118,6 +118,44 @@ class CodeAssessmentServiceTest {
     }
 
     @Test
+    void candidateSubmissionRejectsLanguageMismatch() {
+        jdbcTemplate.assessments.add(assessment("ASSIGNED", null, null, null));
+
+        assertThatThrownBy(() -> service.submit(candidate(), ASSIGNMENT_ID, new CodeSubmissionRequest("SQL", """
+                SELECT status, count(*)
+                FROM applications
+                WHERE employer_id = current_setting('devhire.employer_id')::uuid
+                GROUP BY status
+                LIMIT 25
+                """, "SQL evidence does not match the Java challenge.")))
+                .isInstanceOf(DevHireException.class)
+                .hasMessageContaining("must match the assigned challenge language");
+
+        assertThat(jdbcTemplate.updates).isEmpty();
+    }
+
+    @Test
+    void listResponsesRemoveRawCodeAndRedactSecretLikePreview() {
+        jdbcTemplate.assessments.add(assessmentWithCode("""
+                class CandidateSolution {
+                    String password = "super-secret-demo-value";
+                    String token = "eyJhbGciOiJIUzI1NiJ9.demo.payload";
+                    @Test void provesRetry() { assert true; }
+                }
+                """));
+
+        var responses = service.candidateAssessments(candidate());
+
+        assertThat(responses).hasSize(1);
+        assertThat(responses.getFirst().submittedCode()).isNull();
+        assertThat(responses.getFirst().submittedCodePreview())
+                .contains("password=<redacted>")
+                .contains("token=<redacted>")
+                .doesNotContain("super-secret-demo-value")
+                .doesNotContain("eyJhbGci");
+    }
+
+    @Test
     void adminSummaryAggregatesAssessmentHealthForOperationsDashboard() {
         var summary = service.adminSummary(admin());
 
@@ -149,6 +187,21 @@ class CodeAssessmentServiceTest {
                                                      String decision,
                                                      Instant submittedAt,
                                                      Instant dueAt) {
+        String submittedCode = submittedAt == null ? null : "class Solution { @Test void provesRetry() { assert true; } }";
+        return assessmentWithCode(status, latestScore, decision, submittedAt, dueAt, submittedCode);
+    }
+
+    private static CodeAssessmentResponse assessmentWithCode(String submittedCode) {
+        return assessmentWithCode("AUTO_REVIEWED", 88, "ADVANCE", Instant.parse("2026-05-06T10:00:00Z"),
+                Instant.now().plusSeconds(1_209_600), submittedCode);
+    }
+
+    private static CodeAssessmentResponse assessmentWithCode(String status,
+                                                            Integer latestScore,
+                                                            String decision,
+                                                            Instant submittedAt,
+                                                            Instant dueAt,
+                                                            String submittedCode) {
         return new CodeAssessmentResponse(
                 ASSIGNMENT_ID,
                 UUID.randomUUID(),
@@ -169,12 +222,12 @@ class CodeAssessmentServiceTest {
                 latestScore == null ? List.of() : List.of("missing-test-evidence"),
                 latestScore == null ? null : "Review completed.",
                 true,
-                submittedAt == null ? null : "class Solution { @Test void provesRetry() { assert true; } }",
+                submittedCode,
                 submittedAt == null ? null : 1,
                 submittedAt == null ? null : "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
                 "static-rubric-v1",
                 "devhire-code-rubric-v1",
-                submittedAt == null ? null : "class Solution { @Test void provesRetry() { assert true; } }",
+                submittedCode,
                 submittedAt != null,
                 dueAt,
                 Instant.parse("2026-05-01T00:00:00Z"),
@@ -245,6 +298,13 @@ class CodeAssessmentServiceTest {
                         row(rowMapper, "EMPLOYER_REVIEWED", 1),
                         row(rowMapper, "FAILED", 1),
                         row(rowMapper, "PASSED", 1));
+            }
+            if (!assessments.isEmpty()) {
+                var rows = new ArrayList<T>();
+                while (!assessments.isEmpty()) {
+                    rows.add(cast(assessments.removeFirst()));
+                }
+                return rows;
             }
             return List.of();
         }
