@@ -1,45 +1,44 @@
-# DevHire v0.6 PR Stack
+# DevHire v0.6 Merge Record
 
-This document keeps the active v0.6 Stitch and code-assessment work understandable while protected branch review is doing its job. The stack is intentional; it prevents a large UI/backend/security change from landing as one opaque pull request.
+This document is the historical record for the v0.6 Stitch and code-assessment work. The stack is no longer active: the work has been consolidated into `master`, the temporary `v0.6*` branches have been removed, and branch protection has been restored.
 
-## Current Stack
+## Final State
 
-| Order | PR | Scope | Base | Status |
-|---:|---|---|---|---|
-| 1 | [#43](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/pull/43) | Stitch client/admin redesign baseline | `master` | Green, waiting for required review |
-| 2 | [#46](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/pull/46) | Code assessment grading workflow | `v0.6-stitch-client-admin-redesign` | Green stacked follow-up |
-| 3 | [#47](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/pull/47) | Employer code review decision coverage | `v0.6.4-code-assessment-grading` | Green stacked follow-up |
-| 4 | [#48](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/pull/48) | Code assessment review polish | `v0.6.5-code-assessment-review-polish` | Green stacked follow-up |
-| 5 | [#49](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/pull/49) | Code grading flagship workflow | `v0.6.6-stitch-code-assessment-completion` | Green stacked follow-up |
+| Signal | State |
+|---|---|
+| Default branch | `master` |
+| Final master SHA | `ebd9708` |
+| Open PRs | `0` |
+| Temporary v0.6 branches | Deleted after merge |
+| Branch protection | Required reviews, required status checks, conversation resolution, admin enforcement, and force-push protection enabled |
 
-## Merge Policy
+## Merged Work
 
-The root blocker is not a technical failure. PR #43 targets `master`, and `master` requires a real approving review. We do not direct-push to `master`, use admin bypass, or weaken branch protection to speed this up.
+| PR / commit | Scope | Result |
+|---|---|---|
+| [#43](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/pull/43) | Stitch client/admin redesign baseline | Merged |
+| [#45](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/pull/45) | v0.6 Stitch route fidelity | Merged |
+| [#51](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/pull/51) | v0.6.7 assessment control plane integration | Merged |
+| `1074a00` | Include local v0.6 polish branches | Merged into integration stack |
+| `3829220` | Include latest `origin/master` after PR #43 | Merged into master |
+| `ebd9708` | Include remote v0.6.1 fidelity branch | Final master head |
 
-After PR #43 receives approval and merges:
+PRs #46, #47, #48, #49, and #50 were closed as superseded by the final v0.6.7 integration path. Their code changes are represented in the merged stack rather than kept as separate open review branches.
 
-1. Retarget PR #46 to `master`, wait for checks, then merge through review.
-2. Retarget PR #47 to `master`, wait for checks, then merge through review.
-3. Retarget PR #48 to `master`, wait for checks, then merge through review.
-4. Retarget PR #49 to `master`, wait for checks, then merge through review.
-5. Re-run the public evidence gates and update release notes only after the stack is on `master`.
+## Verification
 
-## Why This Is Not Version Sprawl
+The final `master` head passed the reviewer gates:
 
-The public release remains `v0.5.1`; the active development line remains `0.6.0-SNAPSHOT`. The v0.6 branch stack is review staging for one product slice: Stitch full-app redesign plus candidate code assessment as the flagship feature.
+```powershell
+.\scripts\github-workflow-status.ps1 -Branch master -RequireGreen
+.\scripts\docs-quality.ps1
+.\scripts\observability-catalog-verify.ps1
+.\scripts\visual-evidence-audit.ps1
+```
 
 The reviewer-facing source of truth is:
 
 - [status.md](status.md)
 - [REVIEW_EVIDENCE.md](REVIEW_EVIDENCE.md)
 - [code-assessment-reviewer-proof.md](code-assessment-reviewer-proof.md)
-- this PR stack page
-
-## Verification
-
-```powershell
-.\scripts\pr-stack-status.ps1
-.\scripts\github-workflow-status.ps1 -Branch master -RequireGreen
-```
-
-`pr-stack-status.ps1` writes sanitized Markdown and JSON reports under ignored `reports/pr-stack-status/`.
+- [ui-redesign-v0.6.md](ui-redesign-v0.6.md)

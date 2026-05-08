@@ -9,6 +9,7 @@ For the deliberately transparent list of what is still not proven in a live prod
 - Every backend service exposes `/actuator/health`, readiness/liveness probes, and `/actuator/prometheus`.
 - Docker images are multi-stage and run as non-root users.
 - Docker Compose has PostgreSQL, Redis, Kafka, OpenSearch, Prometheus, Grafana, Loki, Tempo, OpenTelemetry Collector, services, and frontend.
+- The code-assessment path separates domain ownership (`application-service`) from isolated execution (`assessment-runner-service`).
 - Kubernetes and Helm manifests include probes, resources, HPA, PDB, NetworkPolicy, and secret references.
 
 ## Data
@@ -31,8 +32,8 @@ For the deliberately transparent list of what is still not proven in a live prod
 ## Observability
 
 - Trace IDs flow through errors and logs.
-- Prometheus alert rules cover error rate, latency, service availability, JVM pressure, search latency, and outbox failures.
-- Grafana dashboards are provisioned from repository files.
+- Prometheus alert rules cover error rate, latency, service availability, JVM pressure, search latency, outbox failures, AI provider behavior, and code assessment grading/review risk.
+- Grafana dashboards are provisioned from repository files and include Gateway, service health, data capacity, outbox, search/AI, and code assessment runner health.
 
 ## Delivery
 

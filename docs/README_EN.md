@@ -8,7 +8,7 @@ DevHire Cloud is a Java 21 / Spring Boot 3.5 production engineering portfolio fo
 |---|---|
 | Latest public release | [v0.5.1](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.5.1) |
 | Current development cycle | `0.6.0-SNAPSHOT` |
-| v0.6 Stitch app | PR #43 green; stacked v0.6.7 promotes code assessment into the flagship candidate grading, employer review, and admin health workflow |
+| v0.6 Stitch app | Merged into `master`; Code Assessment Studio is now the flagship candidate grading, employer review, and admin health workflow |
 | Branch governance | Protected `master`, PR-based release flow |
 | Dependabot queue | 0 open PRs at the latest cleanup scan |
 | v1 status | Roadmap and acceptance checklist only, not a released tag |
@@ -34,12 +34,12 @@ DevHire Cloud is a Java 21 / Spring Boot 3.5 production engineering portfolio fo
 | Layer | Implementation |
 |---|---|
 | Edge | Spring Cloud Gateway, JWT validation, CORS, rate limiting, centralized error response |
-| Core services | auth, user, company, job, application, notification, audit, AI |
+| Core services | auth, user, company, job, application, assessment-runner, notification, audit, AI |
 | Data ownership | PostgreSQL database/schema per service, Flyway migrations, no shared JPA entities |
 | Messaging | Kafka events plus transactional outbox and idempotent consumers |
 | Search | OpenSearch adapter with PostgreSQL fallback |
 | AI | Claude Haiku assistant with citations, tool traces, safety guardrails, and metrics |
-| Code assessment | Deterministic rubric grading for candidate submissions, employer review, admin health metrics |
+| Code assessment | Deterministic rubric grading plus Judge0-compatible internal runner boundary, hidden/visible cases, integrity signals, employer review, admin health metrics |
 | Observability | Actuator, Prometheus, Grafana, Loki, Tempo, OpenTelemetry, domain KPI dashboards |
 | Security | JWT/RBAC, refresh token rotation, Gitleaks, Trivy, CodeQL, SBOM, protected `master` |
 | Delivery | Maven, Docker matrix, GitHub Actions, Helm, Kubernetes, Argo CD, AWS Terraform blueprint |
@@ -53,7 +53,7 @@ DevHire Cloud is a Java 21 / Spring Boot 3.5 production engineering portfolio fo
 | Admin/Ops | `/admin`, `/admin/ai`, code assessment health |
 | Platform | `/assistant`, `/platform/observability`, `/platform/cloud`, `/platform/releases` |
 
-The v0.6 implementation follows Stitch project `projects/5421325194779586117`. Primary screenshots are checked to avoid raw UUIDs, `UNKNOWN`, loading-only states, smoke labels, offline banners, and fallback banners. The stacked v0.6.7 work turns Code Assessment Studio into the flagship product feature: candidate coding workspace, visible runner cases, hidden server-side scoring, deterministic rubric scoring, integrity/similarity posture, redacted list/detail boundaries, attempt metadata, code hash, rubric versioning, employer review dossier, and admin assessment health. The v0.7 boundary adds an internal `assessment-runner-service` with a Judge0-compatible adapter while `application-service` remains the domain owner.
+The v0.6 implementation follows Stitch project `projects/5421325194779586117` and is merged on `master`. Primary screenshots are checked to avoid raw UUIDs, `UNKNOWN`, loading-only states, smoke labels, offline banners, and fallback banners. Code Assessment Studio is the flagship product feature: candidate coding workspace, visible runner cases, hidden server-side scoring, deterministic rubric scoring, integrity/similarity posture, redacted list/detail boundaries, attempt metadata, code hash, rubric versioning, employer review dossier, and admin assessment health. The runner boundary uses an internal `assessment-runner-service` with a Judge0-compatible adapter while `application-service` remains the domain owner.
 
 ## Cloud State Matrix
 
