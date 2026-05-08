@@ -97,5 +97,8 @@ function logoUrlForDomain(domain: string) {
   if (localSlug) {
     return `/company-logos/${localSlug}.png`;
   }
+  if (domain.endsWith(".devhire.local")) {
+    return "/devhire-mark.svg";
+  }
   return `https://www.google.com/s2/favicons?sz=128&domain=${domain}`;
 }
