@@ -1,0 +1,40 @@
+FROM maven:3.9.12-eclipse-temurin-21 AS build
+WORKDIR /workspace
+ARG SERVICE_NAME=assessment-runner-service
+COPY pom.xml .
+COPY common-lib/pom.xml common-lib/pom.xml
+COPY api-gateway/pom.xml api-gateway/pom.xml
+COPY auth-service/pom.xml auth-service/pom.xml
+COPY user-service/pom.xml user-service/pom.xml
+COPY company-service/pom.xml company-service/pom.xml
+COPY job-service/pom.xml job-service/pom.xml
+COPY application-service/pom.xml application-service/pom.xml
+COPY notification-service/pom.xml notification-service/pom.xml
+COPY audit-service/pom.xml audit-service/pom.xml
+COPY ai-service/pom.xml ai-service/pom.xml
+COPY assessment-runner-service/pom.xml assessment-runner-service/pom.xml
+COPY common-lib/src common-lib/src
+COPY ${SERVICE_NAME}/src ${SERVICE_NAME}/src
+RUN mvn -B -T1 -pl ${SERVICE_NAME} -am package -DskipTests
+
+FROM eclipse-temurin:21-jre-alpine
+ARG SERVICE_NAME=assessment-runner-service
+ARG BUILD_VERSION=0.6.0-SNAPSHOT
+ARG VCS_REF=local
+ARG VCS_URL=https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices
+ARG BUILD_CREATED=unknown
+LABEL org.opencontainers.image.title="DevHire Cloud assessment-runner-service" \
+      org.opencontainers.image.description="Internal sandbox execution adapter for DevHire Cloud code assessments" \
+      org.opencontainers.image.source="${VCS_URL}" \
+      org.opencontainers.image.revision="${VCS_REF}" \
+      org.opencontainers.image.version="${BUILD_VERSION}" \
+      org.opencontainers.image.created="${BUILD_CREATED}" \
+      org.opencontainers.image.licenses="MIT"
+ENV APP_HOME=/app
+WORKDIR ${APP_HOME}
+RUN apk upgrade --no-cache
+RUN addgroup -S devhire && adduser -S devhire -G devhire
+COPY --from=build /workspace/${SERVICE_NAME}/target/${SERVICE_NAME}-*.jar app.jar
+USER devhire
+EXPOSE 8089
+ENTRYPOINT ["java", "-XX:MaxRAMPercentage=75", "-jar", "app.jar"]

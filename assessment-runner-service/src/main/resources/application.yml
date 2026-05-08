@@ -1,0 +1,36 @@
+server:
+  port: ${SERVER_PORT:8089}
+
+spring:
+  application:
+    name: assessment-runner-service
+
+devhire:
+  assessment-runner:
+    judge0-base-url: ${JUDGE0_BASE_URL:}
+    network-disabled: ${DEVHIRE_RUNNER_NETWORK_DISABLED:true}
+    max-cpu-millis: ${DEVHIRE_RUNNER_MAX_CPU_MILLIS:2000}
+    max-memory-kb: ${DEVHIRE_RUNNER_MAX_MEMORY_KB:131072}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
+  tracing:
+    sampling:
+      probability: ${MANAGEMENT_TRACING_SAMPLING_PROBABILITY:1.0}
+  otlp:
+    tracing:
+      endpoint: ${MANAGEMENT_OTLP_TRACING_ENDPOINT:${OTEL_EXPORTER_OTLP_ENDPOINT:http://localhost:4318}/v1/traces}
+
+logging:
+  pattern:
+    level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"

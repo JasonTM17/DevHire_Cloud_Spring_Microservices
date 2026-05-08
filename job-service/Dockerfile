@@ -12,6 +12,7 @@ COPY application-service/pom.xml application-service/pom.xml
 COPY notification-service/pom.xml notification-service/pom.xml
 COPY audit-service/pom.xml audit-service/pom.xml
 COPY ai-service/pom.xml ai-service/pom.xml
+COPY assessment-runner-service/pom.xml assessment-runner-service/pom.xml
 COPY common-lib/src common-lib/src
 COPY ${SERVICE_NAME}/src ${SERVICE_NAME}/src
 RUN mvn -B -T1 -pl ${SERVICE_NAME} -am package -DskipTests

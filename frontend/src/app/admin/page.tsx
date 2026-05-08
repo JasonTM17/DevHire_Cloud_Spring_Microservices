@@ -8,6 +8,7 @@ import { MetricCard } from "@/components/MetricCard";
 import { StatusPill, statusLabel } from "@/components/StatusPill";
 import { api } from "@/lib/api";
 import { brandForCompany } from "@/lib/demoCompanies";
+import { formatDateTime } from "@/lib/dateFormat";
 import { previewAiProviderStatus, previewAuditLogs, previewCodeAssessmentSummary, previewCompanies, previewJobs, previewOperationsSummary } from "@/lib/previewData";
 import type { AiProviderStatus, AuditLog, CodeAssessmentSummary, Company, Job, OperationsSummary, PageResponse } from "@/types/domain";
 
@@ -192,7 +193,7 @@ export default function AdminPage() {
                   <StatusPill value={item.actorRole} />
                 </div>
                 <span className="muted">{item.actorEmail}</span>
-                <small>{new Date(item.createdAt).toLocaleString()}</small>
+                <small>{formatDateTime(item.createdAt)}</small>
               </div>
             ))}
           </div>
@@ -206,19 +207,21 @@ export default function AdminPage() {
         <div className="metrics-row compact-metrics">
           <MetricCard icon={ClipboardCheck} label="Assignments" value={codeAssessmentSummary.totalAssignments} helper="Active code challenges" />
           <MetricCard icon={Gauge} label="Average score" value={`${codeAssessmentSummary.averageScore}%`} helper="Deterministic rubric" />
-          <MetricCard icon={CheckCircle2} label="Pass rate" value={`${codePassRate}%`} helper="Employer decisions" />
-          <MetricCard icon={ShieldCheck} label="Risk flags" value={codeAssessmentSummary.riskySubmissions} helper="Needs reviewer attention" />
+          <MetricCard icon={CheckCircle2} label="Runner queue" value={codeAssessmentSummary.runQueueDepth ?? 0} helper="Sandbox backlog" />
+          <MetricCard icon={ShieldCheck} label="Sandbox fail" value={`${codeAssessmentSummary.sandboxFailureRate ?? 0}%`} helper="Policy or execution blocks" />
         </div>
         <div className="evidence-grid">
           <div className="constraint-box">
             <strong>Assessment pipeline</strong>
             <span>{codeAssessmentSummary.submitted} submitted / {codeAssessmentSummary.autoReviewed} auto reviewed</span>
             <span>{codeAssessmentSummary.employerReviewed} employer reviewed / {codeAssessmentSummary.failed} failed</span>
+            <span>{codePassRate}% pass rate across employer decisions</span>
           </div>
           <div className="constraint-box">
             <strong>Safety posture</strong>
-            <span>Deterministic score remains source of truth</span>
-            <span>AI feedback is advisory and non-blocking</span>
+            <span>{codeAssessmentSummary.riskySubmissions} risky submissions need reviewer attention</span>
+            <span>Integrity risk avg {codeAssessmentSummary.averageIntegrityRisk ?? 0}% / similarity avg {codeAssessmentSummary.averageSimilarityScore ?? 0}%</span>
+            <span>Hidden tests and final score are recalculated server-side</span>
           </div>
         </div>
         <div className="insight-list compact">
@@ -248,7 +251,7 @@ export default function AdminPage() {
               <strong>{aiProvider?.consecutiveFailures ?? 0} consecutive provider failures</strong>
               <small>
                 {aiProvider?.lastFailureAt
-                  ? `Last failure ${new Date(aiProvider.lastFailureAt).toLocaleString()} (${aiProvider.lastFailureReason ?? "provider error"})`
+                  ? `Last failure ${formatDateTime(aiProvider.lastFailureAt)} (${aiProvider.lastFailureReason ?? "provider error"})`
                   : "No provider failures recorded in this runtime"}
               </small>
             </div>
@@ -259,8 +262,8 @@ export default function AdminPage() {
               <strong>Max tokens {aiProvider?.maxTokens ?? 900}</strong>
               <small>
                 {aiProvider?.circuitOpenUntil
-                  ? `Circuit cooldown until ${new Date(aiProvider.circuitOpenUntil).toLocaleString()}`
-                  : `Checked ${aiProvider?.checkedAt ? new Date(aiProvider.checkedAt).toLocaleString() : "after login"}`}
+                  ? `Circuit cooldown until ${formatDateTime(aiProvider.circuitOpenUntil)}`
+                  : `Checked ${aiProvider?.checkedAt ? formatDateTime(aiProvider.checkedAt) : "after login"}`}
               </small>
             </div>
             <button className="button secondary" type="button" onClick={reindexKnowledge} disabled={reindexing}>

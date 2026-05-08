@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Braces, CheckCircle2, ClipboardCheck, Clock3, PlayCircle, ShieldCheck, Trophy } from "lucide-react";
 import { MetricCard } from "@/components/MetricCard";
 import { StatusPill, statusLabel } from "@/components/StatusPill";
 import { api } from "@/lib/api";
+import { formatShortDate } from "@/lib/dateFormat";
 import { previewCodeAssessments } from "@/lib/previewData";
-import type { CodeAssessment } from "@/types/domain";
+import type { CodeAssessment, CodeIntegrityEvent, CodeRun } from "@/types/domain";
 
 const FINAL_STATUSES = new Set(["PASSED", "FAILED"]);
 const DEFAULT_CODE = `class CandidateSolution {
@@ -21,6 +22,33 @@ const DEFAULT_CODE = `class CandidateSolution {
   }
 }`;
 
+type EvidenceCase = {
+  label: string;
+  detail: string;
+  matched: (code: string) => boolean;
+};
+
+type AnalysisResult = {
+  label: string;
+  detail: string;
+  matched: boolean;
+  output?: string;
+  error?: string;
+};
+
+type IntegrityCounters = {
+  focusLoss: number;
+  pasteBurst: number;
+  tabHidden: number;
+};
+
+type ChallengeExample = {
+  title: string;
+  input: string;
+  output: string;
+  explanation: string;
+};
+
 export default function CandidateAssessmentsPage() {
   const [assessments, setAssessments] = useState<CodeAssessment[]>(previewCodeAssessments);
   const [selectedId, setSelectedId] = useState(previewCodeAssessments[0]?.id ?? "");
@@ -29,8 +57,14 @@ export default function CandidateAssessmentsPage() {
   const [notes, setNotes] = useState("I focused on idempotency, transaction boundaries, and reviewer-safe evidence.");
   const [message, setMessage] = useState("");
   const [analysisMessage, setAnalysisMessage] = useState("");
+  const [analysisResults, setAnalysisResults] = useState<AnalysisResult[]>([]);
+  const [latestRun, setLatestRun] = useState<CodeRun | undefined>(previewCodeAssessments[0]?.latestRun);
+  const [integrityCounters, setIntegrityCounters] = useState<IntegrityCounters>({ focusLoss: 0, pasteBurst: 0, tabHidden: 0 });
   const [loadingDetail, setLoadingDetail] = useState(false);
+  const [running, setRunning] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const sessionStartedAt = useRef(Date.now());
+  const lastPasteAt = useRef(0);
 
   useEffect(() => {
     api.candidateCodeAssessments()
@@ -41,6 +75,30 @@ export default function CandidateAssessmentsPage() {
         setSelectedId(preferred?.id ?? "");
       })
       .catch(() => setAssessments(previewCodeAssessments));
+  }, []);
+
+  useEffect(() => {
+    const onBlur = () => setIntegrityCounters((current) => ({ ...current, focusLoss: current.focusLoss + 1 }));
+    const onVisibility = () => {
+      if (document.visibilityState === "hidden") {
+        setIntegrityCounters((current) => ({ ...current, tabHidden: current.tabHidden + 1 }));
+      }
+    };
+    const onPaste = () => {
+      const now = Date.now();
+      if (now - lastPasteAt.current < 1_500) {
+        setIntegrityCounters((current) => ({ ...current, pasteBurst: current.pasteBurst + 1 }));
+      }
+      lastPasteAt.current = now;
+    };
+    window.addEventListener("blur", onBlur);
+    document.addEventListener("visibilitychange", onVisibility);
+    document.addEventListener("paste", onPaste);
+    return () => {
+      window.removeEventListener("blur", onBlur);
+      document.removeEventListener("visibilitychange", onVisibility);
+      document.removeEventListener("paste", onPaste);
+    };
   }, []);
 
   const selected = useMemo(
@@ -60,6 +118,10 @@ export default function CandidateAssessmentsPage() {
     setLanguage(selected.language || "Java");
     setCode(selected.submittedCode || selected.submittedCodePreview || selected.starterCode || DEFAULT_CODE);
     setAnalysisMessage("");
+    setAnalysisResults([]);
+    setLatestRun(selected.latestRun);
+    setIntegrityCounters({ focusLoss: 0, pasteBurst: 0, tabHidden: 0 });
+    sessionStartedAt.current = Date.now();
 
     if (!isUuid(selected.id) || selected.submittedCode) {
       return;
@@ -69,6 +131,7 @@ export default function CandidateAssessmentsPage() {
       .then((detail) => {
         setAssessments((current) => current.map((item) => (item.id === detail.id ? detail : item)));
         setCode(detail.submittedCode || detail.submittedCodePreview || detail.starterCode || DEFAULT_CODE);
+        setLatestRun(detail.latestRun);
       })
       .catch(() => {
         setCode(selected.submittedCodePreview || selected.starterCode || DEFAULT_CODE);
@@ -76,15 +139,62 @@ export default function CandidateAssessmentsPage() {
       .finally(() => setLoadingDetail(false));
   }, [selected?.id]);
 
-  function runStaticAnalysis() {
+  async function runStaticAnalysis() {
     if (!selected) {
       return;
     }
+    if (isUuid(selected.id)) {
+      try {
+        setRunning(true);
+        const run = await api.runCodeAssessment(
+          selected.id,
+          language,
+          code,
+          integrityEvents(integrityCounters),
+          await clientFingerprintHash(),
+          elapsedSeconds(sessionStartedAt.current)
+        );
+        setLatestRun(run);
+        setAssessments((current) => current.map((item) => (item.id === selected.id
+          ? {
+              ...item,
+              latestRun: run,
+              integrityRiskScore: run.integrityRiskScore,
+              similarityScore: run.similarityScore,
+              sandboxStatus: run.sandboxStatus
+            }
+          : item)));
+        setAnalysisResults(run.results.map((result) => ({
+          label: result.name,
+          detail: result.error ?? result.output ?? `${result.executionTimeMs} ms / ${Math.round(result.memoryKb / 1024)} MB`,
+          matched: result.passed,
+          output: result.output,
+          error: result.error
+        })));
+        setAnalysisMessage(
+          `${run.visiblePassed}/${run.visibleTotal} visible cases passed in ${run.executionTimeMs} ms; hidden cases remain server-side for final submit.`
+        );
+        return;
+      } catch (ex) {
+        setAnalysisMessage(ex instanceof Error && ex.message !== "Failed to fetch"
+          ? ex.message
+          : "Local static judge is active while the sandbox runner is unreachable.");
+      } finally {
+        setRunning(false);
+      }
+    }
     const hasTest = /(@test|assert|expect\()/i.test(code);
     const hasRisk = /(api[_-]?key|password|secret|runtime\.getruntime|processbuilder|system\.exit)/i.test(code);
-    const caseCount = assessmentEvidenceCases(selected).filter((testCase) => testCase.matched(code)).length;
+    const cases = assessmentEvidenceCases(selected);
+    const results = cases.map((testCase) => ({
+      label: testCase.label,
+      detail: testCase.detail,
+      matched: testCase.matched(code)
+    }));
+    const caseCount = results.filter((testCase) => testCase.matched).length;
+    setAnalysisResults(results);
     setAnalysisMessage(
-      `${caseCount}/${assessmentEvidenceCases(selected).length} static cases matched; ${
+      `${caseCount}/${cases.length} static judge cases matched; ${
         hasRisk ? "security review required" : hasTest ? "test evidence present" : "add assertion evidence"
       }.`
     );
@@ -104,12 +214,22 @@ export default function CandidateAssessmentsPage() {
     }
     try {
       setSubmitting(true);
-      const updated = await api.submitCodeAssessment(selected.id, language, code, notes);
+      const updated = await api.submitCodeAssessment(
+        selected.id,
+        language,
+        code,
+        notes,
+        integrityEvents(integrityCounters),
+        await clientFingerprintHash(),
+        elapsedSeconds(sessionStartedAt.current)
+      );
       setAssessments((current) => current.map((item) => (item.id === updated.id ? updated : item)));
-      setMessage(`Rubric score ready: ${updated.latestScore ?? 0}/${updated.maxScore}.`);
+      setLatestRun(updated.latestRun);
+      setMessage(`Rubric score ready: ${updated.latestScore ?? 0}/${updated.maxScore}; hidden tests were scored server-side.`);
     } catch (ex) {
       const simulated = simulateLocalReview(selected, code);
       setAssessments((current) => current.map((item) => (item.id === simulated.id ? simulated : item)));
+      setLatestRun(simulated.latestRun);
       setMessage(ex instanceof Error && ex.message !== "Failed to fetch"
         ? ex.message
         : `Rubric score ready: ${simulated.latestScore}/${simulated.maxScore}.`);
@@ -123,15 +243,15 @@ export default function CandidateAssessmentsPage() {
       <div className="hero-strip">
         <div>
           <p className="eyebrow">Code assessment</p>
-          <h1>Technical proof workspace</h1>
+          <h1>Code Interview Studio</h1>
           <p>
-            Complete coding challenges with deterministic rubric scoring, security smell checks, and employer-ready
-            review evidence.
+            Solve interview-style coding challenges with visible examples, static judge cases, rubric scoring, security
+            smell checks, and employer-ready review evidence.
           </p>
         </div>
         <div className="hero-actions">
-          <span className="badge live">Safe static review</span>
-          <span className="badge">Deterministic rubric</span>
+          <span className="badge live">Sandbox judge</span>
+          <span className="badge">Employer rubric</span>
         </div>
       </div>
 
@@ -139,7 +259,7 @@ export default function CandidateAssessmentsPage() {
         <MetricCard icon={ClipboardCheck} label="Assigned" value={assessments.length} helper="Coding challenges" />
         <MetricCard icon={Trophy} label="Reviewed" value={completed} helper="With rubric evidence" />
         <MetricCard icon={CheckCircle2} label="Average" value={`${average}%`} helper="Latest submissions" />
-        <MetricCard icon={ShieldCheck} label="Risk flags" value={riskFlags} helper="Static review signals" />
+        <MetricCard icon={ShieldCheck} label="Risk flags" value={riskFlags} helper="Sandbox and integrity signals" />
       </div>
 
       <div className="split-grid assessment-workspace">
@@ -174,37 +294,83 @@ export default function CandidateAssessmentsPage() {
                 <ClipboardCheck size={20} />
                 <h2>{selected.challengeTitle}</h2>
               </div>
-              <p className="muted">{selected.prompt}</p>
-              <div className="constraint-box">
-                <strong>Review constraints</strong>
-                <span>{selected.constraints}</span>
+              <div className="interview-lab-grid">
+                <div className="constraint-box problem-card">
+                  <strong>Problem statement</strong>
+                  <p>{selected.prompt}</p>
+                  <div className="tag-list">
+                    <span className="badge">{difficultyLabel(selected)}</span>
+                    <span className="badge">{selected.language}</span>
+                    <span className="badge">Due {formatDate(selected.dueAt)}</span>
+                  </div>
+                </div>
+                <div className="constraint-box judge-card">
+                  <strong>Interview target</strong>
+                  {complexityTargets(selected).map((target) => (
+                    <span key={target}>{target}</span>
+                  ))}
+                </div>
+              </div>
+              <div className="example-grid">
+                {challengeExamples(selected).map((example) => (
+                  <div className="example-card" key={example.title}>
+                    <strong>{example.title}</strong>
+                    <code>Input: {example.input}</code>
+                    <code>Output: {example.output}</code>
+                    <span>{example.explanation}</span>
+                  </div>
+                ))}
               </div>
               <div className="evidence-grid">
                 <div className="constraint-box">
-                  <strong>Visible static cases</strong>
-                  {assessmentEvidenceCases(selected).map((testCase) => (
-                    <span key={testCase.label}>{testCase.label}</span>
+                  <strong>Visible judge cases</strong>
+                  {visibleJudgeCases(selected).map((testCase) => (
+                    <span key={testCase.label}>{testCase.label}: {testCase.detail}</span>
                   ))}
                 </div>
                 <div className="constraint-box">
-                  <strong>Required signals</strong>
+                  <strong>Session integrity</strong>
                   <span>{selected.skills.join(" / ")}</span>
                   <span>Attempt {selected.attemptNumber ?? 0} / grader {selected.graderVersion ?? "static-rubric-v1"}</span>
                   <span>Rubric {selected.rubricVersion ?? "devhire-code-rubric-v1"}</span>
+                  <span>Focus {integrityCounters.focusLoss} / paste bursts {integrityCounters.pasteBurst} / hidden tabs {integrityCounters.tabHidden}</span>
                   {selected.codeHash ? <span>Code hash {selected.codeHash.slice(0, 12)}</span> : null}
                 </div>
               </div>
+              <div className="evidence-grid">
+                <div className="constraint-box">
+                  <strong>Sandbox execution</strong>
+                  <span>{(latestRun ?? selected.latestRun)?.sandboxStatus ?? selected.sandboxStatus ?? "JUDGE0_COMPATIBLE_LOCAL_SANDBOX"}</span>
+                  <span>Visible {(latestRun ?? selected.latestRun)?.visiblePassed ?? 0}/{(latestRun ?? selected.latestRun)?.visibleTotal ?? selected.visibleTestCases?.length ?? 0}</span>
+                  <span>Hidden {(latestRun ?? selected.latestRun)?.hiddenPassed ?? 0}/{(latestRun ?? selected.latestRun)?.hiddenTotal ?? 0} scored only after submit</span>
+                </div>
+                <div className="constraint-box">
+                  <strong>Risk signals</strong>
+                  <span>Integrity risk {Math.round((latestRun?.integrityRiskScore ?? selected.integrityRiskScore ?? 0) * 10) / 10}%</span>
+                  <span>Similarity {Math.round((latestRun?.similarityScore ?? selected.similarityScore ?? 0) * 10) / 10}%</span>
+                  <span>Deadline lock {FINAL_STATUSES.has(selected.status) ? "finalized" : `open until ${formatDate(selected.dueAt)}`}</span>
+                </div>
+              </div>
               <div className="form">
-                <select aria-label="Submission language" value={language} onChange={(event) => setLanguage(event.target.value)}>
-                  <option>Java</option>
-                  <option>SQL</option>
-                  <option>TypeScript</option>
-                </select>
+                <div className="editor-toolbar">
+                  <label>
+                    Language
+                    <select aria-label="Submission language" value={language} onChange={(event) => setLanguage(event.target.value)}>
+                      <option>Java</option>
+                      <option>SQL</option>
+                      <option>TypeScript</option>
+                    </select>
+                  </label>
+                  <span className="badge">Time box 45 min</span>
+                  <span className="badge">Target score 85+</span>
+                  <span className="badge">Hidden tests server-side</span>
+                </div>
                 <textarea
                   className="code-editor"
                   aria-label="Candidate code submission"
                   value={code}
                   onChange={(event) => setCode(event.target.value)}
+                  placeholder="Write the solution, edge-case handling, and assertion evidence here."
                   spellCheck={false}
                 />
                 <textarea
@@ -223,13 +389,30 @@ export default function CandidateAssessmentsPage() {
                     ? "Employer decision locked"
                     : submitting ? "Scoring" : "Submit for rubric score"}
                 </button>
-                <button className="button secondary" type="button" onClick={runStaticAnalysis}>
+                <button className="button secondary" type="button" onClick={runStaticAnalysis} disabled={running}>
                   <PlayCircle size={16} />
-                  Run static analysis
+                  {running ? "Running visible cases" : "Run judge analysis"}
                 </button>
               </div>
               {loadingDetail ? <p className="muted">Owner-only submission detail sync in progress...</p> : null}
               {analysisMessage ? <p className="success">{analysisMessage}</p> : null}
+              {analysisResults.length ? (
+                <div className="judge-results" aria-label="Static judge case results">
+                  {analysisResults.map((result) => (
+                    <div className="judge-case" key={result.label}>
+                      <span className={result.matched ? "case-dot pass" : "case-dot"} />
+                      <span>
+                        <strong>{result.label}</strong>
+                        <small>{result.detail}</small>
+                        {result.output ? <small>{result.output}</small> : null}
+                      </span>
+                      <span className={result.matched ? "badge live" : "badge warn"}>
+                        {result.matched ? "Matched" : "Needs evidence"}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
               {message ? <p className="success">{message}</p> : null}
             </>
           ) : null}
@@ -295,10 +478,14 @@ export default function CandidateAssessmentsPage() {
 function simulateLocalReview(item: CodeAssessment, code: string): CodeAssessment {
   const hasTest = /(@test|assert|expect\()/i.test(code);
   const hasRisk = /(api[_-]?key|password|secret|runtime\.getruntime|processbuilder|system\.exit)/i.test(code);
-  const score = Math.max(58, Math.min(94, 68 + Math.floor(code.length / 120) + (hasTest ? 10 : 0) - (hasRisk ? 15 : 0)));
+  const matchedCases = assessmentEvidenceCases(item).filter((testCase) => testCase.matched(code)).length;
+  const score = Math.max(
+    58,
+    Math.min(96, 62 + Math.floor(code.length / 140) + matchedCases * 6 + (hasTest ? 9 : 0) - (hasRisk ? 16 : 0))
+  );
   return {
     ...item,
-    status: score >= 85 && !hasRisk ? "AUTO_REVIEWED" : "AUTO_REVIEWED",
+    status: "AUTO_REVIEWED",
     latestScore: score,
     latestDecision: score >= 85 && !hasRisk ? "ADVANCE" : "REVIEW",
     submittedCode: code,
@@ -308,6 +495,35 @@ function simulateLocalReview(item: CodeAssessment, code: string): CodeAssessment
     codeHash: "local-static-analysis",
     graderVersion: item.graderVersion ?? "static-rubric-v1",
     rubricVersion: item.rubricVersion ?? "devhire-code-rubric-v1",
+    latestRun: {
+      id: "local-visible-run",
+      status: hasRisk ? "POLICY_BLOCKED" : "COMPLETED",
+      sandboxStatus: hasRisk ? "sandbox-policy-blocked" : "JUDGE0_COMPATIBLE_LOCAL_SANDBOX",
+      visiblePassed: matchedCases,
+      visibleTotal: assessmentEvidenceCases(item).length,
+      hiddenPassed: 0,
+      hiddenTotal: 0,
+      executionTimeMs: Math.max(42, Math.min(900, Math.floor(code.length / 8))),
+      memoryKb: 18_432,
+      failureReason: hasRisk ? "Network, filesystem, or process boundary usage requires server review." : undefined,
+      integrityRiskScore: 0,
+      similarityScore: 0,
+      results: assessmentEvidenceCases(item).map((testCase) => ({
+        caseId: testCase.label,
+        name: testCase.label,
+        visibility: "VISIBLE",
+        passed: testCase.matched(code),
+        output: testCase.matched(code) ? `matched:${testCase.label}` : undefined,
+        error: testCase.matched(code) ? undefined : testCase.detail,
+        executionTimeMs: 42,
+        memoryKb: 18_432
+      })),
+      createdAt: new Date().toISOString(),
+      completedAt: new Date().toISOString()
+    },
+    integrityRiskScore: 0,
+    similarityScore: 0,
+    sandboxStatus: hasRisk ? "sandbox-policy-blocked" : "JUDGE0_COMPATIBLE_LOCAL_SANDBOX",
     submittedAt: new Date().toISOString(),
     feedback: score >= 85
       ? "Strong production-ready submission with clear implementation signals and low review risk."
@@ -333,30 +549,152 @@ function emptyRubric() {
   ];
 }
 
+function visibleJudgeCases(item: CodeAssessment) {
+  if (item.visibleTestCases?.length) {
+    return item.visibleTestCases.map((testCase) => ({
+      label: testCase.name,
+      detail: `${testCase.input} / weight ${testCase.weight}`,
+      matched: (code: string) => assessmentEvidenceCases(item).some((fallback) => fallback.matched(code))
+    }));
+  }
+  return assessmentEvidenceCases(item);
+}
+
+function integrityEvents(counters: IntegrityCounters): CodeIntegrityEvent[] {
+  const events: CodeIntegrityEvent[] = [];
+  if (counters.focusLoss > 0) {
+    events.push({ type: "FOCUS_LOSS", count: counters.focusLoss, metadata: JSON.stringify({ source: "window.blur" }) });
+  }
+  if (counters.pasteBurst > 0) {
+    events.push({ type: "PASTE_BURST", count: counters.pasteBurst, metadata: JSON.stringify({ windowMs: 1500 }) });
+  }
+  if (counters.tabHidden > 0) {
+    events.push({ type: "TAB_HIDDEN", count: counters.tabHidden, metadata: JSON.stringify({ source: "visibilitychange" }) });
+  }
+  return events;
+}
+
+function elapsedSeconds(startedAt: number) {
+  return Math.max(1, Math.floor((Date.now() - startedAt) / 1000));
+}
+
+async function clientFingerprintHash() {
+  const source = [
+    navigator.userAgent,
+    navigator.language,
+    `${screen.width}x${screen.height}`,
+    Intl.DateTimeFormat().resolvedOptions().timeZone
+  ].join("|");
+  if (!crypto.subtle) {
+    return fallbackHash(source);
+  }
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(source));
+  return Array.from(new Uint8Array(digest)).map((byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+function fallbackHash(value: string) {
+  let hash = 0x811c9dc5;
+  for (const char of value) {
+    hash ^= char.charCodeAt(0);
+    hash = Math.imul(hash, 0x01000193);
+  }
+  return Math.abs(hash).toString(16).padStart(16, "0");
+}
+
 function assessmentEvidenceCases(item: CodeAssessment) {
   if (item.language.toLowerCase() === "sql") {
     return [
-      { label: "Scopes by employer_id", matched: (code: string) => /employer_id/i.test(code) },
-      { label: "Groups by status", matched: (code: string) => /group\s+by\s+status/i.test(code) },
-      { label: "Avoids unbounded result sets", matched: (code: string) => /limit|where/i.test(code) }
+      { label: "Scopes by employer_id", detail: "Query is tenant-scoped before aggregation.", matched: (code: string) => /employer_id/i.test(code) },
+      { label: "Groups by status", detail: "Pipeline states are aggregated deterministically.", matched: (code: string) => /group\s+by\s+status/i.test(code) },
+      { label: "Avoids unbounded result sets", detail: "Uses WHERE or LIMIT to avoid unsafe scans.", matched: (code: string) => /limit|where/i.test(code) }
     ];
   }
   if (item.challengeTitle.toLowerCase().includes("search")) {
     return [
-      { label: "OpenSearch primary adapter", matched: (code: string) => /opensearch|search/i.test(code) },
-      { label: "PostgreSQL recovery path", matched: (code: string) => /postgres|jdbc|repository/i.test(code) },
-      { label: "Published-only visibility guard", matched: (code: string) => /published/i.test(code) }
+      { label: "OpenSearch primary adapter", detail: "Uses the search adapter for relevance-first retrieval.", matched: (code: string) => /opensearch|search/i.test(code) },
+      { label: "PostgreSQL recovery path", detail: "Defines a repository or JDBC recovery path.", matched: (code: string) => /postgres|jdbc|repository/i.test(code) },
+      { label: "Published-only visibility guard", detail: "Filters private jobs from public results.", matched: (code: string) => /published/i.test(code) }
     ];
   }
   return [
-    { label: "Transaction or batch boundary", matched: (code: string) => /transaction|batch/i.test(code) },
-    { label: "Retry and max attempt handling", matched: (code: string) => /retry|maxattempt/i.test(code) },
-    { label: "Assertion-style test evidence", matched: (code: string) => /@test|assert|expect\(/i.test(code) }
+    { label: "Transaction or batch boundary", detail: "Protects publish state with an atomic batch boundary.", matched: (code: string) => /transaction|batch/i.test(code) },
+    { label: "Retry and max attempt handling", detail: "Handles bounded retry and poison-message safety.", matched: (code: string) => /retry|maxattempt/i.test(code) },
+    { label: "Assertion-style test evidence", detail: "Includes executable-style assertions or test annotations.", matched: (code: string) => /@test|assert|expect\(/i.test(code) }
   ];
 }
 
+function challengeExamples(item: CodeAssessment): ChallengeExample[] {
+  if (item.language.toLowerCase() === "sql") {
+    return [
+      {
+        title: "Example 1",
+        input: "applications(employer_id=17, status in [SUBMITTED, INTERVIEW])",
+        output: "SUBMITTED=12, INTERVIEW=5",
+        explanation: "The reviewer expects tenant-scoped grouping before counts are returned."
+      },
+      {
+        title: "Example 2",
+        input: "applications from another employer",
+        output: "excluded",
+        explanation: "Cross-company rows must never leak into an employer dashboard."
+      }
+    ];
+  }
+  if (item.challengeTitle.toLowerCase().includes("search")) {
+    return [
+      {
+        title: "Example 1",
+        input: "keyword='spring kafka', status=PUBLISHED",
+        output: "ranked published jobs",
+        explanation: "Prefer search relevance while preserving publication visibility."
+      },
+      {
+        title: "Example 2",
+        input: "OpenSearch unavailable",
+        output: "PostgreSQL fallback results",
+        explanation: "The candidate should keep public search usable during dependency degradation."
+      }
+    ];
+  }
+  return [
+    {
+      title: "Example 1",
+      input: "3 pending events, maxAttempts=3",
+      output: "3 published events",
+      explanation: "The batch should publish eligible events and preserve idempotency."
+    },
+    {
+      title: "Example 2",
+      input: "1 event already at maxAttempts",
+      output: "event stays reviewable",
+      explanation: "Poison-message handling should prevent endless retries."
+    }
+  ];
+}
+
+function complexityTargets(item: CodeAssessment) {
+  if (item.language.toLowerCase() === "sql") {
+    return ["Expected: indexed WHERE + GROUP BY", "Watch: tenant isolation", "Evidence: bounded result set"];
+  }
+  if (item.challengeTitle.toLowerCase().includes("search")) {
+    return ["Expected: adapter failover", "Watch: private result leakage", "Evidence: published-only test"];
+  }
+  return ["Expected: O(n) batch pass", "Watch: duplicate publish risk", "Evidence: retry and assertion coverage"];
+}
+
+function difficultyLabel(item: CodeAssessment) {
+  const normalized = item.level.toLowerCase();
+  if (normalized.includes("senior") || normalized.includes("lead")) {
+    return "Hard";
+  }
+  if (normalized.includes("mid")) {
+    return "Medium";
+  }
+  return "Interview";
+}
+
 function formatDate(value: string) {
-  return new Date(value).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  return formatShortDate(value);
 }
 
 function isUuid(value: string) {

@@ -74,7 +74,7 @@ test.describe("DevHire Cloud portfolio smoke", () => {
     await expect(page.getByText(/Live profile|Read-only sample/)).toBeVisible();
     await page.goto("/candidate/assessments");
     await expect(page.getByTestId("candidate-assessments-page")).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Technical proof workspace" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Code Interview Studio" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Submission history" })).toBeVisible();
     await expect(page.getByLabel("Candidate code submission")).toBeVisible();
     await page.getByRole("button", { name: "Submit for rubric score" }).click();

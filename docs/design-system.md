@@ -32,7 +32,7 @@ DevHire Cloud should read as a production SaaS recruitment operations platform, 
 - Use compact buttons with icons for commands.
 - Cards and panels use 8px radius maximum, 1px borders, and low-shadow hover states.
 - Company imagery should use crisp logo marks with fallback initials.
-- Production and DevOps credibility should be visible through small operational signals: API gateway, outbox, OpenSearch, Kafka, CI/CD, observability.
+- Production and DevOps credibility should be visible through small operational signals: API gateway, outbox, OpenSearch, Kafka, CI/CD, observability, assessment runner queue, sandbox failure rate, integrity risk, and similarity posture.
 
 ## Component Notes
 
@@ -57,7 +57,7 @@ The canvas now separates three product regions:
 - Employer/Company: company profile and hiring pipeline workflows.
 - Client/Candidate: mobile-first candidate flows for job discovery, applications, profile, assessments, offers, interview prep, career roadmap, skill analytics, and community.
 
-Candidate screens should feel guided and focused. Admin and platform screens should stay compact, operational, and evidence-heavy. Primary portfolio screenshots must not show raw IDs, `UNKNOWN`, loading-only panels, fallback/offline warnings, or smoke labels.
+Candidate screens should feel guided and focused; Code Interview Studio should expose visible cases and run feedback while keeping hidden tests server-side. Admin and platform screens should stay compact, operational, and evidence-heavy. Primary portfolio screenshots must not show raw IDs, `UNKNOWN`, loading-only panels, fallback/offline warnings, or smoke labels.
 
 ## Repository Facade Decision
 

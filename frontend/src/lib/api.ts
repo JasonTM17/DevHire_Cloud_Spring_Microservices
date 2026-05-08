@@ -9,6 +9,8 @@ import type {
   CandidateApplicationsSummary,
   CandidateAssessment,
   CodeAssessment,
+  CodeIntegrityEvent,
+  CodeRun,
   CodeAssessmentSummary,
   CandidateDashboardSummary,
   CandidateOffer,
@@ -108,10 +110,32 @@ export const api = {
   candidateAssessments: () => request<CandidateAssessment[]>("/api/candidate/assessments"),
   candidateCodeAssessments: () => request<CodeAssessment[]>("/api/candidate/code-assessments"),
   candidateCodeAssessment: (id: string) => request<CodeAssessment>(`/api/candidate/code-assessments/${id}`),
-  submitCodeAssessment: (id: string, language: string, code: string, notes?: string) =>
+  runCodeAssessment: (
+    id: string,
+    language: string,
+    code: string,
+    integrityEvents: CodeIntegrityEvent[] = [],
+    clientFingerprintHash?: string,
+    elapsedSeconds?: number
+  ) =>
+    request<CodeRun>(`/api/candidate/code-assessments/${id}/runs`, {
+      method: "POST",
+      body: JSON.stringify({ language, code, integrityEvents, clientFingerprintHash, elapsedSeconds })
+    }),
+  codeAssessmentRun: (id: string, runId: string) =>
+    request<CodeRun>(`/api/candidate/code-assessments/${id}/runs/${runId}`),
+  submitCodeAssessment: (
+    id: string,
+    language: string,
+    code: string,
+    notes?: string,
+    integrityEvents: CodeIntegrityEvent[] = [],
+    clientFingerprintHash?: string,
+    elapsedSeconds?: number
+  ) =>
     request<CodeAssessment>(`/api/candidate/code-assessments/${id}/submissions`, {
       method: "POST",
-      body: JSON.stringify({ language, code, notes })
+      body: JSON.stringify({ language, code, notes, integrityEvents, clientFingerprintHash, elapsedSeconds })
     }),
   candidateRoadmap: () => request<CandidateRoadmap>("/api/candidate/roadmap"),
   candidateInterviewPrep: () => request<InterviewPrep[]>("/api/candidate/interview-prep"),

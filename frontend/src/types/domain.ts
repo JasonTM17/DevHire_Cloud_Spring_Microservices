@@ -218,6 +218,49 @@ export type RubricScore = {
   evidence: string;
 };
 
+export type CodeIntegrityEvent = {
+  type: string;
+  count: number;
+  metadata?: string;
+};
+
+export type CodeTestCase = {
+  id: string;
+  name: string;
+  visibility: "VISIBLE" | "HIDDEN";
+  input: string;
+  weight: number;
+};
+
+export type CodeRunCaseResult = {
+  caseId: string;
+  name: string;
+  visibility: "VISIBLE" | "HIDDEN";
+  passed: boolean;
+  output?: string;
+  error?: string;
+  executionTimeMs: number;
+  memoryKb: number;
+};
+
+export type CodeRun = {
+  id: string;
+  status: string;
+  sandboxStatus: string;
+  visiblePassed: number;
+  visibleTotal: number;
+  hiddenPassed: number;
+  hiddenTotal: number;
+  executionTimeMs: number;
+  memoryKb: number;
+  failureReason?: string;
+  integrityRiskScore: number;
+  similarityScore: number;
+  results: CodeRunCaseResult[];
+  createdAt: string;
+  completedAt?: string;
+};
+
 export type CodeAssessment = {
   id: string;
   applicationId: string;
@@ -245,6 +288,11 @@ export type CodeAssessment = {
   rubricVersion?: string;
   submittedCodePreview?: string;
   hasSubmittedCode: boolean;
+  visibleTestCases?: CodeTestCase[];
+  latestRun?: CodeRun;
+  integrityRiskScore?: number;
+  similarityScore?: number;
+  sandboxStatus?: string;
   dueAt: string;
   assignedAt: string;
   submittedAt?: string;
@@ -259,6 +307,10 @@ export type CodeAssessmentSummary = {
   failed: number;
   averageScore: number;
   riskySubmissions: number;
+  runQueueDepth: number;
+  sandboxFailureRate: number;
+  averageIntegrityRisk: number;
+  averageSimilarityScore: number;
   statusDistribution: StatusCount[];
 };
 

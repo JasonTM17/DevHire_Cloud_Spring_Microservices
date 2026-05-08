@@ -25,6 +25,8 @@ spring:
 
 job-service:
   url: ${JOB_SERVICE_URL:http://localhost:8084}
+assessment-runner-service:
+  url: ${ASSESSMENT_RUNNER_SERVICE_URL:http://localhost:8089}
 devhire:
   outbox:
     publisher:

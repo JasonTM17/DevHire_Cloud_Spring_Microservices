@@ -19,6 +19,8 @@ import type {
   SkillAnalytics
 } from "@/types/domain";
 
+const PREVIEW_NOW = new Date("2026-05-08T02:00:00.000Z");
+
 export const previewJobs: PageResponse<Job> = {
   content: [
     previewJob("preview-java-platform", "Senior Java Platform Engineer", "Build event-driven Spring Boot services for high-volume hiring workflows.", "Ho Chi Minh City / Remote", "Senior", ["Java", "Spring Boot", "Kafka", "PostgreSQL"]),
@@ -236,7 +238,7 @@ export const previewAiProviderStatus: AiProviderStatus = {
   mode: "CLAUDE_READY",
   circuitBreakerState: "CLOSED",
   consecutiveFailures: 0,
-  checkedAt: new Date().toISOString()
+  checkedAt: daysAgo(0)
 };
 
 export const previewCandidateDashboardSummary: CandidateDashboardSummary = {
@@ -358,6 +360,32 @@ export const previewCodeAssessments: CodeAssessment[] = [
     rubricVersion: "devhire-code-rubric-v1",
     submittedCodePreview: "class CandidateSolution { Map<String, Integer> review(List<Event> events) { /* transaction batch maxAttempts publishedAt lastError */ return Map.of(\"published\", events.size()); }...",
     hasSubmittedCode: true,
+    visibleTestCases: [
+      { id: "preview-case-outbox-visible-1", name: "Visible batch boundary", visibility: "VISIBLE", input: "3 pending outbox events", weight: 15 },
+      { id: "preview-case-outbox-visible-2", name: "Visible retry cap", visibility: "VISIBLE", input: "poison event at max attempts", weight: 15 }
+    ],
+    latestRun: {
+      id: "preview-run-outbox",
+      status: "COMPLETED",
+      sandboxStatus: "JUDGE0_COMPATIBLE_LOCAL_SANDBOX",
+      visiblePassed: 2,
+      visibleTotal: 2,
+      hiddenPassed: 2,
+      hiddenTotal: 2,
+      executionTimeMs: 146,
+      memoryKb: 24576,
+      integrityRiskScore: 8.5,
+      similarityScore: 4.2,
+      results: [
+        { caseId: "preview-case-outbox-visible-1", name: "Visible batch boundary", visibility: "VISIBLE", passed: true, output: "matched:transaction|batch", executionTimeMs: 62, memoryKb: 18432 },
+        { caseId: "preview-case-outbox-visible-2", name: "Visible retry cap", visibility: "VISIBLE", passed: true, output: "matched:retry|maxattempts", executionTimeMs: 84, memoryKb: 24576 }
+      ],
+      createdAt: daysAgo(1),
+      completedAt: daysAgo(1)
+    },
+    integrityRiskScore: 8.5,
+    similarityScore: 4.2,
+    sandboxStatus: "JUDGE0_COMPATIBLE_LOCAL_SANDBOX",
     dueAt: daysFromNow(6),
     assignedAt: daysAgo(4),
     submittedAt: daysAgo(1)
@@ -395,6 +423,32 @@ export const previewCodeAssessments: CodeAssessment[] = [
     rubricVersion: "devhire-code-rubric-v1",
     submittedCodePreview: "SELECT status, count(*) AS total FROM job_applications WHERE employer_id = :employerId GROUP BY status ORDER BY status LIMIT 50;",
     hasSubmittedCode: true,
+    visibleTestCases: [
+      { id: "preview-case-sql-visible-1", name: "Visible tenant scope", visibility: "VISIBLE", input: "employer scoped rows", weight: 20 },
+      { id: "preview-case-sql-visible-2", name: "Visible grouped status", visibility: "VISIBLE", input: "status funnel", weight: 20 }
+    ],
+    latestRun: {
+      id: "preview-run-sql",
+      status: "COMPLETED",
+      sandboxStatus: "JUDGE0_COMPATIBLE_LOCAL_SANDBOX",
+      visiblePassed: 2,
+      visibleTotal: 2,
+      hiddenPassed: 0,
+      hiddenTotal: 1,
+      executionTimeMs: 88,
+      memoryKb: 18432,
+      integrityRiskScore: 16.4,
+      similarityScore: 11.8,
+      results: [
+        { caseId: "preview-case-sql-visible-1", name: "Visible tenant scope", visibility: "VISIBLE", passed: true, output: "matched:employer_id", executionTimeMs: 38, memoryKb: 16384 },
+        { caseId: "preview-case-sql-visible-2", name: "Visible grouped status", visibility: "VISIBLE", passed: true, output: "matched:group|status", executionTimeMs: 50, memoryKb: 18432 }
+      ],
+      createdAt: daysAgo(2),
+      completedAt: daysAgo(2)
+    },
+    integrityRiskScore: 16.4,
+    similarityScore: 11.8,
+    sandboxStatus: "JUDGE0_COMPATIBLE_LOCAL_SANDBOX",
     dueAt: daysFromNow(3),
     assignedAt: daysAgo(6),
     submittedAt: daysAgo(2)
@@ -426,6 +480,14 @@ export const previewCodeAssessments: CodeAssessment[] = [
     rubricVersion: "devhire-code-rubric-v1",
     submittedCodePreview: undefined,
     hasSubmittedCode: false,
+    visibleTestCases: [
+      { id: "preview-case-resilience-visible-1", name: "Visible OpenSearch adapter", visibility: "VISIBLE", input: "primary search dependency", weight: 20 },
+      { id: "preview-case-resilience-visible-2", name: "Visible Postgres recovery", visibility: "VISIBLE", input: "dependency outage", weight: 20 }
+    ],
+    latestRun: undefined,
+    integrityRiskScore: 0,
+    similarityScore: 0,
+    sandboxStatus: "JUDGE0_COMPATIBLE_LOCAL_SANDBOX",
     dueAt: daysFromNow(9),
     assignedAt: daysAgo(1),
     submittedAt: undefined
@@ -441,6 +503,10 @@ export const previewCodeAssessmentSummary: CodeAssessmentSummary = {
   failed: 1,
   averageScore: 84.5,
   riskySubmissions: 2,
+  runQueueDepth: 1,
+  sandboxFailureRate: 3.4,
+  averageIntegrityRisk: 12.8,
+  averageSimilarityScore: 9.1,
   statusDistribution: [
     { status: "ASSIGNED", count: 4 },
     { status: "AUTO_REVIEWED", count: 6 },
@@ -578,9 +644,9 @@ function previewJob(id: string, title: string, description: string, location: st
     type: "Full-time",
     skills,
     status: "PUBLISHED",
-    publishedAt: new Date().toISOString(),
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    publishedAt: daysAgo(0),
+    createdAt: daysAgo(0),
+    updatedAt: daysAgo(0)
   };
 }
 
@@ -599,13 +665,13 @@ function previewAudit(action: string, targetType: string, targetId: string): Aud
 }
 
 function daysAgo(days: number) {
-  const value = new Date();
+  const value = new Date(PREVIEW_NOW);
   value.setDate(value.getDate() - days);
   return value.toISOString();
 }
 
 function daysFromNow(days: number) {
-  const value = new Date();
+  const value = new Date(PREVIEW_NOW);
   value.setDate(value.getDate() + days);
   return value.toISOString();
 }

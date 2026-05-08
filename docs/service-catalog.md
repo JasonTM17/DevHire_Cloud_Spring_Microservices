@@ -11,10 +11,11 @@ This catalog is the reviewer-facing inventory for DevHire Cloud services. It exp
 | user-service | 8082 | `devhire_user` | `/users/**` | Candidate and employer profile management |
 | company-service | 8083 | `devhire_company` | `/companies/**`, `/admin/companies/**` | Employer company onboarding and admin approval |
 | job-service | 8084 | `devhire_job` | `/jobs/**`, `/admin/jobs/**`, `/internal/jobs/**` | Job posting lifecycle, OpenSearch search, PostgreSQL fallback, internal job checks |
-| application-service | 8085 | `devhire_application` | `/jobs/{jobId}/applications`, `/applications/**`, `/employer/jobs/**` | Candidate application workflow, duplicate prevention, status history |
+| application-service | 8085 | `devhire_application` | `/jobs/{jobId}/applications`, `/applications/**`, `/employer/jobs/**`, `/candidate/code-assessments/**`, `/employer/code-assessments/**` | Candidate application workflow, duplicate prevention, status history, code assessment domain owner |
 | notification-service | 8086 | `devhire_notification` | `/notifications/**` | Internal notifications, email queue, Mailpit/Gmail SMTP profiles, idempotent event consumers |
 | audit-service | 8087 | `devhire_audit` | `/admin/audit-logs` | Administrative audit log ingestion and filtering |
 | ai-service | 8088 | `devhire_ai` | `/ai/**`, `/admin/ai/**` | Claude Haiku assistant, RAG-style citations, tool traces, provider fallback, AI audit events |
+| assessment-runner-service | 8089 | none | `/internal/assessment-runs` | Judge0-compatible internal adapter for isolated visible/hidden code test execution |
 | frontend | 3001 | none | Next.js pages | Recruiter demo UI for jobs, dashboards, assistant, and operations evidence |
 
 ## Data Boundary Rules
@@ -30,6 +31,7 @@ This catalog is the reviewer-facing inventory for DevHire Cloud services. It exp
 | Consumer | Provider | Purpose | Evidence |
 |---|---|---|---|
 | application-service | job-service | Validate job visibility and employer ownership before apply/status update | `application-service/src/main/java/com/devhire/application/client/JobClient.java`, `job-service/src/main/java/com/devhire/job/controller/InternalJobController.java` |
+| application-service | assessment-runner-service | Run visible/hidden code test cases without exposing hidden payloads to the frontend | `application-service/src/main/java/com/devhire/application/client/AssessmentRunnerClient.java`, `assessment-runner-service/src/main/java/com/devhire/runner/controller/AssessmentRunnerController.java` |
 | job-service | company-service | Verify company is approved before job publication | `job-service/src/main/java/com/devhire/job/client/CompanyClient.java`, `company-service/src/main/java/com/devhire/company/controller/InternalCompanyController.java` |
 | ai-service | job-service | Search and explain job results for assistant tool calls | `ai-service/src/main/java/com/devhire/ai/tool/JobSearchTool.java` |
 | frontend | api-gateway | Product demo and role dashboards | `frontend/src/lib/api.ts`, `frontend/e2e/*.spec.ts` |

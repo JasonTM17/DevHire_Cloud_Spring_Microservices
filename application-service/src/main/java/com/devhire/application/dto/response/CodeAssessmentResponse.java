@@ -31,6 +31,11 @@ public record CodeAssessmentResponse(
         String rubricVersion,
         String submittedCodePreview,
         boolean hasSubmittedCode,
+        List<CodeTestCaseResponse> visibleTestCases,
+        CodeRunResponse latestRun,
+        double integrityRiskScore,
+        double similarityScore,
+        String sandboxStatus,
         Instant dueAt,
         Instant assignedAt,
         Instant submittedAt

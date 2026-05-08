@@ -40,12 +40,12 @@ DevHire Cloud là portfolio production engineering cho một nền tảng tuyể
 | Layer | Implementation |
 |---|---|
 | Edge | Spring Cloud Gateway, JWT validation, CORS, rate limit, centralized error shape |
-| Core services | auth, user, company, job, application, notification, audit, AI |
+| Core services | auth, user, company, job, application, assessment-runner, notification, audit, AI |
 | Data ownership | PostgreSQL database/schema per service, Flyway migrations, no shared JPA entities |
 | Messaging | Kafka events, transactional outbox, idempotent consumers |
 | Search | OpenSearch adapter with PostgreSQL fallback |
 | AI | Claude Haiku assistant with citations, tool traces, safety guardrails, metrics |
-| Code assessment | Deterministic rubric grading for candidate submissions, employer review, admin health metrics |
+| Code assessment | Deterministic rubric grading plus Judge0-compatible internal runner boundary, hidden/visible cases, integrity signals, employer review, admin health metrics |
 | Observability | Actuator, Prometheus, Grafana, Loki, Tempo, OpenTelemetry, domain KPI dashboards |
 | Security | JWT/RBAC, refresh token rotation, Gitleaks, Trivy, CodeQL, SBOM, protected `master` |
 | Delivery | Maven, Docker matrix, GitHub Actions, Helm, raw K8s, Argo CD, Terraform AWS blueprint |
@@ -59,7 +59,7 @@ DevHire Cloud là portfolio production engineering cho một nền tảng tuyể
 | Admin/Ops | `/admin`, `/admin/ai`, code assessment health |
 | Platform | `/assistant`, `/platform/observability`, `/platform/cloud`, `/platform/releases` |
 
-The v0.6 work follows Stitch project `projects/5421325194779586117`. Primary screenshots are checked to avoid raw UUIDs, `UNKNOWN`, loading-only states, smoke labels, offline banners and fallback banners. The stacked v0.6.7 work turns Code Assessment Studio into the flagship product feature: candidate coding workspace, deterministic static scoring, redacted list/detail boundaries, attempt metadata, code hash, rubric versioning, employer review dossier, and admin assessment health. Sandbox execution is intentionally reserved for a later isolated-worker phase.
+The v0.6 work follows Stitch project `projects/5421325194779586117`. Primary screenshots are checked to avoid raw UUIDs, `UNKNOWN`, loading-only states, smoke labels, offline banners and fallback banners. The stacked v0.6.7 work turns Code Interview Studio into the flagship product feature: LeetCode-style prompt/examples/judge-case UX, deterministic rubric scoring, visible runner analysis, hidden server-side scoring, integrity/similarity signals, redacted list/detail boundaries, attempt metadata, code hash, rubric versioning, employer review dossier, and admin assessment health. The v0.7 boundary adds an internal `assessment-runner-service` so application-service remains the domain owner while isolated execution concerns stay behind a Judge0-compatible adapter.
 
 ## Cloud State Matrix
 

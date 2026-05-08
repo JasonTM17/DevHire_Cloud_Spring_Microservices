@@ -1,4 +1,5 @@
 import { StatusPill } from "@/components/StatusPill";
+import { formatCalendarDate } from "@/lib/dateFormat";
 import type { CandidateOffer } from "@/types/domain";
 
 export function OfferCard({ offer }: { offer: CandidateOffer }) {
@@ -20,7 +21,7 @@ export function OfferCard({ offer }: { offer: CandidateOffer }) {
         ))}
       </div>
       <span className="muted">
-        Decision deadline {offer.expiresAt ? new Date(offer.expiresAt).toLocaleDateString() : "to be scheduled"}
+        Decision deadline {offer.expiresAt ? formatCalendarDate(offer.expiresAt) : "to be scheduled"}
       </span>
     </article>
   );

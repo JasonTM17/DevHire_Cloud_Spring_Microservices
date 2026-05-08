@@ -11,6 +11,10 @@ public record CodeAssessmentSummaryResponse(
         long failed,
         double averageScore,
         long riskySubmissions,
+        long runQueueDepth,
+        double sandboxFailureRate,
+        double averageIntegrityRisk,
+        double averageSimilarityScore,
         List<StatusCountResponse> statusDistribution
 ) {
 }

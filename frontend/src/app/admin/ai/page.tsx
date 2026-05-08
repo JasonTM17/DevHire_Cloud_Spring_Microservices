@@ -6,6 +6,7 @@ import { Bot, DatabaseZap, RefreshCw, ShieldCheck } from "lucide-react";
 import { MetricCard } from "@/components/MetricCard";
 import { StatusPill, statusLabel } from "@/components/StatusPill";
 import { api } from "@/lib/api";
+import { formatDateTime } from "@/lib/dateFormat";
 import { previewAiProviderStatus } from "@/lib/previewData";
 import type { AiProviderStatus } from "@/types/domain";
 
@@ -79,7 +80,7 @@ export default function AdminAiPage() {
           <div className="table-row">
             <span>
               <strong>Last verification</strong>
-              <small>{new Date(provider.checkedAt).toLocaleString()}</small>
+              <small>{formatDateTime(provider.checkedAt)}</small>
             </span>
             <StatusPill value={provider.circuitBreakerState} />
           </div>

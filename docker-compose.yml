@@ -247,6 +247,7 @@ services:
       NOTIFICATION_SERVICE_URL: http://notification-service:8086
       AUDIT_SERVICE_URL: http://audit-service:8087
       AI_SERVICE_URL: http://ai-service:8088
+      ASSESSMENT_RUNNER_SERVICE_URL: http://assessment-runner-service:8089
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:3001,http://localhost:${FRONTEND_HOST_PORT:-3001}}
       OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://otel-collector:4318}
     ports:
@@ -409,9 +410,13 @@ services:
       <<: *service-env
       SERVICE_DATABASE: devhire_application
       JOB_SERVICE_URL: http://job-service:8084
+      ASSESSMENT_RUNNER_SERVICE_URL: http://assessment-runner-service:8089
     ports:
       - "${APPLICATION_HOST_PORT:-8085}:8085"
-    depends_on: *service-depends
+    depends_on:
+      <<: *service-depends
+      assessment-runner-service:
+        condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:8085/actuator/health/readiness | grep UP"]
       interval: 15s
@@ -522,6 +527,30 @@ services:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:8088/actuator/health/readiness | grep UP"]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+    networks:
+      - devhire
+
+  assessment-runner-service:
+    build:
+      context: .
+      dockerfile: assessment-runner-service/Dockerfile
+      args:
+        <<: *image-label-args
+        SERVICE_NAME: assessment-runner-service
+    image: devhire/assessment-runner-service:local
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-docker}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://otel-collector:4318}
+      DEVHIRE_RUNNER_NETWORK_DISABLED: "true"
+      DEVHIRE_RUNNER_MAX_CPU_MILLIS: "2000"
+      DEVHIRE_RUNNER_MAX_MEMORY_KB: "131072"
+    ports:
+      - "${ASSESSMENT_RUNNER_HOST_PORT:-8089}:8089"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8089/actuator/health/readiness | grep UP"]
       interval: 15s
       timeout: 5s
       retries: 20

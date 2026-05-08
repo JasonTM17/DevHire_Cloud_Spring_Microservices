@@ -29,6 +29,7 @@
         <module>notification-service</module>
         <module>audit-service</module>
         <module>ai-service</module>
+        <module>assessment-runner-service</module>
     </modules>
 
     <properties>

@@ -1,9 +1,11 @@
 package com.devhire.application.controller;
 
 import com.devhire.application.dto.request.CodeReviewRequest;
+import com.devhire.application.dto.request.CodeRunRequest;
 import com.devhire.application.dto.request.CodeSubmissionRequest;
 import com.devhire.application.dto.response.CodeAssessmentResponse;
 import com.devhire.application.dto.response.CodeAssessmentSummaryResponse;
+import com.devhire.application.dto.response.CodeRunResponse;
 import com.devhire.application.service.CodeAssessmentService;
 import com.devhire.common.ApiResponse;
 import com.devhire.common.constants.AppHeaders;
@@ -52,6 +54,24 @@ public class CodeAssessmentController {
                                                       @PathVariable UUID id,
                                                       @Valid @RequestBody CodeSubmissionRequest request) {
         return ApiResponse.ok(codeAssessmentService.submit(new AuthenticatedUser(userId, email, role), id, request));
+    }
+
+    @PostMapping("/candidate/code-assessments/{id}/runs")
+    public ApiResponse<CodeRunResponse> runVisibleCases(@RequestHeader(AppHeaders.USER_ID) UUID userId,
+                                                        @RequestHeader(AppHeaders.USER_EMAIL) String email,
+                                                        @RequestHeader(AppHeaders.USER_ROLE) UserRole role,
+                                                        @PathVariable UUID id,
+                                                        @Valid @RequestBody CodeRunRequest request) {
+        return ApiResponse.ok(codeAssessmentService.runVisibleCases(new AuthenticatedUser(userId, email, role), id, request));
+    }
+
+    @GetMapping("/candidate/code-assessments/{id}/runs/{runId}")
+    public ApiResponse<CodeRunResponse> runStatus(@RequestHeader(AppHeaders.USER_ID) UUID userId,
+                                                  @RequestHeader(AppHeaders.USER_EMAIL) String email,
+                                                  @RequestHeader(AppHeaders.USER_ROLE) UserRole role,
+                                                  @PathVariable UUID id,
+                                                  @PathVariable UUID runId) {
+        return ApiResponse.ok(codeAssessmentService.runStatus(new AuthenticatedUser(userId, email, role), id, runId));
     }
 
     @GetMapping("/employer/code-assessments")

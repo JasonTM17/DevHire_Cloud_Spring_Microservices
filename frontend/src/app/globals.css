@@ -1260,7 +1260,10 @@ textarea {
 .assessment-list,
 .assessment-review-grid,
 .rubric-grid,
-.evidence-grid {
+.evidence-grid,
+.interview-lab-grid,
+.example-grid,
+.judge-results {
   display: grid;
   gap: 12px;
 }
@@ -1316,6 +1319,93 @@ textarea {
   display: grid;
   gap: 6px;
   padding: 14px;
+}
+
+.interview-lab-grid {
+  grid-template-columns: minmax(0, 1.15fr) minmax(240px, 0.75fr);
+}
+
+.problem-card p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.judge-card span,
+.example-card span {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.example-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.example-card {
+  display: grid;
+  gap: 7px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #f8fbff;
+}
+
+.example-card code {
+  overflow-wrap: anywhere;
+  border-radius: 6px;
+  background: #e8f0ff;
+  padding: 7px 8px;
+  color: #1d4ed8;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 12px;
+}
+
+.editor-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 10px;
+}
+
+.editor-toolbar label {
+  min-width: min(240px, 100%);
+  flex: 1 1 220px;
+}
+
+.judge-results {
+  margin-top: 12px;
+}
+
+.judge-case {
+  display: grid;
+  grid-template-columns: 12px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-muted);
+}
+
+.judge-case small {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.case-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--warning);
+  box-shadow: 0 0 0 4px var(--warning-soft);
+}
+
+.case-dot.pass {
+  background: var(--success);
+  box-shadow: 0 0 0 4px var(--success-soft);
 }
 
 .constraint-box span,
@@ -1391,6 +1481,45 @@ textarea {
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
+.panel,
+.metric,
+.table-row,
+.constraint-box,
+.review-summary,
+.rubric-card,
+.assessment-card,
+.review-card,
+.audit-item,
+.insight-line,
+.pipeline-step,
+.example-card,
+.judge-case {
+  min-width: 0;
+}
+
+.table-row > *,
+.company-line > *,
+.status-line > *,
+.section-title > *,
+.insight-line > *,
+.judge-case > * {
+  min-width: 0;
+}
+
+.table-row strong,
+.table-row small,
+.company-line strong,
+.company-line span,
+.audit-item strong,
+.audit-item span,
+.constraint-box span,
+.review-card strong,
+.review-card small,
+.judge-case strong,
+.judge-case small {
+  overflow-wrap: anywhere;
+}
+
 .spin {
   animation: spin 0.9s linear infinite;
 }
@@ -1425,7 +1554,9 @@ textarea {
 
   .rubric-grid,
   .assessment-review-grid,
-  .evidence-grid {
+  .evidence-grid,
+  .interview-lab-grid,
+  .example-grid {
     grid-template-columns: 1fr;
   }
 }
@@ -1552,5 +1683,23 @@ textarea {
 
   .assessment-card {
     grid-template-columns: 1fr;
+  }
+
+  .compact-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .metric,
+  .button {
+    width: 100%;
+  }
+
+  .judge-case {
+    grid-template-columns: 12px minmax(0, 1fr);
+  }
+
+  .judge-case .badge {
+    grid-column: 2;
+    justify-self: start;
   }
 }

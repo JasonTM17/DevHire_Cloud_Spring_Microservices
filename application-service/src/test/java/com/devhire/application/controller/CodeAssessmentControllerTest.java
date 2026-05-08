@@ -1,9 +1,13 @@
 package com.devhire.application.controller;
 
 import com.devhire.application.dto.request.CodeReviewRequest;
+import com.devhire.application.dto.request.CodeRunRequest;
 import com.devhire.application.dto.request.CodeSubmissionRequest;
 import com.devhire.application.dto.response.CodeAssessmentResponse;
 import com.devhire.application.dto.response.CodeAssessmentSummaryResponse;
+import com.devhire.application.dto.response.CodeRunCaseResultResponse;
+import com.devhire.application.dto.response.CodeRunResponse;
+import com.devhire.application.dto.response.CodeTestCaseResponse;
 import com.devhire.application.dto.response.RubricScoreResponse;
 import com.devhire.application.dto.response.StatusCountResponse;
 import com.devhire.application.service.CodeAssessmentService;
@@ -41,8 +45,11 @@ class CodeAssessmentControllerTest {
     @Test
     void candidateCanListAndSubmitCodeAssessment() throws Exception {
         UUID assignmentId = UUID.randomUUID();
+        UUID runId = UUID.randomUUID();
         when(service.candidateAssessments(any())).thenReturn(List.of(response(assignmentId, "AUTO_REVIEWED")));
         when(service.submit(any(), eq(assignmentId), any())).thenReturn(response(assignmentId, "AUTO_REVIEWED"));
+        when(service.runVisibleCases(any(), eq(assignmentId), any())).thenReturn(run(runId));
+        when(service.runStatus(any(), eq(assignmentId), eq(runId))).thenReturn(run(runId));
 
         mockMvc.perform(candidateGet("/candidate/code-assessments"))
                 .andExpect(status().isOk())
@@ -51,7 +58,26 @@ class CodeAssessmentControllerTest {
                 .andExpect(jsonPath("$.data[0].attemptNumber", is(1)))
                 .andExpect(jsonPath("$.data[0].graderVersion", is("static-rubric-v1")))
                 .andExpect(jsonPath("$.data[0].rubricVersion", is("devhire-code-rubric-v1")))
+                .andExpect(jsonPath("$.data[0].visibleTestCases[0].visibility", is("VISIBLE")))
+                .andExpect(jsonPath("$.data[0].latestRun.sandboxStatus", is("JUDGE0_COMPATIBLE_LOCAL_SANDBOX")))
                 .andExpect(jsonPath("$.data[0].rubric[0].category", is("Correctness and completeness")));
+
+        mockMvc.perform(post("/candidate/code-assessments/{id}/runs", assignmentId)
+                        .headers(candidateHeaders())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new CodeRunRequest(
+                                "Java",
+                                "class Solution { @Test void givenPending_whenReviewed_thenPublishesBatch(){ assert true; } }",
+                                List.of(),
+                                "fingerprint-hash",
+                                120))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.visiblePassed", is(1)))
+                .andExpect(jsonPath("$.data.hiddenTotal", is(0)));
+
+        mockMvc.perform(candidateGet("/candidate/code-assessments/%s/runs/%s".formatted(assignmentId, runId)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.id", is(runId.toString())));
 
         mockMvc.perform(post("/candidate/code-assessments/{id}/submissions", assignmentId)
                         .headers(candidateHeaders())
@@ -70,6 +96,7 @@ class CodeAssessmentControllerTest {
         when(service.review(any(), eq(assignmentId), any())).thenReturn(response(assignmentId, "PASSED"));
         when(service.adminSummary(any())).thenReturn(new CodeAssessmentSummaryResponse(
                 18, 14, 6, 4, 3, 1, 84.5, 2,
+                1, 3.4, 12.8, 9.1,
                 List.of(new StatusCountResponse("AUTO_REVIEWED", 6))));
 
         mockMvc.perform(patch("/employer/code-assessments/{id}/review", assignmentId)
@@ -116,9 +143,41 @@ class CodeAssessmentControllerTest {
                 "devhire-code-rubric-v1",
                 "class CandidateSolution { assert true; }",
                 true,
+                List.of(new CodeTestCaseResponse(UUID.randomUUID(), "Visible retry cap", "VISIBLE", "poison event", 15)),
+                run(UUID.randomUUID()),
+                12.8,
+                9.1,
+                "JUDGE0_COMPATIBLE_LOCAL_SANDBOX",
                 Instant.now().plusSeconds(1_209_600),
                 Instant.parse("2026-05-01T00:00:00Z"),
                 Instant.parse("2026-05-06T00:00:00Z"));
+    }
+
+    private static CodeRunResponse run(UUID id) {
+        return new CodeRunResponse(
+                id,
+                "COMPLETED",
+                "JUDGE0_COMPATIBLE_LOCAL_SANDBOX",
+                1,
+                1,
+                0,
+                0,
+                52,
+                18_432,
+                null,
+                12.8,
+                9.1,
+                List.of(new CodeRunCaseResultResponse(
+                        UUID.randomUUID(),
+                        "Visible retry cap",
+                        "VISIBLE",
+                        true,
+                        "matched:retry",
+                        null,
+                        52,
+                        18_432)),
+                Instant.parse("2026-05-06T00:01:00Z"),
+                Instant.parse("2026-05-06T00:01:01Z"));
     }
 
     private static org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder candidateGet(String path) {

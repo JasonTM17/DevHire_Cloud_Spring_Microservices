@@ -3,6 +3,8 @@ package com.devhire.application.service;
 import com.devhire.application.dto.request.CodeReviewRequest;
 import com.devhire.application.dto.request.CodeSubmissionRequest;
 import com.devhire.application.dto.response.CodeAssessmentResponse;
+import com.devhire.application.dto.response.CodeRunResponse;
+import com.devhire.application.dto.response.CodeTestCaseResponse;
 import com.devhire.application.dto.response.RubricScoreResponse;
 import com.devhire.application.dto.response.StatusCountResponse;
 import com.devhire.application.event.ApplicationEventPublisher;
@@ -167,6 +169,10 @@ class CodeAssessmentServiceTest {
         assertThat(summary.failed()).isEqualTo(1);
         assertThat(summary.averageScore()).isEqualTo(82.3);
         assertThat(summary.riskySubmissions()).isEqualTo(2);
+        assertThat(summary.runQueueDepth()).isEqualTo(0);
+        assertThat(summary.sandboxFailureRate()).isEqualTo(4.2);
+        assertThat(summary.averageIntegrityRisk()).isEqualTo(12.6);
+        assertThat(summary.averageSimilarityScore()).isEqualTo(7.7);
         assertThat(summary.statusDistribution()).extracting(StatusCountResponse::status)
                 .containsExactly("ASSIGNED", "AUTO_REVIEWED", "EMPLOYER_REVIEWED", "FAILED", "PASSED");
     }
@@ -229,6 +235,26 @@ class CodeAssessmentServiceTest {
                 "devhire-code-rubric-v1",
                 submittedCode,
                 submittedAt != null,
+                List.of(new CodeTestCaseResponse(UUID.randomUUID(), "Visible retry cap", "VISIBLE", "poison event", 15)),
+                submittedAt == null ? null : new CodeRunResponse(
+                        UUID.randomUUID(),
+                        "COMPLETED",
+                        "JUDGE0_COMPATIBLE_LOCAL_SANDBOX",
+                        2,
+                        2,
+                        1,
+                        1,
+                        92,
+                        20_480,
+                        null,
+                        12.6,
+                        7.7,
+                        List.of(),
+                        Instant.parse("2026-05-06T09:59:00Z"),
+                        Instant.parse("2026-05-06T10:00:00Z")),
+                submittedAt == null ? 0 : 12.6,
+                submittedAt == null ? 0 : 7.7,
+                "JUDGE0_COMPATIBLE_LOCAL_SANDBOX",
                 dueAt,
                 Instant.parse("2026-05-01T00:00:00Z"),
                 submittedAt);
@@ -263,6 +289,9 @@ class CodeAssessmentServiceTest {
             if (sql.contains("FOR UPDATE")) {
                 return requiredType.cast(1);
             }
+            if (sql.stripLeading().startsWith("SELECT challenge_id")) {
+                return requiredType.cast(UUID.fromString("52000000-0000-0000-0001-000000000001"));
+            }
             return scalar(sql, requiredType);
         }
 
@@ -280,6 +309,15 @@ class CodeAssessmentServiceTest {
             }
             if (sql.contains("avg(final_score)")) {
                 return requiredType.cast(82.34);
+            }
+            if (sql.contains("avg(CASE WHEN status IN")) {
+                return requiredType.cast(4.24);
+            }
+            if (sql.contains("avg(integrity_risk_score)")) {
+                return requiredType.cast(12.55);
+            }
+            if (sql.contains("avg(similarity_score)")) {
+                return requiredType.cast(7.72);
             }
             return requiredType.cast(0L);
         }
@@ -299,6 +337,14 @@ class CodeAssessmentServiceTest {
                         row(rowMapper, "FAILED", 1),
                         row(rowMapper, "PASSED", 1));
             }
+            if (sql.contains("FROM code_challenge_test_cases")) {
+                return List.of(
+                        testCase(rowMapper, "Visible retry cap", "VISIBLE", "retry,maxAttempts,lastError", 15),
+                        testCase(rowMapper, "Hidden assertion evidence", "HIDDEN", "@Test,assert", 20));
+            }
+            if (sql.contains("FROM code_assessment_run_results")) {
+                return List.of();
+            }
             if (!assessments.isEmpty()) {
                 var rows = new ArrayList<T>();
                 while (!assessments.isEmpty()) {
@@ -311,7 +357,7 @@ class CodeAssessmentServiceTest {
 
         @Override
         public int update(String sql, Object... args) {
-            updates.add(new RecordedUpdate(sql, List.of(args)));
+            updates.add(new RecordedUpdate(sql, java.util.Arrays.asList(args)));
             return 1;
         }
 
@@ -320,6 +366,21 @@ class CodeAssessmentServiceTest {
                 ResultSet rs = mock(ResultSet.class);
                 when(rs.getString("status")).thenReturn(status);
                 when(rs.getLong("total")).thenReturn(count);
+                return mapper.mapRow(rs, 0);
+            } catch (Exception ex) {
+                throw new AssertionError(ex);
+            }
+        }
+
+        private static <T> T testCase(RowMapper<T> mapper, String name, String visibility, String expected, int weight) {
+            try {
+                ResultSet rs = mock(ResultSet.class);
+                when(rs.getObject("id", UUID.class)).thenReturn(UUID.randomUUID());
+                when(rs.getString("name")).thenReturn(name);
+                when(rs.getString("visibility")).thenReturn(visibility);
+                when(rs.getString("input_text")).thenReturn("sample input");
+                when(rs.getString("expected_output")).thenReturn(expected);
+                when(rs.getInt("weight")).thenReturn(weight);
                 return mapper.mapRow(rs, 0);
             } catch (Exception ex) {
                 throw new AssertionError(ex);

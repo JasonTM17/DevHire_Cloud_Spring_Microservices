@@ -53,7 +53,7 @@ DevHire Cloud is a Java 21 / Spring Boot 3.5 production engineering portfolio fo
 | Admin/Ops | `/admin`, `/admin/ai`, code assessment health |
 | Platform | `/assistant`, `/platform/observability`, `/platform/cloud`, `/platform/releases` |
 
-The v0.6 implementation follows Stitch project `projects/5421325194779586117`. Primary screenshots are checked to avoid raw UUIDs, `UNKNOWN`, loading-only states, smoke labels, offline banners, and fallback banners. The stacked v0.6.7 work turns Code Assessment Studio into the flagship product feature: candidate coding workspace, deterministic static scoring, redacted list/detail boundaries, attempt metadata, code hash, rubric versioning, employer review dossier, and admin assessment health. Sandbox execution is reserved for a later isolated-worker phase.
+The v0.6 implementation follows Stitch project `projects/5421325194779586117`. Primary screenshots are checked to avoid raw UUIDs, `UNKNOWN`, loading-only states, smoke labels, offline banners, and fallback banners. The stacked v0.6.7 work turns Code Assessment Studio into the flagship product feature: candidate coding workspace, visible runner cases, hidden server-side scoring, deterministic rubric scoring, integrity/similarity posture, redacted list/detail boundaries, attempt metadata, code hash, rubric versioning, employer review dossier, and admin assessment health. The v0.7 boundary adds an internal `assessment-runner-service` with a Judge0-compatible adapter while `application-service` remains the domain owner.
 
 ## Cloud State Matrix
 

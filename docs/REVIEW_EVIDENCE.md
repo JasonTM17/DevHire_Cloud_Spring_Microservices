@@ -32,7 +32,7 @@ See [status.md](status.md) for the single source of truth.
 | Product workflow | Jobs page has keyword, skill, location, level, minimum salary, sorting, clear-filter, result total, and pagination controls. |
 | Rich demo data | `portfolio-verify.ps1 -Docs` now runs `demo-data-summary.ps1 -Aggregates -Json` so the 1,108-row deterministic dataset and status/action distributions are part of reviewer verification. |
 | Frontend preview | [frontend-preview-deploy.md](frontend-preview-deploy.md) documents Vercel as frontend-only preview; backend remains Spring Cloud Gateway plus Java services. |
-| Code assessment flagship | [code-assessment-reviewer-proof.md](code-assessment-reviewer-proof.md) documents the 5-minute flow: candidate submits code, deterministic score appears, employer reviews, and admin sees assessment health. |
+| Code assessment flagship | [code-assessment-reviewer-proof.md](code-assessment-reviewer-proof.md) documents the 5-minute flow: candidate runs visible cases, submits code, hidden tests score server-side, integrity/similarity risk appears, employer reviews, and admin sees runner health. |
 | PR stack governance | [pr-stack-v0.6.md](pr-stack-v0.6.md) and `scripts/pr-stack-status.ps1` show the exact review/merge order for the active Stitch/code-assessment stack. |
 | Gateway observability | `api-gateway` emits `devhire_gateway_requests_total`, `devhire_gateway_request_latency_seconds`, and `devhire_gateway_rate_limited_total` by route/status. |
 | Runtime observability smoke | `runtime-observability-smoke.ps1` now checks Gateway custom metrics together with recruitment, notification, audit, search, AI, and outbox metrics. |

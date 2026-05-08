@@ -1,3 +1,8 @@
+UPDATE code_submissions
+SET reviewed_at = submitted_at
+WHERE reviewed_at IS NOT NULL
+  AND reviewed_at < submitted_at;
+
 ALTER TABLE code_challenges
     ADD CONSTRAINT chk_code_challenge_language_supported
         CHECK (language IN ('Java', 'SQL', 'TypeScript'));

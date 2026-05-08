@@ -390,6 +390,18 @@ export default function EmployerPage() {
                   <span className={reviewable ? "badge live" : "badge"}>
                     {reviewable ? "Ready for employer decision" : item.submittedAt ? "Decision recorded" : "Waiting for candidate submission"}
                   </span>
+                  {item.latestRun ? (
+                    <span className="badge">Visible {item.latestRun.visiblePassed}/{item.latestRun.visibleTotal}</span>
+                  ) : null}
+                  {item.latestRun ? (
+                    <span className="badge">Hidden {item.latestRun.hiddenPassed}/{item.latestRun.hiddenTotal}</span>
+                  ) : null}
+                  <span className={(item.integrityRiskScore ?? 0) >= 55 ? "badge warn" : "badge live"}>
+                    Integrity {Math.round((item.integrityRiskScore ?? 0) * 10) / 10}%
+                  </span>
+                  <span className={(item.similarityScore ?? 0) >= 85 ? "badge warn" : "badge"}>
+                    Similarity {Math.round((item.similarityScore ?? 0) * 10) / 10}%
+                  </span>
                   {item.codeHash ? <span className="badge">Hash {item.codeHash.slice(0, 10)}</span> : null}
                 </div>
                 <div className="button-row">
@@ -441,6 +453,9 @@ export default function EmployerPage() {
                 <strong>Review safety</strong>
                 <span>{selectedReview.graderVersion ?? "static-rubric-v1"}</span>
                 <span>{selectedReview.rubricVersion ?? "devhire-code-rubric-v1"}</span>
+                <span>{selectedReview.sandboxStatus ?? selectedReview.latestRun?.sandboxStatus ?? "JUDGE0_COMPATIBLE_LOCAL_SANDBOX"}</span>
+                <span>Visible {selectedReview.latestRun?.visiblePassed ?? 0}/{selectedReview.latestRun?.visibleTotal ?? selectedReview.visibleTestCases?.length ?? 0} / hidden {selectedReview.latestRun?.hiddenPassed ?? 0}/{selectedReview.latestRun?.hiddenTotal ?? 0}</span>
+                <span>Integrity {Math.round((selectedReview.integrityRiskScore ?? 0) * 10) / 10}% / similarity {Math.round((selectedReview.similarityScore ?? 0) * 10) / 10}%</span>
                 {selectedReview.codeHash ? <span>Hash {selectedReview.codeHash.slice(0, 12)}</span> : <span>No submitted hash yet</span>}
               </div>
             </div>

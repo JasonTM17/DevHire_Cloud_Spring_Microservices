@@ -6,6 +6,7 @@ import { Bot, MessageSquareText, ShieldCheck } from "lucide-react";
 import { MetricCard } from "@/components/MetricCard";
 import { StatusPill } from "@/components/StatusPill";
 import { api } from "@/lib/api";
+import { formatCalendarDate } from "@/lib/dateFormat";
 import { previewInterviewPrep } from "@/lib/previewData";
 import type { InterviewPrep } from "@/types/domain";
 
@@ -44,7 +45,7 @@ export default function InterviewPrepPage() {
               <StatusPill value={item.fallback ? "SAFETY_BACKUP" : "CLAUDE"} />
             </div>
             <p>{item.focusAreas.join(" / ")}</p>
-            <span className="muted">Last practiced {new Date(item.lastMessageAt).toLocaleDateString()}</span>
+            <span className="muted">Last practiced {formatCalendarDate(item.lastMessageAt)}</span>
           </article>
         ))}
       </div>
