@@ -103,6 +103,7 @@ button {
 }
 
 .nav-list,
+.nav-group,
 .rail-health,
 .sidebar-footer,
 .page-stack,
@@ -135,6 +136,20 @@ button {
   padding: 0 12px;
   color: #c9d7e8;
   font-size: 14px;
+}
+
+.nav-group {
+  gap: 6px;
+}
+
+.nav-group-label {
+  margin: 8px 0 2px;
+  padding: 0 12px;
+  color: #7f92ad;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .nav-item.active,
@@ -982,6 +997,18 @@ textarea {
 
 .dashboard-grid .panel {
   min-height: 156px;
+}
+
+.action-panel {
+  display: grid;
+  gap: 6px;
+  transition: border-color 120ms ease, transform 120ms ease, box-shadow 120ms ease;
+}
+
+.action-panel:hover {
+  border-color: var(--line-strong);
+  box-shadow: 0 12px 24px rgba(11, 18, 32, 0.08);
+  transform: translateY(-2px);
 }
 
 .assistant-hero {

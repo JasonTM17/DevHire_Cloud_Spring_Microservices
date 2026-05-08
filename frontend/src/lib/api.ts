@@ -6,10 +6,20 @@ import type {
   AiReindexResponse,
   AuditLog,
   AuthResponse,
+  CandidateApplicationsSummary,
+  CandidateAssessment,
+  CandidateDashboardSummary,
+  CandidateOffer,
+  CandidateRoadmap,
   Company,
+  EmployerPipelineSummary,
+  InterviewPrep,
   Job,
   Notification,
+  OperationsSummary,
   PageResponse,
+  SkillAnalytics,
+  UserProfile,
   UserRole
 } from "@/types/domain";
 
@@ -90,9 +100,19 @@ export const api = {
       body: JSON.stringify({ cvUrl, coverLetter })
     }),
   myApplications: () => request<PageResponse<Application>>("/api/applications/me"),
+  candidateDashboardSummary: () => request<CandidateDashboardSummary>("/api/candidate/dashboard/summary"),
+  candidateApplicationsSummary: () => request<CandidateApplicationsSummary>("/api/candidate/applications/summary"),
+  candidateOffers: () => request<CandidateOffer[]>("/api/candidate/offers"),
+  candidateAssessments: () => request<CandidateAssessment[]>("/api/candidate/assessments"),
+  candidateRoadmap: () => request<CandidateRoadmap>("/api/candidate/roadmap"),
+  candidateInterviewPrep: () => request<InterviewPrep[]>("/api/candidate/interview-prep"),
+  candidateSkillAnalytics: () => request<SkillAnalytics>("/api/candidate/skill-analytics"),
   notifications: () => request<PageResponse<Notification>>("/api/notifications"),
   readAllNotifications: () => request<Notification[]>("/api/notifications/read-all", { method: "PATCH" }),
   companies: () => request<PageResponse<Company>>("/api/companies"),
+  adminCompanies: (status = "PENDING") => request<PageResponse<Company>>(`/api/companies?status=${encodeURIComponent(status)}`),
+  employerCompanies: () => request<PageResponse<Company>>("/api/employer/companies"),
+  companyBySlug: (slug: string) => request<Company>(`/api/companies/slug/${encodeURIComponent(slug)}`),
   createCompany: (payload: CompanyPayload) =>
     request<Company>("/api/companies", { method: "POST", body: JSON.stringify(payload) }),
   approveCompany: (id: string) => request<Company>(`/api/admin/companies/${id}/approve`, { method: "PATCH" }),
@@ -104,15 +124,19 @@ export const api = {
   createJob: (payload: JobPayload) =>
     request<Job>("/api/jobs", { method: "POST", body: JSON.stringify(payload) }),
   submitJobReview: (id: string) => request<Job>(`/api/jobs/${id}/submit-review`, { method: "PATCH" }),
+  adminJobs: (status = "PENDING_REVIEW") => request<PageResponse<Job>>(`/api/admin/jobs?status=${encodeURIComponent(status)}`),
   approveJob: (id: string) => request<Job>(`/api/admin/jobs/${id}/approve`, { method: "PATCH" }),
   applicationsForJob: (jobId: string) =>
     request<PageResponse<Application>>(`/api/employer/jobs/${jobId}/applications`),
+  employerPipelineSummary: () => request<EmployerPipelineSummary>("/api/employer/pipeline/summary"),
+  userProfileMe: () => request<UserProfile>("/api/users/me"),
   updateApplicationStatus: (id: string, status: string) =>
     request<Application>(`/api/applications/${id}/status`, {
       method: "PATCH",
       body: JSON.stringify({ status })
     }),
   auditLogs: () => request<PageResponse<AuditLog>>("/api/admin/audit-logs"),
+  operationsSummary: () => request<OperationsSummary>("/api/admin/operations/summary"),
   aiProviderStatus: () => request<AiProviderStatus>("/api/admin/ai/provider/status"),
   reindexAiKnowledge: () =>
     request<AiReindexResponse>("/api/admin/ai/knowledge/reindex", { method: "POST" }),

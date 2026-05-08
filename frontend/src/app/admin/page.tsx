@@ -8,13 +8,14 @@ import { MetricCard } from "@/components/MetricCard";
 import { StatusPill } from "@/components/StatusPill";
 import { api } from "@/lib/api";
 import { brandForCompany } from "@/lib/demoCompanies";
-import { previewAiProviderStatus, previewAuditLogs, previewCompanies, previewJobs } from "@/lib/previewData";
-import type { AiProviderStatus, AuditLog, Company, Job, PageResponse } from "@/types/domain";
+import { previewAiProviderStatus, previewAuditLogs, previewCompanies, previewJobs, previewOperationsSummary } from "@/lib/previewData";
+import type { AiProviderStatus, AuditLog, Company, Job, OperationsSummary, PageResponse } from "@/types/domain";
 
 export default function AdminPage() {
   const [companies, setCompanies] = useState<PageResponse<Company>>(previewCompanies);
   const [audit, setAudit] = useState<PageResponse<AuditLog>>(previewAuditLogs);
   const [aiProvider, setAiProvider] = useState<AiProviderStatus>(previewAiProviderStatus);
+  const [operationsSummary, setOperationsSummary] = useState<OperationsSummary>(previewOperationsSummary);
   const [reviewJobs, setReviewJobs] = useState<PageResponse<Job>>(previewJobs);
   const [selectedJobId, setSelectedJobId] = useState(previewJobs.content[0]?.id ?? "");
   const [message, setMessage] = useState("");
@@ -23,12 +24,12 @@ export default function AdminPage() {
 
   function load() {
     setLoading(true);
-    const jobParams = new URLSearchParams({ page: "0", size: "12", sort: "publishedAt,desc" });
-    Promise.all([api.companies(), api.auditLogs(), api.aiProviderStatus(), api.jobs(jobParams)])
-      .then(([companyPage, auditPage, providerStatus, jobPage]) => {
+    Promise.all([api.adminCompanies("PENDING"), api.auditLogs(), api.aiProviderStatus(), api.adminJobs("PENDING_REVIEW"), api.operationsSummary()])
+      .then(([companyPage, auditPage, providerStatus, jobPage, ops]) => {
         setCompanies(companyPage);
         setAudit(auditPage);
         setAiProvider(providerStatus);
+        setOperationsSummary(ops);
         setReviewJobs(jobPage.content.length ? jobPage : previewJobs);
         setSelectedJobId((current) => current || jobPage.content[0]?.id || previewJobs.content[0]?.id || "");
         setMessage("");
@@ -37,6 +38,7 @@ export default function AdminPage() {
         setCompanies(previewCompanies);
         setAudit(previewAuditLogs);
         setAiProvider(previewAiProviderStatus);
+        setOperationsSummary(previewOperationsSummary);
         setReviewJobs(previewJobs);
         setSelectedJobId(previewJobs.content[0]?.id ?? "");
         setMessage(previewDashboardMessage(ex));
@@ -98,9 +100,9 @@ export default function AdminPage() {
       </div>
       <div className="metrics-row">
         <MetricCard icon={Building2} label="Companies" value={companies?.totalElements ?? 0} helper="Review queue" />
-        <MetricCard icon={Activity} label="Audit events" value={audit?.totalElements ?? 0} helper="Kafka ingested" />
+        <MetricCard icon={Activity} label="Audit events" value={operationsSummary.auditEvents} helper="Kafka ingested" />
         <MetricCard icon={ShieldCheck} label="Pending" value={companies?.content.filter((item) => item.status === "PENDING").length ?? 0} helper="Needs admin action" />
-        <MetricCard icon={Bot} label="AI mode" value={aiProvider?.mode ?? "REVIEWER_SAFE"} helper={aiProvider?.apiKeyConfigured ? "Claude API" : "Reviewer-safe preview"} />
+        <MetricCard icon={Bot} label="AI mode" value={displayProviderMode(aiProvider?.mode ?? "REVIEWER_SAFE")} helper={aiProvider?.apiKeyConfigured ? "Claude API" : "Reviewer-safe preview"} />
       </div>
       {message && positiveMessage ? <p className="success">{message}</p> : null}
       {message && !positiveMessage ? <DemoModeNotice message={message} /> : null}
@@ -111,7 +113,7 @@ export default function AdminPage() {
             <h2>Company reviews</h2>
           </div>
           <div className="table-list">
-            {loading && companies.content.length === 0 ? <div className="empty-state compact">Loading admin review queue...</div> : null}
+            {loading && companies.content.length === 0 ? <div className="empty-state compact">Syncing admin review queue...</div> : null}
             {companies.content.length === 0 ? (
               <div className="empty-state compact">No companies waiting for review.</div>
             ) : null}
@@ -164,7 +166,7 @@ export default function AdminPage() {
             ))}
           </div>
           <div className="stack">
-            {loading && audit.content.length === 0 ? <div className="empty-state compact">Loading audit stream...</div> : null}
+            {loading && audit.content.length === 0 ? <div className="empty-state compact">Syncing audit stream...</div> : null}
             {audit.content.length === 0 ? <div className="empty-state compact">No audit events yet.</div> : null}
             {audit.content.slice(0, 12).map((item) => (
               <div className="audit-item" key={item.id}>
@@ -241,4 +243,10 @@ function countBy<T>(items: T[], selector: (item: T) => string) {
     acc[key] = (acc[key] ?? 0) + 1;
     return acc;
   }, {});
+}
+
+function displayProviderMode(mode: string) {
+  return mode
+    .replace("DEMO_FALLBACK", "REVIEWER_SAFE")
+    .replace("CIRCUIT_OPEN_FALLBACK", "CIRCUIT_OPEN_SAFE_MODE");
 }

@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -15,6 +16,9 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.math.BigDecimal;
 import java.util.UUID;
+
+import com.devhire.job.dto.request.JobSearchCriteria;
+import com.devhire.job.search.PostgresJobSearchAdapter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -83,5 +87,44 @@ class JobRepositoryIT {
 
         assertThatThrownBy(() -> jobRepository.saveAndFlush(job))
                 .isInstanceOf(DataIntegrityViolationException.class);
+    }
+
+    @Test
+    void postgresSearchFiltersPublishedJobsByCompanyAndType() {
+        UUID targetCompanyId = UUID.randomUUID();
+        UUID otherCompanyId = UUID.randomUUID();
+        Job target = publishedJob(targetCompanyId, "Senior Platform Engineer", "Full-time");
+        Job wrongCompany = publishedJob(otherCompanyId, "Senior Platform Engineer", "Full-time");
+        Job wrongType = publishedJob(targetCompanyId, "Senior Platform Contractor", "Contract");
+        jobRepository.saveAndFlush(target);
+        jobRepository.saveAndFlush(wrongCompany);
+        jobRepository.saveAndFlush(wrongType);
+
+        var adapter = new PostgresJobSearchAdapter(jobRepository);
+        var page = adapter.searchPublished(new JobSearchCriteria(
+                "Platform", null, null, null, null, "Senior", "Full-time", targetCompanyId),
+                PageRequest.of(0, 10));
+
+        assertThat(page.getContent()).extracting(Job::getId).contains(target.getId());
+        assertThat(page.getContent()).extracting(Job::getId).doesNotContain(wrongCompany.getId(), wrongType.getId());
+    }
+
+    private static Job publishedJob(UUID companyId, String title, String type) {
+        Job job = new Job(companyId, UUID.randomUUID());
+        job.updateContent(
+                title,
+                "Build developer platform services",
+                "Java, Kubernetes, PostgreSQL",
+                "Remote-first team",
+                BigDecimal.valueOf(3500),
+                BigDecimal.valueOf(6500),
+                "Remote",
+                "Senior",
+                type,
+                "Java,Kubernetes,PostgreSQL"
+        );
+        job.submitReview();
+        job.approve();
+        return job;
     }
 }

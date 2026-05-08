@@ -35,6 +35,7 @@ $requiredPaths = @(
     "docs/production-engineering-scorecard.md",
     "docs/repository-structure.md",
     "docs/design-system.md",
+    "docs/ui-redesign-v0.6.md",
     "docs/demo-data.md",
     "docs/data-model-and-seed-strategy.md",
     "docs/versioning.md",

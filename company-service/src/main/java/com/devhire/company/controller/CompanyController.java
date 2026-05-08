@@ -46,10 +46,29 @@ public class CompanyController {
         return ApiResponse.ok(companyService.get(id));
     }
 
+    @GetMapping("/companies/slug/{slug}")
+    public ApiResponse<CompanyResponse> getBySlug(@PathVariable String slug) {
+        return ApiResponse.ok(companyService.getApprovedBySlug(slug));
+    }
+
     @GetMapping("/companies")
-    public ApiResponse<Page<CompanyResponse>> list(@RequestParam(required = false) CompanyStatus status,
+    public ApiResponse<Page<CompanyResponse>> list(@RequestHeader(value = AppHeaders.USER_ID, required = false) UUID userId,
+                                                   @RequestHeader(value = AppHeaders.USER_EMAIL, required = false) String email,
+                                                   @RequestHeader(value = AppHeaders.USER_ROLE, required = false) UserRole role,
+                                                   @RequestParam(required = false) CompanyStatus status,
                                                    Pageable pageable) {
-        return ApiResponse.ok(companyService.list(status, pageable));
+        if (status != null) {
+            return ApiResponse.ok(companyService.listForAdmin(new AuthenticatedUser(userId, email, role), status, pageable));
+        }
+        return ApiResponse.ok(companyService.listPublic(pageable));
+    }
+
+    @GetMapping("/employer/companies")
+    public ApiResponse<Page<CompanyResponse>> listEmployerCompanies(@RequestHeader(AppHeaders.USER_ID) UUID userId,
+                                                                    @RequestHeader(AppHeaders.USER_EMAIL) String email,
+                                                                    @RequestHeader(AppHeaders.USER_ROLE) UserRole role,
+                                                                    Pageable pageable) {
+        return ApiResponse.ok(companyService.listForEmployer(new AuthenticatedUser(userId, email, role), pageable));
     }
 
     @PatchMapping("/admin/companies/{id}/approve")
@@ -74,4 +93,3 @@ public class CompanyController {
         return companyService.getInternal(id);
     }
 }
-

@@ -28,6 +28,8 @@ DevHire Cloud là một portfolio microservices Java 21 / Spring Boot 3.5 cho n�
 | Evidence pack | [docs/REVIEW_EVIDENCE.md](docs/REVIEW_EVIDENCE.md) |
 | Architecture | [docs/architecture-review-index.md](docs/architecture-review-index.md) |
 | Service catalog | [docs/service-catalog.md](docs/service-catalog.md) |
+| Security evidence | [docs/security-evidence.md](docs/security-evidence.md) |
+| v0.6 Stitch redesign | [docs/ui-redesign-v0.6.md](docs/ui-redesign-v0.6.md) |
 | Frontend preview | [docs/frontend-preview-deploy.md](docs/frontend-preview-deploy.md) |
 | Cloud readiness | [docs/cloud-readiness-review.md](docs/cloud-readiness-review.md) |
 | Production scorecard | [docs/production-engineering-scorecard.md](docs/production-engineering-scorecard.md) |
@@ -99,6 +101,14 @@ Portfolio verification:
 | AI Assistant | Grafana SLO |
 |---|---|
 | ![Assistant](docs/screenshots/assistant-page.png) | ![Grafana SLO](docs/screenshots/ops-grafana-slo.png) |
+
+| Docker Runtime | AI Ops | Mailpit | OpenAPI |
+|---|---|---|---|
+| ![Docker runtime jobs](docs/screenshots/docker-runtime-jobs.png) | ![AI provider operations](docs/screenshots/ops-ai-provider.png) | ![Mailpit](docs/screenshots/ops-mailpit.png) | ![OpenAPI job service](docs/screenshots/ops-openapi-job-service.png) |
+
+| Prometheus Rules | Visual Evidence Manifest |
+|---|---|
+| ![Prometheus rules](docs/screenshots/ops-prometheus-rules.png) | [docs/evidence-manifest.json](docs/evidence-manifest.json) tracks all 12 curated screenshots. |
 
 ## v1 Roadmap
 

@@ -22,6 +22,8 @@ DevHire Cloud is a Java 21 / Spring Boot 3.5 production engineering portfolio fo
 | Evidence pack | [REVIEW_EVIDENCE.md](REVIEW_EVIDENCE.md) |
 | Architecture | [architecture-review-index.md](architecture-review-index.md) |
 | Service catalog | [service-catalog.md](service-catalog.md) |
+| Security evidence | [security-evidence.md](security-evidence.md) |
+| v0.6 Stitch redesign | [ui-redesign-v0.6.md](ui-redesign-v0.6.md) |
 | Frontend preview | [frontend-preview-deploy.md](frontend-preview-deploy.md) |
 | Cloud readiness | [cloud-readiness-review.md](cloud-readiness-review.md) |
 | Production scorecard | [production-engineering-scorecard.md](production-engineering-scorecard.md) |
@@ -80,6 +82,26 @@ Portfolio verification:
 | Admin | `admin@devhire.local` | `Admin@123456` |
 | Employer | `employer@devhire.local` | `Employer@123456` |
 | Candidate | `candidate@devhire.local` | `Candidate@123456` |
+
+## Product Screenshots
+
+| Jobs | Job Detail |
+|---|---|
+| ![Jobs](screenshots/jobs-page.png) | ![Job detail](screenshots/job-detail.png) |
+
+| Candidate | Employer | Admin |
+|---|---|---|
+| ![Candidate](screenshots/candidate-dashboard.png) | ![Employer](screenshots/employer-dashboard.png) | ![Admin](screenshots/admin-dashboard.png) |
+
+| Assistant | Grafana SLO | Prometheus Rules |
+|---|---|---|
+| ![Assistant](screenshots/assistant-page.png) | ![Grafana SLO](screenshots/ops-grafana-slo.png) | ![Prometheus rules](screenshots/ops-prometheus-rules.png) |
+
+| Docker Runtime | AI Ops | Mailpit | OpenAPI |
+|---|---|---|---|
+| ![Docker runtime jobs](screenshots/docker-runtime-jobs.png) | ![AI provider operations](screenshots/ops-ai-provider.png) | ![Mailpit](screenshots/ops-mailpit.png) | ![OpenAPI job service](screenshots/ops-openapi-job-service.png) |
+
+The full visual evidence set is machine-checked in [evidence-manifest.json](evidence-manifest.json).
 
 ## v1 Roadmap
 

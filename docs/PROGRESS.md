@@ -2,6 +2,63 @@
 
 This file records implementation progress, verification commands, and commit boundaries.
 
+## 2026-05-07 - v0.6.1 Stitch fidelity security hotfix
+
+- Resolved PR #44 security scan blockers after the Stitch fidelity implementation by moving Spring Boot to the latest `3.5.x` patch and pinning Netty at the repository level.
+- Confirmed Trivy no longer reports Spring Boot findings; the remaining image finding was the optional Reactor Netty native epoll transport.
+- Excluded `io.netty:netty-transport-native-epoll` from the reactive gateway and AI service dependency graphs so both services use the standard NIO transport in container images.
+- Kept business APIs, database schemas, and frontend behavior unchanged.
+
+Verification:
+
+- `mvn -T1 clean verify` passed before the native epoll exclusion.
+- `.\scripts\check-coverage.ps1` passed.
+- `cd frontend && npm run typecheck` passed.
+- `cd frontend && npm run build` passed.
+- `cd frontend && npm run e2e:all` passed.
+- `mvn -pl api-gateway dependency:tree "-Dincludes=io.netty:netty-transport-native-epoll"` confirmed no native epoll dependency remains.
+- `mvn -pl ai-service dependency:tree "-Dincludes=io.netty:netty-transport-native-epoll"` confirmed no native epoll dependency remains.
+- `mvn -T1 -pl api-gateway,ai-service -am clean verify` passed after the exclusion.
+- `.\scripts\api-compatibility.ps1 -ManifestOnly` passed.
+- `.\scripts\docs-quality.ps1` passed.
+- `.\scripts\docs-parity.ps1` passed.
+- `.\scripts\evidence-manifest-verify.ps1` passed.
+- `.\scripts\repo-hygiene.ps1` passed.
+- `.\scripts\visual-evidence-audit.ps1` passed.
+- `.\scripts\domain-placeholder-audit.ps1` passed.
+- `.\scripts\professionalism-audit.ps1` passed.
+- `.\scripts\portfolio-verify.ps1 -Docs -Docker -Cloud` passed after retrying a transient Terraform provider download failure.
+
+## 2026-05-06 - v0.6 Stitch client/admin redesign implementation
+
+- Re-scanned Stitch project `projects/5421325194779586117` and mapped the expanded client screens plus admin/ops screens into product routes.
+- Refactored the frontend navigation into role-aware Candidate, Employer, Admin/Ops, and Platform workspaces.
+- Added candidate routes for applications, profile, assessments, offers, AI interview prep, roadmap, skill analytics, and community.
+- Added platform routes for observability, cloud control plane, and releases.
+- Added backend read-model endpoints for candidate dashboard, applications, offers, assessments, employer pipeline, skill analytics, AI roadmap/interview prep, and admin operations summary.
+- Added deterministic Flyway-backed candidate offer and assessment data in `application-service`.
+- Added a user-service profile persistence hardening slice: case-insensitive email uniqueness, repository lookup helpers, and a Testcontainers-backed repository IT for Flyway seed profile segmentation.
+- Hardened `migration-smoke.ps1` with an early Docker daemon preflight so reviewer runs fail fast and clearly when Docker Desktop is not available.
+- Added company-service workflow hardening tests for duplicate slug rejection, invalid slug rejection, admin reject reason persistence, non-admin approval blocking, and outbox event publishing.
+- Added audit-service operations read-model service tests for admin aggregates, empty audit-log timestamp handling, and non-admin access blocking.
+- Documented the Stitch-to-route mapping in `docs/ui-redesign-v0.6.md` and updated the design system notes.
+
+Verification:
+
+- `mvn -T1 -pl application-service,job-service,ai-service,audit-service,api-gateway -am test` passed.
+- `mvn -T1 -pl user-service -am verify` passed; `UserProfileRepositoryIT` was skipped because Docker daemon was not available in this local session.
+- `mvn -T1 -pl company-service -am test` passed after company workflow hardening.
+- `mvn -T1 -pl audit-service -am test` passed after operations read-model service coverage.
+- `.\scripts\migration-smoke.ps1 -Services user-service -SkipStart` now fails fast with a clear Docker daemon availability message when Docker Desktop is off.
+- `cd frontend && npm run typecheck` passed.
+- `cd frontend && npm run build` passed.
+- `cd frontend && npm run e2e:all` passed with 5 desktop and 2 mobile Playwright smoke tests.
+- `mvn -T1 clean verify` passed across all 11 Maven modules; Testcontainers integration tests were skipped because Docker daemon was not available in this local session.
+- `.\scripts\check-coverage.ps1` passed after adding read-model service tests.
+- `.\scripts\api-compatibility.ps1 -ManifestOnly` passed with manifest version `0.6.0` and 48 tracked endpoints.
+- `.\scripts\portfolio-verify.ps1 -Docs -Docker` passed.
+- `.\scripts\portfolio-verify.ps1 -Docs -Docker -Cloud` passed every docs/docker/cloud policy step but stopped at Terraform safe validate because local Terraform is absent and Dockerized Terraform cannot run while Docker daemon is off.
+
 ## 2026-05-06 - GitHub audit tooling hardening
 
 - Merged the runtime reviewer evidence refresh into `master` after all PR checks passed, then restored branch protection with the repository governance script.
@@ -76,7 +133,7 @@ Committed as `chore: initialize microservices monorepo structure`.
 
 ## Phase 1 - Parent build + common config
 
-- Added a Maven multi-module parent build using Spring Boot 3.5.13, Spring Cloud 2025.0.2, Java 21 release target, JaCoCo, Surefire, Failsafe, Springdoc, Testcontainers, JJWT, and shared dependency management.
+- Added a Maven multi-module parent build using Spring Boot 3.5.x, Spring Cloud 2025.0.2, Java 21 release target, JaCoCo, Surefire, Failsafe, Springdoc, Testcontainers, JJWT, and shared dependency management.
 - Added service modules: `api-gateway`, `auth-service`, `user-service`, `company-service`, `job-service`, `application-service`, `notification-service`, and `audit-service`.
 - Added `common-lib` with shared API response, error model, field violations, pagination response, security roles, correlation id filter, constants, and event DTO contracts.
 - Added minimal Spring Boot application entrypoints and baseline actuator config for every service.
@@ -3313,3 +3370,39 @@ Verification:
   - unexpected exceptions returning stable internal-error responses,
   - correlation id preservation, generation, response header propagation, and MDC cleanup.
 - Raised the `common-lib` coverage gate from 48% to 60% after coverage increased to 67.5%.
+
+## v0.6.2 Stitch completion polish
+
+- Continued on stacked branch `v0.6.2-stitch-completion-polish` from `v0.6.1-stitch-fidelity-polish`; PR #43/#44 remain protected by required review.
+- Tightened public/private API boundaries:
+  - public company id/list/slug surfaces expose approved companies only,
+  - employer company list is scoped by authenticated employer,
+  - admin company and job review queues use authenticated admin read models,
+  - public job detail now returns published jobs only,
+  - job search `type` and `companyId` filters are represented in the compatibility manifest.
+- Completed Stitch route fidelity checks across candidate, employer, admin/ops, and platform regions:
+  - role-aware navigation now separates Candidate, Employer, Admin/Ops, and Platform,
+  - `/admin/ai` adds an AI operations surface,
+  - platform evidence pages show verification proof without primary screenshot smoke/fallback copy,
+  - candidate roadmap mojibake was removed.
+- Added route-matrix Playwright coverage and mobile checks for the expanded candidate Stitch screens.
+- Updated visual evidence promotion so curated product and operations screenshots can be promoted together.
+- Updated README VI/EN/JA and review evidence so all languages surface the same screenshot/security/cloud proof.
+
+Verification:
+
+- `mvn -T1 -pl company-service,job-service,application-service,api-gateway -am test`
+- `mvn -T1 clean verify`
+- `.\scripts\check-coverage.ps1`
+- `cd frontend && npm run typecheck`
+- `cd frontend && npm run build`
+- `cd frontend && npm run e2e:all`
+- `.\scripts\api-compatibility.ps1 -ManifestOnly`
+- `.\scripts\docs-quality.ps1`
+- `.\scripts\docs-parity.ps1`
+- `.\scripts\evidence-manifest-verify.ps1`
+- `.\scripts\visual-evidence-audit.ps1`
+- `.\scripts\repo-hygiene.ps1`
+- `.\scripts\domain-placeholder-audit.ps1`
+- `.\scripts\professionalism-audit.ps1`
+- `.\scripts\portfolio-verify.ps1 -Docs -Docker -Cloud`

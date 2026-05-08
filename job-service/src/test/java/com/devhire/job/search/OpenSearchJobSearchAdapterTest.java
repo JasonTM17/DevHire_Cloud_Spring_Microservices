@@ -40,6 +40,7 @@ class OpenSearchJobSearchAdapterTest {
     void searchUsesOpenSearchIdsAndPreservesHitOrder() {
         UUID firstId = UUID.randomUUID();
         UUID secondId = UUID.randomUUID();
+        UUID companyId = UUID.randomUUID();
         Job first = publishedJob(firstId, "Senior Java");
         Job second = publishedJob(secondId, "Platform Engineer");
         when(client.search(eq("devhire_jobs"), any())).thenReturn(new OpenSearchSearchResult(
@@ -49,16 +50,21 @@ class OpenSearchJobSearchAdapterTest {
         when(repository.findAllById(List.of(secondId, firstId))).thenReturn(List.of(first, second));
 
         var page = adapter.searchPublished(new JobSearchCriteria("java", "Java", "Remote",
-                BigDecimal.valueOf(2000), BigDecimal.valueOf(7000), "Senior"), PageRequest.of(0, 10));
+                BigDecimal.valueOf(2000), BigDecimal.valueOf(7000), "Senior", "Full-time", companyId),
+                PageRequest.of(0, 10));
 
         assertThat(page.getTotalElements()).isEqualTo(2);
         assertThat(page.getContent()).extracting(Job::getId).containsExactly(secondId, firstId);
+        ArgumentCaptor<Map<String, Object>> request = ArgumentCaptor.forClass(Map.class);
+        verify(client).search(eq("devhire_jobs"), request.capture());
+        assertThat(request.getValue().toString())
+                .contains("companyId", companyId.toString(), "type", "full-time", "level", "senior");
     }
 
     @Test
     void searchFallsBackToPostgresWhenOpenSearchFails() {
         var pageable = PageRequest.of(0, 10);
-        var criteria = new JobSearchCriteria("java", null, null, null, null, null);
+        var criteria = new JobSearchCriteria("java", null, null, null, null, null, null, null);
         Job job = publishedJob(UUID.randomUUID(), "Senior Java");
         when(client.search(eq("devhire_jobs"), any())).thenThrow(new IllegalStateException("cluster unavailable"));
         when(fallback.searchPublished(criteria, pageable)).thenReturn(new PageImpl<>(List.of(job), pageable, 1));
@@ -75,7 +81,7 @@ class OpenSearchJobSearchAdapterTest {
                 "http://localhost:9200", "devhire_jobs", true, false);
         var strictAdapter = new OpenSearchJobSearchAdapter(client, propertiesWithoutFallback, repository, fallback,
                 new SimpleMeterRegistry());
-        var criteria = new JobSearchCriteria("java", null, null, null, null, null);
+        var criteria = new JobSearchCriteria("java", null, null, null, null, null, null, null);
         when(client.search(eq("devhire_jobs"), any())).thenThrow(new IllegalStateException("cluster unavailable"));
 
         assertThatThrownBy(() -> strictAdapter.searchPublished(criteria, PageRequest.of(0, 10)))
@@ -95,7 +101,9 @@ class OpenSearchJobSearchAdapterTest {
         assertThat(document.getValue())
                 .containsEntry("publishedAt", job.getPublishedAt().toString())
                 .containsEntry("createdAt", "2026-05-02T00:00:00Z")
-                .containsEntry("updatedAt", "2026-05-02T00:00:00Z");
+                .containsEntry("updatedAt", "2026-05-02T00:00:00Z")
+                .containsEntry("level", "senior")
+                .containsEntry("type", "full-time");
     }
 
     @Test

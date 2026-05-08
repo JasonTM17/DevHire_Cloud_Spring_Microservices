@@ -8,7 +8,7 @@ This page is the single source of truth for the current public state of DevHire 
 | GitHub release | https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.5.1 |
 | Default branch | `master` |
 | Branch protection | Enabled |
-| Open pull requests | 0 at the latest public cleanup scan |
+| Open pull requests | 2 active Stitch redesign PRs: #43 base redesign and #44 fidelity polish |
 | Dependabot queue | 0 open PRs after curated cleanup |
 | Maven development version | `0.6.0-SNAPSHOT` |
 | Frontend development version | `0.6.0` |
@@ -22,6 +22,7 @@ This page is the single source of truth for the current public state of DevHire 
 | Track | Current evidence |
 |---|---|
 | Product UX | Reviewer-facing jobs workflow now includes richer filters, sorting, totals, and pagination. |
+| Stitch v0.6 | PR #43 and #44 are green and waiting for required review before protected-branch merge. |
 | Frontend deploy | Optional Vercel preview path exists for `frontend/` only; Java backend deployment remains Docker/AWS blueprint. |
 | Gateway operations | Gateway emits route request, latency, and rate-limit metrics with Prometheus alert coverage. |
 | Runtime proof | Runtime observability smoke checks Gateway metrics plus domain KPI metrics when Docker is running. |

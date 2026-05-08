@@ -1,31 +1,34 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Bell, ClipboardList, MailCheck, TimerReset, TrendingUp } from "lucide-react";
+import Link from "next/link";
+import { Bell, ClipboardList, FileCheck2, MailCheck, Map, TimerReset, TrendingUp } from "lucide-react";
+import { CandidateTimeline } from "@/components/CandidateTimeline";
 import { DemoModeNotice } from "@/components/DemoModeNotice";
 import { MetricCard } from "@/components/MetricCard";
+import { StatusDistributionList } from "@/components/StatusDistributionList";
 import { StatusPill } from "@/components/StatusPill";
 import { api } from "@/lib/api";
-import { previewApplications, previewNotifications } from "@/lib/previewData";
-import type { Application, Notification, PageResponse } from "@/types/domain";
+import { previewCandidateDashboardSummary, previewNotifications } from "@/lib/previewData";
+import type { CandidateDashboardSummary, Notification, PageResponse } from "@/types/domain";
 
 export default function CandidatePage() {
-  const [applications, setApplications] = useState<PageResponse<Application> | null>(null);
   const [notifications, setNotifications] = useState<PageResponse<Notification> | null>(null);
+  const [summary, setSummary] = useState<CandidateDashboardSummary>(previewCandidateDashboardSummary);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
 
   function load() {
     setLoading(true);
-    Promise.all([api.myApplications(), api.notifications()])
-      .then(([apps, notis]) => {
-        setApplications(apps);
+    Promise.all([api.notifications(), api.candidateDashboardSummary()])
+      .then(([notis, dashboard]) => {
         setNotifications(notis);
+        setSummary(dashboard);
         setError("");
       })
       .catch((ex) => {
-        setApplications(previewApplications);
         setNotifications(previewNotifications);
+        setSummary(previewCandidateDashboardSummary);
         setError(previewDashboardMessage(ex));
       })
       .finally(() => setLoading(false));
@@ -39,8 +42,6 @@ export default function CandidatePage() {
   }
 
   const unread = notifications?.content.filter((item) => !item.read).length ?? 0;
-  const statusCounts = countBy(applications?.content ?? [], (item) => item.status);
-
   return (
     <section className="page-stack" data-testid="candidate-dashboard">
       <div className="hero-strip">
@@ -48,12 +49,19 @@ export default function CandidatePage() {
           <p className="eyebrow">Candidate workspace</p>
           <h1>Applications</h1>
           <p>
-            A focused applicant cockpit for tracking CV submissions, status movement, notification delivery, and email
-            follow-up from the notification-service.
+            A Stitch-aligned client workspace for job discovery, application movement, offers, skill proof, and AI
+            interview preparation.
           </p>
         </div>
         <div className="hero-actions">
-          <span className="badge live">Email queue persisted</span>
+          <Link className="button secondary" href="/candidate/offers">
+            <FileCheck2 size={16} />
+            Review offers
+          </Link>
+          <Link className="button outline" href="/candidate/roadmap">
+            <Map size={16} />
+            Roadmap
+          </Link>
           <button className="button secondary" type="button" onClick={markAllRead}>
             <MailCheck size={16} />
             Mark all read
@@ -61,9 +69,10 @@ export default function CandidatePage() {
         </div>
       </div>
       <div className="metrics-row">
-        <MetricCard icon={ClipboardList} label="Applications" value={applications?.totalElements ?? 0} helper="Submitted jobs" />
+        <MetricCard icon={ClipboardList} label="Applications" value={summary.applications} helper="Submitted jobs" />
         <MetricCard icon={Bell} label="Unread" value={unread} helper="Internal notifications" />
-        <MetricCard icon={TrendingUp} label="Pipeline" value="Live" helper="Kafka status events" />
+        <MetricCard icon={TrendingUp} label="Interviews" value={summary.interviews} helper="Pipeline movement" />
+        <MetricCard icon={FileCheck2} label="Offers" value={summary.offers} helper="Offer review ready" />
       </div>
       <DemoModeNotice message={error} />
       <div className="split-grid">
@@ -72,34 +81,14 @@ export default function CandidatePage() {
             <TimerReset size={20} />
             <h2>Application tracker</h2>
           </div>
-          <div className="insight-list compact">
-            {["SUBMITTED", "REVIEWING", "INTERVIEW", "OFFER"].map((status) => (
-              <div className="insight-line" key={status}>
-                <span>{status.toLowerCase().replace("_", " ")}</span>
-                <strong>{statusCounts[status] ?? 0}</strong>
-              </div>
-            ))}
-          </div>
-          <div className="table-list">
-            {loading ? <div className="empty-state compact">Loading candidate applications...</div> : null}
-            {!loading && applications?.content.length === 0 ? (
-              <div className="empty-state compact">No applications yet. Apply to a published job to start the pipeline.</div>
-            ) : null}
-            {!loading && applications?.content.map((item) => (
-              <div className="table-row" key={item.id}>
-                <span>
-                  <strong>{applicationTitle(item.jobId)}</strong>
-                  <small>Submitted {new Date(item.createdAt).toLocaleDateString()}</small>
-                </span>
-                <StatusPill value={item.status} />
-              </div>
-            ))}
-          </div>
+          <StatusDistributionList items={summary.statusDistribution} />
+          {loading ? <div className="empty-state compact">Syncing candidate pipeline...</div> : null}
+          {!loading ? <CandidateTimeline items={summary.timeline} /> : null}
         </div>
         <div className="panel">
           <h2>Notifications</h2>
           <div className="stack">
-            {loading ? <div className="empty-state compact">Loading notification inbox...</div> : null}
+            {loading ? <div className="empty-state compact">Syncing notification inbox...</div> : null}
             {!loading && notifications?.content.length === 0 ? (
               <div className="empty-state compact">No notifications yet. Status updates will appear here.</div>
             ) : null}
@@ -116,6 +105,23 @@ export default function CandidatePage() {
           </div>
         </div>
       </div>
+      <div className="dashboard-grid">
+        <Link className="panel action-panel" href="/candidate/assessments">
+          <p className="eyebrow">Skill assessment</p>
+          <h2>Verified backend skills</h2>
+          <span className="muted">Java, Kafka, AWS, observability proof for employer review.</span>
+        </Link>
+        <Link className="panel action-panel" href="/candidate/interview-prep">
+          <p className="eyebrow">AI prep</p>
+          <h2>Interview practice hub</h2>
+          <span className="muted">Claude prompts, citations, and production interview drills.</span>
+        </Link>
+        <Link className="panel action-panel" href="/candidate/skill-analytics">
+          <p className="eyebrow">Market signals</p>
+          <h2>Cloud skill analytics</h2>
+          <span className="muted">Demand, salary bands, locations, and role distribution.</span>
+        </Link>
+      </div>
     </section>
   );
 }
@@ -128,25 +134,8 @@ function previewDashboardMessage(ex: unknown) {
   return `${message}. Curated candidate data is active for this reviewer session.`;
 }
 
-function applicationTitle(jobId: string) {
-  const titles: Record<string, string> = {
-    "preview-java-platform": "Senior Java Platform Engineer",
-    "preview-cloud-search": "Search Platform Engineer",
-    "preview-sre": "Backend SRE Engineer"
-  };
-  return titles[jobId] ?? "Portfolio job";
-}
-
 function emailStatusLabel(status: string) {
   if (status === "DISABLED") return "internal notification only";
   if (status === "FAILED_RETRYABLE") return "queued for retry";
   return status.toLowerCase().replaceAll("_", " ");
-}
-
-function countBy<T>(items: T[], selector: (item: T) => string) {
-  return items.reduce<Record<string, number>>((acc, item) => {
-    const key = selector(item);
-    acc[key] = (acc[key] ?? 0) + 1;
-    return acc;
-  }, {});
 }
