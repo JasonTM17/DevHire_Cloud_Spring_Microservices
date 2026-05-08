@@ -6,17 +6,17 @@ DevHire Cloud publishes immutable service images from the protected release work
 
 | Service | GHCR image | Docker Hub mirror |
 |---|---|---|
-| api-gateway | `ghcr.io/jasontm17/devhire/api-gateway:<tag>` | `docker.io/<namespace>/devhire-cloud-api-gateway:<tag>` |
-| auth-service | `ghcr.io/jasontm17/devhire/auth-service:<tag>` | `docker.io/<namespace>/devhire-cloud-auth-service:<tag>` |
-| user-service | `ghcr.io/jasontm17/devhire/user-service:<tag>` | `docker.io/<namespace>/devhire-cloud-user-service:<tag>` |
-| company-service | `ghcr.io/jasontm17/devhire/company-service:<tag>` | `docker.io/<namespace>/devhire-cloud-company-service:<tag>` |
-| job-service | `ghcr.io/jasontm17/devhire/job-service:<tag>` | `docker.io/<namespace>/devhire-cloud-job-service:<tag>` |
-| application-service | `ghcr.io/jasontm17/devhire/application-service:<tag>` | `docker.io/<namespace>/devhire-cloud-application-service:<tag>` |
-| notification-service | `ghcr.io/jasontm17/devhire/notification-service:<tag>` | `docker.io/<namespace>/devhire-cloud-notification-service:<tag>` |
-| audit-service | `ghcr.io/jasontm17/devhire/audit-service:<tag>` | `docker.io/<namespace>/devhire-cloud-audit-service:<tag>` |
-| ai-service | `ghcr.io/jasontm17/devhire/ai-service:<tag>` | `docker.io/<namespace>/devhire-cloud-ai-service:<tag>` |
-| assessment-runner-service | `ghcr.io/jasontm17/devhire/assessment-runner-service:<tag>` | `docker.io/<namespace>/devhire-cloud-assessment-runner-service:<tag>` |
-| frontend | `ghcr.io/jasontm17/devhire/frontend:<tag>` | `docker.io/<namespace>/devhire-cloud-frontend:<tag>` |
+| api-gateway | `ghcr.io/jasontm17/devhire/api-gateway:<tag>` | `docker.io/nguyenson1710/devhire-cloud-api-gateway:<tag>` |
+| auth-service | `ghcr.io/jasontm17/devhire/auth-service:<tag>` | `docker.io/nguyenson1710/devhire-cloud-auth-service:<tag>` |
+| user-service | `ghcr.io/jasontm17/devhire/user-service:<tag>` | `docker.io/nguyenson1710/devhire-cloud-user-service:<tag>` |
+| company-service | `ghcr.io/jasontm17/devhire/company-service:<tag>` | `docker.io/nguyenson1710/devhire-cloud-company-service:<tag>` |
+| job-service | `ghcr.io/jasontm17/devhire/job-service:<tag>` | `docker.io/nguyenson1710/devhire-cloud-job-service:<tag>` |
+| application-service | `ghcr.io/jasontm17/devhire/application-service:<tag>` | `docker.io/nguyenson1710/devhire-cloud-application-service:<tag>` |
+| notification-service | `ghcr.io/jasontm17/devhire/notification-service:<tag>` | `docker.io/nguyenson1710/devhire-cloud-notification-service:<tag>` |
+| audit-service | `ghcr.io/jasontm17/devhire/audit-service:<tag>` | `docker.io/nguyenson1710/devhire-cloud-audit-service:<tag>` |
+| ai-service | `ghcr.io/jasontm17/devhire/ai-service:<tag>` | `docker.io/nguyenson1710/devhire-cloud-ai-service:<tag>` |
+| assessment-runner-service | `ghcr.io/jasontm17/devhire/assessment-runner-service:<tag>` | `docker.io/nguyenson1710/devhire-cloud-assessment-runner-service:<tag>` |
+| frontend | `ghcr.io/jasontm17/devhire/frontend:<tag>` | `docker.io/nguyenson1710/devhire-cloud-frontend:<tag>` |
 
 Use release tags or commit SHAs. Do not deploy `latest`; it is intentionally not published.
 
@@ -53,10 +53,18 @@ Docker Hub mirroring is skipped unless these repository secrets exist:
 ```powershell
 gh secret set DOCKERHUB_USERNAME --repo JasonTM17/DevHire_Cloud_Spring_Microservices
 gh secret set DOCKERHUB_TOKEN --repo JasonTM17/DevHire_Cloud_Spring_Microservices
-gh variable set DOCKERHUB_NAMESPACE --body <namespace> --repo JasonTM17/DevHire_Cloud_Spring_Microservices
+gh variable set DOCKERHUB_NAMESPACE --body nguyenson1710 --repo JasonTM17/DevHire_Cloud_Spring_Microservices
 ```
 
 If `DOCKERHUB_NAMESPACE` is omitted, the workflow uses `DOCKERHUB_USERNAME` as the namespace.
+
+## Current Preview Mirror
+
+The current preview images were mirrored through Docker Desktop under the `nguyenson1710` Docker Hub account. Each service has these tags:
+
+- `container-preview-74b4fb7`
+- `sha-74b4fb7`
+- `v0.6.0-preview`
 
 ## Pull Examples
 
@@ -68,8 +76,8 @@ docker pull ghcr.io/jasontm17/devhire/frontend:v0.6.0
 Docker Hub mirror examples:
 
 ```powershell
-docker pull docker.io/<namespace>/devhire-cloud-api-gateway:v0.6.0
-docker pull docker.io/<namespace>/devhire-cloud-frontend:v0.6.0
+docker pull docker.io/nguyenson1710/devhire-cloud-api-gateway:v0.6.0-preview
+docker pull docker.io/nguyenson1710/devhire-cloud-frontend:v0.6.0-preview
 ```
 
 After the first GHCR publish, package visibility may still need an owner review in GitHub Packages settings if the account defaults packages to private.

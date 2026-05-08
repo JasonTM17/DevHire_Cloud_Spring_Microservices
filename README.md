@@ -75,7 +75,7 @@ The v0.6 work follows Stitch project `projects/5421325194779586117`. Primary scr
 
 ## Container Images
 
-Release images publish to GHCR as `ghcr.io/jasontm17/devhire/<service>:<tag>` with commit SHA tags, OCI labels, SBOM, and BuildKit provenance. Docker Hub mirroring is supported as `docker.io/<namespace>/devhire-cloud-<service>:<tag>` when `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` repository secrets are configured. See [container images](docs/container-images.md).
+Release images publish to GHCR as `ghcr.io/jasontm17/devhire/<service>:<tag>` with commit SHA tags, OCI labels, SBOM, and BuildKit provenance. Docker Hub mirrors live under `docker.io/nguyenson1710/devhire-cloud-<service>:<tag>` when `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` repository secrets are configured; the current preview set was also pushed locally through Docker Desktop. See [container images](docs/container-images.md).
 
 ## Run Locally
 
