@@ -8,6 +8,15 @@ SET slug = 'cloud-architecture-challenge',
     required_signals_csv = '@Bean,ResourceValidator,EnterpriseSecurityPolicy.STRICT,production,@Test,assert'
 WHERE id = '52000000-0000-0000-0001-000000000001';
 
+UPDATE code_assessment_assignments
+SET challenge_id = '52000000-0000-0000-0001-000000000001',
+    status = 'ASSIGNED',
+    candidate_name = 'DevHire Candidate',
+    due_at = GREATEST(due_at, now() + interval '6 days'),
+    updated_at = now()
+WHERE application_id = '40000000-0000-0000-0000-000000000001'
+  AND candidate_id = '00000000-0000-0000-0000-000000000003';
+
 UPDATE code_challenge_test_cases
 SET name = 'Bean Initialization',
     input_text = '@Bean ResourceValidator',

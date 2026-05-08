@@ -100,7 +100,8 @@ export default function CandidateAssessmentsPage() {
     api.candidateCodeAssessments()
       .then((items) => {
         const next = items.length ? items : previewCodeAssessments;
-        const preferred = next.find((item) => !FINAL_STATUSES.has(item.status)) ?? next[0];
+        const flagship = next.find((item) => item.challengeTitle.toLowerCase().includes("cloud architecture"));
+        const preferred = flagship ?? next.find((item) => !FINAL_STATUSES.has(item.status)) ?? next[0];
         setAssessments(next);
         setSelectedId(preferred?.id ?? "");
       })
