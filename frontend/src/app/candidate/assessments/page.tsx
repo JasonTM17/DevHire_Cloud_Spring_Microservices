@@ -31,7 +31,7 @@ import org.springframework.context.annotation.Bean;
 
 /**
  * Main application class for the DevHire Cloud Resource Manager.
- * TASK 1: Implement the missing Bean definition below.
+ * TASK 1: Provide the ResourceValidator bean below.
  */
 @SpringBootApplication
 public class CloudServiceApplication {
@@ -40,7 +40,6 @@ public class CloudServiceApplication {
     SpringApplication.run(CloudServiceApplication.class, args);
   }
 
-  /* TODO: Implement ResourceValidator Bean here */
   @Bean
   public ResourceValidator resourceValidator() {
     return new ResourceValidator(EnterpriseSecurityPolicy.STRICT, "production");

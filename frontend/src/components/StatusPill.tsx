@@ -28,18 +28,27 @@ const statusLabelMap: Record<string, string> = {
   CANDIDATE: "Candidate",
   CLAUDE: "Claude",
   SAFETY_BACKUP: "Safety backup",
+  NEEDS_REVIEW: "Needs review",
   UNKNOWN: "Needs review"
 };
 
 export function StatusPill({ value }: { value: string }) {
-  const normalized = value?.trim() || "UNKNOWN";
+  const normalized = normalizeStatus(value);
   const className = normalized.toLowerCase().replaceAll("_", "-");
   return <span className={`status status-${className}`}>{statusLabel(normalized)}</span>;
 }
 
 export function statusLabel(value: string) {
-  const normalized = value?.trim() || "UNKNOWN";
+  const normalized = normalizeStatus(value);
   return statusLabelMap[normalized] ?? toTitleCase(normalized);
+}
+
+function normalizeStatus(value: string) {
+  const normalized = value?.trim();
+  if (!normalized || normalized === "UNKNOWN") {
+    return "NEEDS_REVIEW";
+  }
+  return normalized;
 }
 
 function toTitleCase(value: string) {
