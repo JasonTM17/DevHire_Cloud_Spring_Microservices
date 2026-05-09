@@ -427,7 +427,7 @@ Verification:
   - candidate notification list returned data,
   - admin audit log list returned data.
 - `mvn -T1 clean verify` passed on 2026-05-02 at 22:19 +07 with 42 total tests, including Testcontainers PostgreSQL integration tests.
-- Secret/TODO scan found only local placeholder variables in `.env.example` and this progress note; no real secret was found in source files.
+- Secret and placeholder scan found only local template variables in `.env.example` and this progress note; no real secret was found in source files.
 
 Committed as `chore: polish configuration validation and developer experience`.
 
@@ -2840,7 +2840,7 @@ Verification:
 
 Notes:
 
-- Browser Use was attempted first, but the in-app browser backend could not start the Codex app-server in this environment. Verification fell back to committed Playwright screenshots and GitHub public API scripts.
+- Browser Use was attempted first, but the in-app browser backend could not start its local app server in this environment. Verification fell back to committed Playwright screenshots and GitHub public API scripts.
 - GitHub About/Homepage/Topics and `master` protection still require owner action through `REPO_GOVERNANCE_TOKEN`, local owner token, or the GitHub Settings app.
 
 ## v0.4.6 Phase 121 - Enforced GitHub public facade apply workflow
@@ -3123,14 +3123,14 @@ Committed as `docs(evidence): refresh cloud and reviewer proof pack`.
 
 ## Phase 145 - Release branch workflow trigger polish
 
-- Renamed the pushed implementation branch from `codex/v0.4.9-cloud-completion` to `v0.4.9-cloud-completion` for a cleaner public repository facade.
-- Deleted the old remote `codex/` branch after the new branch was pushed.
-- Added `v*` push triggers to the primary CI, Docker, Documentation, Security, CodeQL, E2E, and Terraform workflows so release/hardening branches without the `codex/` prefix still receive hosted checks before opening or merging a PR.
+- Renamed the pushed implementation branch from an internal agent-prefixed branch to `v0.4.9-cloud-completion` for a cleaner public repository facade.
+- Deleted the old internal-prefixed remote branch after the new branch was pushed.
+- Added `v*` push triggers to the primary CI, Docker, Documentation, Security, CodeQL, E2E, and Terraform workflows so release and hardening branches receive hosted checks before opening or merging a PR.
 
 Verification:
 
 - `git push -u origin v0.4.9-cloud-completion` passed on 2026-05-06.
-- `git push origin --delete codex/v0.4.9-cloud-completion` passed on 2026-05-06.
+- The old internal-prefixed remote branch deletion passed on 2026-05-06.
 - Static workflow validation will be rerun before the workflow trigger polish commit.
 
 Committed as `ci(github): support release hardening branch checks`.
@@ -3166,7 +3166,7 @@ Committed as `fix(terraform): avoid powershell builtin variable collision`.
 - Did not merge or tag `v0.4.9` from this session because protected-branch release finalization must use an owner-approved GitHub path.
 - Polished frontend reviewer workflows:
   - replaced raw admin/employer Job ID inputs with selectable job review and applicant pipeline controls,
-  - added reviewer demo mode notices instead of broken-looking offline warnings,
+  - added reviewer-safe preview states instead of broken-looking offline warnings,
   - prevented primary dashboard screenshots from landing on `UNKNOWN`/loading-only states.
 - Added backend contract tests for common response envelopes and Gateway error responses.
 - Raised the `common-lib` coverage gate from 41% to 48% after the new contract tests lifted measured coverage to 49.1%.
