@@ -16,7 +16,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Validate compose file
         run: docker compose config --quiet
@@ -27,7 +27,7 @@ jobs:
 
       - name: Upload AI eval report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: ai-eval-summary
           path: reports/ai/eval-summary.json
@@ -39,7 +39,7 @@ jobs:
 
       - name: Store compose logs
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: compose-ai-eval-log
           path: compose-ai-eval.log

@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           persist-credentials: false
 
@@ -38,9 +38,8 @@ jobs:
 
       - name: Upload Scorecard report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: openssf-scorecard-report
           path: security-reports/scorecard.sarif
           if-no-files-found: warn
-
