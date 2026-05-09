@@ -6,7 +6,7 @@ This document is the implementation bridge from the Stitch project to the produc
 
 - Stitch project: `projects/5421325194779586117`
 - Product split: Admin/Ops, Employer/Company, Client/Candidate
-- Frontend branches: `v0.6-stitch-client-admin-redesign`, `v0.6.1-stitch-fidelity-polish`, `v0.6.2-stitch-completion-polish`, `v0.6.3-stitch-full-app-completion`, stacked `v0.6.4-code-assessment-grading`, stacked `v0.6.5-code-assessment-review-polish`, stacked `v0.6.6-stitch-code-assessment-completion`, and stacked `v0.6.7-code-assessment-flagship`
+- Merge state: merged into `master` through the v0.6 consolidation path; temporary `v0.6*` branches have been deleted after verification.
 - Goal: make the product feel like a recruitment operations platform instead of a static portfolio demo.
 
 ## Route Mapping

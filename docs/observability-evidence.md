@@ -34,6 +34,10 @@ Prometheus rules currently cover:
 - AI fallback spike.
 - AI provider circuit breaker open state.
 - AI service 5xx rate.
+- Code assessment grading failures.
+- Code assessment employer-review backlog.
+- Code assessment risk-flag backlog.
+- Code grading p95 latency.
 
 Grafana panels currently cover:
 
@@ -53,6 +57,9 @@ Grafana panels currently cover:
 - AI assistant request rate.
 - AI assistant p95 latency.
 - AI tool calls and fallback count.
+- Code assessment queue by status.
+- Code submission volume and review decisions.
+- Code risk flags, grading latency, runner requests, and runner client failures.
 
 ## Domain Metric Catalog
 
@@ -67,6 +74,7 @@ The reviewer-facing observability gate checks that domain metrics are represente
 | Audit | `devhire_audit_ingested_total` |
 | Search | `devhire_job_search_requests_total`, `devhire_job_search_latency_seconds` |
 | AI assistant | `devhire_ai_conversations_total`, `devhire_ai_usage_events_total`, `devhire_ai_fallback_total`, `devhire_ai_chat_latency_seconds`, `devhire_ai_provider_circuit_open` |
+| Code assessment | `devhire_code_assessments_total`, `devhire_code_submissions_total`, `devhire_code_grading_requests_total`, `devhire_code_grading_latency_seconds`, `devhire_code_grading_score`, `devhire_code_review_risk_flags_total`, `devhire_code_review_decisions_total`, `devhire_code_runner_client_failures_total`, `devhire_assessment_runner_requests_total`, `devhire_assessment_runner_latency_seconds` |
 | Runtime capacity | `hikaricp_connections_active`, `hikaricp_connections_max`, `jvm_memory_used_bytes` |
 
 ## Regeneration

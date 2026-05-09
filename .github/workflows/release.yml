@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       image_tag:
-        description: Image tag to publish
+        description: Image tag to publish to GHCR and, when configured, Docker Hub
         required: true
         default: manual
 
@@ -35,7 +35,12 @@ jobs:
           - notification-service
           - audit-service
           - ai-service
+          - assessment-runner-service
           - frontend
+    env:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+      DOCKERHUB_NAMESPACE: ${{ vars.DOCKERHUB_NAMESPACE }}
 
     steps:
       - name: Checkout
@@ -51,23 +56,43 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Login to Docker Hub when configured
+        shell: bash
+        run: |
+          if [[ -z "${DOCKERHUB_USERNAME}" || -z "${DOCKERHUB_TOKEN}" ]]; then
+            echo "Docker Hub credentials not configured; skipping Docker Hub publish."
+            echo "DOCKERHUB_PUSH=false" >> "${GITHUB_ENV}"
+            exit 0
+          fi
+
+          echo "${DOCKERHUB_TOKEN}" | docker login docker.io -u "${DOCKERHUB_USERNAME}" --password-stdin
+          echo "DOCKERHUB_PUSH=true" >> "${GITHUB_ENV}"
+
       - name: Compute image tags
         shell: bash
         run: |
           owner="${GITHUB_REPOSITORY_OWNER,,}"
+          service="${{ matrix.service }}"
+          dockerhub_namespace="${DOCKERHUB_NAMESPACE:-${DOCKERHUB_USERNAME:-}}"
+          dockerhub_namespace="${dockerhub_namespace,,}"
+
           if [[ "${GITHUB_EVENT_NAME}" == "workflow_dispatch" ]]; then
             version="${{ inputs.image_tag }}"
           else
             version="${GITHUB_REF_NAME}"
           fi
+
           {
-            echo "IMAGE_NAME=ghcr.io/${owner}/devhire/${{ matrix.service }}"
+            echo "GHCR_IMAGE_NAME=ghcr.io/${owner}/devhire/${service}"
             echo "VERSION_TAG=${version}"
             echo "BUILD_CREATED=$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
             echo "VCS_URL=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}"
+            if [[ -n "${dockerhub_namespace}" ]]; then
+              echo "DOCKERHUB_IMAGE_NAME=docker.io/${dockerhub_namespace}/devhire-cloud-${service}"
+            fi
           } >> "${GITHUB_ENV}"
 
-      - name: Build and push image
+      - name: Build and push GHCR image
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -80,16 +105,56 @@ jobs:
             BUILD_CREATED=${{ env.BUILD_CREATED }}
             NEXT_PUBLIC_API_BASE_URL=${{ vars.NEXT_PUBLIC_API_BASE_URL || 'https://devhire.invalid' }}
           tags: |
-            ${{ env.IMAGE_NAME }}:${{ env.VERSION_TAG }}
-            ${{ env.IMAGE_NAME }}:${{ github.sha }}
+            ${{ env.GHCR_IMAGE_NAME }}:${{ env.VERSION_TAG }}
+            ${{ env.GHCR_IMAGE_NAME }}:${{ github.sha }}
           labels: |
             org.opencontainers.image.title=devhire-${{ matrix.service }}
             org.opencontainers.image.description=DevHire Cloud ${{ matrix.service }} image
+            org.opencontainers.image.url=${{ env.VCS_URL }}
+            org.opencontainers.image.documentation=${{ env.VCS_URL }}/blob/${{ github.sha }}/docs/container-images.md
             org.opencontainers.image.source=${{ env.VCS_URL }}
             org.opencontainers.image.revision=${{ github.sha }}
             org.opencontainers.image.version=${{ env.VERSION_TAG }}
             org.opencontainers.image.created=${{ env.BUILD_CREATED }}
+            org.opencontainers.image.vendor=DevHire Cloud
+            org.opencontainers.image.authors=JasonTM17
             org.opencontainers.image.licenses=MIT
+          cache-from: type=gha,scope=release-${{ matrix.service }}
+          cache-to: type=gha,scope=release-${{ matrix.service }},mode=max
+          provenance: mode=max
+          sbom: true
+          push: true
+
+      - name: Build and push Docker Hub image
+        if: env.DOCKERHUB_PUSH == 'true'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ matrix.service }}/Dockerfile
+          build-args: |
+            SERVICE_NAME=${{ matrix.service }}
+            BUILD_VERSION=${{ env.VERSION_TAG }}
+            VCS_REF=${{ github.sha }}
+            VCS_URL=${{ env.VCS_URL }}
+            BUILD_CREATED=${{ env.BUILD_CREATED }}
+            NEXT_PUBLIC_API_BASE_URL=${{ vars.NEXT_PUBLIC_API_BASE_URL || 'https://devhire.invalid' }}
+          tags: |
+            ${{ env.DOCKERHUB_IMAGE_NAME }}:${{ env.VERSION_TAG }}
+            ${{ env.DOCKERHUB_IMAGE_NAME }}:${{ github.sha }}
+          labels: |
+            org.opencontainers.image.title=devhire-${{ matrix.service }}
+            org.opencontainers.image.description=DevHire Cloud ${{ matrix.service }} image
+            org.opencontainers.image.url=${{ env.VCS_URL }}
+            org.opencontainers.image.documentation=${{ env.VCS_URL }}/blob/${{ github.sha }}/docs/container-images.md
+            org.opencontainers.image.source=${{ env.VCS_URL }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.version=${{ env.VERSION_TAG }}
+            org.opencontainers.image.created=${{ env.BUILD_CREATED }}
+            org.opencontainers.image.vendor=DevHire Cloud
+            org.opencontainers.image.authors=JasonTM17
+            org.opencontainers.image.licenses=MIT
+          cache-from: type=gha,scope=release-${{ matrix.service }}
+          cache-to: type=gha,scope=release-${{ matrix.service }},mode=max
           provenance: mode=max
           sbom: true
           push: true

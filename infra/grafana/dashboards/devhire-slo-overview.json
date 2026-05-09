@@ -376,6 +376,130 @@
       ],
       "title": "AI Tool Calls And Fallbacks",
       "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "drawStyle": "line", "fillOpacity": 10, "lineWidth": 2, "showPoints": "never" },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green" }, { "color": "orange", "value": 10 }, { "color": "red", "value": 20 }] },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 7, "w": 12, "x": 0, "y": 30 },
+      "id": 12,
+      "options": {
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "tooltip": { "mode": "multi", "sort": "none" }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
+          "editorMode": "code",
+          "expr": "sum by (status) (devhire_code_assessments_total)",
+          "legendFormat": "assessment {{status}}",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
+          "editorMode": "code",
+          "expr": "sum by (status) (devhire_code_submissions_total)",
+          "legendFormat": "submission {{status}}",
+          "range": true,
+          "refId": "B"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
+          "editorMode": "code",
+          "expr": "sum by (type) (devhire_code_review_risk_flags_total)",
+          "legendFormat": "risk {{type}}",
+          "range": true,
+          "refId": "C"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
+          "editorMode": "code",
+          "expr": "sum by (decision, status) (increase(devhire_code_review_decisions_total[10m]))",
+          "legendFormat": "decision {{decision}} {{status}}",
+          "range": true,
+          "refId": "D"
+        }
+      ],
+      "title": "Code Assessment Queue And Risk",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "drawStyle": "line", "fillOpacity": 10, "lineWidth": 2, "showPoints": "never" },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green" }, { "color": "orange", "value": 1 }, { "color": "red", "value": 3 }] },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 7, "w": 12, "x": 12, "y": 30 },
+      "id": 13,
+      "options": {
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "tooltip": { "mode": "multi", "sort": "none" }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
+          "editorMode": "code",
+          "expr": "sum by (language, status) (increase(devhire_code_grading_requests_total[10m]))",
+          "legendFormat": "grading {{language}} {{status}}",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(devhire_code_grading_latency_seconds_bucket[5m])))",
+          "legendFormat": "grading p95",
+          "range": true,
+          "refId": "B"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
+          "editorMode": "code",
+          "expr": "avg(devhire_code_grading_score)",
+          "legendFormat": "average score",
+          "range": true,
+          "refId": "C"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
+          "editorMode": "code",
+          "expr": "sum by (language, status) (increase(devhire_assessment_runner_requests_total[10m]))",
+          "legendFormat": "runner {{language}} {{status}}",
+          "range": true,
+          "refId": "D"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(devhire_assessment_runner_latency_seconds_bucket[5m])))",
+          "legendFormat": "runner p95",
+          "range": true,
+          "refId": "E"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
+          "editorMode": "code",
+          "expr": "increase(devhire_code_runner_client_failures_total[10m])",
+          "legendFormat": "runner client failures",
+          "range": true,
+          "refId": "F"
+        }
+      ],
+      "title": "Code Grading And Runner Health",
+      "type": "timeseries"
     }
   ],
   "refresh": "30s",

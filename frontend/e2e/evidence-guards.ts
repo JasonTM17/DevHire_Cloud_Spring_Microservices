@@ -27,6 +27,22 @@ export async function assertPrimaryEvidenceReady(page: Page) {
     expect(bodyText, "Assessment evidence must use the Stitch flagship challenge").toContain("Cloud Architecture Challenge");
     expect(bodyText, "Assessment evidence must not show stale outbox copy").not.toMatch(/Java outbox|OutboxRetryReviewer|pending outbox|retry reviewer/i);
   }
+  await page.waitForFunction(
+    () => {
+      const visibleImages = Array.from(document.images).filter((image) => {
+        const style = window.getComputedStyle(image);
+        const rect = image.getBoundingClientRect();
+        return style.display !== "none" && style.visibility !== "hidden" && rect.width > 0 && rect.height > 0;
+      });
+
+      return visibleImages.every((image) => image.complete && image.naturalWidth > 0 && image.naturalHeight > 0);
+    },
+    undefined,
+    { timeout: 10_000 }
+  );
+  await page.evaluate(async () => {
+    await Promise.all(Array.from(document.images).map((image) => image.decode().catch(() => undefined)));
+  });
 }
 
 export async function expectNoHorizontalOverflow(page: Page) {

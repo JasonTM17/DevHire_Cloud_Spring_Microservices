@@ -12,6 +12,11 @@ DevHire Cloud uses Prometheus, Grafana, Micrometer, OpenTelemetry, Loki, and Tem
 | AI assistant latency | p95 below 5 seconds over 5 minutes | `devhire_ai_chat_latency_seconds_bucket` |
 | AI assistant provider fallback | Fewer than 5 fallback answers over 15 minutes in non-demo environments | `devhire_ai_fallback_total` |
 | AI provider circuit health | Circuit breaker should remain closed outside provider incidents | `devhire_ai_provider_circuit_open` |
+| Code assessment grading reliability | Zero grading failures for 10 minutes | `devhire_code_grading_requests_total{status="failure"}` |
+| Code assessment review backlog | Submitted or auto-reviewed assessments should stay below 20 for 30 minutes | `devhire_code_assessments_total{status=~"SUBMITTED|AUTO_REVIEWED"}` |
+| Code assessment safety | Risk-flag backlog should stay below 10 submissions for 30 minutes | `devhire_code_review_risk_flags_total{type="any"}` |
+| Code grading latency | p95 below 1 second over 5 minutes | `devhire_code_grading_latency_seconds_bucket` |
+| Assessment runner health | Runner requests should complete without policy/client failures during normal assessment flow | `devhire_assessment_runner_requests_total`, `devhire_code_runner_client_failures_total` |
 | Recruitment funnel visibility | Application status metrics should be non-empty in seeded/runtime demos | `devhire_applications_total`, `devhire_application_status_transitions_total` |
 | Notification delivery backlog | Retryable email failures should stay below 25 rows for 30 minutes | `devhire_email_delivery_total{status="FAILED_RETRYABLE"}` |
 | Outbox backlog | Pending/failed/dead-letter backlog should stay below 50 rows per service | `devhire_outbox_backlog` |
@@ -51,6 +56,10 @@ Current alerts:
 - `DevHireAiFallbackSpike`
 - `DevHireAiProviderCircuitOpen`
 - `DevHireAiHigh5xxRate`
+- `DevHireCodeGradingFailures`
+- `DevHireCodeAssessmentReviewBacklogHigh`
+- `DevHireCodeRiskFlagBacklogHigh`
+- `DevHireCodeGradingLatencyHigh`
 
 Validate the rules locally:
 
@@ -85,6 +94,7 @@ The dashboard pack includes:
 - Outbox backlog and publish failures.
 - Audit action distribution.
 - AI assistant request rate, p95 latency, usage rows, tool calls, and Claude fallback count.
+- Code assessment queue, submission status, risk flags, employer decisions, grading p95 latency, runner requests, and runner client failures.
 
 The README operations screenshots for Prometheus and Grafana are rendered from the same repository-owned configuration instead of from a potentially empty live UI page. See [observability evidence](observability-evidence.md) for the screenshot generation and quality-gate policy.
 
@@ -100,6 +110,19 @@ AI assistant metrics are emitted by `ai-service`:
 - `devhire_ai_provider_circuit_opened_total`
 - `devhire_ai_conversations_total`
 - `devhire_ai_usage_events_total`
+
+Code assessment metrics are emitted by `application-service` and `assessment-runner-service`:
+
+- `devhire_code_assessments_total{status}`
+- `devhire_code_submissions_total{language,status}`
+- `devhire_code_grading_requests_total{language,status}`
+- `devhire_code_grading_latency_seconds_bucket`
+- `devhire_code_grading_score`
+- `devhire_code_review_risk_flags_total{type}`
+- `devhire_code_review_decisions_total{decision,status}`
+- `devhire_code_runner_client_failures_total{status}`
+- `devhire_assessment_runner_requests_total{language,status}`
+- `devhire_assessment_runner_latency_seconds_bucket`
 
 Recruitment domain metrics are emitted by service-owned modules:
 
@@ -128,7 +151,8 @@ Every chat request also emits audit/outbox activity:
 5. Use Loki logs with trace id/correlation id for the impacted service.
 6. If `DevHireOutboxPublishFailures` fires, inspect Kafka availability and the service `outbox_events` table for `FAILED` or `DEAD_LETTER` rows.
 7. If `DevHireAiProviderCircuitOpen` fires, check admin AI provider diagnostics, Anthropic key/configuration, outbound network policy, and recent provider errors.
-8. Roll back the newest deployment if the failure correlates with a release.
+8. If a code assessment alert fires, check `application-service`, `assessment-runner-service`, hidden-case migration data, runner client failures, and `/admin` assessment health before trusting candidate scores.
+9. Roll back the newest deployment if the failure correlates with a release.
 
 ## Review Commands
 

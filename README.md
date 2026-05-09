@@ -2,6 +2,7 @@
 
 [![CI](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/ci.yml/badge.svg)](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/ci.yml)
 [![Docker](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/docker.yml/badge.svg)](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/docker.yml)
+[![Release Images](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/release.yml/badge.svg)](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/release.yml)
 [![Security](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/security.yml/badge.svg)](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/security.yml)
 [![Terraform](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/terraform.yml/badge.svg)](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/terraform.yml)
 [![Docs](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/docs.yml/badge.svg)](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/docs.yml)
@@ -14,7 +15,7 @@ DevHire Cloud là portfolio production engineering cho một nền tảng tuyể
 |---|---|
 | Latest public release | [v0.5.1](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.5.1) |
 | Current development cycle | `0.6.0-SNAPSHOT` |
-| v0.6 Stitch app | PR #43 green; stacked v0.6.7 promotes code assessment into the flagship candidate grading, employer review, and admin health workflow |
+| v0.6 Stitch app | Merged into `master`; Code Assessment Studio is now the flagship candidate grading, employer review, and admin health workflow |
 | Branch governance | `master` protected, PR-based release flow |
 | Dependabot queue | 0 open PRs at latest cleanup scan |
 | v1 status | Roadmap and acceptance checklist only, not a released tag |
@@ -31,6 +32,7 @@ DevHire Cloud là portfolio production engineering cho một nền tảng tuyể
 | v0.6 Stitch redesign | [docs/ui-redesign-v0.6.md](docs/ui-redesign-v0.6.md) |
 | Architecture | [docs/architecture-review-index.md](docs/architecture-review-index.md) |
 | Service catalog | [docs/service-catalog.md](docs/service-catalog.md) |
+| Container images | [docs/container-images.md](docs/container-images.md) |
 | Security evidence | [docs/security-evidence.md](docs/security-evidence.md) |
 | Cloud readiness | [docs/cloud-readiness-review.md](docs/cloud-readiness-review.md) |
 | Production scorecard | [docs/production-engineering-scorecard.md](docs/production-engineering-scorecard.md) |
@@ -48,7 +50,7 @@ DevHire Cloud là portfolio production engineering cho một nền tảng tuyể
 | Code assessment | Deterministic rubric grading plus Judge0-compatible internal runner boundary, hidden/visible cases, integrity signals, employer review, admin health metrics |
 | Observability | Actuator, Prometheus, Grafana, Loki, Tempo, OpenTelemetry, domain KPI dashboards |
 | Security | JWT/RBAC, refresh token rotation, Gitleaks, Trivy, CodeQL, SBOM, protected `master` |
-| Delivery | Maven, Docker matrix, GitHub Actions, Helm, raw K8s, Argo CD, Terraform AWS blueprint |
+| Delivery | Maven, Docker matrix, GHCR/Docker Hub image publishing, GitHub Actions, Helm, raw K8s, Argo CD, Terraform AWS blueprint |
 
 ## v0.6 Full-App Product Surface
 
@@ -59,7 +61,7 @@ DevHire Cloud là portfolio production engineering cho một nền tảng tuyể
 | Admin/Ops | `/admin`, `/admin/ai`, code assessment health |
 | Platform | `/assistant`, `/platform/observability`, `/platform/cloud`, `/platform/releases` |
 
-The v0.6 work follows Stitch project `projects/5421325194779586117`. Primary screenshots are checked to avoid raw UUIDs, `UNKNOWN`, loading-only states, smoke labels, offline banners and fallback banners. The stacked v0.6.7 work turns Code Interview Studio into the flagship product feature: LeetCode-style prompt/examples/judge-case UX, deterministic rubric scoring, visible runner analysis, hidden server-side scoring, integrity/similarity signals, redacted list/detail boundaries, attempt metadata, code hash, rubric versioning, employer review dossier, and admin assessment health. The v0.7 boundary adds an internal `assessment-runner-service` so application-service remains the domain owner while isolated execution concerns stay behind a Judge0-compatible adapter.
+The v0.6 work follows Stitch project `projects/5421325194779586117` and is merged on `master`. Primary screenshots are checked to avoid raw UUIDs, `UNKNOWN`, loading-only states, smoke labels, offline banners and fallback banners. Code Interview Studio is the flagship product feature: LeetCode-style prompt/examples/judge-case UX, deterministic rubric scoring, visible runner analysis, hidden server-side scoring, integrity/similarity signals, redacted list/detail boundaries, attempt metadata, code hash, rubric versioning, employer review dossier, and admin assessment health. The runner boundary uses an internal `assessment-runner-service` so application-service remains the domain owner while isolated execution concerns stay behind a Judge0-compatible adapter.
 
 ## Cloud State Matrix
 
@@ -70,6 +72,10 @@ The v0.6 work follows Stitch project `projects/5421325194779586117`. Primary scr
 | Helm | Local/staging/prod/AWS values | `.\scripts\cloud-verify.ps1` |
 | Terraform AWS | Blueprint validate only, no AWS credentials required | `.\scripts\terraform-validate.ps1` |
 | GitOps | Argo CD samples targeting `master` | [deploy/gitops](deploy/gitops) |
+
+## Container Images
+
+Release images publish to GHCR as `ghcr.io/jasontm17/devhire/<service>:<tag>` with commit SHA tags, OCI labels, SBOM, and BuildKit provenance. Docker Hub mirrors live under `docker.io/nguyenson1710/devhire-cloud-<service>:<tag>` when `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` repository secrets are configured; the current preview set was also pushed locally through Docker Desktop. See [container images](docs/container-images.md).
 
 ## Run Locally
 

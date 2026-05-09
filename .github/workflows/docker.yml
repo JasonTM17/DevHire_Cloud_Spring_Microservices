@@ -1,11 +1,13 @@
 name: Docker Images
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
       - master
       - "codex/**"
+      - "container-*"
       - "v*"
   pull_request:
 
@@ -30,6 +32,7 @@ jobs:
           - notification-service
           - audit-service
           - ai-service
+          - assessment-runner-service
           - frontend
 
     steps:
@@ -61,14 +64,20 @@ jobs:
             VCS_URL=${{ steps.image-metadata.outputs.source }}
             BUILD_CREATED=${{ steps.image-metadata.outputs.created }}
             NEXT_PUBLIC_API_BASE_URL=${{ vars.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080' }}
-          tags: devhire/${{ matrix.service }}:${{ github.sha }}
+          tags: devhire-cloud/${{ matrix.service }}:${{ github.sha }}
           labels: |
             org.opencontainers.image.title=devhire-${{ matrix.service }}
             org.opencontainers.image.description=DevHire Cloud ${{ matrix.service }} image
+            org.opencontainers.image.url=${{ steps.image-metadata.outputs.source }}
+            org.opencontainers.image.documentation=${{ steps.image-metadata.outputs.source }}/blob/${{ github.sha }}/docs/container-images.md
             org.opencontainers.image.source=${{ steps.image-metadata.outputs.source }}
             org.opencontainers.image.revision=${{ github.sha }}
             org.opencontainers.image.version=${{ steps.image-metadata.outputs.version }}
             org.opencontainers.image.created=${{ steps.image-metadata.outputs.created }}
+            org.opencontainers.image.vendor=DevHire Cloud
+            org.opencontainers.image.authors=JasonTM17
             org.opencontainers.image.licenses=MIT
+          cache-from: type=gha,scope=docker-${{ matrix.service }}
+          cache-to: type=gha,scope=docker-${{ matrix.service }},mode=max
           push: false
           load: false

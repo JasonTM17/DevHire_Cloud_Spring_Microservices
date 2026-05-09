@@ -20,7 +20,7 @@ DevHire Cloud separates public portfolio releases from active development snapsh
 - Maven parent and all service modules must use the same snapshot version.
 - Frontend version matches the next release number without `-SNAPSHOT`.
 - Helm `version` tracks chart changes; Helm `appVersion` tracks the latest released application tag.
-- Docker and GHCR images are tagged by release tag and commit SHA.
+- GHCR and Docker Hub images are tagged by release tag and commit SHA.
 - Every release tag must have `docs/release-notes/<tag>.md`; the release workflow fails if the file is missing.
 - Release evidence for old tags stays in the repo for audit history, but reviewer-facing docs point to the latest release first.
 
@@ -30,7 +30,7 @@ DevHire Cloud separates public portfolio releases from active development snapsh
 2. Update Maven, frontend, Helm, changelog, release notes, and release evidence.
 3. Run docs, build, Docker, cloud, security, and frontend gates.
 4. Tag from a green `master` commit with `vX.Y.Z`.
-5. Let `.github/workflows/release.yml` publish GHCR images and create the GitHub Release from the matching release notes file.
+5. Let `.github/workflows/release.yml` publish GHCR images, optionally mirror Docker Hub images, and create the GitHub Release from the matching release notes file.
 6. Move `master` to the next development version after the release.
 
 ## Historical Evidence Policy

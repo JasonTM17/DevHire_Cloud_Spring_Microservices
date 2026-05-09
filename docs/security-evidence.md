@@ -25,9 +25,9 @@ Every backend service image and the Next.js frontend image now carries Open Cont
 - `org.opencontainers.image.created` records the UTC build timestamp;
 - `org.opencontainers.image.title`, `description`, and `licenses` make image inventory output readable for reviewers and scanners.
 
-The `Docker Images` and `Security` workflows pass these values during pull request and branch builds. The `Release Images` workflow publishes the same metadata to GHCR and tags every image by both release version and commit SHA. SBOM generation and Trivy scanning then attach to images that can be traced back to repository source, commit, and release evidence.
+The `Docker Images` and `Security` workflows pass these values during pull request and branch builds. The `Release Images` workflow publishes the same metadata to GHCR, optionally mirrors the same image set to Docker Hub, and tags every image by both release version and commit SHA. SBOM generation and Trivy scanning then attach to images that can be traced back to repository source, commit, and release evidence.
 
-Release images now request BuildKit provenance attestations and SBOM output during the GHCR publish workflow:
+Release images now request BuildKit provenance attestations and SBOM output during the registry publish workflow:
 
 - `provenance: mode=max` records source, build input, and commit metadata for release images;
 - `sbom: true` emits package inventory from the image build;

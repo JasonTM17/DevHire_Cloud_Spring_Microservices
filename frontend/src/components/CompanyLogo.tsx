@@ -23,7 +23,8 @@ export function CompanyLogo({ brand, size = "md" }: CompanyLogoProps) {
         <img
           alt=""
           src={brand.logoUrl}
-          loading="lazy"
+          loading="eager"
+          decoding="sync"
           referrerPolicy="no-referrer"
           onError={() => setFailed(true)}
         />
