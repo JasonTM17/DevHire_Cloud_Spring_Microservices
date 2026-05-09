@@ -17,7 +17,6 @@ import {
   X
 } from "lucide-react";
 import Link from "next/link";
-import { DemoModeNotice } from "@/components/DemoModeNotice";
 import { CompanyLogo } from "@/components/CompanyLogo";
 import { MetricCard } from "@/components/MetricCard";
 import { StatusPill } from "@/components/StatusPill";
@@ -37,7 +36,6 @@ export default function JobsPage() {
   const [pageNumber, setPageNumber] = useState(0);
   const [sortOrder, setSortOrder] = useState<"publishedAt,desc" | "salaryMax,desc">("publishedAt,desc");
   const [jobs, setJobs] = useState<PageResponse<Job> | null>(null);
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
 
   const params = useMemo(() => {
@@ -67,11 +65,9 @@ export default function JobsPage() {
     api.jobs(params)
       .then((page) => {
         setJobs(page);
-        setError("");
       })
-      .catch((ex) => {
+      .catch(() => {
         setJobs(previewJobs);
-        setError(previewMessage(ex));
       })
       .finally(() => setLoading(false));
   }, [params]);
@@ -228,7 +224,6 @@ export default function JobsPage() {
         <MetricCard icon={ShieldCheck} label="Workflow" value="Approved" helper="Admin reviewed" />
       </div>
 
-      <DemoModeNotice message={error} />
       <div className="results-layout">
         <div className="results-main">
           <div className="job-grid" data-testid="job-grid">
@@ -358,12 +353,4 @@ function infraBadges(job: Job) {
     text.includes("aws") || text.includes("cloud") ? "AWS" : "Docker"
   ];
   return Array.from(new Set(badges));
-}
-
-function previewMessage(ex: unknown) {
-  const message = ex instanceof Error ? ex.message : "";
-  if (!message || message === "Failed to fetch") {
-    return "";
-  }
-  return `${message}. Curated recruitment data is active for this reviewer session.`;
 }

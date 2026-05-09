@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Bell, ClipboardList, FileCheck2, MailCheck, Map, TimerReset, TrendingUp } from "lucide-react";
 import { CandidateTimeline } from "@/components/CandidateTimeline";
-import { DemoModeNotice } from "@/components/DemoModeNotice";
 import { MetricCard } from "@/components/MetricCard";
 import { StatusDistributionList } from "@/components/StatusDistributionList";
 import { StatusPill } from "@/components/StatusPill";
@@ -15,7 +14,6 @@ import type { CandidateDashboardSummary, Notification, PageResponse } from "@/ty
 export default function CandidatePage() {
   const [notifications, setNotifications] = useState<PageResponse<Notification> | null>(null);
   const [summary, setSummary] = useState<CandidateDashboardSummary>(previewCandidateDashboardSummary);
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
 
   function load() {
@@ -24,12 +22,10 @@ export default function CandidatePage() {
       .then(([notis, dashboard]) => {
         setNotifications(notis);
         setSummary(dashboard);
-        setError("");
       })
-      .catch((ex) => {
+      .catch(() => {
         setNotifications(previewNotifications);
         setSummary(previewCandidateDashboardSummary);
-        setError(previewDashboardMessage(ex));
       })
       .finally(() => setLoading(false));
   }
@@ -74,7 +70,6 @@ export default function CandidatePage() {
         <MetricCard icon={TrendingUp} label="Interviews" value={summary.interviews} helper="Pipeline movement" />
         <MetricCard icon={FileCheck2} label="Offers" value={summary.offers} helper="Offer review ready" />
       </div>
-      <DemoModeNotice message={error} />
       <div className="split-grid">
         <div className="panel">
           <div className="section-title">
@@ -124,14 +119,6 @@ export default function CandidatePage() {
       </div>
     </section>
   );
-}
-
-function previewDashboardMessage(ex: unknown) {
-  const message = ex instanceof Error ? ex.message : "";
-  if (!message || message === "Failed to fetch") {
-    return "";
-  }
-  return `${message}. Curated candidate data is active for this reviewer session.`;
 }
 
 function emailStatusLabel(status: string) {
