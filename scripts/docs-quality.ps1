@@ -155,6 +155,31 @@ try {
         }
     }
 
+    $primaryReviewFiles = @(
+        "README.md",
+        "docs/README_EN.md",
+        "docs/status.md",
+        "docs/REVIEW_EVIDENCE.md",
+        "docs/professional-review-map.md",
+        "docs/architecture-review-index.md",
+        "docs/production-readiness.md",
+        "docs/production-engineering-scorecard.md"
+    )
+    $staleReviewerPatterns = @(
+        "docs/release-evidence/v0.3.0.md",
+        "docs/release-evidence/v0.4.0.md",
+        "docs/runbooks/backup-restore.md",
+        "scan the 30-second review,"
+    )
+    foreach ($path in $primaryReviewFiles) {
+        $content = Get-Content -Raw -Encoding UTF8 $path
+        foreach ($pattern in $staleReviewerPatterns) {
+            if ($content.Contains($pattern)) {
+                throw "Primary reviewer document contains stale guidance '$pattern': $path"
+            }
+        }
+    }
+
     $demo = Get-Content -Raw -Encoding UTF8 "docs/demo-script.md"
     foreach ($expected in @("/assistant", "Claude", "AI_TOOL_EXECUTED", "scripts/reset-demo-data.ps1")) {
         if ($demo -notmatch [regex]::Escape($expected)) {

@@ -1,42 +1,62 @@
 # Production Readiness Notes
 
-DevHire Cloud is a portfolio system, but it intentionally models the checklist a production engineer would expect before handing a platform to another team.
+DevHire Cloud is a portfolio system, not a live customer SaaS. The readiness goal is therefore precise: make every production-shaped claim inspectable, repeatable, and scoped. This page summarizes what is already engineered, how it is verified, and what is intentionally not claimed.
 
-For the deliberately transparent list of what is still not proven in a live production environment, see [remaining gaps and roadmap](remaining-gaps-and-roadmap.md).
+For the transparent list of remaining real-production gaps, see [remaining gaps and roadmap](remaining-gaps-and-roadmap.md).
 
-## Runtime
+## Readiness Ledger
 
-- Every backend service exposes `/actuator/health`, readiness/liveness probes, and `/actuator/prometheus`.
-- Docker images are multi-stage and run as non-root users.
-- Docker Compose has PostgreSQL, Redis, Kafka, OpenSearch, Prometheus, Grafana, Loki, Tempo, OpenTelemetry Collector, services, and frontend.
-- The code-assessment path separates domain ownership (`application-service`) from isolated execution (`assessment-runner-service`).
-- Kubernetes and Helm manifests include probes, resources, HPA, PDB, NetworkPolicy, and secret references.
+| Area | Implemented posture | Verification |
+|---|---|---|
+| Runtime health | Every backend service exposes `/actuator/health`, readiness/liveness probes, and `/actuator/prometheus`. | `mvn -T1 verify`, `docker compose config --quiet`, runtime smoke scripts |
+| Container runtime | Multi-stage images run as non-root users and carry OCI metadata. | Docker workflow, [container images](container-images.md), Trivy image scans |
+| Local platform | Docker Compose includes PostgreSQL, Redis, Kafka, OpenSearch, Prometheus, Grafana, Loki, Tempo, OpenTelemetry Collector, backend services, and frontend. | `docker compose up -d --build`, `portfolio-verify.ps1 -Runtime` |
+| Code assessment isolation | `application-service` owns assignments, hidden tests, scoring, audit, and review; `assessment-runner-service` owns isolated execution adapter behavior. | [code assessment reviewer proof](code-assessment-reviewer-proof.md), focused service tests |
+| Kubernetes posture | Raw manifests and Helm values include probes, resources, HPA, PDB, NetworkPolicy, and secret references. | `cloud-verify.ps1`, `kubectl kustomize deploy/k8s` |
+| AWS posture | Terraform is apply-ready blueprint validation, not an unverified production claim. | `terraform-validate.ps1`, [cloud readiness review](cloud-readiness-review.md) |
 
-## Data
+## Data and Events
 
-- Each service owns a separate database.
-- Flyway handles schema and seed data.
-- Important uniqueness rules are enforced at database level.
-- Application status changes are transactional and retain history.
-- Outbox tables protect event publishing from partial failures.
+| Control | Posture |
+|---|---|
+| Service ownership | Each business service owns its own database/schema and Flyway migrations. |
+| Transaction boundaries | Application state changes are transactional and preserve status history. |
+| Database invariants | Important uniqueness and score/hash/version constraints are enforced at database level. |
+| Event reliability | Outbox tables protect event publishing from partial failures; consumers are idempotent. |
+| Demo data | Deterministic seed data supports reviewer flows without real customer data. |
 
 ## Security
 
-- Passwords are hashed with BCrypt.
-- Access tokens are short-lived JWTs.
-- Refresh tokens rotate and can be revoked.
-- Gateway strips spoofed identity headers before validating JWT.
-- Secrets are environment-driven and excluded by `.gitignore`.
-- CI scans for secrets and vulnerable dependencies.
+| Control | Posture |
+|---|---|
+| Identity | BCrypt passwords, short-lived JWT access tokens, refresh-token rotation, and revocation. |
+| Authorization | Role checks protect candidate, employer, and admin/ops routes; non-admin users cannot open Admin/Ops direct routes. |
+| Gateway hardening | The gateway strips spoofed identity headers before validating JWT. |
+| Secret handling | Secrets are environment-driven, ignored by repository hygiene checks, and never required for deterministic local fallback paths. |
+| Supply chain | CI runs Gitleaks, dependency review, CodeQL, SBOM generation, Trivy filesystem scans, and Trivy image scans. |
 
 ## Observability
 
-- Trace IDs flow through errors and logs.
-- Prometheus alert rules cover error rate, latency, service availability, JVM pressure, search latency, outbox failures, AI provider behavior, and code assessment grading/review risk.
-- Grafana dashboards are provisioned from repository files and include Gateway, service health, data capacity, outbox, search/AI, and code assessment runner health.
+| Signal | Posture |
+|---|---|
+| Tracing | Trace IDs flow through errors and logs. |
+| Metrics | Actuator and domain metrics cover gateway, recruitment, notification, audit, outbox, search, AI, and code assessment. |
+| Alerts | Prometheus rules cover error rate, latency, availability, JVM pressure, search latency, outbox failures, AI provider behavior, runner health, grading latency, and review risk. |
+| Dashboards | Grafana dashboards are provisioned from repository files and include Gateway, service health, data capacity, outbox, search/AI, and code assessment runner health. |
 
 ## Delivery
 
-- CI validates backend, frontend, Docker builds, security, Terraform, smoke flows, performance smoke, and browser E2E.
-- Release images can be published to GHCR on tag.
-- AWS Terraform is blueprint-safe and does not auto-apply in CI.
+| Gate | Posture |
+|---|---|
+| Backend | Maven verification and focused service tests. |
+| Frontend | TypeScript, production build, Playwright route matrix, mobile overflow checks, and Stitch pixel-diff evidence. |
+| Docker | Matrix builds for services and frontend, OCI labels, SBOM/provenance, GHCR canonical registry, Docker Hub mirror support. |
+| Cloud | Helm/raw Kubernetes/Terraform validation without automatic cloud apply. |
+| Governance | Protected `master`, PR-based flow, branch protection documented, docs quality and evidence audits. |
+
+## Explicit Non-Claims
+
+- No live customer traffic is claimed.
+- No external penetration test is claimed.
+- No production AWS account is claimed unless a credentialed deployment phase is run.
+- No webcam or screen-lock proctoring is claimed; code assessment anti-cheat focuses on server-owned scoring, hidden tests, runner isolation, audit metadata, integrity signals, and similarity posture.

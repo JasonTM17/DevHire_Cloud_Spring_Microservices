@@ -1,6 +1,15 @@
 # DevHire Cloud - Microservices Recruitment Platform
 
-DevHire Cloud is a Java 21 / Spring Boot 3.5 production engineering portfolio for a recruitment platform similar to a small ITviec or LinkedIn Jobs. It demonstrates real service boundaries, service-owned databases, Kafka/outbox eventing, OpenSearch, observability, Docker/Kubernetes/Terraform, CI/CD, security evidence, and a Claude Haiku AI assistant.
+DevHire Cloud is a production-engineering portfolio for a recruitment platform: Java 21, Spring Boot 3.5, Next.js, Kafka, OpenSearch, PostgreSQL, Redis, Docker, Kubernetes, Terraform, and a controlled Claude Haiku AI assistant. The repository is written for senior review: it emphasizes service boundaries, owned data, event reliability, observability, security, CI/CD, cloud readiness, and evidence that can be checked without trusting the README.
+
+## 30-Second Reviewer Brief
+
+| Question | Answer |
+|---|---|
+| What is being demonstrated? | A microservices hiring platform with candidate, employer, admin/ops, platform, AI, and code-assessment workflows. |
+| What is the flagship feature? | Code Assessment Studio: LeetCode-style candidate coding, visible runner analysis, hidden server-side tests, deterministic rubric scoring, integrity/similarity signals, employer review, and admin runner health. |
+| What is production-shaped? | Service-owned databases, Flyway migrations, Kafka/outbox, idempotent consumers, Prometheus/Grafana/Loki/Tempo/OTel, security scans, SBOM, Docker image publishing, Helm, raw Kubernetes, Argo CD, and AWS Terraform blueprint. |
+| What is not claimed? | This is not a live customer SaaS. AWS remains an apply-ready blueprint until a credentialed deployment phase is approved. |
 
 ## Public Repository Status
 
@@ -8,64 +17,69 @@ DevHire Cloud is a Java 21 / Spring Boot 3.5 production engineering portfolio fo
 |---|---|
 | Latest public release | [v0.5.1](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.5.1) |
 | Current development cycle | `0.6.0-SNAPSHOT` |
-| v0.6 Stitch app | Merged into `master`; Code Assessment Studio is now the flagship candidate grading, employer review, and admin health workflow |
-| Branch governance | Protected `master`, PR-based release flow |
-| Dependabot queue | 0 open PRs at the latest cleanup scan |
+| v0.6 Stitch app | Merged into `master`; Code Assessment Studio is the flagship candidate grading, employer review, and admin health workflow |
+| Default branch | `master`, protected and PR-governed |
+| Dependabot queue | 0 open PRs at latest cleanup scan |
 | v1 status | Roadmap and acceptance checklist only, not a released tag |
 
 ## Reviewer Quick Links
 
 | Need | Link |
 |---|---|
-| Vietnamese README | [../README.md](../README.md) |
-| Japanese README | [README_JA.md](README_JA.md) |
+| Root README | [../README.md](../README.md) |
+| Japanese docs | [README_JA.md](README_JA.md) |
 | Current status | [status.md](status.md) |
 | Evidence pack | [REVIEW_EVIDENCE.md](REVIEW_EVIDENCE.md) |
 | Code assessment proof | [code-assessment-reviewer-proof.md](code-assessment-reviewer-proof.md) |
-| v0.6 Stitch redesign | [ui-redesign-v0.6.md](ui-redesign-v0.6.md) |
-| Architecture | [architecture-review-index.md](architecture-review-index.md) |
+| Stitch redesign | [ui-redesign-v0.6.md](ui-redesign-v0.6.md) |
+| Architecture review | [architecture-review-index.md](architecture-review-index.md) |
 | Service catalog | [service-catalog.md](service-catalog.md) |
+| Container images | [container-images.md](container-images.md) |
 | Security evidence | [security-evidence.md](security-evidence.md) |
 | Cloud readiness | [cloud-readiness-review.md](cloud-readiness-review.md) |
 | Production scorecard | [production-engineering-scorecard.md](production-engineering-scorecard.md) |
 
-## Architecture Proof
+## Architecture and Operations Proof
 
-| Layer | Implementation |
+| Layer | Proof in this repository |
 |---|---|
-| Edge | Spring Cloud Gateway, JWT validation, CORS, rate limiting, centralized error response |
+| Edge | Spring Cloud Gateway, JWT validation, CORS, rate limiting, centralized error response, route metrics |
 | Core services | auth, user, company, job, application, assessment-runner, notification, audit, AI |
 | Data ownership | PostgreSQL database/schema per service, Flyway migrations, no shared JPA entities |
-| Messaging | Kafka events plus transactional outbox and idempotent consumers |
+| Messaging | Kafka domain events, transactional outbox, retry/dead-letter posture, idempotent consumers |
 | Search | OpenSearch adapter with PostgreSQL fallback |
-| AI | Claude Haiku assistant with citations, tool traces, safety guardrails, and metrics |
-| Code assessment | Deterministic rubric grading plus Judge0-compatible internal runner boundary, hidden/visible cases, integrity signals, employer review, admin health metrics |
-| Observability | Actuator, Prometheus, Grafana, Loki, Tempo, OpenTelemetry, domain KPI dashboards |
-| Security | JWT/RBAC, refresh token rotation, Gitleaks, Trivy, CodeQL, SBOM, protected `master` |
-| Delivery | Maven, Docker matrix, GitHub Actions, Helm, Kubernetes, Argo CD, AWS Terraform blueprint |
+| AI | Claude Haiku assistant with citations, tool traces, safety guardrails, deterministic fallback, metrics |
+| Code assessment | Internal Judge0-compatible runner boundary, visible/hidden cases, rubric scoring, integrity and similarity risk, audit metadata |
+| Observability | Actuator, Prometheus, Grafana, Loki, Tempo, OpenTelemetry, domain KPI dashboards and alert rules |
+| Security | JWT/RBAC, refresh-token rotation, gateway spoofing protection, Gitleaks, Trivy, CodeQL, SBOM, branch protection |
+| Delivery | Maven verification, Docker image matrix, GHCR/Docker Hub publishing, GitHub Actions, Helm, raw Kubernetes, Argo CD, Terraform AWS blueprint |
 
-## v0.6 Full-App Product Surface
+## v0.6 Product Surface
 
-| Area | Routes |
+| Area | Routes and workflows |
 |---|---|
 | Candidate | `/jobs`, `/jobs/[id]`, `/candidate`, applications, profile, code assessments, offers, interview prep, roadmap, skill analytics, community |
-| Employer | `/employer`, `/companies/[slug]`, code-review queue |
-| Admin/Ops | `/admin`, `/admin/ai`, code assessment health |
+| Employer | `/employer`, `/companies/[slug]`, code assessment review dossier |
+| Admin/Ops | `/admin`, `/admin/ai`, code-assessment health, AI operations, platform signals |
 | Platform | `/assistant`, `/platform/observability`, `/platform/cloud`, `/platform/releases` |
 
-The v0.6 implementation follows Stitch project `projects/5421325194779586117` and is merged on `master`. Primary screenshots are checked to avoid raw UUIDs, `UNKNOWN`, loading-only states, smoke labels, offline banners, and fallback banners. Code Assessment Studio is the flagship product feature: candidate coding workspace, visible runner cases, hidden server-side scoring, deterministic rubric scoring, integrity/similarity posture, redacted list/detail boundaries, attempt metadata, code hash, rubric versioning, employer review dossier, and admin assessment health. The runner boundary uses an internal `assessment-runner-service` with a Judge0-compatible adapter while `application-service` remains the domain owner.
+The v0.6 UI follows Stitch project `projects/5421325194779586117` and the "DevHire Cloud Operations" design system: dark navigation rail, light operational workspace, compact panels, 8px radius, Inter typography, dense tables, and restrained emerald/cobalt status language. Route-matrix screenshots are checked for broken assets, overflow, raw UUIDs, `UNKNOWN`, loading-only states, fallback banners, and smoke labels.
 
 ## Cloud State Matrix
 
 | Target | State | Verification |
 |---|---|---|
-| Docker Compose | Full local stack | `docker compose config --quiet` |
-| Raw Kubernetes | Renderable, no `latest`, includes `ai-service` | `kubectl kustomize deploy/k8s` |
-| Helm | Local/staging/prod/AWS values | `.\scripts\cloud-verify.ps1` |
-| Terraform AWS | Blueprint validate only, no AWS credentials required | `.\scripts\terraform-validate.ps1` |
+| Docker Compose | Full local stack for backend, frontend, data, messaging, and observability | `docker compose config --quiet` |
+| Raw Kubernetes | Renderable manifests, no `latest`, includes `ai-service` | `kubectl kustomize deploy/k8s` |
+| Helm | Local, staging, production, and AWS values | `.\scripts\cloud-verify.ps1` |
+| Terraform AWS | Apply-ready blueprint validation; no credentials required for CI validation | `.\scripts\terraform-validate.ps1` |
 | GitOps | Argo CD samples targeting `master` | [deploy/gitops](../deploy/gitops) |
 
-## Run Locally
+## Container Images
+
+Release images publish to GHCR as `ghcr.io/jasontm17/devhire/<service>:<tag>` with commit SHA tags, OCI labels, SBOM, and BuildKit provenance. Docker Hub mirrors are available as `docker.io/nguyenson1710/devhire-cloud-<service>:<tag>` when the Docker Hub secrets are configured. The current preview set was also pushed locally through Docker Desktop. See [container images](container-images.md).
+
+## Run and Verify Locally
 
 ```powershell
 docker compose up -d --build
@@ -96,7 +110,7 @@ Portfolio verification:
 | Employer | `employer@devhire.local` | `Employer@123456` |
 | Candidate | `candidate@devhire.local` | `Candidate@123456` |
 
-## Product Screenshots
+## Product Evidence
 
 | Jobs | Job Detail |
 |---|---|
@@ -114,7 +128,7 @@ Portfolio verification:
 |---|---|---|
 | ![Candidate applications](screenshots/stitch/candidate-applications.png) | ![Cloud](screenshots/stitch/platform-cloud.png) | ![Releases](screenshots/stitch/platform-releases.png) |
 
-| Assistant | Grafana SLO | Prometheus Rules |
+| AI Assistant | Grafana SLO | Prometheus Rules |
 |---|---|---|
 | ![Assistant](screenshots/assistant-page.png) | ![Grafana SLO](screenshots/ops-grafana-slo.png) | ![Prometheus rules](screenshots/ops-prometheus-rules.png) |
 
@@ -122,8 +136,8 @@ The full visual evidence set is machine-checked in [evidence-manifest.json](evid
 
 ## v1 Roadmap
 
-`v1.0.0` is not released. The v1 roadmap covers product UX, backend integration maturity, API/event compatibility, observability SLOs, deterministic data depth, cloud apply-ready evidence, and supply-chain hardening. See [v1 reviewer guide](v1-reviewer-guide.md), [v1 demo script](v1-demo-script.md), and [v1 production gap register](v1-production-gap-register.md).
+`v1.0.0` is not released. The v1 roadmap focuses on product UX depth, backend integration maturity, API/event compatibility, observability SLO maturity, deterministic data depth, cloud apply evidence, and supply-chain hardening. See [v1 reviewer guide](v1-reviewer-guide.md), [v1 demo script](v1-demo-script.md), and [v1 production gap register](v1-production-gap-register.md).
 
 ## Honest Scope
 
-This is a production engineering portfolio, not a live customer SaaS claim. AWS remains an apply-ready blueprint unless a separate credentialed cloud deployment phase is approved.
+DevHire Cloud is a production-engineering portfolio, not a claim of live customer traffic. It does not claim external penetration testing, a production AWS account, or real customer data. Secrets are not committed; cloud apply remains a separate, credentialed operation.
