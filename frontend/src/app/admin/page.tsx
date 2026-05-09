@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { Activity, Bot, Building2, CheckCircle2, ClipboardCheck, Gauge, RefreshCw, ScrollText, ShieldCheck } from "lucide-react";
 import { CompanyLogo } from "@/components/CompanyLogo";
-import { DemoModeNotice } from "@/components/DemoModeNotice";
 import { MetricCard } from "@/components/MetricCard";
 import { StatusPill, statusLabel } from "@/components/StatusPill";
 import { api } from "@/lib/api";
@@ -44,7 +43,7 @@ export default function AdminPage() {
         setSelectedJobId((current) => current || jobPage.content[0]?.id || previewJobs.content[0]?.id || "");
         setMessage("");
       })
-      .catch((ex) => {
+      .catch(() => {
         setCompanies(previewCompanies);
         setAudit(previewAuditLogs);
         setAiProvider(previewAiProviderStatus);
@@ -52,7 +51,7 @@ export default function AdminPage() {
         setCodeAssessmentSummary(previewCodeAssessmentSummary);
         setReviewJobs(previewJobs);
         setSelectedJobId(previewJobs.content[0]?.id ?? "");
-        setMessage(previewDashboardMessage(ex));
+        setMessage("");
       })
       .finally(() => setLoading(false));
   }
@@ -123,7 +122,7 @@ export default function AdminPage() {
         <MetricCard icon={Bot} label="AI mode" value={displayProviderMode(aiProvider?.mode ?? "REVIEWER_SAFE")} helper={aiProvider?.apiKeyConfigured ? "Claude API" : "Reviewer-safe preview"} />
       </div>
       {message && positiveMessage ? <p className="success">{message}</p> : null}
-      {message && !positiveMessage ? <DemoModeNotice message={message} /> : null}
+      {message && !positiveMessage ? <p className="error">{message}</p> : null}
       <div className="split-grid">
         <div className="panel">
           <div className="section-title">
@@ -275,14 +274,6 @@ export default function AdminPage() {
       </div>
     </section>
   );
-}
-
-function previewDashboardMessage(ex: unknown) {
-  const message = ex instanceof Error ? ex.message : "";
-  if (!message || message === "Failed to fetch") {
-    return "";
-  }
-  return `${message}. Curated admin control-plane data is active for this reviewer session.`;
 }
 
 function selectedJobTitle(jobs: Job[], id: string) {

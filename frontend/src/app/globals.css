@@ -869,8 +869,7 @@ textarea {
 .audit-item,
 .demo-account,
 .auth-brief,
-.pipeline-step,
-.demo-mode-banner {
+.pipeline-step {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--panel-muted);
@@ -879,8 +878,7 @@ textarea {
 .notification,
 .audit-item,
 .demo-account,
-.pipeline-step,
-.demo-mode-banner {
+.pipeline-step {
   padding: 14px;
 }
 
@@ -940,27 +938,6 @@ textarea {
   border: 1px solid #fed7aa;
   background: var(--warning-soft);
   color: var(--warning);
-}
-
-.demo-mode-banner {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  border-color: #bae6fd;
-  background: #f0f9ff;
-  color: #075985;
-}
-
-.demo-mode-banner strong,
-.demo-mode-banner span {
-  display: block;
-}
-
-.demo-mode-banner span {
-  margin-top: 2px;
-  color: #2b6680;
-  font-size: 13px;
-  line-height: 1.45;
 }
 
 .auth-brief {

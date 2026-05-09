@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Braces, Building2, ClipboardList, GitPullRequestArrow, Plus, Send, ShieldCheck, UsersRound } from "lucide-react";
 import { CompanyLogo } from "@/components/CompanyLogo";
-import { DemoModeNotice } from "@/components/DemoModeNotice";
 import { MetricCard } from "@/components/MetricCard";
 import { StatusPill, statusLabel } from "@/components/StatusPill";
 import { api } from "@/lib/api";
@@ -71,7 +70,7 @@ export default function EmployerPage() {
         setSelectedJobId((current) => current || jobPage.content[0]?.id || previewJobs.content[0]?.id || "");
         setMessage("");
       })
-      .catch((ex) => {
+      .catch(() => {
         setCompanies(previewCompanies);
         setJobs(previewJobs);
         setPipelineSummary(previewEmployerPipelineSummary);
@@ -79,7 +78,7 @@ export default function EmployerPage() {
         setSelectedReviewId(previewCodeAssessments[0]?.id ?? "");
         setSelectedReviewDetail(previewCodeAssessments[0] ?? null);
         setSelectedJobId(previewJobs.content[0]?.id ?? "");
-        setMessage(previewDashboardMessage(ex));
+        setMessage("");
       })
       .finally(() => setLoadingCompanies(false));
   }
@@ -142,15 +141,15 @@ export default function EmployerPage() {
   async function loadApplications() {
     if (!selectedJobId) {
       setApplications(previewApplications);
-      setMessage("Showing curated applicant preview for the selected portfolio job.");
+      setMessage("");
       return;
     }
     try {
       setApplications(await api.applicationsForJob(selectedJobId));
       setMessage("");
-    } catch (ex) {
+    } catch {
       setApplications(previewApplications);
-      setMessage(previewDashboardMessage(ex));
+      setMessage("");
     }
   }
 
@@ -163,11 +162,11 @@ export default function EmployerPage() {
       setSelectedReviewId((current) => current || nextAssessments[0]?.id || "");
       setSelectedReviewDetail(nextAssessments.find((item) => item.id === selectedReviewId) ?? nextAssessments[0] ?? null);
       setMessage("");
-    } catch (ex) {
+    } catch {
       setCodeAssessments(previewCodeAssessments);
       setSelectedReviewId(previewCodeAssessments[0]?.id ?? "");
       setSelectedReviewDetail(previewCodeAssessments[0] ?? null);
-      setMessage(previewDashboardMessage(ex));
+      setMessage("");
     } finally {
       setLoadingCodeReviews(false);
     }
@@ -249,7 +248,7 @@ export default function EmployerPage() {
         <MetricCard icon={ShieldCheck} label="Code reviews" value={codeAssessments.filter((item) => item.submittedAt).length} helper="Rubric-scored submissions" />
       </div>
       {message && isPositiveMessage(message) ? <p className="success">{message}</p> : null}
-      {message && !isPositiveMessage(message) ? <DemoModeNotice message={message} /> : null}
+      {message && !isPositiveMessage(message) ? <p className="error">{message}</p> : null}
       <div className="split-grid">
         <div className="panel">
           <div className="section-title">
@@ -504,14 +503,6 @@ export default function EmployerPage() {
       </div>
     </section>
   );
-}
-
-function previewDashboardMessage(ex: unknown) {
-  const message = ex instanceof Error ? ex.message : "";
-  if (!message || message === "Failed to fetch") {
-    return "";
-  }
-  return `${message}. Curated employer pipeline data is active for this reviewer session.`;
 }
 
 function isPositiveMessage(message: string) {

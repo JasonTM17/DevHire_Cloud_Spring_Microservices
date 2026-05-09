@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { BriefcaseBusiness, CheckCircle2, MapPin, SendHorizonal, ServerCog } from "lucide-react";
 import { useParams } from "next/navigation";
 import { CompanyLogo } from "@/components/CompanyLogo";
-import { DemoModeNotice } from "@/components/DemoModeNotice";
 import { StatusPill } from "@/components/StatusPill";
 import { api } from "@/lib/api";
 import { brandForJob } from "@/lib/demoCompanies";
@@ -19,7 +18,6 @@ export default function JobDetailPage() {
   const [coverLetter, setCoverLetter] = useState("I am interested in this role and available for interview.");
   const [hasSession, setHasSession] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [loadWarning, setLoadWarning] = useState("");
   const [message, setMessage] = useState("");
   const [messageTone, setMessageTone] = useState<"success" | "error">("success");
 
@@ -28,11 +26,9 @@ export default function JobDetailPage() {
     api.job(params.id)
       .then((value) => {
         setJob(value);
-        setLoadWarning("");
       })
-      .catch((ex) => {
+      .catch(() => {
         setJob(previewJobs.content.find((item) => item.id === params.id) ?? previewJobs.content[0]);
-        setLoadWarning(previewMessage(ex));
       });
   }, [params.id]);
 
@@ -86,7 +82,6 @@ export default function JobDetailPage() {
           </div>
           <StatusPill value={job.status} />
         </div>
-        <DemoModeNotice message={loadWarning} />
         <div className="dashboard-grid">
           <div className="panel">
             <p className="eyebrow">Salary band</p>
@@ -178,14 +173,6 @@ export default function JobDetailPage() {
 function salary(job: Job) {
   if (!job.salaryMin && !job.salaryMax) return "Negotiable";
   return `$${job.salaryMin ?? 0} - $${job.salaryMax ?? 0}`;
-}
-
-function previewMessage(ex: unknown) {
-  const message = ex instanceof Error ? ex.message : "";
-  if (!message || message === "Failed to fetch") {
-    return "";
-  }
-  return `${message}. Curated job detail data is active for this reviewer session.`;
 }
 
 function applicationMessage(ex: unknown) {
