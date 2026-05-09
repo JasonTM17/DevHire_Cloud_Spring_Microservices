@@ -7,16 +7,19 @@ This index is a guided path for a senior backend, DevOps, or solution architectu
 Open:
 
 - `README.md`
+- `docs/status.md`
+- `docs/REVIEW_EVIDENCE.md`
 - `docs/service-catalog.md`
 - `docs/evidence-manifest.md`
-- `docs/release-evidence/v0.3.0.md`
+- `docs/code-assessment-reviewer-proof.md`
 
 Look for:
 
 - microservice boundaries,
 - runtime evidence,
 - CI/security posture,
-- reviewer commands.
+- reviewer commands,
+- clear claims and explicit non-claims.
 
 ## 15-Minute Backend Review
 
@@ -27,6 +30,8 @@ Open:
 - `auth-service/src/main/java/com/devhire/auth/service/AuthService.java`
 - `job-service/src/main/java/com/devhire/job/service/JobService.java`
 - `application-service/src/main/java/com/devhire/application/service/ApplicationWorkflowService.java`
+- `application-service/src/main/java/com/devhire/application/service/CodeAssessmentService.java`
+- `assessment-runner-service/src/main/java/com/devhire/assessmentrunner`
 - `notification-service/src/main/java/com/devhire/notification/event`
 
 Ask:
@@ -36,6 +41,7 @@ Ask:
 - Are entities hidden behind DTOs?
 - Is idempotency handled for async consumers?
 - Are failure cases tested or smoke-tested?
+- Does the code-assessment domain keep hidden tests and score ownership on the server side?
 
 ## 15-Minute DevOps Review
 
@@ -44,12 +50,14 @@ Open:
 - `docker-compose.yml`
 - `.github/workflows/ci.yml`
 - `.github/workflows/docker.yml`
+- `.github/workflows/release.yml`
 - `.github/workflows/security.yml`
 - `.github/workflows/terraform.yml`
 - `deploy/helm/devhire-cloud`
 - `deploy/terraform/aws/TERRAFORM_DOCS.md`
 - `infra/prometheus/rules`
 - `infra/grafana/dashboards/devhire-slo-overview.json`
+- `docs/container-images.md`
 
 Ask:
 
@@ -58,6 +66,7 @@ Ask:
 - Does CI avoid cloud apply by default?
 - Are observability and SLO evidence present?
 - Can a reviewer run a small runtime proof locally?
+- Do image tags, SBOM, provenance, and registry docs trace back to source and CI?
 
 ## 15-Minute AI/Product Review
 
@@ -67,8 +76,12 @@ Open:
 - `ai-service/src/main/java/com/devhire/ai/tool`
 - `docs/ai-safety.md`
 - `docs/ai-evaluation.md`
+- `docs/ui-redesign-v0.6.md`
+- `docs/design-system.md`
 - `frontend/src/app/assistant/page.tsx`
+- `frontend/src/app/candidate/assessments/page.tsx`
 - `frontend/e2e/assistant-smoke.spec.ts`
+- `frontend/e2e/stitch-route-matrix.spec.ts`
 
 Ask:
 
@@ -76,6 +89,7 @@ Ask:
 - Are citations and tool traces visible?
 - Are unsafe prompts refused?
 - Is provider cost/secret policy documented?
+- Does the UI match the Stitch operations design system and avoid broken/loading/fallback evidence?
 
 ## Runtime Proof Path
 

@@ -83,7 +83,7 @@ Evidence:
 
 ## Cloud Readiness
 
-Cloud deployment is intentionally blueprint-safe. The repo contains Docker Compose for local runtime, Kubernetes raw manifests, Helm values for local/staging/prod/AWS, Argo CD samples, External Secrets wiring, and an AWS Terraform blueprint for EKS, RDS, Redis, MSK, OpenSearch, ECR, and Secrets Manager. v0.4.9 adds race-safe Terraform validation, stricter cloud policy auditing, explicit kubeconform CRD skip handling, AWS account bootstrap docs, and an apply runbook. No cloud apply or secret commit is required.
+Cloud deployment is intentionally blueprint-safe. The repo contains Docker Compose for local runtime, Kubernetes raw manifests, Helm values for local/staging/prod/AWS, Argo CD samples, External Secrets wiring, and an AWS Terraform blueprint for EKS, RDS, Redis, MSK, OpenSearch, ECR, and Secrets Manager. The current `master` branch includes race-safe Terraform validation, stricter cloud policy auditing, explicit kubeconform CRD skip handling, AWS account bootstrap docs, and an apply runbook. No cloud apply or secret commit is required.
 
 Evidence:
 
