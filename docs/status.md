@@ -23,10 +23,10 @@ This page is the single source of truth for the current public state of DevHire 
 |---|---|
 | Product UX | Reviewer-facing jobs workflow now includes richer filters, sorting, totals, and pagination. |
 | Stitch v0.6 | Merged into `master`; full-app screenshot evidence and flagship code assessment proof are part of the default branch. |
-| Code assessment | Candidate code submissions now have deterministic rubric scoring, attempt metadata, code hash, rubric versioning, redacted list/detail API boundaries, employer review dossier, admin health summary, due-date enforcement, and static risk flags. |
+| Code assessment | Candidate code submissions now use Java `CandidateSolution.solve(String input)`, visible/custom runs, hidden server-side grading, 75/25 runtime-plus-static scoring, attempt metadata, code hash, rubric versioning, redacted candidate boundaries, employer review dossier, admin runner health, due-date enforcement, and static risk flags. |
 | Frontend deploy | Optional Vercel preview path exists for `frontend/` only; Java backend deployment remains Docker/AWS blueprint. |
 | Gateway operations | Gateway emits route request, latency, and rate-limit metrics with Prometheus alert coverage. |
-| Runtime proof | Runtime observability smoke checks Gateway metrics plus domain KPI metrics when Docker is running. |
+| Runtime proof | Runtime observability smoke checks Gateway metrics plus domain KPI metrics when Docker is running; code-assessment smoke covers assign, visible/custom run, hidden submit redaction, employer review, and admin summary. |
 
 ## Reviewer Path
 

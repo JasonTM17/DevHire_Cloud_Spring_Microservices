@@ -31,7 +31,7 @@ Open:
 - `job-service/src/main/java/com/devhire/job/service/JobService.java`
 - `application-service/src/main/java/com/devhire/application/service/ApplicationWorkflowService.java`
 - `application-service/src/main/java/com/devhire/application/service/CodeAssessmentService.java`
-- `assessment-runner-service/src/main/java/com/devhire/assessmentrunner`
+- `assessment-runner-service/src/main/java/com/devhire/runner`
 - `notification-service/src/main/java/com/devhire/notification/event`
 
 Ask:
@@ -58,6 +58,7 @@ Open:
 - `infra/prometheus/rules`
 - `infra/grafana/dashboards/devhire-slo-overview.json`
 - `docs/container-images.md`
+- `docs/runbooks/code-assessment-runner.md`
 
 Ask:
 
@@ -98,6 +99,7 @@ Run:
 ```powershell
 docker compose up -d --build
 .\scripts\portfolio-verify.ps1 -Runtime -GatewayUrl http://localhost:8080
+.\scripts\code-assessment-smoke.ps1 -GatewayUrl http://localhost:8080
 .\scripts\evidence-audit.ps1
 ```
 
@@ -109,6 +111,7 @@ Expected proof:
 - AI eval passes in deterministic fallback mode when no Anthropic key is configured,
 - Mailpit captures email,
 - OpenAPI required paths exist,
+- code assessment assignment, visible/custom run, hidden submit redaction, employer review, and admin summary pass through Gateway,
 - k6 smoke has 0% failed requests for the lightweight local gate,
 - evidence manifest passes.
 

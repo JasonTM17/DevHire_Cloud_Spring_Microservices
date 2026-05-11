@@ -82,12 +82,22 @@
         { "method": "GET", "localPath": "/candidate/assessments", "gatewayPath": "/api/candidate/assessments", "surface": "candidate" },
         { "method": "GET", "localPath": "/candidate/code-assessments", "gatewayPath": "/api/candidate/code-assessments", "surface": "candidate", "responsePolicy": "owned-by-authenticated-candidate-redacted-list", "responseFields": ["attemptNumber", "codeHash", "graderVersion", "rubricVersion", "submittedCodePreview", "hasSubmittedCode"] },
         { "method": "GET", "localPath": "/candidate/code-assessments/{id}", "gatewayPath": "/api/candidate/code-assessments/{id}", "surface": "candidate", "responsePolicy": "owned-by-authenticated-candidate-detail" },
-        { "method": "POST", "localPath": "/candidate/code-assessments/{id}/submissions", "gatewayPath": "/api/candidate/code-assessments/{id}/submissions", "surface": "candidate", "requestPolicy": "deterministic-rubric-no-code-execution", "responseFields": ["attemptNumber", "codeHash", "graderVersion", "rubricVersion", "submittedCodePreview", "hasSubmittedCode"] },
+        { "method": "POST", "localPath": "/candidate/code-assessments/{id}/run", "gatewayPath": "/api/candidate/code-assessments/{id}/run", "surface": "candidate", "requestPolicy": "legacy-visible-run-alias-no-hidden-payloads", "responsePolicy": "owned-by-authenticated-candidate-visible-run" },
+        { "method": "POST", "localPath": "/candidate/code-assessments/{id}/runs", "gatewayPath": "/api/candidate/code-assessments/{id}/runs", "surface": "candidate", "requestPolicy": "visible-cases-only-no-hidden-payloads", "responsePolicy": "owned-by-authenticated-candidate-visible-run" },
+        { "method": "GET", "localPath": "/candidate/code-assessments/{id}/runs/{runId}", "gatewayPath": "/api/candidate/code-assessments/{id}/runs/{runId}", "surface": "candidate", "responsePolicy": "owned-by-authenticated-candidate-visible-run" },
+        { "method": "GET", "localPath": "/candidate/code-assessments/{id}/submissions", "gatewayPath": "/api/candidate/code-assessments/{id}/submissions", "surface": "candidate", "responsePolicy": "owned-by-authenticated-candidate-submission-history-hidden-redacted" },
+        { "method": "POST", "localPath": "/candidate/code-assessments/{id}/submit", "gatewayPath": "/api/candidate/code-assessments/{id}/submit", "surface": "candidate", "requestPolicy": "legacy-server-owned-submit-alias", "responseFields": ["attemptNumber", "codeHash", "graderVersion", "rubricVersion", "submittedCodePreview", "hasSubmittedCode"] },
+        { "method": "POST", "localPath": "/candidate/code-assessments/{id}/submissions", "gatewayPath": "/api/candidate/code-assessments/{id}/submissions", "surface": "candidate", "requestPolicy": "server-owned-runtime-and-rubric-scoring", "responseFields": ["attemptNumber", "codeHash", "graderVersion", "rubricVersion", "submittedCodePreview", "hasSubmittedCode"] },
         { "method": "GET", "localPath": "/employer/pipeline/summary", "gatewayPath": "/api/employer/pipeline/summary", "surface": "employer" },
+        { "method": "POST", "localPath": "/employer/applications/{applicationId}/code-assessments", "gatewayPath": "/api/employer/applications/{applicationId}/code-assessments", "surface": "employer", "requestPolicy": "owned-open-application-only", "responsePolicy": "assigned-or-existing-assignment" },
         { "method": "GET", "localPath": "/employer/code-assessments", "gatewayPath": "/api/employer/code-assessments", "surface": "employer", "queryParams": ["jobId", "status"], "responsePolicy": "owned-by-authenticated-employer-redacted-list", "responseFields": ["attemptNumber", "codeHash", "graderVersion", "rubricVersion", "submittedCodePreview", "hasSubmittedCode"] },
         { "method": "GET", "localPath": "/employer/code-assessments/{id}", "gatewayPath": "/api/employer/code-assessments/{id}", "surface": "employer", "responsePolicy": "owned-by-authenticated-employer-detail" },
+        { "method": "GET", "localPath": "/employer/code-assessments/{id}/submissions", "gatewayPath": "/api/employer/code-assessments/{id}/submissions", "surface": "employer", "responsePolicy": "owned-by-authenticated-employer-submission-history-hidden-aggregate" },
         { "method": "PATCH", "localPath": "/employer/code-assessments/{id}/review", "gatewayPath": "/api/employer/code-assessments/{id}/review", "surface": "employer" },
-        { "method": "GET", "localPath": "/admin/code-assessments/summary", "gatewayPath": "/api/admin/code-assessments/summary", "surface": "admin", "responsePolicy": "assessment-health-summary" }
+        { "method": "GET", "localPath": "/admin/code-assessments/summary", "gatewayPath": "/api/admin/code-assessments/summary", "surface": "admin", "responsePolicy": "assessment-health-summary" },
+        { "method": "GET", "localPath": "/admin/code-challenges", "gatewayPath": "/api/admin/code-challenges", "surface": "admin", "responsePolicy": "code-challenge-registry" },
+        { "method": "POST", "localPath": "/admin/code-challenges", "gatewayPath": "/api/admin/code-challenges", "surface": "admin", "requestPolicy": "validate-reference-before-active-publish" },
+        { "method": "PATCH", "localPath": "/admin/code-challenges/{id}", "gatewayPath": "/api/admin/code-challenges/{id}", "surface": "admin", "requestPolicy": "versioned-challenge-update" }
       ]
     },
     {
@@ -123,6 +133,15 @@
         { "method": "GET", "localPath": "/admin/ai/provider/status", "gatewayPath": "/api/admin/ai/provider/status", "surface": "admin" },
         { "method": "GET", "localPath": "/candidate/roadmap", "gatewayPath": "/api/candidate/roadmap", "surface": "candidate" },
         { "method": "GET", "localPath": "/candidate/interview-prep", "gatewayPath": "/api/candidate/interview-prep", "surface": "candidate" }
+      ]
+    },
+    {
+      "name": "assessment-runner-service",
+      "localPort": 8089,
+      "gatewayPrefix": null,
+      "endpoints": [
+        { "method": "POST", "localPath": "/internal/assessment-runs", "gatewayPath": null, "surface": "internal", "requestPolicy": "internal-token-only-runner-execution" },
+        { "method": "GET", "localPath": "/internal/assessment-runs/health", "gatewayPath": null, "surface": "internal", "responsePolicy": "runner-mode-health-and-fail-closed-reason" }
       ]
     }
   ],

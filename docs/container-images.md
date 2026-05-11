@@ -60,10 +60,9 @@ If `DOCKERHUB_NAMESPACE` is omitted, the workflow uses `DOCKERHUB_USERNAME` as t
 
 ## Current Preview Mirror
 
-The current preview images were mirrored through Docker Desktop under the `nguyenson1710` Docker Hub account. Each service has these tags:
+The current preview images were mirrored through Docker Desktop under the `nguyenson1710` Docker Hub account. The latest local mirror was refreshed on 2026-05-11 after the Java code-assessment grading completion. Each service has these tags:
 
-- `container-preview-74b4fb7`
-- `sha-74b4fb7`
+- `container-preview-20260511-code-assessment`
 - `v0.6.0-preview`
 
 ## Pull Examples
@@ -79,5 +78,25 @@ Docker Hub mirror examples:
 docker pull docker.io/nguyenson1710/devhire-cloud-api-gateway:v0.6.0-preview
 docker pull docker.io/nguyenson1710/devhire-cloud-frontend:v0.6.0-preview
 ```
+
+Verify the complete Docker Hub mirror set:
+
+```powershell
+.\scripts\dockerhub-image-verify.ps1 -Tags v0.6.0-preview,container-preview-20260511-code-assessment
+```
+
+Use the production compose sample with Docker Hub mirror names:
+
+```powershell
+$env:IMAGE_TAG = "container-preview-20260511-code-assessment"
+$env:DEVHIRE_RUNNER_MODE = "judge0"
+$env:JUDGE0_BASE_URL = "https://judge0.example.internal"
+docker compose -f deploy/docker-compose.prod.yml -f deploy/docker-compose.dockerhub.yml config --quiet
+.\scripts\code-assessment-smoke.ps1 -GatewayUrl http://localhost:8080
+```
+
+Production compose and Kubernetes profiles must keep `DEVHIRE_RUNNER_MODE=judge0` and require `JUDGE0_BASE_URL`; local deterministic mode is preview-only and should not be used for trusted candidate scoring.
+
+For assessment-specific verification after deployment, run the [code assessment runner runbook](runbooks/code-assessment-runner.md) smoke sequence: Gateway workflow smoke first, then live Judge0 smoke when the sandbox is reachable.
 
 After the first GHCR publish, package visibility may still need an owner review in GitHub Packages settings if the account defaults packages to private.

@@ -9,7 +9,7 @@ DevHire Cloud treats observability as reviewable source code, not as a decorativ
 | Prometheus alert rules | `infra/prometheus/rules/devhire-slo.yml` | `docs/screenshots/ops-prometheus-rules.png` |
 | Grafana SLO dashboard | `infra/grafana/dashboards/devhire-slo-overview.json` | `docs/screenshots/ops-grafana-slo.png` |
 | Domain dashboards | `infra/grafana/dashboards/devhire-*.json` | Verified by `scripts/observability-catalog-verify.ps1` |
-| Runtime domain metrics | `scripts/runtime-observability-smoke.ps1` | Scrapes service `/actuator/prometheus` endpoints when Docker is running |
+| Runtime domain metrics | `scripts/runtime-observability-smoke.ps1` | Scrapes service `/actuator/prometheus` endpoints, including `assessment-runner-service`, when Docker is running |
 | Prometheus scrape config | `infra/prometheus/prometheus.yml` | Verified by `promtool` and Docker Compose config |
 | Grafana provisioning | `infra/grafana/provisioning/` | Loaded by the local Docker stack |
 
@@ -38,6 +38,7 @@ Prometheus rules currently cover:
 - Code assessment employer-review backlog.
 - Code assessment risk-flag backlog.
 - Code grading p95 latency.
+- Assessment runner unavailable, fail-closed, compile-error, timeout, policy-blocked, queue-depth, sandbox-failure, latency, and client-failure alerts.
 
 Grafana panels currently cover:
 
@@ -59,7 +60,7 @@ Grafana panels currently cover:
 - AI tool calls and fallback count.
 - Code assessment queue by status.
 - Code submission volume and review decisions.
-- Code risk flags, grading latency, runner requests, and runner client failures.
+- Code risk flags, grading latency, runner verdict rates, queue depth, sandbox failures, and runner client failures.
 
 ## Domain Metric Catalog
 
@@ -68,14 +69,16 @@ The reviewer-facing observability gate checks that domain metrics are represente
 | Area | Metrics |
 |---|---|
 | Gateway | `devhire_gateway_requests_total`, `devhire_gateway_request_latency_seconds`, `devhire_gateway_rate_limited_total` |
-| Recruitment funnel | `devhire_applications_total`, `devhire_application_status_transitions_total` |
-| Notification delivery | `devhire_notifications_total`, `devhire_email_delivery_total` |
+| Recruitment funnel | `devhire_applications`, `devhire_application_status_transitions` |
+| Notification delivery | `devhire_notifications`, `devhire_email_delivery` |
 | Event reliability | `devhire_outbox_backlog`, `devhire_outbox_publish_failure_total` |
-| Audit | `devhire_audit_ingested_total` |
+| Audit | `devhire_audit_ingested` |
 | Search | `devhire_job_search_requests_total`, `devhire_job_search_latency_seconds` |
-| AI assistant | `devhire_ai_conversations_total`, `devhire_ai_usage_events_total`, `devhire_ai_fallback_total`, `devhire_ai_chat_latency_seconds`, `devhire_ai_provider_circuit_open` |
-| Code assessment | `devhire_code_assessments_total`, `devhire_code_submissions_total`, `devhire_code_grading_requests_total`, `devhire_code_grading_latency_seconds`, `devhire_code_grading_score`, `devhire_code_review_risk_flags_total`, `devhire_code_review_decisions_total`, `devhire_code_runner_client_failures_total`, `devhire_assessment_runner_requests_total`, `devhire_assessment_runner_latency_seconds` |
+| AI assistant | `devhire_ai_conversations`, `devhire_ai_usage_events`, `devhire_ai_fallback_total`, `devhire_ai_chat_latency_seconds`, `devhire_ai_provider_circuit_open` |
+| Code assessment | `devhire_code_assessments`, `devhire_code_submissions`, `devhire_code_grading_requests_total`, `devhire_code_grading_latency_seconds`, `devhire_code_grading_score`, `devhire_code_review_risk_flags`, `devhire_code_review_decisions_total`, `devhire_code_runner_client_failures_total`, `devhire_assessment_runner_requests_total{language,status,verdict}`, `devhire_assessment_runner_latency_seconds`, `devhire_assessment_runner_queue_depth`, `devhire_assessment_runner_sandbox_failures_total{reason}`, `devhire_assessment_runner_fail_closed`, `devhire_assessment_runner_judge0_configured` |
 | Runtime capacity | `hikaricp_connections_active`, `hikaricp_connections_max`, `jvm_memory_used_bytes` |
+
+For code-assessment incident handling, see the [code assessment runner runbook](runbooks/code-assessment-runner.md). It maps fail-closed, unavailable, compile-error, timeout, policy-blocked, queue-depth, sandbox-failure, and client-failure alerts to first checks and recovery steps.
 
 ## Regeneration
 
