@@ -119,7 +119,7 @@ groups:
           description: '{{ $labels.service }} has an outbox backlog in {{ $labels.status }}. Check Kafka, publisher retries, and dead-letter runbooks.'
 
       - alert: DevHireEmailRetryBacklogHigh
-        expr: sum(devhire_email_delivery_total{status="FAILED_RETRYABLE"}) > 25
+        expr: sum(devhire_email_delivery{status="FAILED_RETRYABLE"}) > 25
         for: 30m
         labels:
           severity: warning
@@ -220,7 +220,7 @@ groups:
           description: Deterministic code grading failed for submitted assessments. Check application-service logs and grader/rubric deployment changes.
 
       - alert: DevHireCodeAssessmentReviewBacklogHigh
-        expr: sum(devhire_code_assessments_total{status=~"SUBMITTED|AUTO_REVIEWED"}) > 20
+        expr: sum(devhire_code_assessments{status=~"SUBMITTED|REVIEWED|AUTO_REVIEWED"}) > 20
         for: 30m
         labels:
           severity: warning
@@ -230,8 +230,111 @@ groups:
           summary: DevHire code assessment review backlog is high
           description: Candidate submissions are waiting for employer review. Check reviewer staffing, queue filters, and assessment due-date workflow.
 
+      - alert: DevHireAssessmentRunnerUnavailableSpike
+        expr: increase(devhire_assessment_runner_requests_total{verdict="runner_unavailable"}[10m]) > 0
+        for: 5m
+        labels:
+          severity: critical
+          service: assessment-runner-service
+          slo: assessment-availability
+        annotations:
+          summary: DevHire assessment runner unavailable verdicts detected
+          description: Candidate code submissions are failing closed because the runner is unavailable. Check Judge0 connectivity, internal token routing, and assessment-runner-service readiness.
+
+      - alert: DevHireAssessmentRunnerFailClosed
+        expr: max(devhire_assessment_runner_fail_closed) > 0
+        for: 5m
+        labels:
+          severity: critical
+          service: assessment-runner-service
+          slo: assessment-availability
+        annotations:
+          summary: DevHire assessment runner is fail-closed
+          description: Server-side code grading is intentionally unavailable or Judge0 configuration is missing. Production must not fall back to deterministic scoring.
+
+      - alert: DevHireAssessmentRunnerCompileErrorSpike
+        expr: increase(devhire_assessment_runner_requests_total{verdict="compile_error"}[15m]) > 5
+        for: 10m
+        labels:
+          severity: warning
+          service: assessment-runner-service
+          slo: assessment-quality
+        annotations:
+          summary: DevHire compile-error verdicts are elevated
+          description: A spike in compile errors can indicate a broken starter contract, stale challenge copy, or Judge0 Java harness regression.
+
+      - alert: DevHireAssessmentRunnerTimeoutSpike
+        expr: increase(devhire_assessment_runner_requests_total{verdict="time_limit_exceeded"}[15m]) > 3
+        for: 10m
+        labels:
+          severity: warning
+          service: assessment-runner-service
+          slo: assessment-latency
+        annotations:
+          summary: DevHire code assessment timeouts are elevated
+          description: Candidate submissions are timing out more often than expected. Review challenge limits, Judge0 queue latency, and malicious/infinite-loop submissions.
+
+      - alert: DevHireAssessmentRunnerPolicyBlockedSpike
+        expr: increase(devhire_assessment_runner_requests_total{verdict="policy_blocked"}[15m]) > 3
+        for: 10m
+        labels:
+          severity: warning
+          service: assessment-runner-service
+          slo: assessment-safety
+        annotations:
+          summary: DevHire code assessment policy blocks are elevated
+          description: Sandbox policy is blocking candidate submissions. Review risky code patterns and confirm policy rules still match the Java solve contract.
+
+      - alert: DevHireAssessmentRunnerQueueDepthHigh
+        expr: max(devhire_assessment_runner_queue_depth) > 10
+        for: 10m
+        labels:
+          severity: warning
+          service: assessment-runner-service
+          slo: assessment-latency
+        annotations:
+          summary: DevHire assessment runner queue depth is high
+          description: The runner queue is backing up. Check Judge0 capacity, polling latency, and assessment-runner-service replicas.
+
+      - alert: DevHireAssessmentRunnerLatencyHigh
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (le) (rate(devhire_assessment_runner_latency_seconds_bucket[5m]))
+          ) > 3
+        for: 10m
+        labels:
+          severity: warning
+          service: assessment-runner-service
+          slo: assessment-latency
+        annotations:
+          summary: DevHire assessment runner p95 latency is high
+          description: Code execution latency is above the expected budget. Check Judge0 queue, network, and sandbox polling behavior.
+
+      - alert: DevHireAssessmentRunnerSandboxFailures
+        expr: increase(devhire_assessment_runner_sandbox_failures_total[10m]) > 0
+        for: 5m
+        labels:
+          severity: warning
+          service: assessment-runner-service
+          slo: assessment-safety
+        annotations:
+          summary: DevHire assessment runner sandbox failures detected
+          description: Sandbox execution failed or policy blocked candidate code. Check runner logs and the candidate evidence trail before review decisions.
+
+      - alert: DevHireCodeRunnerClientFailures
+        expr: increase(devhire_code_runner_client_failures_total[10m]) > 0
+        for: 5m
+        labels:
+          severity: warning
+          service: application-service
+          slo: assessment-availability
+        annotations:
+          summary: DevHire application-service runner client failures detected
+          description: application-service could not call assessment-runner-service. Check Gateway routes, service discovery, internal tokens, and runner health.
+
       - alert: DevHireCodeRiskFlagBacklogHigh
-        expr: sum(devhire_code_review_risk_flags_total{type="any"}) > 10
+        expr: sum(devhire_code_review_risk_flags{type="any"}) > 10
         for: 30m
         labels:
           severity: warning

@@ -33,3 +33,13 @@ patches:
       - op: replace
         path: /spec/rules/0/host
         value: devhire.local
+  - target:
+      kind: ConfigMap
+      name: devhire-config
+    patch: |-
+      - op: replace
+        path: /data/DEVHIRE_RUNNER_MODE
+        value: deterministic
+      - op: replace
+        path: /data/JUDGE0_BASE_URL
+        value: ""

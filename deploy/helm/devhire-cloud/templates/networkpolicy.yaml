@@ -8,8 +8,15 @@ metadata:
 {{ include "devhire.labels" . | nindent 4 }}
 spec:
   podSelector:
-    matchLabels:
-      app.kubernetes.io/part-of: devhire-cloud
+    matchExpressions:
+      - key: app.kubernetes.io/part-of
+        operator: In
+        values:
+          - devhire-cloud
+      - key: app.kubernetes.io/name
+        operator: NotIn
+        values:
+          - assessment-runner-service
   policyTypes:
     - Ingress
     - Egress
@@ -39,4 +46,35 @@ spec:
           port: 587
         - protocol: TCP
           port: 443
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: devhire-assessment-runner-runtime
+  namespace: {{ .Values.global.namespace }}
+  labels:
+{{ include "devhire.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: assessment-runner-service
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: application-service
+      ports:
+        - protocol: TCP
+          port: 8089
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: devhire-platform
+      ports:
+        - protocol: TCP
+          port: 2358
 {{- end }}

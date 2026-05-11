@@ -40,6 +40,9 @@ images:
   - name: devhire/ai-service
     newName: ghcr.io/jasontm17/devhire/ai-service
     newTag: sha-REPLACE_WITH_GIT_SHA
+  - name: devhire/assessment-runner-service
+    newName: ghcr.io/jasontm17/devhire/assessment-runner-service
+    newTag: sha-REPLACE_WITH_GIT_SHA
   - name: devhire/frontend
     newName: ghcr.io/jasontm17/devhire/frontend
     newTag: sha-REPLACE_WITH_GIT_SHA

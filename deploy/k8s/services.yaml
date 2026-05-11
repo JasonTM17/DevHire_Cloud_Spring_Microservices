@@ -917,3 +917,82 @@ spec:
     - name: http
       port: 8088
       targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: assessment-runner-service
+  labels:
+    app.kubernetes.io/name: assessment-runner-service
+    app.kubernetes.io/part-of: devhire-cloud
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: assessment-runner-service
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: assessment-runner-service
+        app.kubernetes.io/part-of: devhire-cloud
+    spec:
+      serviceAccountName: devhire-service
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: assessment-runner-service
+          image: devhire/assessment-runner-service:sha-REPLACE_WITH_GIT_SHA
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8089
+          envFrom:
+            - configMapRef:
+                name: devhire-config
+          env:
+            - name: DEVHIRE_GATEWAY_INTERNAL_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: devhire-secrets
+                  key: DEVHIRE_GATEWAY_INTERNAL_TOKEN
+          resources:
+            requests:
+              cpu: 150m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 20
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: assessment-runner-service
+  labels:
+    app.kubernetes.io/name: assessment-runner-service
+    app.kubernetes.io/part-of: devhire-cloud
+spec:
+  selector:
+    app.kubernetes.io/name: assessment-runner-service
+  ports:
+    - name: http
+      port: 8089
+      targetPort: http

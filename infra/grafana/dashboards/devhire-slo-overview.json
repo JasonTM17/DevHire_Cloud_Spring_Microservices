@@ -398,7 +398,7 @@
         {
           "datasource": { "type": "prometheus", "uid": "Prometheus" },
           "editorMode": "code",
-          "expr": "sum by (status) (devhire_code_assessments_total)",
+          "expr": "sum by (status) (devhire_code_assessments)",
           "legendFormat": "assessment {{status}}",
           "range": true,
           "refId": "A"
@@ -406,7 +406,7 @@
         {
           "datasource": { "type": "prometheus", "uid": "Prometheus" },
           "editorMode": "code",
-          "expr": "sum by (status) (devhire_code_submissions_total)",
+          "expr": "sum by (status) (devhire_code_submissions)",
           "legendFormat": "submission {{status}}",
           "range": true,
           "refId": "B"
@@ -414,7 +414,7 @@
         {
           "datasource": { "type": "prometheus", "uid": "Prometheus" },
           "editorMode": "code",
-          "expr": "sum by (type) (devhire_code_review_risk_flags_total)",
+          "expr": "sum by (type) (devhire_code_review_risk_flags)",
           "legendFormat": "risk {{type}}",
           "range": true,
           "refId": "C"
@@ -476,8 +476,8 @@
         {
           "datasource": { "type": "prometheus", "uid": "Prometheus" },
           "editorMode": "code",
-          "expr": "sum by (language, status) (increase(devhire_assessment_runner_requests_total[10m]))",
-          "legendFormat": "runner {{language}} {{status}}",
+          "expr": "sum by (language, status, verdict) (increase(devhire_assessment_runner_requests_total[10m]))",
+          "legendFormat": "runner {{language}} {{status}} {{verdict}}",
           "range": true,
           "refId": "D"
         },
@@ -496,6 +496,30 @@
           "legendFormat": "runner client failures",
           "range": true,
           "refId": "F"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
+          "editorMode": "code",
+          "expr": "max(devhire_assessment_runner_queue_depth)",
+          "legendFormat": "runner queue depth",
+          "range": true,
+          "refId": "G"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
+          "editorMode": "code",
+          "expr": "sum by (reason) (increase(devhire_assessment_runner_sandbox_failures_total[10m]))",
+          "legendFormat": "sandbox failure {{reason}}",
+          "range": true,
+          "refId": "H"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
+          "editorMode": "code",
+          "expr": "max(devhire_assessment_runner_fail_closed)",
+          "legendFormat": "runner fail-closed",
+          "range": true,
+          "refId": "I"
         }
       ],
       "title": "Code Grading And Runner Health",
