@@ -35,7 +35,8 @@ See [status.md](status.md) for the single source of truth.
 | Code assessment flagship | [code-assessment-reviewer-proof.md](code-assessment-reviewer-proof.md) documents the 5-minute flow: candidate runs visible cases, submits code, hidden tests score server-side, integrity/similarity risk appears, employer reviews, and admin sees runner health. |
 | Branch governance | [pr-stack-v0.6.md](pr-stack-v0.6.md) records the completed v0.6 merge and branch cleanup; `master` protection is restored. |
 | Gateway observability | `api-gateway` emits `devhire_gateway_requests_total`, `devhire_gateway_request_latency_seconds`, and `devhire_gateway_rate_limited_total` by route/status. |
-| Runtime observability smoke | `runtime-observability-smoke.ps1` now checks Gateway custom metrics together with recruitment, notification, audit, search, AI, and outbox metrics. |
+| Code assessment runtime smoke | `code-assessment-smoke.ps1` exercises the Gateway path for employer assignment, candidate visible/custom run, server-side hidden submit, redaction checks, employer review, and admin summary. |
+| Runtime observability smoke | `runtime-observability-smoke.ps1` now checks Gateway custom metrics together with recruitment, notification, audit, search, AI, outbox, and assessment-runner metrics. |
 | SLO alerts | Prometheus rules include Gateway route p95 latency and route-level rate-limit spike alerts. |
 | Stitch visual QA | Playwright is the official visual evidence path; Browser Use is optional for local visual inspection when the in-app browser runtime is available. v0.6.7 adds route-matrix screenshots, broader mobile checks, refreshed Stitch evidence, and a shared primary-evidence denylist. |
 
@@ -67,6 +68,7 @@ Runtime proof when Docker is available:
 
 ```powershell
 docker compose up -d --build
+.\scripts\code-assessment-smoke.ps1 -GatewayUrl http://localhost:8080
 .\scripts\runtime-observability-smoke.ps1 -GatewayUrl http://localhost:8080
 .\scripts\portfolio-runtime-report.ps1 -GatewayUrl http://localhost:8080
 ```
@@ -81,7 +83,7 @@ docker compose up -d --build
 | Operations are observable | Prometheus rules, Grafana dashboards, Loki/Tempo/OTel, [observability evidence](observability-evidence.md) |
 | Domain runtime data is observable | Recruitment funnel, notification delivery, audit ingestion, outbox, search, and AI metrics, [SLO docs](slo.md) |
 | AI is controlled | Claude Haiku provider config, deterministic fallback, citations, tool traces, [AI safety](ai-safety.md) |
-| Candidate code grading is reviewer-safe | Deterministic static rubric, redacted list/detail API boundary, audit metadata, and [code assessment reviewer proof](code-assessment-reviewer-proof.md) |
+| Candidate code grading is reviewer-safe | Server-side Java runner boundary, hidden redaction, 75/25 runtime-plus-static scoring, audit metadata, runner health, and [code assessment reviewer proof](code-assessment-reviewer-proof.md) |
 | Cloud is blueprint-safe | Helm, Argo CD, AWS Terraform blueprint, External Secrets, race-safe validation, [cloud completion scorecard](cloud-completion-scorecard.md) |
 | Gaps are explicit | [Remaining gaps and roadmap](remaining-gaps-and-roadmap.md) separates portfolio evidence from real-production follow-ups |
 | v1 path is explicit | [v1 reviewer guide](v1-reviewer-guide.md), [v1 demo script](v1-demo-script.md), and [v1 acceptance checklist](release-evidence/v1.0.0.md) define future acceptance |

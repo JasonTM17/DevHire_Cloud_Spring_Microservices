@@ -15,6 +15,7 @@
         "company-service/pom.xml",
         "job-service/pom.xml",
         "application-service/pom.xml",
+        "assessment-runner-service/pom.xml",
         "notification-service/pom.xml",
         "audit-service/pom.xml",
         "ai-service/pom.xml"
@@ -25,6 +26,7 @@
       "description": "Local runtime, observability, and deployment blueprints are documented and executable.",
       "requiredPaths": [
         "docker-compose.yml",
+        "deploy/docker-compose.dockerhub.yml",
         ".env.example",
         "infra/prometheus/prometheus.yml",
         "infra/grafana/dashboards/devhire-slo-overview.json",
@@ -42,7 +44,10 @@
         "scripts/portfolio-demo-evidence.ps1",
         "scripts/runtime-reliability.ps1",
         "scripts/runtime-evidence-summary.ps1",
+        "scripts/runtime-observability-smoke.ps1",
         "scripts/api-smoke.ps1",
+        "scripts/code-assessment-smoke.ps1",
+        "scripts/judge0-smoke.ps1",
         "scripts/ai-eval.ps1",
         "scripts/email-smoke.ps1",
         "scripts/openapi-verify.ps1",
@@ -75,6 +80,7 @@
         "scripts/cloud-verify.ps1",
         "scripts/cloud-policy-audit.ps1",
         "scripts/cloud-evidence-summary.ps1",
+        "scripts/dockerhub-image-verify.ps1",
         "scripts/v1-release-verify.ps1",
         "scripts/v1-runtime-evidence.ps1",
         "scripts/v1-cloud-evidence.ps1",
@@ -125,6 +131,9 @@
         "docs/runtime-acceptance-matrix.md",
         "docs/runtime-evidence-v0.4.md",
         "docs/observability-evidence.md",
+        "docs/slo.md",
+        "docs/security.md",
+        "docs/container-images.md",
         "docs/repository-hygiene.md",
         "docs/production-readiness.md",
         "docs/cloud-readiness-review.md",
@@ -215,6 +224,7 @@
         "docs/runbooks/opensearch-degradation.md",
         "docs/runbooks/smtp-provider-outage.md",
         "docs/runbooks/ai-provider-outage.md",
+        "docs/runbooks/code-assessment-runner.md",
         "docs/runbooks/database-restore-drill.md",
         "docs/runbooks/backup-restore.md"
       ]

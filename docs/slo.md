@@ -13,12 +13,12 @@ DevHire Cloud uses Prometheus, Grafana, Micrometer, OpenTelemetry, Loki, and Tem
 | AI assistant provider fallback | Fewer than 5 fallback answers over 15 minutes in non-demo environments | `devhire_ai_fallback_total` |
 | AI provider circuit health | Circuit breaker should remain closed outside provider incidents | `devhire_ai_provider_circuit_open` |
 | Code assessment grading reliability | Zero grading failures for 10 minutes | `devhire_code_grading_requests_total{status="failure"}` |
-| Code assessment review backlog | Submitted or auto-reviewed assessments should stay below 20 for 30 minutes | `devhire_code_assessments_total{status=~"SUBMITTED|AUTO_REVIEWED"}` |
-| Code assessment safety | Risk-flag backlog should stay below 10 submissions for 30 minutes | `devhire_code_review_risk_flags_total{type="any"}` |
+| Code assessment review backlog | Submitted or reviewed assessments should stay below 20 for 30 minutes | `devhire_code_assessments{status=~"SUBMITTED|REVIEWED|AUTO_REVIEWED"}` |
+| Code assessment safety | Risk-flag backlog should stay below 10 submissions for 30 minutes | `devhire_code_review_risk_flags{type="any"}` |
 | Code grading latency | p95 below 1 second over 5 minutes | `devhire_code_grading_latency_seconds_bucket` |
-| Assessment runner health | Runner requests should complete without policy/client failures during normal assessment flow | `devhire_assessment_runner_requests_total`, `devhire_code_runner_client_failures_total` |
-| Recruitment funnel visibility | Application status metrics should be non-empty in seeded/runtime demos | `devhire_applications_total`, `devhire_application_status_transitions_total` |
-| Notification delivery backlog | Retryable email failures should stay below 25 rows for 30 minutes | `devhire_email_delivery_total{status="FAILED_RETRYABLE"}` |
+| Assessment runner health | Runner requests should complete without compile spikes, timeouts, unavailable verdicts, policy failures, client failures, or fail-closed configuration drift during normal assessment flow | `devhire_assessment_runner_requests_total{status,verdict}`, `devhire_assessment_runner_sandbox_failures_total`, `devhire_code_runner_client_failures_total`, `/internal/assessment-runs/health` |
+| Recruitment funnel visibility | Application status metrics should be non-empty in seeded/runtime demos | `devhire_applications`, `devhire_application_status_transitions` |
+| Notification delivery backlog | Retryable email failures should stay below 25 rows for 30 minutes | `devhire_email_delivery{status="FAILED_RETRYABLE"}` |
 | Outbox backlog | Pending/failed/dead-letter backlog should stay below 50 rows per service | `devhire_outbox_backlog` |
 | Service health | All service scrape targets available | Prometheus `up{job="devhire-services"}` |
 | Event reliability | Zero outbox publish failures for 10 minutes | `devhire_outbox_publish_failure_total` |
@@ -60,6 +60,15 @@ Current alerts:
 - `DevHireCodeAssessmentReviewBacklogHigh`
 - `DevHireCodeRiskFlagBacklogHigh`
 - `DevHireCodeGradingLatencyHigh`
+- `DevHireAssessmentRunnerUnavailableSpike`
+- `DevHireAssessmentRunnerFailClosed`
+- `DevHireAssessmentRunnerCompileErrorSpike`
+- `DevHireAssessmentRunnerTimeoutSpike`
+- `DevHireAssessmentRunnerPolicyBlockedSpike`
+- `DevHireAssessmentRunnerQueueDepthHigh`
+- `DevHireAssessmentRunnerLatencyHigh`
+- `DevHireAssessmentRunnerSandboxFailures`
+- `DevHireCodeRunnerClientFailures`
 
 Validate the rules locally:
 
@@ -94,7 +103,7 @@ The dashboard pack includes:
 - Outbox backlog and publish failures.
 - Audit action distribution.
 - AI assistant request rate, p95 latency, usage rows, tool calls, and Claude fallback count.
-- Code assessment queue, submission status, risk flags, employer decisions, grading p95 latency, runner requests, and runner client failures.
+- Code assessment queue, submission status, risk flags, employer decisions, grading p95 latency, accepted/compile-error/timeout/unavailable runner verdict rates, queue depth, sandbox failures, and runner client failures.
 
 The README operations screenshots for Prometheus and Grafana are rendered from the same repository-owned configuration instead of from a potentially empty live UI page. See [observability evidence](observability-evidence.md) for the screenshot generation and quality-gate policy.
 
@@ -108,30 +117,32 @@ AI assistant metrics are emitted by `ai-service`:
 - `devhire_ai_provider_failures_total`
 - `devhire_ai_provider_circuit_open`
 - `devhire_ai_provider_circuit_opened_total`
-- `devhire_ai_conversations_total`
-- `devhire_ai_usage_events_total`
+- `devhire_ai_conversations`
+- `devhire_ai_usage_events`
 
 Code assessment metrics are emitted by `application-service` and `assessment-runner-service`:
 
-- `devhire_code_assessments_total{status}`
-- `devhire_code_submissions_total{language,status}`
+- `devhire_code_assessments{status}`
+- `devhire_code_submissions{language,status}`
 - `devhire_code_grading_requests_total{language,status}`
 - `devhire_code_grading_latency_seconds_bucket`
 - `devhire_code_grading_score`
-- `devhire_code_review_risk_flags_total{type}`
+- `devhire_code_review_risk_flags{type}`
 - `devhire_code_review_decisions_total{decision,status}`
-- `devhire_code_runner_client_failures_total{status}`
-- `devhire_assessment_runner_requests_total{language,status}`
+- `devhire_code_runner_client_failures_total{language}`
+- `devhire_assessment_runner_requests_total{language,status,verdict}`
 - `devhire_assessment_runner_latency_seconds_bucket`
+- `devhire_assessment_runner_queue_depth`
+- `devhire_assessment_runner_sandbox_failures_total{reason}`
 
 Recruitment domain metrics are emitted by service-owned modules:
 
-- `devhire_applications_total{status}`
-- `devhire_application_status_transitions_total{from,to}`
-- `devhire_notifications_total{type,read}`
-- `devhire_email_delivery_total{status}`
+- `devhire_applications{status}`
+- `devhire_application_status_transitions{from,to}`
+- `devhire_notifications{type,read}`
+- `devhire_email_delivery{status}`
 - `devhire_outbox_backlog{service,status}`
-- `devhire_audit_ingested_total{action}`
+- `devhire_audit_ingested{action}`
 - `devhire_job_search_requests_total{adapter,status}`
 - `devhire_job_search_latency_seconds_bucket`
 
@@ -151,7 +162,7 @@ Every chat request also emits audit/outbox activity:
 5. Use Loki logs with trace id/correlation id for the impacted service.
 6. If `DevHireOutboxPublishFailures` fires, inspect Kafka availability and the service `outbox_events` table for `FAILED` or `DEAD_LETTER` rows.
 7. If `DevHireAiProviderCircuitOpen` fires, check admin AI provider diagnostics, Anthropic key/configuration, outbound network policy, and recent provider errors.
-8. If a code assessment alert fires, check `application-service`, `assessment-runner-service`, hidden-case migration data, runner client failures, and `/admin` assessment health before trusting candidate scores.
+8. If a code assessment alert fires, follow the [code assessment runner runbook](runbooks/code-assessment-runner.md), check `application-service`, `assessment-runner-service`, `/internal/assessment-runs/health`, hidden-case migration data, challenge publish state, wrong-answer/compile-error/timeout/policy/unavailable rates, runner client failures, and `/admin` assessment health before trusting candidate scores.
 9. Roll back the newest deployment if the failure correlates with a release.
 
 ## Review Commands
@@ -166,6 +177,7 @@ Runtime smoke after starting the stack:
 
 ```powershell
 scripts/api-smoke.ps1 -GatewayUrl http://localhost:8080
+scripts/code-assessment-smoke.ps1 -GatewayUrl http://localhost:8080
 scripts/perf-smoke.ps1 -BaseUrl http://localhost:8080 -Vus 2 -Duration 10s -UseDocker
 scripts/runtime-observability-smoke.ps1 -GatewayUrl http://localhost:8080
 ```

@@ -15,7 +15,7 @@ This catalog is the reviewer-facing inventory for DevHire Cloud services. It exp
 | notification-service | 8086 | `devhire_notification` | `/notifications/**` | Internal notifications, email queue, Mailpit/Gmail SMTP profiles, idempotent event consumers |
 | audit-service | 8087 | `devhire_audit` | `/admin/audit-logs` | Administrative audit log ingestion and filtering |
 | ai-service | 8088 | `devhire_ai` | `/ai/**`, `/admin/ai/**` | Claude Haiku assistant, RAG-style citations, tool traces, provider fallback, AI audit events |
-| assessment-runner-service | 8089 | none | `/internal/assessment-runs` | Judge0-compatible internal adapter for isolated visible/hidden code test execution |
+| assessment-runner-service | 8089 | none | `/internal/assessment-runs`, `/internal/assessment-runs/health`, `/actuator/prometheus` | Judge0-compatible internal adapter for isolated visible/hidden code test execution, fail-closed health, and runner metrics |
 | frontend | 3001 | none | Next.js pages | Recruiter demo UI for jobs, dashboards, assistant, and operations evidence |
 
 ## Data Boundary Rules
@@ -57,6 +57,7 @@ This catalog is the reviewer-facing inventory for DevHire Cloud services. It exp
 | Application workflow | `application-service/src/main/java/com/devhire/application/service/ApplicationWorkflowService.java` |
 | Notification delivery | `notification-service/src/main/java/com/devhire/notification/email/**`, `notification-service/src/main/java/com/devhire/notification/event/**` |
 | AI assistant safety | `ai-service/src/main/java/com/devhire/ai/service/AiAssistantService.java`, `docs/ai-safety.md` |
+| Code assessment runner | `assessment-runner-service/src/main/java/com/devhire/runner/**`, `docs/runbooks/code-assessment-runner.md` |
 | Runtime proof | `scripts/portfolio-verify.ps1`, `scripts/runtime-reliability.ps1`, `docs/runtime-reliability-review.md` |
 
 ## Health, Docs, And Operations URLs
@@ -65,6 +66,8 @@ This catalog is the reviewer-facing inventory for DevHire Cloud services. It exp
 |---|---|
 | Frontend | `http://localhost:3001` |
 | Gateway readiness | `http://localhost:8080/actuator/health/readiness` |
+| Assessment runner health | `http://localhost:8089/internal/assessment-runs/health` |
+| Assessment runner metrics | `http://localhost:8089/actuator/prometheus` |
 | Service OpenAPI | `http://localhost:<service-port>/v3/api-docs` |
 | Swagger UI | `http://localhost:<service-port>/swagger-ui/index.html` |
 | Prometheus | `http://localhost:9090` |

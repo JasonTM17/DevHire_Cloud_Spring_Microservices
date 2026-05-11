@@ -14,7 +14,7 @@ DevHire Cloud is a production-engineering portfolio for a recruitment platform: 
 | Question | Answer |
 |---|---|
 | What is being demonstrated? | A microservices hiring platform with candidate, employer, admin/ops, platform, AI, and code-assessment workflows. |
-| What is the flagship feature? | Code Assessment Studio: LeetCode-style candidate coding, visible runner analysis, hidden server-side tests, deterministic rubric scoring, integrity/similarity signals, employer review, and admin runner health. |
+| What is the flagship feature? | Code Assessment Studio: Java LeetCode-style candidate coding, visible runner analysis, hidden server-side tests, 75/25 runtime-plus-rubric scoring, integrity/similarity signals, employer assignment/review, admin challenge authoring, and runner health. |
 | What is production-shaped? | Service-owned databases, Flyway migrations, Kafka/outbox, idempotent consumers, Prometheus/Grafana/Loki/Tempo/OTel, security scans, SBOM, Docker image publishing, Helm, raw Kubernetes, Argo CD, and AWS Terraform blueprint. |
 | What is not claimed? | This is not a live customer SaaS. AWS remains an apply-ready blueprint until a credentialed deployment phase is approved. |
 
@@ -42,6 +42,7 @@ DevHire Cloud is a production-engineering portfolio for a recruitment platform: 
 | Architecture review | [docs/architecture-review-index.md](docs/architecture-review-index.md) |
 | Service catalog | [docs/service-catalog.md](docs/service-catalog.md) |
 | Container images | [docs/container-images.md](docs/container-images.md) |
+| Code assessment ops runbook | [docs/runbooks/code-assessment-runner.md](docs/runbooks/code-assessment-runner.md) |
 | Security evidence | [docs/security-evidence.md](docs/security-evidence.md) |
 | Cloud readiness | [docs/cloud-readiness-review.md](docs/cloud-readiness-review.md) |
 | Production scorecard | [docs/production-engineering-scorecard.md](docs/production-engineering-scorecard.md) |
@@ -56,7 +57,7 @@ DevHire Cloud is a production-engineering portfolio for a recruitment platform: 
 | Messaging | Kafka domain events, transactional outbox, retry/dead-letter posture, idempotent consumers |
 | Search | OpenSearch adapter with PostgreSQL fallback |
 | AI | Claude Haiku assistant with citations, tool traces, safety guardrails, deterministic fallback, metrics |
-| Code assessment | Internal Judge0-compatible runner boundary, visible/hidden cases, rubric scoring, integrity and similarity risk, audit metadata |
+| Code assessment | Internal Judge0-compatible runner boundary, Java `CandidateSolution.solve(String input)` contract, versioned visible/hidden stdout fixtures, submission history, admin challenge authoring with reference validation, 75/25 rubric scoring, integrity and similarity risk, audit metadata |
 | Observability | Actuator, Prometheus, Grafana, Loki, Tempo, OpenTelemetry, domain KPI dashboards and alert rules |
 | Security | JWT/RBAC, refresh-token rotation, gateway spoofing protection, Gitleaks, Trivy, CodeQL, SBOM, branch protection |
 | Delivery | Maven verification, Docker image matrix, GHCR/Docker Hub publishing, GitHub Actions, Helm, raw Kubernetes, Argo CD, Terraform AWS blueprint |
@@ -86,11 +87,14 @@ The v0.6 UI follows Stitch project `projects/5421325194779586117` and the "DevHi
 
 Release images publish to GHCR as `ghcr.io/jasontm17/devhire/<service>:<tag>` with commit SHA tags, OCI labels, SBOM, and BuildKit provenance. Docker Hub mirrors are available as `docker.io/nguyenson1710/devhire-cloud-<service>:<tag>` when the Docker Hub secrets are configured. The current preview set was also pushed locally through Docker Desktop. See [container images](docs/container-images.md).
 
+Production code grading requires `DEVHIRE_RUNNER_MODE=judge0` and `JUDGE0_BASE_URL`; local development can keep deterministic preview mode. Use `scripts/code-assessment-smoke.ps1` through the Gateway for assign/run/submit/review coverage, and `scripts/judge0-smoke.ps1` against `assessment-runner-service` to verify health, accepted, wrong-answer, compile-error, timeout, and policy-blocked Java submissions. Operational triage lives in the [code assessment runner runbook](docs/runbooks/code-assessment-runner.md).
+
 ## Run and Verify Locally
 
 ```powershell
 docker compose up -d --build
 .\scripts\api-smoke.ps1 -GatewayUrl http://localhost:8080
+.\scripts\code-assessment-smoke.ps1 -GatewayUrl http://localhost:8080
 ```
 
 Frontend preview without Docker:
@@ -106,6 +110,7 @@ Portfolio verification:
 ```powershell
 .\scripts\version-consistency.ps1
 .\scripts\portfolio-verify.ps1 -Docs -Docker -Cloud
+.\scripts\api-compatibility.ps1 -ManifestOnly
 .\scripts\docs-parity.ps1
 ```
 

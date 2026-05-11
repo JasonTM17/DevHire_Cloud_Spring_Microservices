@@ -50,6 +50,20 @@ DevHire Cloud handles recruitment data: accounts, roles, candidate profiles, com
 - Gateway validates JWT and forwards identity through internal headers.
 - Services still enforce role and ownership rules.
 
+### Code assessment runtime security
+
+- `application-service` owns scoring, hidden tests, deadline checks, final decision locks, and audit evidence.
+- `assessment-runner-service` is internal only and accepts `/internal/assessment-runs` only with `X-Internal-Gateway-Token`.
+- The production MVP contract is Java `CandidateSolution.solve(String input)` with no package, no public class, and no JUnit dependency.
+- Candidate APIs return visible test bodies only; hidden payloads, hidden results, hidden stdout/stderr, and hidden compile output are redacted.
+- Employer/admin APIs can see aggregate hidden pass/total metadata and persisted runtime evidence, but not candidate-facing hidden payloads.
+- Compile errors, unavailable runners, policy-blocked code, mismatched responses, and malformed runner responses are persisted as failed evidence and never create a trusted final score.
+- Production scoring requires `DEVHIRE_RUNNER_MODE=judge0` with an internal Judge0 runtime and fails closed when `JUDGE0_BASE_URL` is missing; local deterministic mode is preview-only.
+- Java candidate code is policy-scanned before sandbox execution. The MVP contract blocks `package`, `public class CandidateSolution`, process/network/filesystem calls, and reflection-style boundary escapes.
+- Admin challenge publishing requires at least one visible case, one hidden case, and a reference solution that passes the runner before the challenge can become active.
+- `scripts/code-assessment-smoke.ps1` verifies the Gateway assign/run/submit/review path and asserts candidate payloads do not expose hidden fixtures; `scripts/judge0-smoke.ps1` verifies live runner health plus accepted, wrong-answer, compile-error, timeout, and policy-blocked Java cases.
+- Operational response for runner outages, redaction checks, and fail-closed recovery is documented in [code assessment runner runbook](runbooks/code-assessment-runner.md).
+
 ### Supply chain gates
 
 - Dependency Review protects pull requests.

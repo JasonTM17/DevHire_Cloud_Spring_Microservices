@@ -7,7 +7,7 @@ DevHire Cloud is a production-engineering portfolio for a recruitment platform: 
 | Question | Answer |
 |---|---|
 | What is being demonstrated? | A microservices hiring platform with candidate, employer, admin/ops, platform, AI, and code-assessment workflows. |
-| What is the flagship feature? | Code Assessment Studio: LeetCode-style candidate coding, visible runner analysis, hidden server-side tests, deterministic rubric scoring, integrity/similarity signals, employer review, and admin runner health. |
+| What is the flagship feature? | Code Assessment Studio: Java LeetCode-style candidate coding, visible runner analysis, hidden server-side tests, 75/25 runtime-plus-static scoring, integrity/similarity signals, employer assignment/review, admin challenge authoring, and runner health. |
 | What is production-shaped? | Service-owned databases, Flyway migrations, Kafka/outbox, idempotent consumers, Prometheus/Grafana/Loki/Tempo/OTel, security scans, SBOM, Docker image publishing, Helm, raw Kubernetes, Argo CD, and AWS Terraform blueprint. |
 | What is not claimed? | This is not a live customer SaaS. AWS remains an apply-ready blueprint until a credentialed deployment phase is approved. |
 
@@ -49,7 +49,7 @@ DevHire Cloud is a production-engineering portfolio for a recruitment platform: 
 | Messaging | Kafka domain events, transactional outbox, retry/dead-letter posture, idempotent consumers |
 | Search | OpenSearch adapter with PostgreSQL fallback |
 | AI | Claude Haiku assistant with citations, tool traces, safety guardrails, deterministic fallback, metrics |
-| Code assessment | Internal Judge0-compatible runner boundary, visible/hidden cases, rubric scoring, integrity and similarity risk, audit metadata |
+| Code assessment | Internal Judge0-compatible runner boundary, Java `CandidateSolution.solve(String input)` contract, visible/hidden stdout fixtures, 75/25 scoring, integrity and similarity risk, audit metadata |
 | Observability | Actuator, Prometheus, Grafana, Loki, Tempo, OpenTelemetry, domain KPI dashboards and alert rules |
 | Security | JWT/RBAC, refresh-token rotation, gateway spoofing protection, Gitleaks, Trivy, CodeQL, SBOM, branch protection |
 | Delivery | Maven verification, Docker image matrix, GHCR/Docker Hub publishing, GitHub Actions, Helm, raw Kubernetes, Argo CD, Terraform AWS blueprint |
@@ -84,6 +84,7 @@ Release images publish to GHCR as `ghcr.io/jasontm17/devhire/<service>:<tag>` wi
 ```powershell
 docker compose up -d --build
 .\scripts\api-smoke.ps1 -GatewayUrl http://localhost:8080
+.\scripts\code-assessment-smoke.ps1 -GatewayUrl http://localhost:8080
 ```
 
 Frontend preview without Docker:
