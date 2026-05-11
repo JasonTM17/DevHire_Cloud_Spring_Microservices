@@ -35,7 +35,10 @@ public class ApplicationDomainMetrics {
                         .register(meterRegistry);
             }
         }
-        for (String status : new String[]{"ASSIGNED", "SUBMITTED", "AUTO_REVIEWED", "EMPLOYER_REVIEWED", "PASSED", "FAILED"}) {
+        for (String status : new String[]{
+                "ASSIGNED", "IN_PROGRESS", "SUBMITTED", "REVIEWED", "EXPIRED",
+                "AUTO_REVIEWED", "EMPLOYER_REVIEWED", "PASSED", "FAILED"
+        }) {
             Gauge.builder("devhire_code_assessments_total", () -> count("SELECT count(*) FROM code_assessment_assignments WHERE status = ?", status))
                     .description("Current DevHire code assessment assignments by status")
                     .tag("status", status)

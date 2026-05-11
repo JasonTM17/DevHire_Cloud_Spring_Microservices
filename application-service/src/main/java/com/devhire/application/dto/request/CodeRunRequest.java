@@ -11,6 +11,14 @@ public record CodeRunRequest(
         @NotBlank @Size(min = 40, max = 12000) String code,
         @Valid List<CodeIntegrityEventRequest> integrityEvents,
         @Size(max = 96) String clientFingerprintHash,
-        Integer elapsedSeconds
+        Integer elapsedSeconds,
+        @Size(max = 4000) String customInput
 ) {
+    public CodeRunRequest(String language,
+                          String code,
+                          List<CodeIntegrityEventRequest> integrityEvents,
+                          String clientFingerprintHash,
+                          Integer elapsedSeconds) {
+        this(language, code, integrityEvents, clientFingerprintHash, elapsedSeconds, null);
+    }
 }

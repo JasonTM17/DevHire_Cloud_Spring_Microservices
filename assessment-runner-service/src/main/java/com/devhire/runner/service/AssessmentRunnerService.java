@@ -1,118 +1,124 @@
 package com.devhire.runner.service;
 
+import com.devhire.runner.config.AssessmentRunnerProperties;
+import com.devhire.runner.dto.RunnerHealthResponse;
 import com.devhire.runner.dto.RunnerRunRequest;
 import com.devhire.runner.dto.RunnerRunResponse;
-import com.devhire.runner.dto.RunnerTestCaseRequest;
-import com.devhire.runner.dto.RunnerTestCaseResultResponse;
+import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
-import java.util.regex.Pattern;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 public class AssessmentRunnerService {
-    private static final Pattern FORBIDDEN_BOUNDARY = Pattern.compile(
-            "(?i)(runtime\\.getruntime|processbuilder|system\\.exit|\\.exec\\(|socket\\(|files\\.write|new\\s+file\\(|httpclient|fetch\\(|xmlhttprequest)");
-
     private final MeterRegistry meterRegistry;
+    private final AssessmentRunnerProperties properties;
+    private final SandboxExecutor executor;
+    private final AtomicInteger queueDepth = new AtomicInteger();
+
+    @Autowired
+    public AssessmentRunnerService(MeterRegistry meterRegistry, AssessmentRunnerProperties properties) {
+        this.meterRegistry = meterRegistry;
+        this.properties = properties;
+        this.executor = executorFor(properties);
+        Gauge.builder("devhire_assessment_runner_queue_depth", queueDepth, AtomicInteger::get)
+                .description("In-process assessment runner queue depth")
+                .register(meterRegistry);
+        Gauge.builder("devhire_assessment_runner_fail_closed", this, AssessmentRunnerService::failClosedGauge)
+                .description("Assessment runner fail-closed state; 1 means server-side scoring is unavailable by policy")
+                .tag("mode", properties.getMode())
+                .register(meterRegistry);
+        Gauge.builder("devhire_assessment_runner_judge0_configured", this, AssessmentRunnerService::judge0ConfiguredGauge)
+                .description("Whether Judge0 is configured for the active runner mode")
+                .tag("mode", properties.getMode())
+                .register(meterRegistry);
+    }
 
     public AssessmentRunnerService(MeterRegistry meterRegistry) {
-        this.meterRegistry = meterRegistry;
+        this(meterRegistry, deterministicProperties());
     }
 
     public RunnerRunResponse run(RunnerRunRequest request) {
         Timer.Sample timer = Timer.start(meterRegistry);
+        queueDepth.incrementAndGet();
         try {
-            RunnerRunResponse response = runSafely(request);
+            RunnerRunResponse response = executor.run(request);
             meterRegistry.counter("devhire_assessment_runner_requests_total",
-                    "language", normalizeLanguage(request.language()), "status", response.status()).increment();
+                    "language", normalizeLanguage(request.language()),
+                    "status", safeTag(response.status()),
+                    "verdict", safeTag(response.verdict())).increment();
+            if ("POLICY_BLOCKED".equals(response.verdict()) || "RUNNER_UNAVAILABLE".equals(response.verdict())) {
+                meterRegistry.counter("devhire_assessment_runner_sandbox_failures_total",
+                        "reason", safeTag(response.verdict())).increment();
+            }
             return response;
         } finally {
+            queueDepth.decrementAndGet();
             timer.stop(Timer.builder("devhire_assessment_runner_latency_seconds")
                     .tag("language", normalizeLanguage(request.language()))
+                    .publishPercentileHistogram()
                     .register(meterRegistry));
         }
     }
 
-    private RunnerRunResponse runSafely(RunnerRunRequest request) {
-        String code = request.code() == null ? "" : request.code();
-        if (FORBIDDEN_BOUNDARY.matcher(code).find()) {
-            return blocked(request.testCases(), "sandbox-policy-blocked",
-                    "Network, filesystem, or process boundary usage is blocked for candidate code.");
-        }
-        List<RunnerTestCaseResultResponse> results = new ArrayList<>();
-        long totalTime = 0;
-        long maxMemory = 0;
-        for (RunnerTestCaseRequest testCase : request.testCases()) {
-            long time = executionTime(code, testCase);
-            long memory = memoryKb(code, testCase);
-            boolean passed = matchesExpectedSignal(code, testCase.expectedOutput());
-            totalTime += time;
-            maxMemory = Math.max(maxMemory, memory);
-            results.add(new RunnerTestCaseResultResponse(
-                    testCase.id(),
-                    testCase.name(),
-                    normalizeVisibility(testCase.visibility()),
-                    passed,
-                    passed ? "matched:" + normalizeExpected(testCase.expectedOutput()) : "missing:" + normalizeExpected(testCase.expectedOutput()),
-                    passed ? null : "Expected implementation signal was not present in the sandboxed run.",
-                    time,
-                    memory));
-        }
-        int passed = (int) results.stream().filter(RunnerTestCaseResultResponse::passed).count();
-        return new RunnerRunResponse("COMPLETED", "JUDGE0_COMPATIBLE_LOCAL_SANDBOX", passed, results.size(),
-                totalTime, maxMemory, null, results, Instant.now());
+    public RunnerHealthResponse health() {
+        boolean judge0Configured = !properties.getJudge0BaseUrl().isBlank();
+        String failClosedReason = properties.getMode().equals("judge0") && !judge0Configured
+                ? "Judge0 runtime is not configured; server-side scoring failed closed."
+                : properties.getMode().equals("fail-closed")
+                ? "Assessment runtime is intentionally disabled."
+                : null;
+        boolean failClosed = failClosedReason != null || properties.getMode().equals("fail-closed");
+        String status = failClosedReason == null ? "UP" : "DOWN";
+        return new RunnerHealthResponse(
+                status,
+                properties.getMode(),
+                properties.getRunnerVersion(),
+                judge0Configured,
+                failClosed,
+                properties.isNetworkDisabled(),
+                queueDepth.get(),
+                failClosedReason,
+                Instant.now());
     }
 
-    private static RunnerRunResponse blocked(List<RunnerTestCaseRequest> testCases, String status, String reason) {
-        List<RunnerTestCaseResultResponse> results = testCases.stream()
-                .map(testCase -> new RunnerTestCaseResultResponse(testCase.id(), testCase.name(),
-                        normalizeVisibility(testCase.visibility()), false, "", reason, 0, 0))
-                .toList();
-        return new RunnerRunResponse("POLICY_BLOCKED", status, 0, results.size(), 0, 0, reason, results, Instant.now());
+    private static SandboxExecutor executorFor(AssessmentRunnerProperties properties) {
+        return switch (properties.getMode()) {
+            case "judge0" -> properties.getJudge0BaseUrl().isBlank()
+                    ? new FailClosedExecutor(properties, "Judge0 runtime is not configured; server-side scoring failed closed.")
+                    : new Judge0SandboxExecutor(properties);
+            case "fail-closed" -> new FailClosedExecutor(properties, "Assessment runtime is intentionally disabled.");
+            default -> new DeterministicSignalExecutor(properties);
+        };
     }
 
-    private static boolean matchesExpectedSignal(String code, String expectedOutput) {
-        String normalizedCode = normalize(code);
-        for (String token : normalizeExpected(expectedOutput).split("\\|")) {
-            if (!token.isBlank() && !normalizedCode.contains(token)) {
-                return false;
-            }
+    private static AssessmentRunnerProperties deterministicProperties() {
+        AssessmentRunnerProperties properties = new AssessmentRunnerProperties();
+        properties.setMode("deterministic");
+        return properties;
+    }
+
+    private double failClosedGauge() {
+        if (properties.getMode().equals("fail-closed")) {
+            return 1.0;
         }
-        return true;
+        return properties.getMode().equals("judge0") && properties.getJudge0BaseUrl().isBlank() ? 1.0 : 0.0;
+    }
+
+    private double judge0ConfiguredGauge() {
+        return properties.getJudge0BaseUrl().isBlank() ? 0.0 : 1.0;
     }
 
     private static String normalizeLanguage(String language) {
         return language == null || language.isBlank() ? "unknown" : language.trim().toLowerCase(Locale.ROOT);
     }
 
-    private static String normalizeVisibility(String visibility) {
-        return visibility == null ? "VISIBLE" : visibility.trim().toUpperCase(Locale.ROOT);
-    }
-
-    private static String normalizeExpected(String expectedOutput) {
-        return normalize(expectedOutput).replace(",", "|").replace(" ", "|");
-    }
-
-    private static String normalize(String value) {
-        return (value == null ? "" : value)
-                .replaceAll("(?s)/\\*.*?\\*/", " ")
-                .replaceAll("(?m)//.*$", " ")
-                .replaceAll("[^A-Za-z0-9_@]+", " ")
-                .trim()
-                .toLowerCase(Locale.ROOT);
-    }
-
-    private static long executionTime(String code, RunnerTestCaseRequest testCase) {
-        return Math.min(1_500, 40L + Math.max(0, code.length() / 18) + Math.max(0, testCase.expectedOutput().length()));
-    }
-
-    private static long memoryKb(String code, RunnerTestCaseRequest testCase) {
-        return Math.min(131_072, 16_384L + code.length() * 2L + testCase.name().length() * 32L);
+    private static String safeTag(String value) {
+        return value == null || value.isBlank() ? "unknown" : value.toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9_\\-]+", "_");
     }
 }

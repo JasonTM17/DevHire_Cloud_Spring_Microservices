@@ -7,7 +7,20 @@ public record RunnerTestCaseRequest(
         String name,
         String visibility,
         String input,
+        String stdin,
         String expectedOutput,
-        int weight
+        String setupSql,
+        String expectedRowsJson,
+        int weight,
+        Integer timeLimitMs,
+        Integer memoryLimitKb
 ) {
+    public RunnerTestCaseRequest(UUID id,
+                                 String name,
+                                 String visibility,
+                                 String input,
+                                 String expectedOutput,
+                                 int weight) {
+        this(id, name, visibility, input, input, expectedOutput, null, null, weight, null, null);
+    }
 }

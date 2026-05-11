@@ -1,11 +1,15 @@
 package com.devhire.application.controller;
 
 import com.devhire.application.dto.request.CodeReviewRequest;
+import com.devhire.application.dto.request.CodeChallengeRequest;
 import com.devhire.application.dto.request.CodeRunRequest;
 import com.devhire.application.dto.request.CodeSubmissionRequest;
+import com.devhire.application.dto.request.AssignCodeAssessmentRequest;
 import com.devhire.application.dto.response.CodeAssessmentResponse;
 import com.devhire.application.dto.response.CodeAssessmentSummaryResponse;
+import com.devhire.application.dto.response.CodeChallengeResponse;
 import com.devhire.application.dto.response.CodeRunResponse;
+import com.devhire.application.dto.response.CodeSubmissionSummaryResponse;
 import com.devhire.application.service.CodeAssessmentService;
 import com.devhire.common.ApiResponse;
 import com.devhire.common.constants.AppHeaders;
@@ -47,7 +51,7 @@ public class CodeAssessmentController {
         return ApiResponse.ok(codeAssessmentService.candidateAssessment(new AuthenticatedUser(userId, email, role), id));
     }
 
-    @PostMapping("/candidate/code-assessments/{id}/submissions")
+    @PostMapping({"/candidate/code-assessments/{id}/submissions", "/candidate/code-assessments/{id}/submit"})
     public ApiResponse<CodeAssessmentResponse> submit(@RequestHeader(AppHeaders.USER_ID) UUID userId,
                                                       @RequestHeader(AppHeaders.USER_EMAIL) String email,
                                                       @RequestHeader(AppHeaders.USER_ROLE) UserRole role,
@@ -56,7 +60,7 @@ public class CodeAssessmentController {
         return ApiResponse.ok(codeAssessmentService.submit(new AuthenticatedUser(userId, email, role), id, request));
     }
 
-    @PostMapping("/candidate/code-assessments/{id}/runs")
+    @PostMapping({"/candidate/code-assessments/{id}/runs", "/candidate/code-assessments/{id}/run"})
     public ApiResponse<CodeRunResponse> runVisibleCases(@RequestHeader(AppHeaders.USER_ID) UUID userId,
                                                         @RequestHeader(AppHeaders.USER_EMAIL) String email,
                                                         @RequestHeader(AppHeaders.USER_ROLE) UserRole role,
@@ -74,6 +78,14 @@ public class CodeAssessmentController {
         return ApiResponse.ok(codeAssessmentService.runStatus(new AuthenticatedUser(userId, email, role), id, runId));
     }
 
+    @GetMapping("/candidate/code-assessments/{id}/submissions")
+    public ApiResponse<List<CodeSubmissionSummaryResponse>> candidateSubmissions(@RequestHeader(AppHeaders.USER_ID) UUID userId,
+                                                                                 @RequestHeader(AppHeaders.USER_EMAIL) String email,
+                                                                                 @RequestHeader(AppHeaders.USER_ROLE) UserRole role,
+                                                                                 @PathVariable UUID id) {
+        return ApiResponse.ok(codeAssessmentService.candidateSubmissions(new AuthenticatedUser(userId, email, role), id));
+    }
+
     @GetMapping("/employer/code-assessments")
     public ApiResponse<List<CodeAssessmentResponse>> employerAssessments(@RequestHeader(AppHeaders.USER_ID) UUID userId,
                                                                          @RequestHeader(AppHeaders.USER_EMAIL) String email,
@@ -83,12 +95,30 @@ public class CodeAssessmentController {
         return ApiResponse.ok(codeAssessmentService.employerAssessments(new AuthenticatedUser(userId, email, role), status, jobId));
     }
 
+    @PostMapping("/employer/applications/{applicationId}/code-assessments")
+    public ApiResponse<CodeAssessmentResponse> assign(@RequestHeader(AppHeaders.USER_ID) UUID userId,
+                                                      @RequestHeader(AppHeaders.USER_EMAIL) String email,
+                                                      @RequestHeader(AppHeaders.USER_ROLE) UserRole role,
+                                                      @PathVariable UUID applicationId,
+                                                      @Valid @RequestBody(required = false) AssignCodeAssessmentRequest request) {
+        return ApiResponse.ok(codeAssessmentService.assignToApplication(
+                new AuthenticatedUser(userId, email, role), applicationId, request));
+    }
+
     @GetMapping("/employer/code-assessments/{id}")
     public ApiResponse<CodeAssessmentResponse> employerAssessment(@RequestHeader(AppHeaders.USER_ID) UUID userId,
                                                                   @RequestHeader(AppHeaders.USER_EMAIL) String email,
                                                                   @RequestHeader(AppHeaders.USER_ROLE) UserRole role,
                                                                   @PathVariable UUID id) {
         return ApiResponse.ok(codeAssessmentService.employerAssessment(new AuthenticatedUser(userId, email, role), id));
+    }
+
+    @GetMapping("/employer/code-assessments/{id}/submissions")
+    public ApiResponse<List<CodeSubmissionSummaryResponse>> employerSubmissions(@RequestHeader(AppHeaders.USER_ID) UUID userId,
+                                                                               @RequestHeader(AppHeaders.USER_EMAIL) String email,
+                                                                               @RequestHeader(AppHeaders.USER_ROLE) UserRole role,
+                                                                               @PathVariable UUID id) {
+        return ApiResponse.ok(codeAssessmentService.employerSubmissions(new AuthenticatedUser(userId, email, role), id));
     }
 
     @PatchMapping("/employer/code-assessments/{id}/review")
@@ -105,5 +135,29 @@ public class CodeAssessmentController {
                                                                    @RequestHeader(AppHeaders.USER_EMAIL) String email,
                                                                    @RequestHeader(AppHeaders.USER_ROLE) UserRole role) {
         return ApiResponse.ok(codeAssessmentService.adminSummary(new AuthenticatedUser(userId, email, role)));
+    }
+
+    @GetMapping("/admin/code-challenges")
+    public ApiResponse<List<CodeChallengeResponse>> adminCodeChallenges(@RequestHeader(AppHeaders.USER_ID) UUID userId,
+                                                                        @RequestHeader(AppHeaders.USER_EMAIL) String email,
+                                                                        @RequestHeader(AppHeaders.USER_ROLE) UserRole role) {
+        return ApiResponse.ok(codeAssessmentService.adminCodeChallenges(new AuthenticatedUser(userId, email, role)));
+    }
+
+    @PostMapping("/admin/code-challenges")
+    public ApiResponse<CodeChallengeResponse> createCodeChallenge(@RequestHeader(AppHeaders.USER_ID) UUID userId,
+                                                                  @RequestHeader(AppHeaders.USER_EMAIL) String email,
+                                                                  @RequestHeader(AppHeaders.USER_ROLE) UserRole role,
+                                                                  @Valid @RequestBody CodeChallengeRequest request) {
+        return ApiResponse.ok(codeAssessmentService.createCodeChallenge(new AuthenticatedUser(userId, email, role), request));
+    }
+
+    @PatchMapping("/admin/code-challenges/{id}")
+    public ApiResponse<CodeChallengeResponse> updateCodeChallenge(@RequestHeader(AppHeaders.USER_ID) UUID userId,
+                                                                  @RequestHeader(AppHeaders.USER_EMAIL) String email,
+                                                                  @RequestHeader(AppHeaders.USER_ROLE) UserRole role,
+                                                                  @PathVariable UUID id,
+                                                                  @Valid @RequestBody CodeChallengeRequest request) {
+        return ApiResponse.ok(codeAssessmentService.updateCodeChallenge(new AuthenticatedUser(userId, email, role), id, request));
     }
 }

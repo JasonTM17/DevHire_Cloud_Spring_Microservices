@@ -63,6 +63,7 @@ public class GatewayRoutesConfig {
                 .route("job-service", route -> route.path("/api/jobs/**").filters(filters).uri(jobServiceUrl))
                 .route("notification-service", route -> route.path("/api/notifications/**").filters(filters).uri(notificationServiceUrl))
                 .route("admin-code-assessments", route -> route.path("/api/admin/code-assessments/**").filters(filters).uri(applicationServiceUrl))
+                .route("admin-code-challenges", route -> route.path("/api/admin/code-challenges", "/api/admin/code-challenges/**").filters(filters).uri(applicationServiceUrl))
                 .route("admin-operations-summary", route -> route.path("/api/admin/operations/**").filters(filters).uri(auditServiceUrl))
                 .route("audit-service", route -> route.path("/api/admin/audit-logs/**", "/api/admin/audit-logs").filters(filters).uri(auditServiceUrl))
                 .route("admin-ai-service", route -> route.path("/api/admin/ai/**").filters(filters).uri(aiServiceUrl))

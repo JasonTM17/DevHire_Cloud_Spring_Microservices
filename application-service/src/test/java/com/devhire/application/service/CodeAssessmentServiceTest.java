@@ -1,7 +1,9 @@
 package com.devhire.application.service;
 
 import com.devhire.application.client.AssessmentRunnerClient;
+import com.devhire.application.dto.request.AssignCodeAssessmentRequest;
 import com.devhire.application.dto.request.CodeReviewRequest;
+import com.devhire.application.dto.request.CodeRunRequest;
 import com.devhire.application.dto.request.CodeSubmissionRequest;
 import com.devhire.application.dto.response.CodeAssessmentResponse;
 import com.devhire.application.dto.response.CodeRunResponse;
@@ -16,6 +18,7 @@ import com.devhire.common.security.UserRole;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.Test;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
@@ -39,6 +42,7 @@ class CodeAssessmentServiceTest {
     private static final UUID ASSIGNMENT_ID = UUID.fromString("11111111-1111-1111-1111-111111111111");
     private static final UUID CANDIDATE_ID = UUID.fromString("22222222-2222-2222-2222-222222222222");
     private static final UUID EMPLOYER_ID = UUID.fromString("33333333-3333-3333-3333-333333333333");
+    private static final UUID NON_CLOUD_CHALLENGE_ID = UUID.fromString("52000000-0000-0000-0001-000000000003");
 
     private final RecordingJdbcTemplate jdbcTemplate = new RecordingJdbcTemplate();
     private final ApplicationEventPublisher eventPublisher = mock(ApplicationEventPublisher.class);
@@ -48,18 +52,31 @@ class CodeAssessmentServiceTest {
     @Test
     void candidateSubmissionPersistsDeterministicScoreAndAuditEvents() {
         jdbcTemplate.assessments.add(assessment("ASSIGNED", null, null, null));
-        jdbcTemplate.assessments.add(assessment("AUTO_REVIEWED", 88, "ADVANCE", Instant.parse("2026-05-06T10:00:00Z")));
+        jdbcTemplate.assessments.add(assessment("AUTO_REVIEWED", 88, "PASS", Instant.parse("2026-05-06T10:00:00Z")));
 
         var response = service.submit(candidate(), ASSIGNMENT_ID, new CodeSubmissionRequest("Java", """
-                public class RetryReview {
-                    private final Map<String, Integer> attempts = new HashMap<>();
-                    @Test void givenOutboxWhenRetryThenDeduplicates() { assert attempts.size() >= 0; }
-                    public void handle(String outboxEvent, int retryCount) {
-                        // retry idempotent outbox publication with page limit
-                        attempts.put(outboxEvent, retryCount);
+                class CandidateSolution {
+                    String solve(String input) {
+                        ResourceValidator validator = new ResourceValidator(EnterpriseSecurityPolicy.STRICT, "production");
+                        return validator.validate(input) ? "PASSED" : "REJECTED";
                     }
                 }
-                """, "Includes retry and outbox evidence."));
+                enum EnterpriseSecurityPolicy { STRICT }
+                class ResourceValidator {
+                    private final EnterpriseSecurityPolicy policy;
+                    private final String requiredTag;
+                    ResourceValidator(EnterpriseSecurityPolicy policy, String requiredTag) {
+                        this.policy = policy;
+                        this.requiredTag = requiredTag;
+                    }
+                    boolean validate(String input) {
+                        return policy == EnterpriseSecurityPolicy.STRICT
+                                && input != null
+                                && input.contains("policy=STRICT")
+                                && input.contains("tag=" + requiredTag);
+                    }
+                }
+                """, "Includes runtime validation evidence."));
 
         assertThat(response.status()).isEqualTo("AUTO_REVIEWED");
         assertThat(jdbcTemplate.updates).anySatisfy(update -> {
@@ -68,7 +85,7 @@ class CodeAssessmentServiceTest {
         });
         assertThat(jdbcTemplate.updates).anySatisfy(update -> {
             assertThat(update.sql()).contains("UPDATE code_assessment_assignments");
-            assertThat(update.sql()).contains("AUTO_REVIEWED");
+            assertThat(update.sql()).contains("SUBMITTED");
             assertThat(update.args()).contains(ASSIGNMENT_ID, CANDIDATE_ID);
         });
         verify(eventPublisher, times(2)).publishAudit(any(AuditEvent.class));
@@ -79,8 +96,8 @@ class CodeAssessmentServiceTest {
 
     @Test
     void employerReviewFinalizesLatestSubmissionAndWritesReviewEvent() {
-        jdbcTemplate.assessments.add(assessment("AUTO_REVIEWED", 78, "REVIEW", Instant.parse("2026-05-06T10:00:00Z")));
-        jdbcTemplate.assessments.add(assessment("PASSED", 91, "ADVANCE", Instant.parse("2026-05-06T10:00:00Z")));
+        jdbcTemplate.assessments.add(assessment("AUTO_REVIEWED", 78, "HOLD", Instant.parse("2026-05-06T10:00:00Z")));
+        jdbcTemplate.assessments.add(assessment("PASSED", 91, "PASS", Instant.parse("2026-05-06T10:00:00Z")));
 
         var response = service.review(employer(), ASSIGNMENT_ID,
                 new CodeReviewRequest("advance", "Strong production reasoning.", 91));
@@ -88,11 +105,11 @@ class CodeAssessmentServiceTest {
         assertThat(response.status()).isEqualTo("PASSED");
         assertThat(jdbcTemplate.updates).anySatisfy(update -> {
             assertThat(update.sql()).contains("UPDATE code_submissions");
-            assertThat(update.args()).contains("ADVANCE", 78, "Strong production reasoning.", ASSIGNMENT_ID);
+            assertThat(update.args()).contains("PASS", 78, "Strong production reasoning.", ASSIGNMENT_ID);
         });
         assertThat(jdbcTemplate.updates).anySatisfy(update -> {
             assertThat(update.sql()).contains("INSERT INTO code_review_events");
-            assertThat(update.args()).contains(ASSIGNMENT_ID, EMPLOYER_ID, "EMPLOYER", "ADVANCE");
+            assertThat(update.args()).contains(ASSIGNMENT_ID, EMPLOYER_ID, "EMPLOYER", "PASS");
         });
         verify(eventPublisher).publishAudit(any(AuditEvent.class));
     }
@@ -108,13 +125,37 @@ class CodeAssessmentServiceTest {
     }
 
     @Test
+    void employerAssignsDefaultJavaChallengeToOpenApplication() {
+        jdbcTemplate.assessments.add(assessment("ASSIGNED", null, null, null));
+
+        var response = service.assignToApplication(employer(), UUID.randomUUID(),
+                new AssignCodeAssessmentRequest(null, null));
+
+        assertThat(response.status()).isEqualTo("ASSIGNED");
+        assertThat(jdbcTemplate.updates).anySatisfy(update -> {
+            assertThat(update.sql()).contains("INSERT INTO code_assessment_assignments");
+            assertThat(update.args()).contains("Candidate " + CANDIDATE_ID.toString().substring(0, 8));
+        });
+        verify(eventPublisher).publishAudit(any(AuditEvent.class));
+    }
+
+    @Test
+    void employerCannotAssignNonCloudSeedChallengeInMvpFlow() {
+        assertThatThrownBy(() -> service.assignToApplication(employer(), UUID.randomUUID(),
+                new AssignCodeAssessmentRequest(NON_CLOUD_CHALLENGE_ID, null)))
+                .isInstanceOf(DevHireException.class)
+                .hasMessageContaining("Active Java cloud code challenge not found");
+
+        assertThat(jdbcTemplate.updates).isEmpty();
+    }
+
+    @Test
     void candidateSubmissionRejectsExpiredAssignment() {
         jdbcTemplate.assessments.add(assessment("ASSIGNED", null, null, null, Instant.now().minusSeconds(60)));
 
         assertThatThrownBy(() -> service.submit(candidate(), ASSIGNMENT_ID, new CodeSubmissionRequest("Java", """
-                class Solution {
-                    @Test void provesBehavior() { assert true; }
-                    void review() { /* outbox retry evidence */ }
+                class CandidateSolution {
+                    String solve(String input) { return "PASSED"; }
                 }
                 """, "Submitting after deadline should be rejected.")))
                 .isInstanceOf(DevHireException.class)
@@ -148,18 +189,41 @@ class CodeAssessmentServiceTest {
                 jdbcTemplate, new ObjectMapper(), new CodeAssessmentGrader(),
                 eventPublisher, new SimpleMeterRegistry(), runnerClient);
         jdbcTemplate.assessments.add(assessment("ASSIGNED", null, null, null));
-        jdbcTemplate.assessments.add(assessment("AUTO_REVIEWED", 42, "REVIEW", Instant.parse("2026-05-06T10:00:00Z")));
 
-        serviceWithRunner.submit(candidate(), ASSIGNMENT_ID, new CodeSubmissionRequest("Java", """
-                public class RetryReview {
-                    @Test void givenOutboxWhenRetryThenDeduplicates() { assert true; }
-                    void handle() { /* outbox retry page */ }
+        assertThatThrownBy(() -> serviceWithRunner.submit(candidate(), ASSIGNMENT_ID, new CodeSubmissionRequest("Java", """
+                class CandidateSolution {
+                    String solve(String input) { return "PASSED"; }
                 }
-                """, "Runner outage should not create a trusted local pass."));
+                """, "Runner outage should not create a trusted local pass.")))
+                .isInstanceOf(DevHireException.class)
+                .hasMessageContaining("trusted final score");
 
         assertThat(jdbcTemplate.updates).anySatisfy(update -> {
             assertThat(update.sql()).contains("INSERT INTO code_assessment_runs");
             assertThat(update.args()).contains("FAILED", "sandbox-runner-unavailable");
+        });
+        assertThat(jdbcTemplate.updates).noneSatisfy(update -> assertThat(update.sql()).contains("INSERT INTO code_submissions"));
+    }
+
+    @Test
+    void visibleRunDoesNotTrustSignalsStuffedIntoStringsOrComments() {
+        jdbcTemplate.assessments.add(assessment("ASSIGNED", null, null, null));
+
+        CodeRunResponse response = service.runVisibleCases(candidate(), ASSIGNMENT_ID, new CodeRunRequest("Java", """
+                class CandidateSolution {
+                    // PASSED
+                    String copiedVisibleAnswer = "PASSED";
+                    String solve(String input) { return "REJECTED"; }
+                }
+                """, List.of(), null, 180));
+
+        assertThat(response.visiblePassed()).isZero();
+        assertThat(response.visibleTotal()).isEqualTo(1);
+        assertThat(response.hiddenPassed()).isZero();
+        assertThat(response.hiddenTotal()).isZero();
+        assertThat(response.results()).allSatisfy(result -> {
+            assertThat(result.visibility()).isEqualTo("VISIBLE");
+            assertThat(result.passed()).isFalse();
         });
     }
 
@@ -217,6 +281,14 @@ class CodeAssessmentServiceTest {
         assertThat(summary.riskySubmissions()).isEqualTo(2);
         assertThat(summary.runQueueDepth()).isEqualTo(0);
         assertThat(summary.sandboxFailureRate()).isEqualTo(4.2);
+        assertThat(summary.acceptedRate()).isEqualTo(91.0);
+        assertThat(summary.wrongAnswerRate()).isEqualTo(3.5);
+        assertThat(summary.compileErrorRate()).isEqualTo(3.0);
+        assertThat(summary.timeoutRate()).isEqualTo(2.0);
+        assertThat(summary.runnerUnavailableRate()).isEqualTo(1.0);
+        assertThat(summary.policyBlockedRate()).isEqualTo(0.5);
+        assertThat(summary.averageRuntimeMs()).isEqualTo(128.1);
+        assertThat(summary.p95ExecutionMs()).isEqualTo(244.0);
         assertThat(summary.averageIntegrityRisk()).isEqualTo(12.6);
         assertThat(summary.averageSimilarityScore()).isEqualTo(7.7);
         assertThat(summary.statusDistribution()).extracting(StatusCountResponse::status)
@@ -239,12 +311,13 @@ class CodeAssessmentServiceTest {
                                                      String decision,
                                                      Instant submittedAt,
                                                      Instant dueAt) {
-        String submittedCode = submittedAt == null ? null : "class Solution { @Test void provesRetry() { assert true; } }";
+        String submittedCode = submittedAt == null ? null
+                : "class CandidateSolution { String solve(String input) { return \"PASSED\"; } }";
         return assessmentWithCode(status, latestScore, decision, submittedAt, dueAt, submittedCode);
     }
 
     private static CodeAssessmentResponse assessmentWithCode(String submittedCode) {
-        return assessmentWithCode("AUTO_REVIEWED", 88, "ADVANCE", Instant.parse("2026-05-06T10:00:00Z"),
+        return assessmentWithCode("AUTO_REVIEWED", 88, "PASS", Instant.parse("2026-05-06T10:00:00Z"),
                 Instant.now().plusSeconds(1_209_600), submittedCode);
     }
 
@@ -260,6 +333,7 @@ class CodeAssessmentServiceTest {
                 "Linh Tran",
                 "Senior Distributed Systems Engineer",
                 "Java outbox retry reviewer",
+                1,
                 "Senior",
                 "Java",
                 "Implement idempotent outbox retry review.",
@@ -271,7 +345,7 @@ class CodeAssessmentServiceTest {
                 decision,
                 List.of("Java", "Outbox", "Testing"),
                 latestScore == null ? List.of() : List.of(new RubricScoreResponse("Correctness", latestScore, 100, "Reviewed")),
-                latestScore == null ? List.of() : List.of("missing-test-evidence"),
+                latestScore == null ? List.of() : List.of("low-signal-code"),
                 latestScore == null ? null : "Review completed.",
                 true,
                 submittedCode,
@@ -323,9 +397,27 @@ class CodeAssessmentServiceTest {
         private final List<RecordedUpdate> updates = new ArrayList<>();
 
         @Override
+        public <T> T queryForObject(String sql, RowMapper<T> rowMapper) {
+            return queryForObject(sql, rowMapper, new Object[0]);
+        }
+
+        @Override
         public <T> T queryForObject(String sql, RowMapper<T> rowMapper, Object... args) {
-            if (sql.stripLeading().startsWith("SELECT c.required_signals_csv")) {
-                return cast(List.of("outbox", "retry", "assert", "page"));
+            if (sql.stripLeading().startsWith("SELECT COALESCE(cv.required_signals_csv")) {
+                return cast(List.of("CandidateSolution", "solve", "ResourceValidator",
+                        "EnterpriseSecurityPolicy.STRICT", "production", "PASSED", "REJECTED"));
+            }
+            if (sql.contains("SELECT a.challenge_id") && sql.contains("challenge_version")) {
+                return challengeRef(rowMapper);
+            }
+            if (sql.contains("FROM job_applications")) {
+                return applicationTarget(rowMapper);
+            }
+            if (sql.stripLeading().startsWith("SELECT id, title, language")) {
+                if (args.length > 0 && NON_CLOUD_CHALLENGE_ID.equals(args[0])) {
+                    throw new EmptyResultDataAccessException(1);
+                }
+                return challenge(rowMapper);
             }
             return cast(assessments.removeFirst());
         }
@@ -338,15 +430,20 @@ class CodeAssessmentServiceTest {
             if (sql.stripLeading().startsWith("SELECT challenge_id")) {
                 return requiredType.cast(UUID.fromString("52000000-0000-0000-0001-000000000001"));
             }
-            return scalar(sql, requiredType);
+            if (sql.stripLeading().startsWith("SELECT id")
+                    && sql.contains("FROM code_assessment_assignments")
+                    && sql.contains("application_id")) {
+                return requiredType.cast(ASSIGNMENT_ID);
+            }
+            return scalar(sql, requiredType, args);
         }
 
         @Override
         public <T> T queryForObject(String sql, Class<T> requiredType) {
-            return scalar(sql, requiredType);
+            return scalar(sql, requiredType, new Object[0]);
         }
 
-        private static <T> T scalar(String sql, Class<T> requiredType) {
+        private static <T> T scalar(String sql, Class<T> requiredType, Object... args) {
             if (requiredType == Integer.class) {
                 return requiredType.cast(1);
             }
@@ -358,6 +455,26 @@ class CodeAssessmentServiceTest {
             }
             if (sql.contains("avg(CASE WHEN status IN")) {
                 return requiredType.cast(4.24);
+            }
+            if (sql.contains("verdict = ?")) {
+                String verdict = String.valueOf(args[0]);
+                double value = switch (verdict) {
+                    case "ACCEPTED" -> 91.04;
+                    case "WRONG_ANSWER" -> 3.54;
+                    case "COMPILE_ERROR" -> 3.04;
+                    case "TIME_LIMIT_EXCEEDED" -> 2.04;
+                    case "TIME_LIMIT" -> 0.0;
+                    case "RUNNER_UNAVAILABLE" -> 1.04;
+                    case "POLICY_BLOCKED" -> 0.54;
+                    default -> 0.0;
+                };
+                return requiredType.cast(value);
+            }
+            if (sql.contains("avg(execution_time_ms)")) {
+                return requiredType.cast(128.14);
+            }
+            if (sql.contains("percentile_cont")) {
+                return requiredType.cast(244.04);
             }
             if (sql.contains("avg(integrity_risk_score)")) {
                 return requiredType.cast(12.55);
@@ -385,10 +502,15 @@ class CodeAssessmentServiceTest {
             }
             if (sql.contains("FROM code_challenge_test_cases")) {
                 return List.of(
-                        testCase(rowMapper, "Visible retry cap", "VISIBLE", "retry,maxAttempts,lastError", 15),
-                        testCase(rowMapper, "Hidden assertion evidence", "HIDDEN", "@Test,assert", 20));
+                        testCase(rowMapper, "Runtime solve contract", "VISIBLE",
+                                "resource=res-9982;policy=STRICT;tag=production", "PASSED", 15),
+                        testCase(rowMapper, "Hidden malformed resource rejection", "HIDDEN",
+                                "resource=res-hidden-2;policy=STRICT", "REJECTED", 20));
             }
             if (sql.contains("FROM code_assessment_run_results")) {
+                return List.of();
+            }
+            if (sql.contains("SELECT s.code_text")) {
                 return List.of();
             }
             if (!assessments.isEmpty()) {
@@ -418,15 +540,64 @@ class CodeAssessmentServiceTest {
             }
         }
 
-        private static <T> T testCase(RowMapper<T> mapper, String name, String visibility, String expected, int weight) {
+        private static <T> T testCase(RowMapper<T> mapper,
+                                      String name,
+                                      String visibility,
+                                      String input,
+                                      String expected,
+                                      int weight) {
             try {
                 ResultSet rs = mock(ResultSet.class);
                 when(rs.getObject("id", UUID.class)).thenReturn(UUID.randomUUID());
                 when(rs.getString("name")).thenReturn(name);
                 when(rs.getString("visibility")).thenReturn(visibility);
-                when(rs.getString("input_text")).thenReturn("sample input");
+                when(rs.getString("input_text")).thenReturn(input);
                 when(rs.getString("expected_output")).thenReturn(expected);
+                when(rs.getString("setup_sql")).thenReturn(null);
+                when(rs.getString("expected_rows_json")).thenReturn(null);
                 when(rs.getInt("weight")).thenReturn(weight);
+                when(rs.getInt("ordinal")).thenReturn(1);
+                when(rs.getInt("version")).thenReturn(1);
+                return mapper.mapRow(rs, 0);
+            } catch (Exception ex) {
+                throw new AssertionError(ex);
+            }
+        }
+
+        private static <T> T challengeRef(RowMapper<T> mapper) {
+            try {
+                ResultSet rs = mock(ResultSet.class);
+                when(rs.getObject("challenge_id", UUID.class))
+                        .thenReturn(UUID.fromString("52000000-0000-0000-0001-000000000001"));
+                when(rs.getInt("challenge_version")).thenReturn(1);
+                return mapper.mapRow(rs, 0);
+            } catch (Exception ex) {
+                throw new AssertionError(ex);
+            }
+        }
+
+        private static <T> T applicationTarget(RowMapper<T> mapper) {
+            try {
+                ResultSet rs = mock(ResultSet.class);
+                when(rs.getObject("id", UUID.class)).thenReturn(UUID.randomUUID());
+                when(rs.getObject("candidate_id", UUID.class)).thenReturn(CANDIDATE_ID);
+                when(rs.getObject("employer_id", UUID.class)).thenReturn(EMPLOYER_ID);
+                when(rs.getObject("job_id", UUID.class)).thenReturn(UUID.randomUUID());
+                when(rs.getString("job_title")).thenReturn("Senior Java Platform Engineer");
+                when(rs.getString("status")).thenReturn("REVIEWING");
+                return mapper.mapRow(rs, 0);
+            } catch (Exception ex) {
+                throw new AssertionError(ex);
+            }
+        }
+
+        private static <T> T challenge(RowMapper<T> mapper) {
+            try {
+                ResultSet rs = mock(ResultSet.class);
+                when(rs.getObject("id", UUID.class)).thenReturn(UUID.fromString("52000000-0000-0000-0001-000000000001"));
+                when(rs.getString("title")).thenReturn("Cloud Architecture Challenge");
+                when(rs.getString("language")).thenReturn("Java");
+                when(rs.getInt("version")).thenReturn(1);
                 return mapper.mapRow(rs, 0);
             } catch (Exception ex) {
                 throw new AssertionError(ex);

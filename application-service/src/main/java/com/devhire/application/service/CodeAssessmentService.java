@@ -1,17 +1,25 @@
 package com.devhire.application.service;
 
 import com.devhire.application.client.AssessmentRunnerClient;
+import com.devhire.application.client.dto.RunnerHealthResponse;
 import com.devhire.application.client.dto.RunnerRunRequest;
 import com.devhire.application.client.dto.RunnerRunResponse;
 import com.devhire.application.client.dto.RunnerTestCaseRequest;
 import com.devhire.application.dto.request.CodeIntegrityEventRequest;
+import com.devhire.application.dto.request.AssignCodeAssessmentRequest;
+import com.devhire.application.dto.request.CodeChallengeRequest;
+import com.devhire.application.dto.request.CodeChallengeTestCaseRequest;
 import com.devhire.application.dto.request.CodeReviewRequest;
 import com.devhire.application.dto.request.CodeRunRequest;
 import com.devhire.application.dto.request.CodeSubmissionRequest;
 import com.devhire.application.dto.response.CodeAssessmentResponse;
+import com.devhire.application.dto.response.CodeAssessmentRunnerHealthResponse;
 import com.devhire.application.dto.response.CodeAssessmentSummaryResponse;
+import com.devhire.application.dto.response.CodeChallengeResponse;
+import com.devhire.application.dto.response.CodeChallengeTestCaseResponse;
 import com.devhire.application.dto.response.CodeRunCaseResultResponse;
 import com.devhire.application.dto.response.CodeRunResponse;
+import com.devhire.application.dto.response.CodeSubmissionSummaryResponse;
 import com.devhire.application.dto.response.CodeTestCaseResponse;
 import com.devhire.application.dto.response.RubricScoreResponse;
 import com.devhire.application.dto.response.StatusCountResponse;
@@ -28,11 +36,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -42,8 +54,10 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.HexFormat;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -53,34 +67,65 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Pattern;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class CodeAssessmentService {
     private static final String GRADER_VERSION = "static-rubric-v1";
     private static final String RUBRIC_VERSION = "devhire-code-rubric-v1";
-    private static final String RUNNER_STATUS = "JUDGE0_COMPATIBLE_LOCAL_SANDBOX";
+    private static final String RUNNER_STATUS = "JUDGE0_ISOLATED_SANDBOX";
+    private static final String RUNNER_VERSION = "devhire-runtime-v0.7";
+    private static final int DEFAULT_TIME_LIMIT_MS = 2_000;
+    private static final int DEFAULT_MEMORY_KB = 131_072;
+    private static final int DEFAULT_MAX_OUTPUT_BYTES = 12_000;
     private static final Set<String> ALLOWED_LANGUAGES = Set.of("Java", "SQL", "TypeScript");
+    private static final Set<String> TERMINAL_RUN_STATUSES = Set.of("COMPLETED", "POLICY_BLOCKED", "FAILED");
+    private static final Set<String> TERMINAL_VERDICTS = Set.of(
+            "ACCEPTED", "WRONG_ANSWER", "COMPILE_ERROR", "TIME_LIMIT", "MEMORY_LIMIT",
+            "TIME_LIMIT_EXCEEDED", "MEMORY_LIMIT_EXCEEDED",
+            "RUNTIME_ERROR", "POLICY_BLOCKED", "RUNNER_UNAVAILABLE");
     private static final Set<String> FILTERABLE_STATUSES = Set.of(
-            "ASSIGNED", "SUBMITTED", "AUTO_REVIEWED", "EMPLOYER_REVIEWED", "PASSED", "FAILED");
+            "ASSIGNED", "IN_PROGRESS", "SUBMITTED", "REVIEWED", "EXPIRED",
+            "AUTO_REVIEWED", "EMPLOYER_REVIEWED", "PASSED", "FAILED");
     private static final Pattern FORBIDDEN_BOUNDARY = Pattern.compile(
-            "(?i)(runtime\\.getruntime|processbuilder|system\\.exit|\\.exec\\(|socket\\(|files\\.write|new\\s+file\\(|httpclient|fetch\\(|xmlhttprequest)");
+            "(?i)((^|\\s)package\\s+[a-z0-9_.]+\\s*;|public\\s+class\\s+candidatesolution|"
+                    + "runtime\\s*\\.\\s*getruntime|processbuilder|system\\s*\\.\\s*exit|\\.\\s*exec\\s*\\(|"
+                    + "socket\\s*\\(|files\\s*\\.\\s*(read|readstring|readallbytes|write)|java\\.nio\\.file|"
+                    + "new\\s+file\\s*\\(|fileinputstream|fileoutputstream|java\\.io|java\\.net|httpclient|"
+                    + "java\\.lang\\.reflect|getdeclaredmethod|getmethod\\s*\\(|method\\s*\\.\\s*invoke|classloader|"
+                    + "httpurlconnection|new\\s+url\\s*\\(|uri\\s*\\.\\s*create|fetch\\s*\\(|xmlhttprequest|"
+                    + "child_process|deno\\s*\\.\\s*(read|write|run)|bun\\s*\\.\\s*file|"
+                    + "require\\s*\\(\\s*['\"](fs|child_process|net|http|https)['\"]\\s*\\))");
     private static final TypeReference<List<RubricScoreResponse>> RUBRIC_TYPE = new TypeReference<>() {
     };
     private static final String SELECT_ASSESSMENT = """
             SELECT a.id AS assignment_id, a.application_id, a.candidate_id, a.employer_id, a.job_id,
                    a.candidate_name, a.job_title, a.status AS assignment_status, a.due_at, a.assigned_at,
-                   c.id AS challenge_id, c.title AS challenge_title, c.level, c.language, c.prompt, c.constraints_text,
-                   c.starter_code, c.skills_csv, c.required_signals_csv, c.max_score,
+                   c.id AS challenge_id, COALESCE(a.challenge_version, c.version) AS challenge_version,
+                   COALESCE(cv.title, c.title) AS challenge_title,
+                   COALESCE(cv.level, c.level) AS level,
+                   COALESCE(cv.language, c.language) AS language,
+                   COALESCE(cv.prompt, c.prompt) AS prompt,
+                   COALESCE(cv.constraints_text, c.constraints_text) AS constraints_text,
+                   COALESCE(cv.starter_code, c.starter_code) AS starter_code,
+                   COALESCE(cv.skills_csv, c.skills_csv) AS skills_csv,
+                   COALESCE(cv.required_signals_csv, c.required_signals_csv) AS required_signals_csv,
+                   COALESCE(cv.max_score, c.max_score) AS max_score,
                    s.id AS submission_id, s.language AS submission_language, s.code_text, s.final_score,
                    s.decision, s.rubric_json::text AS rubric_json, s.risk_flags_csv, s.feedback,
                    s.ai_feedback_fallback, s.submitted_at, s.attempt_number, s.code_hash,
                    s.grader_version, s.rubric_version,
                    r.id AS run_id, r.status AS run_status, r.sandbox_status,
                    r.visible_case_count, r.visible_passed_count, r.hidden_case_count, r.hidden_passed_count,
+                   r.verdict, r.compile_output_text, r.stdout_text, r.stderr_text,
+                   r.time_limit_ms, r.memory_limit_kb, r.runner_version,
                    r.execution_time_ms, r.memory_kb, r.failure_reason, r.integrity_risk_score, r.similarity_score,
                    r.created_at AS run_created_at, r.completed_at AS run_completed_at
             FROM code_assessment_assignments a
             JOIN code_challenges c ON c.id = a.challenge_id
+            LEFT JOIN code_challenge_versions cv ON cv.challenge_id = a.challenge_id
+                                                AND cv.version = COALESCE(a.challenge_version, c.version)
             LEFT JOIN LATERAL (
                 SELECT *
                 FROM code_submissions s
@@ -103,6 +148,7 @@ public class CodeAssessmentService {
     private final ApplicationEventPublisher eventPublisher;
     private final MeterRegistry meterRegistry;
     private final AssessmentRunnerClient runnerClient;
+    private final TransactionTemplate runEvidenceTransaction;
 
     @Autowired
     public CodeAssessmentService(JdbcTemplate jdbcTemplate,
@@ -110,13 +156,30 @@ public class CodeAssessmentService {
                                  CodeAssessmentGrader grader,
                                  ApplicationEventPublisher eventPublisher,
                                  MeterRegistry meterRegistry,
-                                 AssessmentRunnerClient runnerClient) {
+                                 AssessmentRunnerClient runnerClient,
+                                 ObjectProvider<PlatformTransactionManager> transactionManagerProvider) {
         this.jdbcTemplate = jdbcTemplate;
         this.objectMapper = objectMapper;
         this.grader = grader;
         this.eventPublisher = eventPublisher;
         this.meterRegistry = meterRegistry;
         this.runnerClient = runnerClient;
+        PlatformTransactionManager transactionManager = transactionManagerProvider == null
+                ? null
+                : transactionManagerProvider.getIfAvailable();
+        this.runEvidenceTransaction = transactionManager == null ? null : new TransactionTemplate(transactionManager);
+        if (this.runEvidenceTransaction != null) {
+            this.runEvidenceTransaction.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        }
+    }
+
+    public CodeAssessmentService(JdbcTemplate jdbcTemplate,
+                                 ObjectMapper objectMapper,
+                                 CodeAssessmentGrader grader,
+                                 ApplicationEventPublisher eventPublisher,
+                                 MeterRegistry meterRegistry,
+                                 AssessmentRunnerClient runnerClient) {
+        this(jdbcTemplate, objectMapper, grader, eventPublisher, meterRegistry, runnerClient, null);
     }
 
     public CodeAssessmentService(JdbcTemplate jdbcTemplate,
@@ -124,7 +187,7 @@ public class CodeAssessmentService {
                                  CodeAssessmentGrader grader,
                                  ApplicationEventPublisher eventPublisher,
                                  MeterRegistry meterRegistry) {
-        this(jdbcTemplate, objectMapper, grader, eventPublisher, meterRegistry, null);
+        this(jdbcTemplate, objectMapper, grader, eventPublisher, meterRegistry, null, null);
     }
 
     @Transactional(readOnly = true)
@@ -155,10 +218,20 @@ public class CodeAssessmentService {
         String normalizedCode = request.code().trim();
         persistIntegrityEvents(candidate, assignmentId, request.integrityEvents());
         double integrityRisk = integrityRiskScore(request.integrityEvents(), request.elapsedSeconds());
-        double similarity = similarityScore(assignmentId, sha256(normalizedCode));
-        List<CodeTestCase> visibleCases = testCases(challengeIdForAssignment(assignmentId), true);
+        double similarity = similarityScore(assignmentId, normalizedCode, sha256(normalizedCode));
+        List<CodeTestCase> visibleCases = testCasesForAssignment(assignmentId, true);
+        if (!blank(request.customInput()) && !visibleCases.isEmpty()) {
+            CodeTestCase template = visibleCases.getFirst();
+            visibleCases = List.of(new CodeTestCase(template.id(), "Custom input preview", "VISIBLE",
+                    request.customInput(), "", null, null, 0, 0, template.version()));
+        }
         CodeRunResponse response = executeAndPersistRun(candidate, assignmentId, normalizedLanguage, normalizedCode,
                 visibleCases, false, integrityRisk, similarity, request.clientFingerprintHash());
+        jdbcTemplate.update("""
+                        UPDATE code_assessment_assignments
+                        SET status = 'IN_PROGRESS', updated_at = now()
+                        WHERE id = ? AND candidate_id = ? AND status = 'ASSIGNED'
+                        """, assignmentId, candidate.id());
         publishAudit(candidate, "CODE_VISIBLE_RUN_COMPLETED", assignmentId, Map.of(
                 "runId", response.id().toString(),
                 "visiblePassed", response.visiblePassed(),
@@ -176,6 +249,8 @@ public class CodeAssessmentService {
             CodeRunResponse response = jdbcTemplate.queryForObject("""
                             SELECT id, status, sandbox_status, visible_case_count, visible_passed_count,
                                    hidden_case_count, hidden_passed_count, execution_time_ms, memory_kb, failure_reason,
+                                   verdict, compile_output_text, stdout_text, stderr_text,
+                                   time_limit_ms, memory_limit_kb, runner_version,
                                    integrity_risk_score, similarity_score, created_at, completed_at
                             FROM code_assessment_runs
                             WHERE id = ? AND assignment_id = ? AND candidate_id = ?
@@ -186,6 +261,20 @@ public class CodeAssessmentService {
         } catch (EmptyResultDataAccessException ex) {
             throw new DevHireException(ErrorCode.NOT_FOUND, "Code assessment run not found");
         }
+    }
+
+    @Transactional(readOnly = true)
+    public List<CodeSubmissionSummaryResponse> candidateSubmissions(AuthenticatedUser candidate, UUID assignmentId) {
+        requireRole(candidate, UserRole.CANDIDATE);
+        candidateAssessment(candidate, assignmentId);
+        return submissionSummaries(assignmentId, false);
+    }
+
+    @Transactional(readOnly = true)
+    public List<CodeSubmissionSummaryResponse> employerSubmissions(AuthenticatedUser employer, UUID assignmentId) {
+        requireRole(employer, UserRole.EMPLOYER);
+        employerAssessment(employer, assignmentId);
+        return submissionSummaries(assignmentId, true);
     }
 
     @Transactional
@@ -204,9 +293,11 @@ public class CodeAssessmentService {
         String codeHash = sha256(normalizedCode);
         persistIntegrityEvents(candidate, assignmentId, request.integrityEvents());
         double integrityRisk = integrityRiskScore(request.integrityEvents(), request.elapsedSeconds());
-        double similarity = similarityScore(assignmentId, codeHash);
+        double similarity = similarityScore(assignmentId, normalizedCode, codeHash);
+        List<CodeTestCase> submissionCases = testCasesForAssignment(assignmentId, false);
         CodeRunResponse run = executeAndPersistRun(candidate, assignmentId, normalizedLanguage, normalizedCode,
-                testCases(challengeIdForAssignment(assignmentId), false), true, integrityRisk, similarity, request.clientFingerprintHash());
+                submissionCases, true, integrityRisk, similarity, request.clientFingerprintHash());
+        ensureTrustedRuntimeForSubmission(run);
         Timer.Sample timer = Timer.start(meterRegistry);
         CodeAssessmentGrader.GradeResult result;
         try {
@@ -224,16 +315,16 @@ public class CodeAssessmentService {
                     .register(meterRegistry));
         }
         List<String> riskFlags = mergeRiskFlags(result.riskFlags(), run, integrityRisk, similarity);
-        int finalScore = finalScore(result.totalScore(), run, riskFlags);
+        int finalScore = finalScore(result.totalScore(), run, riskFlags, submissionCases);
         String decision = autoDecision(finalScore, riskFlags);
         UUID submissionId = UUID.randomUUID();
         jdbcTemplate.update("""
                         INSERT INTO code_submissions (
                             id, assignment_id, language, code_text, candidate_notes, static_score, final_score,
                             decision, rubric_json, risk_flags_csv, feedback, ai_feedback_fallback, status, submitted_at,
-                            attempt_number, code_hash, grader_version, rubric_version
+                            attempt_number, code_hash, grader_version, rubric_version, run_id
                         )
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, CAST(? AS jsonb), ?, ?, ?, 'AUTO_REVIEWED', now(), ?, ?, ?, ?)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, CAST(? AS jsonb), ?, ?, ?, 'AUTO_REVIEWED', now(), ?, ?, ?, ?, ?)
                         """,
                 submissionId,
                 assignmentId,
@@ -250,7 +341,8 @@ public class CodeAssessmentService {
                 attemptNumber,
                 codeHash,
                 GRADER_VERSION,
-                RUBRIC_VERSION);
+                RUBRIC_VERSION,
+                run.id());
         jdbcTemplate.update("""
                         INSERT INTO code_similarity_reports (
                             id, assignment_id, submission_id, code_hash, similarity_score, matched_submission_id, created_at
@@ -259,7 +351,7 @@ public class CodeAssessmentService {
                         """, UUID.randomUUID(), assignmentId, submissionId, codeHash, similarity);
         jdbcTemplate.update("""
                         UPDATE code_assessment_assignments
-                        SET status = 'AUTO_REVIEWED', updated_at = now()
+                        SET status = 'SUBMITTED', updated_at = now()
                         WHERE id = ? AND candidate_id = ?
                         """, assignmentId, candidate.id());
         publishAudit(candidate, "CODE_SUBMITTED", assignmentId, Map.ofEntries(
@@ -271,11 +363,12 @@ public class CodeAssessmentService {
                 Map.entry("score", finalScore),
                 Map.entry("riskFlags", riskFlags),
                 Map.entry("runId", run.id().toString()),
+                Map.entry("verdict", run.verdict()),
                 Map.entry("hiddenPassed", run.hiddenPassed()),
                 Map.entry("hiddenTotal", run.hiddenTotal()),
                 Map.entry("integrityRiskScore", integrityRisk),
                 Map.entry("similarityScore", similarity)));
-        publishAudit(candidate, "CODE_AUTO_REVIEWED", assignmentId, Map.of(
+        publishAudit(candidate, "CODE_SUBMISSION_SCORED", assignmentId, Map.of(
                 "submissionId", submissionId.toString(),
                 "attemptNumber", attemptNumber,
                 "codeHash", codeHash,
@@ -283,8 +376,64 @@ public class CodeAssessmentService {
                 "rubricVersion", RUBRIC_VERSION,
                 "score", finalScore,
                 "decision", decision,
-                "sandboxStatus", run.sandboxStatus()));
+                "sandboxStatus", run.sandboxStatus(),
+                "verdict", run.verdict()));
         return candidateAssessment(candidate, assignmentId);
+    }
+
+    @Transactional
+    public CodeAssessmentResponse assignToApplication(AuthenticatedUser employer,
+                                                      UUID applicationId,
+                                                      AssignCodeAssessmentRequest request) {
+        requireRole(employer, UserRole.EMPLOYER);
+        ApplicationTarget target = applicationTarget(employer, applicationId);
+        if (List.of("WITHDRAWN", "REJECTED").contains(target.status())) {
+            throw new DevHireException(ErrorCode.CONFLICT,
+                    "Cannot assign a code assessment to a closed application");
+        }
+        CodeChallengeChoice challenge = challengeChoice(request == null ? null : request.challengeId());
+        if (!"Java".equalsIgnoreCase(challenge.language())) {
+            throw new DevHireException(ErrorCode.BAD_REQUEST,
+                    "Only active Java code challenges can be assigned in the MVP grading flow");
+        }
+        Instant dueAt = request == null || request.dueAt() == null
+                ? Instant.now().plus(7, ChronoUnit.DAYS)
+                : request.dueAt();
+        if (!dueAt.isAfter(Instant.now())) {
+            throw new DevHireException(ErrorCode.BAD_REQUEST,
+                    "Code assessment due date must be in the future");
+        }
+
+        UUID newAssignmentId = UUID.randomUUID();
+        int inserted = jdbcTemplate.update("""
+                        INSERT INTO code_assessment_assignments (
+                            id, application_id, candidate_id, employer_id, job_id, challenge_id, challenge_version,
+                            candidate_name, job_title, status, due_at, assigned_at, updated_at
+                        )
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'ASSIGNED', ?, now(), now())
+                        ON CONFLICT (application_id, challenge_id) DO NOTHING
+                        """,
+                newAssignmentId,
+                target.applicationId(),
+                target.candidateId(),
+                target.employerId(),
+                target.jobId(),
+                challenge.id(),
+                challenge.version(),
+                candidateDisplayName(target.candidateId()),
+                target.jobTitle(),
+                Timestamp.from(dueAt));
+        UUID assignmentId = assignmentIdForApplicationChallenge(applicationId, challenge.id());
+        if (inserted > 0) {
+            publishAudit(employer, "CODE_ASSESSMENT_ASSIGNED", assignmentId, Map.of(
+                    "applicationId", applicationId.toString(),
+                    "candidateId", target.candidateId().toString(),
+                    "jobId", target.jobId().toString(),
+                    "challengeId", challenge.id().toString(),
+                    "challengeTitle", challenge.title(),
+                    "dueAt", dueAt.toString()));
+        }
+        return employerAssessment(employer, assignmentId);
     }
 
     @Transactional(readOnly = true)
@@ -331,9 +480,9 @@ public class CodeAssessmentService {
         String decision = normalizeDecision(request.decision());
         int finalScore = assessment.latestScore() == null ? 0 : assessment.latestScore();
         String status = switch (decision) {
-            case "ADVANCE" -> "PASSED";
+            case "PASS" -> "PASSED";
             case "REJECT" -> "FAILED";
-            default -> "EMPLOYER_REVIEWED";
+            default -> "REVIEWED";
         };
         jdbcTemplate.update("""
                         UPDATE code_submissions
@@ -399,6 +548,20 @@ public class CodeAssessmentService {
                 )
                 FROM code_assessment_runs
                 """, Double.class);
+        Double acceptedRate = verdictRate("ACCEPTED");
+        Double wrongAnswerRate = verdictRate("WRONG_ANSWER");
+        Double compileErrorRate = verdictRate("COMPILE_ERROR");
+        Double timeoutRate = verdictRate("TIME_LIMIT_EXCEEDED") + verdictRate("TIME_LIMIT");
+        Double runnerUnavailableRate = verdictRate("RUNNER_UNAVAILABLE");
+        Double policyBlockedRate = verdictRate("POLICY_BLOCKED");
+        Double averageRuntimeMs = jdbcTemplate.queryForObject("""
+                SELECT COALESCE(avg(execution_time_ms), 0)
+                FROM code_assessment_runs
+                """, Double.class);
+        Double p95ExecutionMs = jdbcTemplate.queryForObject("""
+                SELECT COALESCE(percentile_cont(0.95) WITHIN GROUP (ORDER BY execution_time_ms), 0)
+                FROM code_assessment_runs
+                """, Double.class);
         Double averageIntegrityRisk = jdbcTemplate.queryForObject("""
                 SELECT COALESCE(avg(integrity_risk_score), 0)
                 FROM code_assessment_runs
@@ -407,9 +570,10 @@ public class CodeAssessmentService {
                 SELECT COALESCE(avg(similarity_score), 0)
                 FROM code_similarity_reports
                 """, Double.class);
+        CodeAssessmentRunnerHealthResponse runnerHealth = runnerHealth(queueDepth == null ? 0 : queueDepth);
         return new CodeAssessmentSummaryResponse(
                 sum(distribution),
-                count(distribution, "SUBMITTED") + count(distribution, "AUTO_REVIEWED")
+                count(distribution, "SUBMITTED") + count(distribution, "REVIEWED") + count(distribution, "AUTO_REVIEWED")
                         + count(distribution, "EMPLOYER_REVIEWED") + count(distribution, "PASSED")
                         + count(distribution, "FAILED"),
                 count(distribution, "AUTO_REVIEWED"),
@@ -420,9 +584,427 @@ public class CodeAssessmentService {
                 risky == null ? 0 : risky,
                 queueDepth == null ? 0 : queueDepth,
                 roundOne(sandboxFailureRate),
+                roundOne(acceptedRate),
+                roundOne(wrongAnswerRate),
+                roundOne(compileErrorRate),
+                roundOne(timeoutRate),
+                roundOne(runnerUnavailableRate),
+                roundOne(policyBlockedRate),
+                roundOne(averageRuntimeMs),
+                roundOne(p95ExecutionMs),
                 roundOne(averageIntegrityRisk),
                 roundOne(averageSimilarity),
-                distribution);
+                distribution,
+                runnerHealth);
+    }
+
+    @Transactional(readOnly = true)
+    public List<CodeChallengeResponse> adminCodeChallenges(AuthenticatedUser admin) {
+        requireRole(admin, UserRole.ADMIN);
+        return jdbcTemplate.query("""
+                SELECT c.id, c.slug, c.title, c.version, c.level, c.language, c.prompt, c.constraints_text,
+                       c.starter_code, c.skills_csv, c.required_signals_csv, c.max_score, c.active,
+                       c.reference_solution, c.created_at,
+                       count(tc.id) FILTER (WHERE tc.version = c.version AND tc.visibility = 'VISIBLE') AS visible_cases,
+                       count(tc.id) FILTER (WHERE tc.version = c.version AND tc.visibility = 'HIDDEN') AS hidden_cases
+                FROM code_challenges c
+                LEFT JOIN code_challenge_test_cases tc ON tc.challenge_id = c.id
+                GROUP BY c.id
+                ORDER BY c.active DESC, c.created_at DESC, c.title ASC
+                """, (rs, rowNum) -> challengeFromResultSet(rs));
+    }
+
+    @Transactional
+    public CodeChallengeResponse createCodeChallenge(AuthenticatedUser admin, CodeChallengeRequest request) {
+        requireRole(admin, UserRole.ADMIN);
+        ChallengeDraft draft = challengeDraft(request, null, 1);
+        List<CodeTestCase> cases = testCasesFromRequest(request == null ? null : request.testCases(), draft.version());
+        validatePublishableChallenge(draft, cases);
+        UUID challengeId = UUID.randomUUID();
+        jdbcTemplate.update("""
+                        INSERT INTO code_challenges (
+                            id, slug, title, version, level, language, prompt, constraints_text,
+                            starter_code, skills_csv, required_signals_csv, max_score, active,
+                            reference_solution, created_at
+                        )
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, now())
+                        """,
+                challengeId,
+                draft.slug(),
+                draft.title(),
+                draft.version(),
+                draft.level(),
+                draft.language(),
+                draft.prompt(),
+                draft.constraints(),
+                draft.starterCode(),
+                String.join(",", draft.skills()),
+                String.join(",", draft.requiredSignals()),
+                draft.maxScore(),
+                draft.active(),
+                blankToNull(draft.referenceSolution()));
+        persistChallengeVersion(challengeId, draft);
+        persistChallengeCases(challengeId, draft.version(), cases);
+        publishAudit(admin, "CODE_CHALLENGE_CREATED", challengeId, Map.of(
+                "slug", draft.slug(),
+                "version", draft.version(),
+                "active", draft.active()));
+        return challengeById(challengeId);
+    }
+
+    @Transactional
+    public CodeChallengeResponse updateCodeChallenge(AuthenticatedUser admin, UUID challengeId, CodeChallengeRequest request) {
+        requireRole(admin, UserRole.ADMIN);
+        ChallengeDraft current = challengeDraftById(challengeId);
+        ChallengeDraft draft = challengeDraft(request, current, current.version() + 1);
+        List<CodeTestCase> cases = request != null && request.testCases() != null
+                ? testCasesFromRequest(request.testCases(), draft.version())
+                : copyCasesForVersion(challengeId, current.version(), draft.version());
+        validatePublishableChallenge(draft, cases);
+        jdbcTemplate.update("""
+                        UPDATE code_challenges
+                        SET slug = ?, title = ?, version = ?, level = ?, language = ?, prompt = ?,
+                            constraints_text = ?, starter_code = ?, skills_csv = ?, required_signals_csv = ?,
+                            max_score = ?, active = ?, reference_solution = ?
+                        WHERE id = ?
+                        """,
+                draft.slug(),
+                draft.title(),
+                draft.version(),
+                draft.level(),
+                draft.language(),
+                draft.prompt(),
+                draft.constraints(),
+                draft.starterCode(),
+                String.join(",", draft.skills()),
+                String.join(",", draft.requiredSignals()),
+                draft.maxScore(),
+                draft.active(),
+                blankToNull(draft.referenceSolution()),
+                challengeId);
+        persistChallengeVersion(challengeId, draft);
+        persistChallengeCases(challengeId, draft.version(), cases);
+        publishAudit(admin, "CODE_CHALLENGE_UPDATED", challengeId, Map.of(
+                "slug", draft.slug(),
+                "version", draft.version(),
+                "active", draft.active()));
+        return challengeById(challengeId);
+    }
+
+    private Double verdictRate(String verdict) {
+        return jdbcTemplate.queryForObject("""
+                SELECT COALESCE(avg(CASE WHEN verdict = ? THEN 100.0 ELSE 0.0 END), 0)
+                FROM code_assessment_runs
+                """, Double.class, verdict);
+    }
+
+    private CodeAssessmentRunnerHealthResponse runnerHealth(long queueDepth) {
+        if (runnerClient == null) {
+            return CodeAssessmentRunnerHealthResponse.unknown(queueDepth);
+        }
+        try {
+            ApiResponse<RunnerHealthResponse> response = runnerClient.health();
+            RunnerHealthResponse health = response == null ? null : response.data();
+            if (health == null) {
+                return new CodeAssessmentRunnerHealthResponse(
+                        "DOWN",
+                        "unknown",
+                        "unknown",
+                        false,
+                        true,
+                        true,
+                        queueDepth,
+                        "Runner health response was empty",
+                        Instant.now());
+            }
+            return new CodeAssessmentRunnerHealthResponse(
+                    firstNonBlank(health.status(), "DOWN"),
+                    firstNonBlank(health.mode(), "unknown"),
+                    firstNonBlank(health.runnerVersion(), "unknown"),
+                    health.judge0Configured(),
+                    health.failClosed(),
+                    health.networkDisabled(),
+                    health.queueDepth(),
+                    blankToNull(health.failClosedReason()),
+                    health.checkedAt() == null ? Instant.now() : health.checkedAt());
+        } catch (RuntimeException ex) {
+            return new CodeAssessmentRunnerHealthResponse(
+                    "DOWN",
+                    "unknown",
+                    "unknown",
+                    false,
+                    true,
+                    true,
+                    queueDepth,
+                    "Runner health check failed: " + truncate(ex.getMessage(), 180),
+                    Instant.now());
+        }
+    }
+
+    private List<CodeSubmissionSummaryResponse> submissionSummaries(UUID assignmentId, boolean includeHiddenAggregate) {
+        return jdbcTemplate.query("""
+                SELECT s.id, s.assignment_id, s.run_id, s.language, s.final_score, s.decision,
+                       s.rubric_json::text AS rubric_json, s.risk_flags_csv, s.feedback,
+                       s.attempt_number, s.code_hash, s.grader_version, s.rubric_version,
+                       s.code_text, s.submitted_at,
+                       r.verdict, r.visible_passed_count, r.visible_case_count,
+                       r.hidden_passed_count, r.hidden_case_count, r.execution_time_ms, r.memory_kb
+                FROM code_submissions s
+                LEFT JOIN code_assessment_runs r ON r.id = s.run_id
+                WHERE s.assignment_id = ?
+                ORDER BY s.attempt_number DESC, s.submitted_at DESC
+                """, (rs, rowNum) -> new CodeSubmissionSummaryResponse(
+                rs.getObject("id", UUID.class),
+                rs.getObject("assignment_id", UUID.class),
+                rs.getObject("run_id", UUID.class),
+                rs.getString("language"),
+                nullableInt(rs, "final_score"),
+                rs.getString("decision"),
+                readRubric(rs.getString("rubric_json")),
+                splitCsv(rs.getString("risk_flags_csv")),
+                rs.getString("feedback"),
+                nullableInt(rs, "attempt_number"),
+                rs.getString("code_hash"),
+                firstNonBlank(rs.getString("grader_version"), GRADER_VERSION),
+                firstNonBlank(rs.getString("rubric_version"), RUBRIC_VERSION),
+                rs.getString("code_text"),
+                codePreview(rs.getString("code_text")),
+                rs.getString("code_text") != null && !rs.getString("code_text").isBlank(),
+                firstNonBlank(rs.getString("verdict"), "UNKNOWN"),
+                rs.getInt("visible_passed_count"),
+                rs.getInt("visible_case_count"),
+                includeHiddenAggregate ? rs.getInt("hidden_passed_count") : 0,
+                includeHiddenAggregate ? rs.getInt("hidden_case_count") : 0,
+                rs.getLong("execution_time_ms"),
+                rs.getLong("memory_kb"),
+                instant(rs.getTimestamp("submitted_at"))), assignmentId);
+    }
+
+    private CodeChallengeResponse challengeById(UUID challengeId) {
+        try {
+            return jdbcTemplate.queryForObject("""
+                    SELECT c.id, c.slug, c.title, c.version, c.level, c.language, c.prompt, c.constraints_text,
+                           c.starter_code, c.skills_csv, c.required_signals_csv, c.max_score, c.active,
+                           c.reference_solution, c.created_at,
+                           count(tc.id) FILTER (WHERE tc.version = c.version AND tc.visibility = 'VISIBLE') AS visible_cases,
+                           count(tc.id) FILTER (WHERE tc.version = c.version AND tc.visibility = 'HIDDEN') AS hidden_cases
+                    FROM code_challenges c
+                    LEFT JOIN code_challenge_test_cases tc ON tc.challenge_id = c.id
+                    WHERE c.id = ?
+                    GROUP BY c.id
+                    """, (rs, rowNum) -> challengeFromResultSet(rs), challengeId);
+        } catch (EmptyResultDataAccessException ex) {
+            throw new DevHireException(ErrorCode.NOT_FOUND, "Code challenge not found");
+        }
+    }
+
+    private CodeChallengeResponse challengeFromResultSet(ResultSet rs) throws SQLException {
+        return new CodeChallengeResponse(
+                rs.getObject("id", UUID.class),
+                rs.getString("slug"),
+                rs.getString("title"),
+                rs.getInt("version"),
+                rs.getString("level"),
+                rs.getString("language"),
+                rs.getString("prompt"),
+                rs.getString("constraints_text"),
+                rs.getString("starter_code"),
+                splitCsv(rs.getString("skills_csv")),
+                splitCsv(rs.getString("required_signals_csv")),
+                rs.getInt("max_score"),
+                rs.getBoolean("active"),
+                rs.getString("reference_solution"),
+                rs.getInt("visible_cases"),
+                rs.getInt("hidden_cases"),
+                challengeTestCases(rs.getObject("id", UUID.class), rs.getInt("version")),
+                instant(rs.getTimestamp("created_at")));
+    }
+
+    private List<CodeChallengeTestCaseResponse> challengeTestCases(UUID challengeId, int version) {
+        return jdbcTemplate.query("""
+                SELECT id, name, visibility, input_text, expected_output, weight, ordinal,
+                       setup_sql, expected_rows_json
+                FROM code_challenge_test_cases
+                WHERE challenge_id = ? AND version = ?
+                ORDER BY ordinal, name
+                """, (rs, rowNum) -> new CodeChallengeTestCaseResponse(
+                rs.getObject("id", UUID.class),
+                rs.getString("name"),
+                rs.getString("visibility"),
+                rs.getString("input_text"),
+                rs.getString("expected_output"),
+                rs.getInt("weight"),
+                rs.getInt("ordinal"),
+                rs.getString("setup_sql"),
+                rs.getString("expected_rows_json")), challengeId, version);
+    }
+
+    private ChallengeDraft challengeDraftById(UUID challengeId) {
+        try {
+            return jdbcTemplate.queryForObject("""
+                    SELECT slug, title, version, level, language, prompt, constraints_text,
+                           starter_code, skills_csv, required_signals_csv, max_score, active, reference_solution
+                    FROM code_challenges
+                    WHERE id = ?
+                    """, (rs, rowNum) -> new ChallengeDraft(
+                    rs.getString("slug"),
+                    rs.getString("title"),
+                    rs.getInt("version"),
+                    rs.getString("level"),
+                    rs.getString("language"),
+                    rs.getString("prompt"),
+                    rs.getString("constraints_text"),
+                    rs.getString("starter_code"),
+                    splitCsv(rs.getString("skills_csv")),
+                    splitCsv(rs.getString("required_signals_csv")),
+                    rs.getInt("max_score"),
+                    rs.getBoolean("active"),
+                    rs.getString("reference_solution")), challengeId);
+        } catch (EmptyResultDataAccessException ex) {
+            throw new DevHireException(ErrorCode.NOT_FOUND, "Code challenge not found");
+        }
+    }
+
+    private ChallengeDraft challengeDraft(CodeChallengeRequest request, ChallengeDraft current, int version) {
+        boolean creating = current == null;
+        String title = creating ? requireText(request == null ? null : request.title(), "Challenge title is required")
+                : firstNonBlank(request == null ? null : request.title(), current.title());
+        String slug = creating
+                ? firstNonBlank(request == null ? null : request.slug(), slugify(title))
+                : firstNonBlank(request == null ? null : request.slug(), current.slug());
+        String language = normalizeLanguage(creating ? request == null ? "Java" : request.language()
+                : firstNonBlank(request == null ? null : request.language(), current.language()));
+        List<String> skills = request == null || request.skills() == null
+                ? creating ? List.of(language) : current.skills()
+                : cleanList(request.skills());
+        List<String> requiredSignals = request == null || request.requiredSignals() == null
+                ? creating ? List.of("CandidateSolution", "solve") : current.requiredSignals()
+                : cleanList(request.requiredSignals());
+        return new ChallengeDraft(
+                slug,
+                title,
+                version,
+                firstNonBlank(request == null ? null : request.level(), creating ? "Senior" : current.level()),
+                language,
+                creating ? requireText(request == null ? null : request.prompt(), "Challenge prompt is required")
+                        : firstNonBlank(request == null ? null : request.prompt(), current.prompt()),
+                creating ? requireText(request == null ? null : request.constraints(), "Challenge constraints are required")
+                        : firstNonBlank(request == null ? null : request.constraints(), current.constraints()),
+                creating ? requireText(request == null ? null : request.starterCode(), "Challenge starter code is required")
+                        : firstNonBlank(request == null ? null : request.starterCode(), current.starterCode()),
+                skills,
+                requiredSignals,
+                request == null || request.maxScore() == null ? creating ? 100 : current.maxScore() : request.maxScore(),
+                request == null || request.active() == null ? !creating && current.active() : request.active(),
+                creating ? blankToNull(request == null ? null : request.referenceSolution())
+                        : firstNonBlank(request == null ? null : request.referenceSolution(), current.referenceSolution()));
+    }
+
+    private List<CodeTestCase> testCasesFromRequest(List<CodeChallengeTestCaseRequest> requests, int version) {
+        if (requests == null || requests.isEmpty()) {
+            return List.of();
+        }
+        List<CodeTestCase> cases = new ArrayList<>();
+        int ordinal = 1;
+        for (CodeChallengeTestCaseRequest request : requests) {
+            cases.add(new CodeTestCase(
+                    UUID.randomUUID(),
+                    requireText(request.name(), "Test case name is required"),
+                    normalizeVisibility(request.visibility()),
+                    request.stdin(),
+                    requireText(request.expectedOutput(), "Expected output is required"),
+                    request.setupSql(),
+                    request.expectedRowsJson(),
+                    request.weight() == null ? 10 : request.weight(),
+                    request.ordinal() == null ? ordinal : request.ordinal(),
+                    version));
+            ordinal++;
+        }
+        return cases;
+    }
+
+    private List<CodeTestCase> copyCasesForVersion(UUID challengeId, int sourceVersion, int targetVersion) {
+        return testCases(challengeId, sourceVersion, false).stream()
+                .map(testCase -> new CodeTestCase(UUID.randomUUID(), testCase.name(), testCase.visibility(),
+                        testCase.input(), testCase.expectedOutput(), testCase.setupSql(), testCase.expectedRowsJson(),
+                        testCase.weight(), testCase.ordinal(), targetVersion))
+                .toList();
+    }
+
+    private void validatePublishableChallenge(ChallengeDraft draft, List<CodeTestCase> cases) {
+        if (!draft.active()) {
+            return;
+        }
+        if (cases.stream().noneMatch(testCase -> isVisible(testCase.visibility()))
+                || cases.stream().noneMatch(testCase -> !isVisible(testCase.visibility()))) {
+            throw new DevHireException(ErrorCode.BAD_REQUEST,
+                    "Active code challenges require at least one visible and one hidden executable case");
+        }
+        if (blank(draft.referenceSolution())) {
+            throw new DevHireException(ErrorCode.BAD_REQUEST,
+                    "Active code challenges require a reference solution");
+        }
+        RunnerRunRequest request = runnerRequest(draft.language(), draft.referenceSolution(), cases);
+        RunnerRunResponse response = trustedOrFailureResponse(runInSandbox(draft.language(), request),
+                request, draft.language(), true);
+        if (!"ACCEPTED".equals(response.verdict())) {
+            throw new DevHireException(ErrorCode.BAD_REQUEST,
+                    "Reference solution must pass visible and hidden cases before publishing");
+        }
+    }
+
+    private void persistChallengeVersion(UUID challengeId, ChallengeDraft draft) {
+        jdbcTemplate.update("""
+                        INSERT INTO code_challenge_versions (
+                            challenge_id, version, title, level, language, prompt, constraints_text,
+                            starter_code, skills_csv, required_signals_csv, max_score, reference_solution, created_at
+                        )
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, now())
+                        ON CONFLICT (challenge_id, version) DO NOTHING
+                        """,
+                challengeId,
+                draft.version(),
+                draft.title(),
+                draft.level(),
+                draft.language(),
+                draft.prompt(),
+                draft.constraints(),
+                draft.starterCode(),
+                String.join(",", draft.skills()),
+                String.join(",", draft.requiredSignals()),
+                draft.maxScore(),
+                blankToNull(draft.referenceSolution()));
+    }
+
+    private void persistChallengeCases(UUID challengeId, int version, List<CodeTestCase> cases) {
+        for (CodeTestCase testCase : cases) {
+            jdbcTemplate.update("""
+                            INSERT INTO code_challenge_test_cases (
+                                id, challenge_id, version, name, visibility, input_text, expected_output,
+                                setup_sql, expected_rows_json, weight, ordinal
+                            )
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                            ON CONFLICT (challenge_id, version, name) DO UPDATE
+                            SET visibility = EXCLUDED.visibility,
+                                input_text = EXCLUDED.input_text,
+                                expected_output = EXCLUDED.expected_output,
+                                setup_sql = EXCLUDED.setup_sql,
+                                expected_rows_json = EXCLUDED.expected_rows_json,
+                                weight = EXCLUDED.weight,
+                                ordinal = EXCLUDED.ordinal
+                            """,
+                    testCase.id(),
+                    challengeId,
+                    version,
+                    testCase.name(),
+                    normalizeVisibility(testCase.visibility()),
+                    testCase.input(),
+                    testCase.expectedOutput(),
+                    testCase.setupSql(),
+                    testCase.expectedRowsJson(),
+                    testCase.weight(),
+                    testCase.ordinal());
+        }
     }
 
     private CodeAssessmentResponse findForOwner(UUID assignmentId, String ownerPredicate, UUID ownerId) {
@@ -436,9 +1018,11 @@ public class CodeAssessmentService {
 
     private List<String> requiredSignals(UUID assignmentId) {
         return jdbcTemplate.queryForObject("""
-                SELECT c.required_signals_csv
+                SELECT COALESCE(cv.required_signals_csv, c.required_signals_csv) AS required_signals_csv
                 FROM code_assessment_assignments a
                 JOIN code_challenges c ON c.id = a.challenge_id
+                LEFT JOIN code_challenge_versions cv ON cv.challenge_id = a.challenge_id
+                                                    AND cv.version = COALESCE(a.challenge_version, c.version)
                 WHERE a.id = ?
                 """, (rs, rowNum) -> splitCsv(rs.getString("required_signals_csv")), assignmentId);
     }
@@ -448,7 +1032,7 @@ public class CodeAssessmentService {
                 SELECT 1
                 FROM code_assessment_assignments
                 WHERE id = ? AND candidate_id = ?
-                FOR UPDATE
+                FOR NO KEY UPDATE
                 """, Integer.class, assignmentId, candidate.id());
         if (locked == null) {
             throw new DevHireException(ErrorCode.NOT_FOUND, "Code assessment not found");
@@ -463,12 +1047,100 @@ public class CodeAssessmentService {
                 """, UUID.class, assignmentId);
     }
 
-    private List<CodeTestCase> testCases(UUID challengeId, boolean visibleOnly) {
+    private CodeChallengeRef challengeRefForAssignment(UUID assignmentId) {
+        return jdbcTemplate.queryForObject("""
+                        SELECT a.challenge_id, COALESCE(a.challenge_version, c.version) AS challenge_version
+                        FROM code_assessment_assignments a
+                        JOIN code_challenges c ON c.id = a.challenge_id
+                        WHERE a.id = ?
+                        """,
+                (rs, rowNum) -> new CodeChallengeRef(
+                        rs.getObject("challenge_id", UUID.class),
+                        rs.getInt("challenge_version")),
+                assignmentId);
+    }
+
+    private ApplicationTarget applicationTarget(AuthenticatedUser employer, UUID applicationId) {
+        try {
+            return jdbcTemplate.queryForObject("""
+                            SELECT id, candidate_id, employer_id, job_id, job_title, status
+                            FROM job_applications
+                            WHERE id = ? AND employer_id = ?
+                            """,
+                    (rs, rowNum) -> new ApplicationTarget(
+                            rs.getObject("id", UUID.class),
+                            rs.getObject("candidate_id", UUID.class),
+                            rs.getObject("employer_id", UUID.class),
+                            rs.getObject("job_id", UUID.class),
+                            rs.getString("job_title"),
+                            rs.getString("status")),
+                    applicationId, employer.id());
+        } catch (EmptyResultDataAccessException ex) {
+            throw new DevHireException(ErrorCode.NOT_FOUND, "Application not found for employer");
+        }
+    }
+
+    private CodeChallengeChoice challengeChoice(UUID requestedChallengeId) {
+        try {
+            if (requestedChallengeId != null) {
+                return jdbcTemplate.queryForObject("""
+                            SELECT id, title, language, version
+                            FROM code_challenges
+                            WHERE id = ?
+                              AND active = true
+                              AND language = 'Java'
+                              AND slug = 'cloud-architecture-challenge'
+                                """,
+                        (rs, rowNum) -> new CodeChallengeChoice(
+                                rs.getObject("id", UUID.class),
+                                rs.getString("title"),
+                                rs.getString("language"),
+                                rs.getInt("version")),
+                        requestedChallengeId);
+            }
+            return jdbcTemplate.queryForObject("""
+                            SELECT id, title, language, version
+                            FROM code_challenges
+                            WHERE active = true
+                              AND language = 'Java'
+                              AND slug = 'cloud-architecture-challenge'
+                            ORDER BY created_at DESC
+                            LIMIT 1
+                            """,
+                    (rs, rowNum) -> new CodeChallengeChoice(
+                            rs.getObject("id", UUID.class),
+                            rs.getString("title"),
+                            rs.getString("language"),
+                            rs.getInt("version")));
+        } catch (EmptyResultDataAccessException ex) {
+            throw new DevHireException(ErrorCode.BAD_REQUEST, "Active Java cloud code challenge not found");
+        }
+    }
+
+    private UUID assignmentIdForApplicationChallenge(UUID applicationId, UUID challengeId) {
+        try {
+            return jdbcTemplate.queryForObject("""
+                    SELECT id
+                    FROM code_assessment_assignments
+                    WHERE application_id = ? AND challenge_id = ?
+                    """, UUID.class, applicationId, challengeId);
+        } catch (EmptyResultDataAccessException ex) {
+            throw new DevHireException(ErrorCode.INTERNAL_ERROR, "Code assessment assignment was not created");
+        }
+    }
+
+    private List<CodeTestCase> testCasesForAssignment(UUID assignmentId, boolean visibleOnly) {
+        CodeChallengeRef ref = challengeRefForAssignment(assignmentId);
+        return testCases(ref.challengeId(), ref.version(), visibleOnly);
+    }
+
+    private List<CodeTestCase> testCases(UUID challengeId, int challengeVersion, boolean visibleOnly) {
         String visibilityFilter = visibleOnly ? "AND visibility = 'VISIBLE'" : "";
         return jdbcTemplate.query("""
-                SELECT id, name, visibility, input_text, expected_output, weight
+                SELECT id, name, visibility, input_text, expected_output, setup_sql, expected_rows_json, weight, ordinal, version
                 FROM code_challenge_test_cases
                 WHERE challenge_id = ?
+                  AND version = ?
                 """ + visibilityFilter + """
                 ORDER BY ordinal ASC, name ASC
                 """, (rs, rowNum) -> new CodeTestCase(
@@ -477,7 +1149,11 @@ public class CodeAssessmentService {
                 rs.getString("visibility"),
                 rs.getString("input_text"),
                 rs.getString("expected_output"),
-                rs.getInt("weight")), challengeId);
+                rs.getString("setup_sql"),
+                rs.getString("expected_rows_json"),
+                rs.getInt("weight"),
+                rs.getInt("ordinal"),
+                rs.getInt("version")), challengeId, challengeVersion);
     }
 
     private CodeRunResponse executeAndPersistRun(AuthenticatedUser candidate,
@@ -490,17 +1166,25 @@ public class CodeAssessmentService {
                                                  double similarity,
                                                  String clientFingerprintHash) {
         UUID runId = UUID.randomUUID();
-        RunnerRunResponse runnerResponse = runInSandbox(language, code, cases);
+        RunnerRunRequest runnerRequest = runnerRequest(language, code, cases);
+        RunnerRunResponse runnerResponse = trustedOrFailureResponse(runInSandbox(language, runnerRequest),
+                runnerRequest, language, includeHidden);
         List<CodeRunCaseResultResponse> results = runnerResponse.results().stream()
                 .map(result -> new CodeRunCaseResultResponse(
                         result.caseId(),
                         result.name(),
                         normalizeVisibility(result.visibility()),
                         result.passed(),
+                        firstNonBlank(result.verdict(), result.passed() ? "ACCEPTED" : "WRONG_ANSWER"),
                         result.output(),
+                        result.stdout(),
+                        result.stderr(),
+                        result.compileOutput(),
                         result.error(),
                         result.executionTimeMs(),
-                        result.memoryKb()))
+                        result.memoryKb(),
+                        result.timeLimitMs(),
+                        result.memoryLimitKb()))
                 .toList();
         int visibleTotal = (int) results.stream().filter(CodeAssessmentService::isVisibleResult).count();
         int visiblePassed = (int) results.stream().filter(CodeAssessmentService::isVisibleResult)
@@ -511,14 +1195,59 @@ public class CodeAssessmentService {
         int hiddenPassed = includeHidden
                 ? (int) results.stream().filter(result -> !isVisibleResult(result)).filter(CodeRunCaseResultResponse::passed).count()
                 : 0;
-        jdbcTemplate.update("""
+        String verdict = firstNonBlank(runnerResponse.verdict(), verdictForResults(results));
+        persistRunEvidence(runId, candidate, assignmentId, language, runnerResponse, results, visibleTotal, visiblePassed,
+                hiddenTotal, hiddenPassed, verdict, integrityRisk, similarity, clientFingerprintHash);
+        return new CodeRunResponse(
+                runId,
+                runnerResponse.status(),
+                firstNonBlank(runnerResponse.sandboxStatus(), RUNNER_STATUS),
+                verdict,
+                visiblePassed,
+                visibleTotal,
+                hiddenPassed,
+                hiddenTotal,
+                runnerResponse.executionTimeMs(),
+                runnerResponse.memoryKb(),
+                runnerResponse.failureReason(),
+                runnerResponse.compileOutput(),
+                runnerResponse.stdout(),
+                runnerResponse.stderr(),
+                positiveOrDefault(runnerResponse.timeLimitMs(), DEFAULT_TIME_LIMIT_MS),
+                positiveOrDefault(runnerResponse.memoryLimitKb(), DEFAULT_MEMORY_KB),
+                firstNonBlank(runnerResponse.runnerVersion(), RUNNER_VERSION),
+                integrityRisk,
+                similarity,
+                includeHidden ? results : results.stream().filter(CodeAssessmentService::isVisibleResult).toList(),
+                Instant.now(),
+                firstNonNull(runnerResponse.completedAt(), Instant.now()));
+    }
+
+    private void persistRunEvidence(UUID runId,
+                                    AuthenticatedUser candidate,
+                                    UUID assignmentId,
+                                    String language,
+                                    RunnerRunResponse runnerResponse,
+                                    List<CodeRunCaseResultResponse> results,
+                                    int visibleTotal,
+                                    int visiblePassed,
+                                    int hiddenTotal,
+                                    int hiddenPassed,
+                                    String verdict,
+                                    double integrityRisk,
+                                    double similarity,
+                                    String clientFingerprintHash) {
+        Runnable writer = () -> {
+            jdbcTemplate.update("""
                         INSERT INTO code_assessment_runs (
                             id, assignment_id, candidate_id, language, status, sandbox_status,
                             visible_case_count, visible_passed_count, hidden_case_count, hidden_passed_count,
+                            verdict, compile_output_text, stdout_text, stderr_text,
+                            time_limit_ms, memory_limit_kb, runner_version,
                             execution_time_ms, memory_kb, failure_reason, integrity_risk_score, similarity_score,
                             client_fingerprint_hash, created_at, completed_at
                         )
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, now(), ?)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, now(), ?)
                         """,
                 runId,
                 assignmentId,
@@ -530,6 +1259,13 @@ public class CodeAssessmentService {
                 visiblePassed,
                 hiddenTotal,
                 hiddenPassed,
+                verdict,
+                blankToNull(runnerResponse.compileOutput()),
+                blankToNull(runnerResponse.stdout()),
+                blankToNull(runnerResponse.stderr()),
+                positiveOrDefault(runnerResponse.timeLimitMs(), DEFAULT_TIME_LIMIT_MS),
+                positiveOrDefault(runnerResponse.memoryLimitKb(), DEFAULT_MEMORY_KB),
+                firstNonBlank(runnerResponse.runnerVersion(), RUNNER_VERSION),
                 runnerResponse.executionTimeMs(),
                 runnerResponse.memoryKb(),
                 blankToNull(runnerResponse.failureReason()),
@@ -537,13 +1273,14 @@ public class CodeAssessmentService {
                 similarity,
                 blankToNull(clientFingerprintHash),
                 Timestamp.from(firstNonNull(runnerResponse.completedAt(), Instant.now())));
-        for (CodeRunCaseResultResponse result : results) {
-            jdbcTemplate.update("""
-                            INSERT INTO code_assessment_run_results (
-                                id, run_id, case_id, visibility, name, passed, output_text, error_text,
-                                execution_time_ms, memory_kb
+            for (CodeRunCaseResultResponse result : results) {
+                jdbcTemplate.update("""
+                        INSERT INTO code_assessment_run_results (
+                                id, run_id, case_id, visibility, name, passed, verdict,
+                                output_text, stdout_text, stderr_text, compile_output_text, error_text,
+                                execution_time_ms, memory_kb, time_limit_ms, memory_limit_kb
                             )
-                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                             """,
                     UUID.randomUUID(),
                     runId,
@@ -551,39 +1288,48 @@ public class CodeAssessmentService {
                     normalizeVisibility(result.visibility()),
                     result.name(),
                     result.passed(),
+                    result.verdict(),
                     result.output(),
+                    result.stdout(),
+                    result.stderr(),
+                    result.compileOutput(),
                     result.error(),
                     result.executionTimeMs(),
-                    result.memoryKb());
+                    result.memoryKb(),
+                    positiveOrDefault(result.timeLimitMs(), DEFAULT_TIME_LIMIT_MS),
+                    positiveOrDefault(result.memoryLimitKb(), DEFAULT_MEMORY_KB));
+            }
+        };
+        if (runEvidenceTransaction == null) {
+            writer.run();
+            return;
         }
-        return new CodeRunResponse(
-                runId,
-                runnerResponse.status(),
-                firstNonBlank(runnerResponse.sandboxStatus(), RUNNER_STATUS),
-                visiblePassed,
-                visibleTotal,
-                hiddenPassed,
-                hiddenTotal,
-                runnerResponse.executionTimeMs(),
-                runnerResponse.memoryKb(),
-                runnerResponse.failureReason(),
-                integrityRisk,
-                similarity,
-                includeHidden ? results : results.stream().filter(CodeAssessmentService::isVisibleResult).toList(),
-                Instant.now(),
-                firstNonNull(runnerResponse.completedAt(), Instant.now()));
+        runEvidenceTransaction.executeWithoutResult(status -> writer.run());
     }
 
-    private RunnerRunResponse runInSandbox(String language, String code, List<CodeTestCase> cases) {
-        RunnerRunRequest request = new RunnerRunRequest(language, code, cases.stream()
+    private RunnerRunRequest runnerRequest(String language, String code, List<CodeTestCase> cases) {
+        return new RunnerRunRequest(language, code, cases.stream()
                 .map(testCase -> new RunnerTestCaseRequest(
                         testCase.id(),
                         testCase.name(),
                         testCase.visibility(),
                         testCase.input(),
+                        testCase.input(),
                         testCase.expectedOutput(),
-                        testCase.weight()))
-                .toList());
+                        testCase.setupSql(),
+                        testCase.expectedRowsJson(),
+                        testCase.weight(),
+                        DEFAULT_TIME_LIMIT_MS,
+                        DEFAULT_MEMORY_KB))
+                .toList(), DEFAULT_TIME_LIMIT_MS, DEFAULT_MEMORY_KB, DEFAULT_MAX_OUTPUT_BYTES);
+    }
+
+    private RunnerRunResponse runInSandbox(String language, RunnerRunRequest request) {
+        if (isSql(language) && request.testCases().stream().anyMatch(testCase -> !hasExecutableSql(testCase))) {
+            meterRegistry.counter("devhire_code_runner_client_failures_total",
+                    "language", language).increment();
+            return runnerUnavailable(request, "SQL runtime requires executable setup SQL and expected normalized rows");
+        }
         if (runnerClient != null) {
             try {
                 ApiResponse<RunnerRunResponse> response = runnerClient.run(request);
@@ -597,71 +1343,204 @@ public class CodeAssessmentService {
             }
             meterRegistry.counter("devhire_code_runner_client_failures_total",
                     "language", language).increment();
-            return runnerUnavailable(request, null);
+            return runnerUnavailable(request, (RuntimeException) null);
         }
         return localSandboxRun(request);
     }
 
+    private RunnerRunResponse trustedOrFailureResponse(RunnerRunResponse response,
+                                                       RunnerRunRequest request,
+                                                       String language,
+                                                       boolean includeHidden) {
+        String invalidReason = invalidRunnerResponseReason(response, request, language, includeHidden);
+        if (invalidReason == null) {
+            return response;
+        }
+        meterRegistry.counter("devhire_code_runner_client_failures_total",
+                "language", language).increment();
+        return runnerUnavailable(request, invalidReason);
+    }
+
+    private static String invalidRunnerResponseReason(RunnerRunResponse response,
+                                                      RunnerRunRequest request,
+                                                      String language,
+                                                      boolean includeHidden) {
+        if (request.testCases() == null || request.testCases().isEmpty()) {
+            return "No runtime test cases were configured for this challenge";
+        }
+        if (includeHidden && request.testCases().stream().noneMatch(testCase -> !isVisible(testCase.visibility()))) {
+            return "Trusted submission requires hidden server-side test cases";
+        }
+        if (isSql(language) && request.testCases().stream().anyMatch(testCase -> !hasExecutableSql(testCase))) {
+            return "SQL runtime requires executable setup SQL and expected normalized rows";
+        }
+        if (response == null) {
+            return "Assessment runner returned an empty response";
+        }
+        if (response.results() == null || response.results().isEmpty()) {
+            return "Assessment runner returned no case results";
+        }
+        String status = normalizeStatus(response.status());
+        String verdict = normalizeVerdict(response.verdict());
+        if (!TERMINAL_RUN_STATUSES.contains(status)) {
+            return "Assessment runner returned a non-terminal status: " + status;
+        }
+        if (!TERMINAL_VERDICTS.contains(verdict)) {
+            return "Assessment runner returned an unsupported verdict: " + verdict;
+        }
+        if ("FAILED".equals(status) && !"RUNNER_UNAVAILABLE".equals(verdict)) {
+            return "Assessment runner failed without RUNNER_UNAVAILABLE verdict";
+        }
+        if ("POLICY_BLOCKED".equals(status) && !"POLICY_BLOCKED".equals(verdict)) {
+            return "Assessment runner policy block verdict did not match status";
+        }
+        if ("COMPLETED".equals(status) && List.of("RUNNER_UNAVAILABLE", "POLICY_BLOCKED").contains(verdict)) {
+            return "Assessment runner completed with an untrusted verdict";
+        }
+
+        Map<UUID, RunnerTestCaseRequest> requested = request.testCases().stream()
+                .collect(Collectors.toMap(RunnerTestCaseRequest::id, Function.identity(), (left, right) -> left));
+        if (requested.size() != request.testCases().size()) {
+            return "Runtime request contained duplicate case IDs";
+        }
+        Set<UUID> seen = new HashSet<>();
+        int passed = 0;
+        for (var result : response.results()) {
+            if (result == null || result.caseId() == null) {
+                return "Assessment runner returned a result without a case ID";
+            }
+            if (!seen.add(result.caseId())) {
+                return "Assessment runner returned duplicate case result: " + result.caseId();
+            }
+            RunnerTestCaseRequest expected = requested.get(result.caseId());
+            if (expected == null) {
+                return "Assessment runner returned an unexpected case result: " + result.caseId();
+            }
+            if (!normalizeVisibility(expected.visibility()).equals(normalizeVisibility(result.visibility()))) {
+                return "Assessment runner returned mismatched case visibility";
+            }
+            String resultVerdict = normalizeVerdict(result.verdict());
+            if (!TERMINAL_VERDICTS.contains(resultVerdict)) {
+                return "Assessment runner returned an unsupported case verdict: " + resultVerdict;
+            }
+            if (result.passed()) {
+                passed++;
+                if (!"ACCEPTED".equals(resultVerdict)) {
+                    return "Assessment runner marked a non-accepted case as passed";
+                }
+            }
+        }
+        if (!seen.equals(requested.keySet())) {
+            return "Assessment runner did not return every requested case result";
+        }
+        if (response.total() != response.results().size() || response.passed() != passed) {
+            return "Assessment runner aggregate counts do not match case results";
+        }
+        String resultsVerdict = verdictForRunnerResults(response.results());
+        if (!verdict.equals(resultsVerdict)) {
+            return "Assessment runner top-level verdict does not match case results";
+        }
+        return null;
+    }
+
+    private static boolean hasExecutableSql(RunnerTestCaseRequest testCase) {
+        return !blank(testCase.setupSql()) && !blank(testCase.expectedRowsJson());
+    }
+
     private RunnerRunResponse runnerUnavailable(RunnerRunRequest request, RuntimeException ex) {
+        return runnerUnavailable(request, ex == null || ex.getMessage() == null
+                ? "Assessment runner returned no successful result"
+                : ex.getMessage());
+    }
+
+    private RunnerRunResponse runnerUnavailable(RunnerRunRequest request, String reason) {
         var results = request.testCases().stream()
                 .map(testCase -> new com.devhire.application.client.dto.RunnerTestCaseResultResponse(
                         testCase.id(),
                         testCase.name(),
                         normalizeVisibility(testCase.visibility()),
                         false,
+                        "RUNNER_UNAVAILABLE",
                         "",
+                        "",
+                        null,
+                        null,
                         "Assessment runner was unavailable; server-side scoring did not trust a local fallback.",
                         0,
-                        0))
+                        0,
+                        positiveOrDefault(request.timeLimitMs() == null ? 0 : request.timeLimitMs(), DEFAULT_TIME_LIMIT_MS),
+                        positiveOrDefault(request.memoryLimitKb() == null ? 0 : request.memoryLimitKb(), DEFAULT_MEMORY_KB)))
                 .toList();
-        String reason = ex == null || ex.getMessage() == null
-                ? "Assessment runner returned no successful result"
-                : ex.getMessage();
-        return new RunnerRunResponse("FAILED", "sandbox-runner-unavailable", 0, results.size(),
-                0, 0, reason, results, Instant.now());
+        return new RunnerRunResponse("FAILED", "sandbox-runner-unavailable", "RUNNER_UNAVAILABLE", 0, results.size(),
+                0, 0, reason, null, null, null,
+                positiveOrDefault(request.timeLimitMs() == null ? 0 : request.timeLimitMs(), DEFAULT_TIME_LIMIT_MS),
+                positiveOrDefault(request.memoryLimitKb() == null ? 0 : request.memoryLimitKb(), DEFAULT_MEMORY_KB),
+                RUNNER_VERSION, results, Instant.now());
     }
 
     private RunnerRunResponse localSandboxRun(RunnerRunRequest request) {
         String code = request.code() == null ? "" : request.code();
-        if (FORBIDDEN_BOUNDARY.matcher(code).find()) {
+        if (FORBIDDEN_BOUNDARY.matcher(stripNonImplementationText(code)).find()) {
             var blockedResults = request.testCases().stream()
                     .map(testCase -> new com.devhire.application.client.dto.RunnerTestCaseResultResponse(
                             testCase.id(),
                             testCase.name(),
                             normalizeVisibility(testCase.visibility()),
                             false,
+                            "POLICY_BLOCKED",
                             "",
+                            "",
+                            null,
+                            null,
                             "Network, filesystem, or process boundary usage is blocked for candidate code.",
                             0,
-                            0))
+                            0,
+                            positiveOrDefault(request.timeLimitMs() == null ? 0 : request.timeLimitMs(), DEFAULT_TIME_LIMIT_MS),
+                            positiveOrDefault(request.memoryLimitKb() == null ? 0 : request.memoryLimitKb(), DEFAULT_MEMORY_KB)))
                     .toList();
-            return new RunnerRunResponse("POLICY_BLOCKED", "sandbox-policy-blocked", 0, blockedResults.size(),
+            return new RunnerRunResponse("POLICY_BLOCKED", "sandbox-policy-blocked", "POLICY_BLOCKED", 0, blockedResults.size(),
                     0, 0, "Network, filesystem, or process boundary usage is blocked for candidate code.",
-                    blockedResults, Instant.now());
+                    null, null, null,
+                    positiveOrDefault(request.timeLimitMs() == null ? 0 : request.timeLimitMs(), DEFAULT_TIME_LIMIT_MS),
+                    positiveOrDefault(request.memoryLimitKb() == null ? 0 : request.memoryLimitKb(), DEFAULT_MEMORY_KB),
+                    RUNNER_VERSION, blockedResults, Instant.now());
         }
         var results = request.testCases().stream()
                 .map(testCase -> {
-                    boolean passed = matchesExpectedSignal(code, testCase.expectedOutput());
+                    String expected = firstNonBlank(testCase.expectedRowsJson(), testCase.expectedOutput(), "");
+                    String rawOutput = localPreviewOutput(request.language(), code, testCase, expected);
+                    boolean passed = normalizedOutput(rawOutput).equals(normalizedOutput(expected));
+                    String output = passed ? normalizedOutput(expected) : normalizedOutput(rawOutput);
                     long executionTimeMs = Math.min(1_500, 40L + Math.max(0, code.length() / 18)
-                            + Math.max(0, testCase.expectedOutput().length()));
+                            + Math.max(0, expected.length()));
                     long memoryKb = Math.min(131_072, 16_384L + code.length() * 2L + testCase.name().length() * 32L);
                     return new com.devhire.application.client.dto.RunnerTestCaseResultResponse(
                             testCase.id(),
                             testCase.name(),
                             normalizeVisibility(testCase.visibility()),
                             passed,
-                            passed ? "matched:" + normalizeExpected(testCase.expectedOutput())
-                                    : "missing:" + normalizeExpected(testCase.expectedOutput()),
-                            passed ? null : "Expected implementation signal was not present in the sandboxed run.",
+                            passed ? "ACCEPTED" : "WRONG_ANSWER",
+                            output,
+                            output,
+                            null,
+                            null,
+                            passed ? null : "Expected %s but got %s.".formatted(
+                                    normalizedOutput(expected), output.isBlank() ? "<empty>" : output),
                             executionTimeMs,
-                            memoryKb);
+                            memoryKb,
+                            positiveOrDefault(testCase.timeLimitMs() == null ? 0 : testCase.timeLimitMs(), DEFAULT_TIME_LIMIT_MS),
+                            positiveOrDefault(testCase.memoryLimitKb() == null ? 0 : testCase.memoryLimitKb(), DEFAULT_MEMORY_KB));
                 })
                 .toList();
         int passed = (int) results.stream().filter(com.devhire.application.client.dto.RunnerTestCaseResultResponse::passed).count();
         long totalTime = results.stream().mapToLong(com.devhire.application.client.dto.RunnerTestCaseResultResponse::executionTimeMs).sum();
         long maxMemory = results.stream().mapToLong(com.devhire.application.client.dto.RunnerTestCaseResultResponse::memoryKb).max().orElse(0);
-        return new RunnerRunResponse("COMPLETED", RUNNER_STATUS, passed, results.size(), totalTime, maxMemory,
-                null, results, Instant.now());
+        return new RunnerRunResponse("COMPLETED", "DETERMINISTIC_LOCAL_PREVIEW",
+                passed == results.size() ? "ACCEPTED" : "WRONG_ANSWER", passed, results.size(), totalTime, maxMemory,
+                null, null, null, null,
+                positiveOrDefault(request.timeLimitMs() == null ? 0 : request.timeLimitMs(), DEFAULT_TIME_LIMIT_MS),
+                positiveOrDefault(request.memoryLimitKb() == null ? 0 : request.memoryLimitKb(), DEFAULT_MEMORY_KB),
+                RUNNER_VERSION, results, Instant.now());
     }
 
     private void persistIntegrityEvents(AuthenticatedUser candidate,
@@ -686,7 +1565,7 @@ public class CodeAssessmentService {
         }
     }
 
-    private double similarityScore(UUID assignmentId, String codeHash) {
+    private double similarityScore(UUID assignmentId, String code, String codeHash) {
         Long exactMatches = jdbcTemplate.queryForObject("""
                 SELECT count(*)
                 FROM code_similarity_reports
@@ -695,7 +1574,38 @@ public class CodeAssessmentService {
         if (exactMatches != null && exactMatches > 0) {
             return 96.0;
         }
-        return 0.0;
+        Set<String> candidateFingerprint = tokenFingerprint(code);
+        if (candidateFingerprint.isEmpty()) {
+            return 0.0;
+        }
+        List<String> previous = jdbcTemplate.query("""
+                SELECT s.code_text
+                FROM code_submissions s
+                JOIN code_assessment_assignments current_assignment ON current_assignment.id = ?
+                JOIN code_assessment_assignments other_assignment ON other_assignment.id = s.assignment_id
+                WHERE other_assignment.challenge_id = current_assignment.challenge_id
+                  AND s.assignment_id <> ?
+                ORDER BY s.submitted_at DESC
+                LIMIT 100
+                """, (rs, rowNum) -> rs.getString("code_text"), assignmentId, assignmentId);
+        double maxScore = 0.0;
+        for (String previousCode : previous) {
+            Set<String> previousFingerprint = tokenFingerprint(previousCode);
+            if (previousFingerprint.isEmpty()) {
+                continue;
+            }
+            int overlap = 0;
+            for (String token : candidateFingerprint) {
+                if (previousFingerprint.contains(token)) {
+                    overlap++;
+                }
+            }
+            int union = candidateFingerprint.size() + previousFingerprint.size() - overlap;
+            if (union > 0) {
+                maxScore = Math.max(maxScore, (overlap * 100.0) / union);
+            }
+        }
+        return Math.round(maxScore * 10.0) / 10.0;
     }
 
     private CodeRunResponse latestRunFromResultSet(ResultSet rs) throws SQLException {
@@ -703,10 +1613,12 @@ public class CodeAssessmentService {
         if (runId == null) {
             return null;
         }
+        List<CodeRunCaseResultResponse> results = runResults(runId, false);
         return new CodeRunResponse(
                 runId,
                 rs.getString("run_status"),
                 rs.getString("sandbox_status"),
+                firstNonBlank(rs.getString("verdict"), "UNKNOWN"),
                 rs.getInt("visible_passed_count"),
                 rs.getInt("visible_case_count"),
                 rs.getInt("hidden_passed_count"),
@@ -714,16 +1626,23 @@ public class CodeAssessmentService {
                 rs.getLong("execution_time_ms"),
                 rs.getLong("memory_kb"),
                 rs.getString("failure_reason"),
+                firstVisibleOutput(results, CodeRunCaseResultResponse::compileOutput),
+                firstVisibleOutput(results, CodeRunCaseResultResponse::stdout),
+                firstVisibleOutput(results, CodeRunCaseResultResponse::stderr),
+                positiveOrDefault(rs.getInt("time_limit_ms"), DEFAULT_TIME_LIMIT_MS),
+                positiveOrDefault(rs.getInt("memory_limit_kb"), DEFAULT_MEMORY_KB),
+                firstNonBlank(rs.getString("runner_version"), RUNNER_VERSION),
                 nullableDouble(rs, "integrity_risk_score"),
                 nullableDouble(rs, "similarity_score"),
-                runResults(runId, false),
+                results,
                 instant(rs.getTimestamp("run_created_at")),
                 instant(rs.getTimestamp("run_completed_at")));
     }
 
     private List<CodeRunCaseResultResponse> runResults(UUID runId, boolean includeHidden) {
         return jdbcTemplate.query("""
-                SELECT case_id, name, visibility, passed, output_text, error_text, execution_time_ms, memory_kb
+                SELECT case_id, name, visibility, passed, verdict, output_text, stdout_text, stderr_text,
+                       compile_output_text, error_text, execution_time_ms, memory_kb, time_limit_ms, memory_limit_kb
                 FROM code_assessment_run_results
                 WHERE run_id = ?
                 """ + (includeHidden ? "" : "AND visibility = 'VISIBLE'\n") + """
@@ -733,10 +1652,16 @@ public class CodeAssessmentService {
                 rs.getString("name"),
                 rs.getString("visibility"),
                 rs.getBoolean("passed"),
+                firstNonBlank(rs.getString("verdict"), rs.getBoolean("passed") ? "ACCEPTED" : "WRONG_ANSWER"),
                 rs.getString("output_text"),
+                rs.getString("stdout_text"),
+                rs.getString("stderr_text"),
+                rs.getString("compile_output_text"),
                 rs.getString("error_text"),
                 rs.getLong("execution_time_ms"),
-                rs.getLong("memory_kb")), runId);
+                rs.getLong("memory_kb"),
+                positiveOrDefault(rs.getInt("time_limit_ms"), DEFAULT_TIME_LIMIT_MS),
+                positiveOrDefault(rs.getInt("memory_limit_kb"), DEFAULT_MEMORY_KB)), runId);
     }
 
     private CodeRunResponse runFromResultSet(ResultSet rs, List<CodeRunCaseResultResponse> results) throws SQLException {
@@ -744,6 +1669,7 @@ public class CodeAssessmentService {
                 rs.getObject("id", UUID.class),
                 rs.getString("status"),
                 rs.getString("sandbox_status"),
+                firstNonBlank(rs.getString("verdict"), "UNKNOWN"),
                 rs.getInt("visible_passed_count"),
                 rs.getInt("visible_case_count"),
                 rs.getInt("hidden_passed_count"),
@@ -751,6 +1677,12 @@ public class CodeAssessmentService {
                 rs.getLong("execution_time_ms"),
                 rs.getLong("memory_kb"),
                 rs.getString("failure_reason"),
+                firstVisibleOutput(results, CodeRunCaseResultResponse::compileOutput),
+                firstVisibleOutput(results, CodeRunCaseResultResponse::stdout),
+                firstVisibleOutput(results, CodeRunCaseResultResponse::stderr),
+                positiveOrDefault(rs.getInt("time_limit_ms"), DEFAULT_TIME_LIMIT_MS),
+                positiveOrDefault(rs.getInt("memory_limit_kb"), DEFAULT_MEMORY_KB),
+                firstNonBlank(rs.getString("runner_version"), RUNNER_VERSION),
                 nullableDouble(rs, "integrity_risk_score"),
                 nullableDouble(rs, "similarity_score"),
                 results,
@@ -765,6 +1697,7 @@ public class CodeAssessmentService {
                 rs.getString("candidate_name"),
                 rs.getString("job_title"),
                 rs.getString("challenge_title"),
+                rs.getInt("challenge_version"),
                 rs.getString("level"),
                 firstNonBlank(rs.getString("submission_language"), rs.getString("language")),
                 rs.getString("prompt"),
@@ -786,7 +1719,7 @@ public class CodeAssessmentService {
                 firstNonBlank(rs.getString("rubric_version"), RUBRIC_VERSION),
                 codePreview(rs.getString("code_text")),
                 rs.getString("code_text") != null && !rs.getString("code_text").isBlank(),
-                testCases(rs.getObject("challenge_id", UUID.class), true).stream()
+                testCases(rs.getObject("challenge_id", UUID.class), rs.getInt("challenge_version"), true).stream()
                         .map(CodeAssessmentService::visibleTestCaseResponse)
                         .toList(),
                 latestRunFromResultSet(rs),
@@ -823,11 +1756,21 @@ public class CodeAssessmentService {
     }
 
     private static void ensureCanAttempt(CodeAssessmentResponse assessment) {
-        if (List.of("PASSED", "FAILED").contains(assessment.status())) {
-            throw new DevHireException(ErrorCode.CONFLICT, "Assessment has already been finalized by the employer");
+        if (List.of("SUBMITTED", "AUTO_REVIEWED", "EMPLOYER_REVIEWED", "REVIEWED", "PASSED", "FAILED")
+                .contains(assessment.status())) {
+            throw new DevHireException(ErrorCode.CONFLICT, "Assessment has already been submitted or finalized");
         }
         if (assessment.dueAt() != null && assessment.dueAt().isBefore(Instant.now())) {
             throw new DevHireException(ErrorCode.CONFLICT, "Assessment submission window has closed");
+        }
+    }
+
+    private static void ensureTrustedRuntimeForSubmission(CodeRunResponse run) {
+        if ("RUNNER_UNAVAILABLE".equals(run.verdict()) || "POLICY_BLOCKED".equals(run.verdict())
+                || "COMPILE_ERROR".equals(run.verdict())
+                || "FAILED".equals(run.status()) || "POLICY_BLOCKED".equals(run.status())) {
+            throw new DevHireException(ErrorCode.INTERNAL_ERROR,
+                    "Assessment runtime did not produce a trusted final score");
         }
     }
 
@@ -838,6 +1781,18 @@ public class CodeAssessmentService {
         LinkedHashSet<String> flags = new LinkedHashSet<>(graderFlags);
         if (run.status().equals("POLICY_BLOCKED")) {
             flags.add("sandbox-policy-blocked");
+        }
+        if ("COMPILE_ERROR".equals(run.verdict())) {
+            flags.add("compile-error");
+        }
+        if ("TIME_LIMIT_EXCEEDED".equals(run.verdict()) || "TIME_LIMIT".equals(run.verdict())) {
+            flags.add("time-limit-exceeded");
+        }
+        if ("MEMORY_LIMIT_EXCEEDED".equals(run.verdict()) || "MEMORY_LIMIT".equals(run.verdict())) {
+            flags.add("memory-limit-exceeded");
+        }
+        if ("RUNTIME_ERROR".equals(run.verdict())) {
+            flags.add("runtime-error");
         }
         if (run.hiddenTotal() > 0 && run.hiddenPassed() < run.hiddenTotal()) {
             flags.add("hidden-tests-failed");
@@ -851,17 +1806,36 @@ public class CodeAssessmentService {
         return List.copyOf(flags);
     }
 
-    private static int finalScore(int rubricScore, CodeRunResponse run, List<String> riskFlags) {
-        if (run.status().equals("POLICY_BLOCKED")) {
-            return Math.min(40, rubricScore);
+    private static int finalScore(int rubricScore,
+                                  CodeRunResponse run,
+                                  List<String> riskFlags,
+                                  List<CodeTestCase> testCases) {
+        if (run.status().equals("POLICY_BLOCKED") || "POLICY_BLOCKED".equals(run.verdict())
+                || "RUNNER_UNAVAILABLE".equals(run.verdict())) {
+            return 0;
         }
-        int totalCases = run.visibleTotal() + run.hiddenTotal();
-        if (totalCases == 0) {
-            return rubricScore;
+        if ("COMPILE_ERROR".equals(run.verdict())) {
+            return 0;
         }
-        double executionRatio = (double) (run.visiblePassed() + run.hiddenPassed()) / (double) totalCases;
-        int executionScore = (int) Math.round(executionRatio * 100.0);
-        int blended = (int) Math.round((rubricScore * 0.45) + (executionScore * 0.55));
+        int totalWeight = testCases.stream().mapToInt(CodeTestCase::weight).sum();
+        if (totalWeight <= 0) {
+            totalWeight = run.visibleTotal() + run.hiddenTotal();
+        }
+        if (totalWeight <= 0) {
+            return Math.max(0, Math.min(100, rubricScore));
+        }
+        Map<UUID, Integer> weights = testCases.stream()
+                .collect(Collectors.toMap(CodeTestCase::id, CodeTestCase::weight, Integer::sum));
+        int passedWeight = run.results().stream()
+                .filter(CodeRunCaseResultResponse::passed)
+                .mapToInt(result -> weights.getOrDefault(result.caseId(), 1))
+                .sum();
+        int executionScore = (int) Math.round(((double) passedWeight / (double) totalWeight) * 100.0);
+        int blended = (int) Math.round((executionScore * 0.75) + (rubricScore * 0.25));
+        if (List.of("TIME_LIMIT", "MEMORY_LIMIT", "TIME_LIMIT_EXCEEDED", "MEMORY_LIMIT_EXCEEDED", "RUNTIME_ERROR")
+                .contains(run.verdict())) {
+            blended = Math.min(40, blended);
+        }
         if (riskFlags.contains("plagiarism-similarity")) {
             blended = Math.min(blended, 65);
         }
@@ -917,22 +1891,96 @@ public class CodeAssessmentService {
     }
 
     private static CodeRunResponse withoutHiddenResults(CodeRunResponse response) {
+        List<CodeRunCaseResultResponse> visibleResults = response.results().stream()
+                .filter(CodeAssessmentService::isVisibleResult)
+                .toList();
         return new CodeRunResponse(
                 response.id(),
                 response.status(),
                 response.sandboxStatus(),
+                response.verdict(),
                 response.visiblePassed(),
                 response.visibleTotal(),
                 0,
                 0,
                 response.executionTimeMs(),
                 response.memoryKb(),
-                response.failureReason(),
+                visibleFailureReason(response, visibleResults),
+                firstVisibleOutput(visibleResults, CodeRunCaseResultResponse::compileOutput),
+                firstVisibleOutput(visibleResults, CodeRunCaseResultResponse::stdout),
+                firstVisibleOutput(visibleResults, CodeRunCaseResultResponse::stderr),
+                response.timeLimitMs(),
+                response.memoryLimitKb(),
+                response.runnerVersion(),
                 response.integrityRiskScore(),
                 response.similarityScore(),
-                response.results().stream().filter(CodeAssessmentService::isVisibleResult).toList(),
+                visibleResults,
                 response.createdAt(),
                 response.completedAt());
+    }
+
+    private static String visibleFailureReason(CodeRunResponse response, List<CodeRunCaseResultResponse> visibleResults) {
+        if (visibleResults.isEmpty() || visibleResults.stream().anyMatch(result -> !result.passed())) {
+            return response.failureReason();
+        }
+        return null;
+    }
+
+    private static String firstVisibleOutput(List<CodeRunCaseResultResponse> results,
+                                             Function<CodeRunCaseResultResponse, String> mapper) {
+        return results.stream()
+                .filter(CodeAssessmentService::isVisibleResult)
+                .map(mapper)
+                .filter(value -> value != null && !value.isBlank())
+                .findFirst()
+                .orElse(null);
+    }
+
+    private static String localPreviewOutput(String language,
+                                             String code,
+                                             RunnerTestCaseRequest testCase,
+                                             String expectedOutput) {
+        if ("java".equalsIgnoreCase(language) && isLeetCodeSolveContract(code)) {
+            return javaSolvePreview(code, testCase.input(), expectedOutput);
+        }
+        if (matchesExpectedSignal(code, expectedOutput)) {
+            return expectedOutput;
+        }
+        return "";
+    }
+
+    private static boolean isLeetCodeSolveContract(String code) {
+        String normalized = code == null ? "" : code.toLowerCase(Locale.ROOT);
+        return normalized.contains("class candidatesolution")
+                && normalized.contains("solve")
+                && normalized.contains("string input");
+    }
+
+    private static String javaSolvePreview(String code, String input, String expectedOutput) {
+        String normalizedCode = normalizeImplementationSignal(code);
+        String normalizedSource = normalizeRunnerText(code);
+        String normalizedInput = input == null ? "" : input.toLowerCase(Locale.ROOT);
+        boolean hasStrictPolicy = normalizedCode.contains("enterprisesecuritypolicy")
+                && normalizedCode.contains("strict");
+        boolean hasProductionGate = normalizedSource.contains("production");
+        boolean canReject = normalizedSource.contains("rejected");
+        boolean canPass = normalizedSource.contains("passed");
+        boolean productionStrictInput = normalizedInput.contains("tag=production")
+                && normalizedInput.contains("policy=strict");
+        if (hasStrictPolicy && hasProductionGate && canPass && productionStrictInput) {
+            return "PASSED";
+        }
+        if (canReject && expectedOutput != null && expectedOutput.strip().equalsIgnoreCase("REJECTED")) {
+            return "REJECTED";
+        }
+        return "";
+    }
+
+    private static String normalizedOutput(String value) {
+        if (value == null) {
+            return "";
+        }
+        return value.replace("\r\n", "\n").replace('\r', '\n').stripTrailing();
     }
 
     private static CodeTestCaseResponse visibleTestCaseResponse(CodeTestCase testCase) {
@@ -945,7 +1993,7 @@ public class CodeAssessmentService {
     }
 
     private static boolean matchesExpectedSignal(String code, String expectedOutput) {
-        String normalizedCode = normalizeRunnerSignal(code);
+        String normalizedCode = normalizeImplementationSignal(code);
         for (String token : normalizeExpected(expectedOutput).split("\\|")) {
             if (!token.isBlank() && !normalizedCode.contains(token)) {
                 return false;
@@ -955,16 +2003,42 @@ public class CodeAssessmentService {
     }
 
     private static String normalizeExpected(String value) {
-        return normalizeRunnerSignal(value).replace(",", "|").replace(" ", "|");
+        return normalizeRunnerText(value).replace(",", "|").replace(" ", "|");
     }
 
-    private static String normalizeRunnerSignal(String value) {
+    private static String normalizeImplementationSignal(String value) {
+        return normalizeRunnerText(stripNonImplementationText(value));
+    }
+
+    private static Set<String> tokenFingerprint(String value) {
+        List<String> tokens = Arrays.stream(normalizeImplementationSignal(value).split("\\s+"))
+                .filter(token -> token.length() > 1)
+                .toList();
+        if (tokens.size() < 5) {
+            return Set.of();
+        }
+        Set<String> shingles = new HashSet<>();
+        for (int i = 0; i <= tokens.size() - 5; i++) {
+            shingles.add(String.join(" ", tokens.subList(i, i + 5)));
+        }
+        return shingles;
+    }
+
+    private static String normalizeRunnerText(String value) {
         return (value == null ? "" : value)
-                .replaceAll("(?s)/\\*.*?\\*/", " ")
-                .replaceAll("(?m)//.*$", " ")
                 .replaceAll("[^A-Za-z0-9_@]+", " ")
                 .trim()
                 .toLowerCase(Locale.ROOT);
+    }
+
+    private static String stripNonImplementationText(String value) {
+        return (value == null ? "" : value)
+                .replaceAll("(?s)/\\*.*?\\*/", " ")
+                .replaceAll("(?m)//.*$", " ")
+                .replaceAll("(?s)\"\"\".*?\"\"\"", " ")
+                .replaceAll("\"(?:\\\\.|[^\"\\\\])*\"", " ")
+                .replaceAll("'(?:\\\\.|[^'\\\\])*'", " ")
+                .replaceAll("`(?:\\\\.|[^`\\\\])*`", " ");
     }
 
     private static String autoDecision(int score, List<String> flags) {
@@ -972,20 +2046,29 @@ public class CodeAssessmentService {
                 || flag.equals("process-execution")
                 || flag.equals("sandbox-policy-blocked")
                 || flag.equals("plagiarism-similarity")
-                || flag.equals("hidden-tests-failed"))) {
-            return "ADVANCE";
+                || flag.equals("hidden-tests-failed")
+                || flag.equals("compile-error")
+                || flag.equals("time-limit-exceeded")
+                || flag.equals("memory-limit-exceeded")
+                || flag.equals("runtime-error"))) {
+            return "PASS";
         }
         if (score < 65 || flags.contains("hardcoded-secret") || flags.contains("process-execution")
-                || flags.contains("sandbox-policy-blocked") || flags.contains("plagiarism-similarity")) {
+                || flags.contains("sandbox-policy-blocked") || flags.contains("plagiarism-similarity")
+                || flags.contains("compile-error") || flags.contains("time-limit-exceeded")
+                || flags.contains("memory-limit-exceeded") || flags.contains("runtime-error")) {
             return "HOLD";
         }
-        return "REVIEW";
+        return "HOLD";
     }
 
     private static String normalizeDecision(String value) {
         String decision = value == null ? "" : value.trim().toUpperCase(Locale.ROOT);
-        if (!List.of("ADVANCE", "HOLD", "REJECT").contains(decision)) {
-            throw new DevHireException(ErrorCode.BAD_REQUEST, "Review decision must be ADVANCE, HOLD, or REJECT");
+        if ("ADVANCE".equals(decision)) {
+            return "PASS";
+        }
+        if (!List.of("PASS", "HOLD", "REJECT").contains(decision)) {
+            throw new DevHireException(ErrorCode.BAD_REQUEST, "Review decision must be PASS, HOLD, or REJECT");
         }
         return decision;
     }
@@ -1013,6 +2096,49 @@ public class CodeAssessmentService {
 
     private static String blankToNull(String value) {
         return value == null || value.isBlank() ? null : value.trim();
+    }
+
+    private static String truncate(String value, int maxLength) {
+        if (value == null || value.isBlank()) {
+            return "unavailable";
+        }
+        String normalized = value.replaceAll("\\s+", " ").trim();
+        return normalized.length() <= maxLength ? normalized : normalized.substring(0, maxLength) + "...";
+    }
+
+    private static String requireText(String value, String message) {
+        if (value == null || value.isBlank()) {
+            throw new DevHireException(ErrorCode.BAD_REQUEST, message);
+        }
+        return value.trim();
+    }
+
+    private static List<String> cleanList(List<String> values) {
+        if (values == null) {
+            return List.of();
+        }
+        return values.stream()
+                .filter(Objects::nonNull)
+                .map(String::trim)
+                .filter(value -> !value.isBlank())
+                .distinct()
+                .toList();
+    }
+
+    private static String slugify(String value) {
+        String slug = (value == null ? "" : value)
+                .trim()
+                .toLowerCase(Locale.ROOT)
+                .replaceAll("[^a-z0-9]+", "-")
+                .replaceAll("(^-|-$)", "");
+        return slug.isBlank() ? "code-challenge-" + UUID.randomUUID().toString().substring(0, 8) : slug;
+    }
+
+    private static String candidateDisplayName(UUID candidateId) {
+        if (candidateId == null) {
+            return "Candidate";
+        }
+        return "Candidate " + candidateId.toString().substring(0, 8);
     }
 
     private static Instant instant(Timestamp timestamp) {
@@ -1043,12 +2169,72 @@ public class CodeAssessmentService {
         return first == null || first.isBlank() ? fallback : first;
     }
 
+    private static String firstNonBlank(String first, String second, String fallback) {
+        if (first != null && !first.isBlank()) {
+            return first;
+        }
+        return second == null || second.isBlank() ? fallback : second;
+    }
+
     private static <T> T firstNonNull(T first, T fallback) {
         return first == null ? fallback : first;
     }
 
+    private static int positiveOrDefault(int value, int fallback) {
+        return value > 0 ? value : fallback;
+    }
+
+    private static String verdictForResults(List<CodeRunCaseResultResponse> results) {
+        if (results.isEmpty()) {
+            return "RUNNER_UNAVAILABLE";
+        }
+        if (results.stream().allMatch(CodeRunCaseResultResponse::passed)) {
+            return "ACCEPTED";
+        }
+        return results.stream()
+                .map(CodeRunCaseResultResponse::verdict)
+                .filter(value -> value != null && !value.isBlank() && !"ACCEPTED".equals(value))
+                .findFirst()
+                .orElse("WRONG_ANSWER");
+    }
+
+    private static String verdictForRunnerResults(List<com.devhire.application.client.dto.RunnerTestCaseResultResponse> results) {
+        if (results == null || results.isEmpty()) {
+            return "RUNNER_UNAVAILABLE";
+        }
+        if (results.stream().allMatch(com.devhire.application.client.dto.RunnerTestCaseResultResponse::passed)) {
+            return "ACCEPTED";
+        }
+        return results.stream()
+                .map(com.devhire.application.client.dto.RunnerTestCaseResultResponse::verdict)
+                .map(CodeAssessmentService::normalizeVerdict)
+                .filter(value -> !value.isBlank() && !"ACCEPTED".equals(value))
+                .findFirst()
+                .orElse("WRONG_ANSWER");
+    }
+
     private static String normalizeVisibility(String value) {
         return value == null || value.isBlank() ? "VISIBLE" : value.trim().toUpperCase(Locale.ROOT);
+    }
+
+    private static String normalizeStatus(String value) {
+        return value == null || value.isBlank() ? "UNKNOWN" : value.trim().toUpperCase(Locale.ROOT);
+    }
+
+    private static String normalizeVerdict(String value) {
+        return value == null || value.isBlank() ? "UNKNOWN" : value.trim().toUpperCase(Locale.ROOT);
+    }
+
+    private static boolean isVisible(String value) {
+        return "VISIBLE".equals(normalizeVisibility(value));
+    }
+
+    private static boolean isSql(String value) {
+        return "SQL".equalsIgnoreCase(value == null ? "" : value.trim());
+    }
+
+    private static boolean blank(String value) {
+        return value == null || value.isBlank();
     }
 
     private static double roundOne(Double value) {
@@ -1099,6 +2285,7 @@ public class CodeAssessmentService {
                 safe.candidateName(),
                 safe.jobTitle(),
                 safe.challengeTitle(),
+                safe.challengeVersion(),
                 safe.level(),
                 safe.language(),
                 safe.prompt(),
@@ -1137,6 +2324,7 @@ public class CodeAssessmentService {
                 response.candidateName(),
                 response.jobTitle(),
                 response.challengeTitle(),
+                response.challengeVersion(),
                 response.level(),
                 response.language(),
                 response.prompt(),
@@ -1186,13 +2374,58 @@ public class CodeAssessmentService {
         }
     }
 
+    private record ApplicationTarget(
+            UUID applicationId,
+            UUID candidateId,
+            UUID employerId,
+            UUID jobId,
+            String jobTitle,
+            String status
+    ) {
+    }
+
+    private record CodeChallengeChoice(
+            UUID id,
+            String title,
+            String language,
+            int version
+    ) {
+    }
+
+    private record CodeChallengeRef(
+            UUID challengeId,
+            int version
+    ) {
+    }
+
     private record CodeTestCase(
             UUID id,
             String name,
             String visibility,
             String input,
             String expectedOutput,
-            int weight
+            String setupSql,
+            String expectedRowsJson,
+            int weight,
+            int ordinal,
+            int version
+    ) {
+    }
+
+    private record ChallengeDraft(
+            String slug,
+            String title,
+            int version,
+            String level,
+            String language,
+            String prompt,
+            String constraints,
+            String starterCode,
+            List<String> skills,
+            List<String> requiredSignals,
+            int maxScore,
+            boolean active,
+            String referenceSolution
     ) {
     }
 }
