@@ -6,7 +6,8 @@ param(
     [string]$NotificationUrl = "http://localhost:$($(if ($env:NOTIFICATION_HOST_PORT) { $env:NOTIFICATION_HOST_PORT } else { '8086' }))",
     [string]$AuditUrl = "http://localhost:$($(if ($env:AUDIT_HOST_PORT) { $env:AUDIT_HOST_PORT } else { '8087' }))",
     [string]$JobUrl = "http://localhost:$($(if ($env:JOB_HOST_PORT) { $env:JOB_HOST_PORT } else { '8084' }))",
-    [string]$AiUrl = "http://localhost:$($(if ($env:AI_HOST_PORT) { $env:AI_HOST_PORT } else { '8088' }))"
+    [string]$AiUrl = "http://localhost:$($(if ($env:AI_HOST_PORT) { $env:AI_HOST_PORT } else { '8088' }))",
+    [string]$AssessmentRunnerUrl = "http://localhost:$($(if ($env:ASSESSMENT_RUNNER_HOST_PORT) { $env:ASSESSMENT_RUNNER_HOST_PORT } else { '8089' }))"
 )
 
 Set-StrictMode -Version Latest
@@ -51,15 +52,49 @@ function Assert-NonZeroSample {
         [string]$MetricName
     )
 
-    $pattern = "(?m)^$([regex]::Escape($MetricName))(\{[^`r`n]*\})?\s+([0-9]+(\.[0-9]+)?)$"
+    $pattern = "(?m)^$([regex]::Escape($MetricName))(\{[^`r`n]*\})?\s+(?<value>[0-9]+(\.[0-9]+)?)\s*$"
     $matches = [regex]::Matches($Content, $pattern)
     foreach ($match in $matches) {
-        if ([double]$match.Groups[3].Value -gt 0) {
+        if ([double]$match.Groups["value"].Value -gt 0) {
             return
         }
     }
     throw "Metric '$MetricName' exists but no non-zero samples were found."
 }
+
+function Select-MetricName {
+    param(
+        [string]$Content,
+        [string[]]$MetricNames
+    )
+
+    foreach ($metricName in $MetricNames) {
+        if ($Content -match "(?m)^$([regex]::Escape($metricName))(\{| )") {
+            return $metricName
+        }
+    }
+    throw "None of the expected metrics were found: $($MetricNames -join ', ')"
+}
+
+function Set-PortEnvFromUrl {
+    param(
+        [Parameter(Mandatory = $true)][string]$Name,
+        [Parameter(Mandatory = $true)][string]$Url
+    )
+
+    $uri = [Uri]$Url
+    if ($uri.Port -gt 0) {
+        [Environment]::SetEnvironmentVariable($Name, [string]$uri.Port, "Process")
+    }
+}
+
+Set-PortEnvFromUrl -Name "GATEWAY_HOST_PORT" -Url $GatewayUrl
+Set-PortEnvFromUrl -Name "APPLICATION_HOST_PORT" -Url $ApplicationUrl
+Set-PortEnvFromUrl -Name "NOTIFICATION_HOST_PORT" -Url $NotificationUrl
+Set-PortEnvFromUrl -Name "AUDIT_HOST_PORT" -Url $AuditUrl
+Set-PortEnvFromUrl -Name "JOB_HOST_PORT" -Url $JobUrl
+Set-PortEnvFromUrl -Name "AI_HOST_PORT" -Url $AiUrl
+Set-PortEnvFromUrl -Name "ASSESSMENT_RUNNER_HOST_PORT" -Url $AssessmentRunnerUrl
 
 if (-not $SkipTraffic) {
     Invoke-Step "API smoke traffic for metrics" {
@@ -77,6 +112,7 @@ $scrapes = @{
     audit = Get-Metrics -BaseUrl $AuditUrl
     job = Get-Metrics -BaseUrl $JobUrl
     ai = Get-Metrics -BaseUrl $AiUrl
+    runner = Get-Metrics -BaseUrl $AssessmentRunnerUrl
 }
 
 Invoke-Step "gateway route metrics" {
@@ -96,22 +132,39 @@ Invoke-Step "gateway route metrics" {
 }
 
 Invoke-Step "application domain metrics" {
-    Assert-MetricExists -Content $scrapes.application -MetricName "devhire_applications_total"
-    Assert-NonZeroSample -Content $scrapes.application -MetricName "devhire_applications_total"
-    Assert-MetricExists -Content $scrapes.application -MetricName "devhire_application_status_transitions_total"
-    Assert-NonZeroSample -Content $scrapes.application -MetricName "devhire_application_status_transitions_total"
+    $applicationsMetric = Select-MetricName -Content $scrapes.application -MetricNames @(
+        "devhire_applications_total",
+        "devhire_applications"
+    )
+    $transitionsMetric = Select-MetricName -Content $scrapes.application -MetricNames @(
+        "devhire_application_status_transitions_total",
+        "devhire_application_status_transitions"
+    )
+    Assert-NonZeroSample -Content $scrapes.application -MetricName $applicationsMetric
+    Assert-NonZeroSample -Content $scrapes.application -MetricName $transitionsMetric
+    Assert-MetricExists -Content $scrapes.application -MetricName "devhire_code_assessments"
+    Assert-NonZeroSample -Content $scrapes.application -MetricName "devhire_code_assessments"
 }
 
 Invoke-Step "notification delivery metrics" {
-    Assert-MetricExists -Content $scrapes.notification -MetricName "devhire_notifications_total"
-    Assert-NonZeroSample -Content $scrapes.notification -MetricName "devhire_notifications_total"
-    Assert-MetricExists -Content $scrapes.notification -MetricName "devhire_email_delivery_total"
-    Assert-NonZeroSample -Content $scrapes.notification -MetricName "devhire_email_delivery_total"
+    $notificationsMetric = Select-MetricName -Content $scrapes.notification -MetricNames @(
+        "devhire_notifications_total",
+        "devhire_notifications"
+    )
+    $emailDeliveryMetric = Select-MetricName -Content $scrapes.notification -MetricNames @(
+        "devhire_email_delivery_total",
+        "devhire_email_delivery"
+    )
+    Assert-NonZeroSample -Content $scrapes.notification -MetricName $notificationsMetric
+    Assert-NonZeroSample -Content $scrapes.notification -MetricName $emailDeliveryMetric
 }
 
 Invoke-Step "audit ingestion metrics" {
-    Assert-MetricExists -Content $scrapes.audit -MetricName "devhire_audit_ingested_total"
-    Assert-NonZeroSample -Content $scrapes.audit -MetricName "devhire_audit_ingested_total"
+    $auditMetric = Select-MetricName -Content $scrapes.audit -MetricNames @(
+        "devhire_audit_ingested_total",
+        "devhire_audit_ingested"
+    )
+    Assert-NonZeroSample -Content $scrapes.audit -MetricName $auditMetric
 }
 
 Invoke-Step "job search metrics" {
@@ -120,10 +173,28 @@ Invoke-Step "job search metrics" {
 }
 
 Invoke-Step "AI usage metrics" {
-    Assert-MetricExists -Content $scrapes.ai -MetricName "devhire_ai_conversations_total"
-    Assert-NonZeroSample -Content $scrapes.ai -MetricName "devhire_ai_conversations_total"
-    Assert-MetricExists -Content $scrapes.ai -MetricName "devhire_ai_usage_events_total"
-    Assert-NonZeroSample -Content $scrapes.ai -MetricName "devhire_ai_usage_events_total"
+    $aiConversationsMetric = Select-MetricName -Content $scrapes.ai -MetricNames @(
+        "devhire_ai_conversations_total",
+        "devhire_ai_conversations"
+    )
+    $aiUsageMetric = Select-MetricName -Content $scrapes.ai -MetricNames @(
+        "devhire_ai_usage_events_total",
+        "devhire_ai_usage_events"
+    )
+    Assert-NonZeroSample -Content $scrapes.ai -MetricName $aiConversationsMetric
+    Assert-NonZeroSample -Content $scrapes.ai -MetricName $aiUsageMetric
+}
+
+Invoke-Step "assessment runner metrics" {
+    Assert-MetricExists -Content $scrapes.runner -MetricName "devhire_assessment_runner_queue_depth"
+    Assert-MetricExists -Content $scrapes.runner -MetricName "devhire_assessment_runner_fail_closed"
+    Assert-MetricExists -Content $scrapes.runner -MetricName "devhire_assessment_runner_judge0_configured"
+    if ($scrapes.runner -match "(?m)^devhire_assessment_runner_requests_total(\{| )") {
+        Assert-MetricExists -Content $scrapes.runner -MetricName "devhire_assessment_runner_requests_total"
+        Assert-MetricExists -Content $scrapes.runner -MetricName "devhire_assessment_runner_latency_seconds_count"
+    } else {
+        Write-Host "Assessment runner request metrics are traffic-driven; surface-only checks passed."
+    }
 }
 
 Invoke-Step "outbox backlog metric surface" {
@@ -133,4 +204,4 @@ Invoke-Step "outbox backlog metric surface" {
 }
 
 Write-Host ""
-Write-Host "Runtime observability smoke passed: custom domain metrics are present and seeded with non-zero recruitment data."
+Write-Host "Runtime observability smoke passed: custom domain metrics and assessment runner surfaces are present."
