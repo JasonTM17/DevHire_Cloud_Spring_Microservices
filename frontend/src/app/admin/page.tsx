@@ -9,7 +9,22 @@ import { api } from "@/lib/api";
 import { brandForCompany } from "@/lib/demoCompanies";
 import { formatDateTime } from "@/lib/dateFormat";
 import { previewAiProviderStatus, previewAuditLogs, previewCodeAssessmentSummary, previewCompanies, previewJobs, previewOperationsSummary } from "@/lib/previewData";
-import type { AiProviderStatus, AuditLog, CodeAssessmentSummary, Company, Job, OperationsSummary, PageResponse } from "@/types/domain";
+import type { AiProviderStatus, AuditLog, CodeAssessmentSummary, CodeChallenge, CodeChallengeTestCase, Company, Job, OperationsSummary, PageResponse } from "@/types/domain";
+
+type ChallengeDraftState = {
+  title: string;
+  level: string;
+  language: string;
+  prompt: string;
+  constraints: string;
+  starterCode: string;
+  referenceSolution: string;
+  skillsCsv: string;
+  requiredSignalsCsv: string;
+  maxScore: number;
+  active: boolean;
+  testCases: CodeChallengeTestCase[];
+};
 
 export default function AdminPage() {
   const [companies, setCompanies] = useState<PageResponse<Company>>(previewCompanies);
@@ -17,10 +32,14 @@ export default function AdminPage() {
   const [aiProvider, setAiProvider] = useState<AiProviderStatus>(previewAiProviderStatus);
   const [operationsSummary, setOperationsSummary] = useState<OperationsSummary>(previewOperationsSummary);
   const [codeAssessmentSummary, setCodeAssessmentSummary] = useState<CodeAssessmentSummary>(previewCodeAssessmentSummary);
+  const [codeChallenges, setCodeChallenges] = useState<CodeChallenge[]>([]);
+  const [editingChallengeId, setEditingChallengeId] = useState<string | null>(null);
+  const [challengeDraft, setChallengeDraft] = useState<ChallengeDraftState>(defaultChallengeDraft());
   const [reviewJobs, setReviewJobs] = useState<PageResponse<Job>>(previewJobs);
   const [selectedJobId, setSelectedJobId] = useState(previewJobs.content[0]?.id ?? "");
   const [message, setMessage] = useState("");
   const [reindexing, setReindexing] = useState(false);
+  const [savingChallenge, setSavingChallenge] = useState(false);
   const [loading, setLoading] = useState(false);
 
   function load() {
@@ -31,14 +50,16 @@ export default function AdminPage() {
       api.aiProviderStatus(),
       api.adminJobs("PENDING_REVIEW"),
       api.operationsSummary(),
-      api.codeAssessmentSummary()
+      api.codeAssessmentSummary(),
+      api.codeChallenges().catch(() => [] as CodeChallenge[])
     ])
-      .then(([companyPage, auditPage, providerStatus, jobPage, ops, codeSummary]) => {
+      .then(([companyPage, auditPage, providerStatus, jobPage, ops, codeSummary, challenges]) => {
         setCompanies(companyPage);
         setAudit(auditPage);
         setAiProvider(providerStatus);
         setOperationsSummary(ops);
         setCodeAssessmentSummary(codeSummary);
+        setCodeChallenges(challenges);
         setReviewJobs(jobPage.content.length ? jobPage : previewJobs);
         setSelectedJobId((current) => current || jobPage.content[0]?.id || previewJobs.content[0]?.id || "");
         setMessage("");
@@ -49,6 +70,7 @@ export default function AdminPage() {
         setAiProvider(previewAiProviderStatus);
         setOperationsSummary(previewOperationsSummary);
         setCodeAssessmentSummary(previewCodeAssessmentSummary);
+        setCodeChallenges([]);
         setReviewJobs(previewJobs);
         setSelectedJobId(previewJobs.content[0]?.id ?? "");
         setMessage("");
@@ -89,8 +111,77 @@ export default function AdminPage() {
     }
   }
 
+  async function saveChallenge(activeOverride = challengeDraft.active) {
+    try {
+      setSavingChallenge(true);
+      const payload = challengePayload(challengeDraft, activeOverride);
+      const saved = editingChallengeId
+        ? await api.updateCodeChallenge(editingChallengeId, payload)
+        : await api.createCodeChallenge(payload);
+      setEditingChallengeId(saved.id);
+      setChallengeDraft(draftFromChallenge(saved));
+      setCodeChallenges((current) => [saved, ...current.filter((item) => item.id !== saved.id)]);
+      setMessage(activeOverride
+        ? `Challenge published: ${saved.title}.`
+        : `Challenge draft saved: ${saved.title}.`);
+    } catch (ex) {
+      setMessage(ex instanceof Error ? ex.message : "Cannot save challenge");
+    } finally {
+      setSavingChallenge(false);
+    }
+  }
+
+  async function toggleChallenge(challenge: CodeChallenge) {
+    try {
+      const updated = await api.updateCodeChallenge(challenge.id, { active: !challenge.active });
+      setCodeChallenges((current) => current.map((item) => (item.id === updated.id ? updated : item)));
+      setMessage(`Challenge ${updated.active ? "activated" : "deactivated"}: ${updated.title}.`);
+    } catch (ex) {
+      setMessage(ex instanceof Error ? ex.message : "Cannot update challenge");
+    }
+  }
+
+  function loadChallengeIntoEditor(challenge: CodeChallenge) {
+    setEditingChallengeId(challenge.id);
+    setChallengeDraft(draftFromChallenge(challenge));
+    setMessage(`Editing challenge: ${challenge.title}.`);
+  }
+
+  function resetChallengeEditor() {
+    setEditingChallengeId(null);
+    setChallengeDraft(defaultChallengeDraft());
+    setMessage("New Java challenge draft ready.");
+  }
+
+  function updateCase(index: number, patch: Partial<CodeChallengeTestCase>) {
+    setChallengeDraft((current) => ({
+      ...current,
+      testCases: current.testCases.map((item, itemIndex) => itemIndex === index ? { ...item, ...patch } : item)
+    }));
+  }
+
+  function addCase(visibility: "VISIBLE" | "HIDDEN") {
+    setChallengeDraft((current) => ({
+      ...current,
+      testCases: [
+        ...current.testCases,
+        {
+          name: visibility === "VISIBLE" ? "Visible example" : "Hidden edge case",
+          visibility,
+          stdin: "",
+          expectedOutput: "",
+          weight: 10,
+          ordinal: current.testCases.length + 1
+        }
+      ]
+    }));
+  }
+
   const aiCircuitOpen = aiProvider?.circuitBreakerState === "OPEN";
-  const positiveMessage = message.includes("approved") || message.includes("reindexed");
+  const positiveMessage = message.includes("approved")
+    || message.includes("reindexed")
+    || message.includes("Challenge")
+    || message.includes("draft ready");
   const auditActionCounts = countBy(audit.content, (item) => item.action);
   const codeReviewed = codeAssessmentSummary.autoReviewed
     + codeAssessmentSummary.employerReviewed
@@ -205,7 +296,7 @@ export default function AdminPage() {
         </div>
         <div className="metrics-row compact-metrics">
           <MetricCard icon={ClipboardCheck} label="Assignments" value={codeAssessmentSummary.totalAssignments} helper="Active code challenges" />
-          <MetricCard icon={Gauge} label="Average score" value={`${codeAssessmentSummary.averageScore}%`} helper="Deterministic rubric" />
+          <MetricCard icon={Gauge} label="Average score" value={`${codeAssessmentSummary.averageScore}%`} helper="Runtime rubric" />
           <MetricCard icon={CheckCircle2} label="Runner queue" value={codeAssessmentSummary.runQueueDepth ?? 0} helper="Sandbox backlog" />
           <MetricCard icon={ShieldCheck} label="Sandbox fail" value={`${codeAssessmentSummary.sandboxFailureRate ?? 0}%`} helper="Policy or execution blocks" />
         </div>
@@ -222,12 +313,191 @@ export default function AdminPage() {
             <span>Integrity risk avg {codeAssessmentSummary.averageIntegrityRisk ?? 0}% / similarity avg {codeAssessmentSummary.averageSimilarityScore ?? 0}%</span>
             <span>Hidden tests and final score are recalculated server-side</span>
           </div>
+          <div className="constraint-box">
+            <strong>Runtime judge</strong>
+            <span>{codeAssessmentSummary.acceptedRate ?? 0}% accepted / {codeAssessmentSummary.wrongAnswerRate ?? 0}% wrong answers</span>
+            <span>{codeAssessmentSummary.compileErrorRate ?? 0}% compile / {codeAssessmentSummary.timeoutRate ?? 0}% timeout / {codeAssessmentSummary.policyBlockedRate ?? 0}% policy blocked</span>
+            <span>{codeAssessmentSummary.runnerUnavailableRate ?? 0}% unavailable / avg runtime {codeAssessmentSummary.averageRuntimeMs ?? 0} ms / p95 {codeAssessmentSummary.p95ExecutionMs ?? 0} ms</span>
+          </div>
         </div>
         <div className="insight-list compact">
           {codeAssessmentSummary.statusDistribution.map((item) => (
             <div className="insight-line" key={item.status}>
               <span>{statusLabel(item.status)}</span>
               <strong>{item.count}</strong>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="panel">
+        <div className="section-title">
+          <ShieldCheck size={20} />
+          <h2>Code challenge management</h2>
+        </div>
+        <div className="form challenge-authoring-form">
+          <div className="inline-form">
+            <input
+              aria-label="Challenge title"
+              value={challengeDraft.title}
+              onChange={(event) => setChallengeDraft((current) => ({ ...current, title: event.target.value }))}
+            />
+            <input
+              aria-label="Challenge level"
+              value={challengeDraft.level}
+              onChange={(event) => setChallengeDraft((current) => ({ ...current, level: event.target.value }))}
+            />
+            <input
+              aria-label="Challenge language"
+              value={challengeDraft.language}
+              onChange={(event) => setChallengeDraft((current) => ({ ...current, language: event.target.value }))}
+            />
+          </div>
+          <textarea
+            aria-label="Problem statement"
+            value={challengeDraft.prompt}
+            onChange={(event) => setChallengeDraft((current) => ({ ...current, prompt: event.target.value }))}
+          />
+          <textarea
+            aria-label="Runtime constraints"
+            value={challengeDraft.constraints}
+            onChange={(event) => setChallengeDraft((current) => ({ ...current, constraints: event.target.value }))}
+          />
+          <div className="code-authoring-grid">
+            <label>
+              Starter code
+              <textarea
+                aria-label="Starter code"
+                value={challengeDraft.starterCode}
+                onChange={(event) => setChallengeDraft((current) => ({ ...current, starterCode: event.target.value }))}
+              />
+            </label>
+            <label>
+              Reference solution
+              <textarea
+                aria-label="Reference solution"
+                value={challengeDraft.referenceSolution}
+                onChange={(event) => setChallengeDraft((current) => ({ ...current, referenceSolution: event.target.value }))}
+              />
+            </label>
+          </div>
+          <div className="inline-form">
+            <input
+              aria-label="Challenge skills"
+              value={challengeDraft.skillsCsv}
+              onChange={(event) => setChallengeDraft((current) => ({ ...current, skillsCsv: event.target.value }))}
+            />
+            <input
+              aria-label="Required signals"
+              value={challengeDraft.requiredSignalsCsv}
+              onChange={(event) => setChallengeDraft((current) => ({ ...current, requiredSignalsCsv: event.target.value }))}
+            />
+            <input
+              aria-label="Max score"
+              type="number"
+              min={1}
+              max={100}
+              value={challengeDraft.maxScore}
+              onChange={(event) => setChallengeDraft((current) => ({ ...current, maxScore: Number(event.target.value) }))}
+            />
+          </div>
+          <div className="challenge-case-list">
+            {challengeDraft.testCases.map((testCase, index) => (
+              <div className="challenge-case-editor" key={`${testCase.visibility}-${index}`}>
+                <div className="inline-form">
+                  <input
+                    aria-label={`Case ${index + 1} name`}
+                    value={testCase.name}
+                    onChange={(event) => updateCase(index, { name: event.target.value })}
+                  />
+                  <select
+                    aria-label={`Case ${index + 1} visibility`}
+                    value={testCase.visibility}
+                    onChange={(event) => updateCase(index, { visibility: event.target.value })}
+                  >
+                    <option value="VISIBLE">Visible</option>
+                    <option value="HIDDEN">Hidden</option>
+                  </select>
+                  <input
+                    aria-label={`Case ${index + 1} weight`}
+                    type="number"
+                    min={1}
+                    max={100}
+                    value={testCase.weight}
+                    onChange={(event) => updateCase(index, { weight: Number(event.target.value) })}
+                  />
+                </div>
+                <div className="code-authoring-grid">
+                  <label>
+                    stdin
+                    <textarea
+                      aria-label={`Case ${index + 1} stdin`}
+                      value={testCase.stdin}
+                      onChange={(event) => updateCase(index, { stdin: event.target.value })}
+                    />
+                  </label>
+                  <label>
+                    expected output
+                    <textarea
+                      aria-label={`Case ${index + 1} expected output`}
+                      value={testCase.expectedOutput}
+                      onChange={(event) => updateCase(index, { expectedOutput: event.target.value })}
+                    />
+                  </label>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="button-row">
+            <button className="button secondary" type="button" onClick={resetChallengeEditor}>
+              New Java draft
+            </button>
+            <button className="button secondary" type="button" onClick={() => addCase("VISIBLE")}>
+              Add visible case
+            </button>
+            <button className="button secondary" type="button" onClick={() => addCase("HIDDEN")}>
+              Add hidden case
+            </button>
+            <button className="button secondary" type="button" onClick={() => saveChallenge(false)} disabled={savingChallenge}>
+              {savingChallenge ? "Saving" : "Save draft"}
+            </button>
+            <button className="button primary" type="button" onClick={() => saveChallenge(true)} disabled={savingChallenge}>
+              Validate and publish
+            </button>
+          </div>
+          <small className="muted">
+            Publishing runs the reference solution against visible and hidden cases before the challenge can become active.
+          </small>
+        </div>
+        <div className="evidence-grid">
+          <div className="constraint-box">
+            <strong>Runner health</strong>
+            <span>{statusLabel(codeAssessmentSummary.runnerHealth.status)} / {codeAssessmentSummary.runnerHealth.mode}</span>
+            <span>{codeAssessmentSummary.runnerHealth.runnerVersion}</span>
+            <span>{codeAssessmentSummary.runnerHealth.failClosed ? "Fail-closed active" : "Fail-closed clear"}</span>
+            <span>Judge0 {codeAssessmentSummary.runnerHealth.judge0Configured ? "configured" : "not configured"} / queue {codeAssessmentSummary.runnerHealth.queueDepth}</span>
+            {codeAssessmentSummary.runnerHealth.lastSmokeStatus
+              ? <span>Last smoke {codeAssessmentSummary.runnerHealth.lastSmokeStatus}{codeAssessmentSummary.runnerHealth.lastSmokeAt ? ` at ${formatDateTime(codeAssessmentSummary.runnerHealth.lastSmokeAt)}` : ""}</span>
+              : null}
+            {codeAssessmentSummary.runnerHealth.failClosedReason ? <span>{codeAssessmentSummary.runnerHealth.failClosedReason}</span> : <span>Runner is accepting assessment work</span>}
+          </div>
+        </div>
+        <div className="table-list">
+          {codeChallenges.length === 0 ? <div className="empty-state compact">No admin challenge registry returned yet.</div> : null}
+          {codeChallenges.slice(0, 6).map((challenge) => (
+            <div className="table-row" key={challenge.id}>
+              <div>
+                <strong>{challenge.title}</strong>
+                <small>
+                  {challenge.language} v{challenge.version} - visible {challenge.visibleCaseCount} / hidden {challenge.hiddenCaseCount}
+                </small>
+              </div>
+              <span className={challenge.active ? "badge live" : "badge"}>{challenge.active ? "Active" : "Draft"}</span>
+              <button className="button secondary" type="button" onClick={() => loadChallengeIntoEditor(challenge)}>
+                Edit
+              </button>
+              <button className="button secondary" type="button" onClick={() => toggleChallenge(challenge)}>
+                {challenge.active ? "Deactivate" : "Activate"}
+              </button>
             </div>
           ))}
         </div>
@@ -278,6 +548,105 @@ export default function AdminPage() {
 
 function selectedJobTitle(jobs: Job[], id: string) {
   return jobs.find((job) => job.id === id)?.title ?? "Selected portfolio job";
+}
+
+function defaultChallengeDraft(): ChallengeDraftState {
+  return {
+    title: "Cloud Architecture Challenge",
+    level: "Senior",
+    language: "Java",
+    prompt: "Implement CandidateSolution.solve(String input) and return PASSED when the resource is strict production traffic, otherwise REJECTED.",
+    constraints: "Submit class CandidateSolution with String solve(String input). Do not use package, public class, network, filesystem, process, or reflection APIs.",
+    starterCode: "class CandidateSolution {\n  String solve(String input) {\n    return \"\";\n  }\n}",
+    referenceSolution: "class CandidateSolution {\n  String solve(String input) {\n    boolean strict = input != null && input.contains(\"policy=STRICT\");\n    boolean production = input != null && input.contains(\"tag=production\");\n    return strict && production ? \"PASSED\" : \"REJECTED\";\n  }\n}",
+    skillsCsv: "Java,Runtime Validation,Security",
+    requiredSignalsCsv: "CandidateSolution,solve",
+    maxScore: 100,
+    active: false,
+    testCases: [
+      {
+        name: "Visible strict production resource",
+        visibility: "VISIBLE",
+        stdin: "resource=res-9982;policy=STRICT;tag=production",
+        expectedOutput: "PASSED",
+        weight: 15,
+        ordinal: 1
+      },
+      {
+        name: "Visible relaxed policy rejection",
+        visibility: "VISIBLE",
+        stdin: "resource=res-2211;policy=RELAXED;tag=production",
+        expectedOutput: "REJECTED",
+        weight: 15,
+        ordinal: 2
+      },
+      {
+        name: "Hidden malformed resource rejection",
+        visibility: "HIDDEN",
+        stdin: "resource=res-hidden-2;policy=STRICT",
+        expectedOutput: "REJECTED",
+        weight: 20,
+        ordinal: 3
+      }
+    ]
+  };
+}
+
+function draftFromChallenge(challenge: CodeChallenge): ChallengeDraftState {
+  return {
+    title: challenge.title,
+    level: challenge.level,
+    language: challenge.language,
+    prompt: challenge.prompt,
+    constraints: challenge.constraints,
+    starterCode: challenge.starterCode,
+    referenceSolution: challenge.referenceSolution ?? "",
+    skillsCsv: challenge.skills.join(","),
+    requiredSignalsCsv: challenge.requiredSignals.join(","),
+    maxScore: challenge.maxScore,
+    active: challenge.active,
+    testCases: (challenge.testCases?.length ? challenge.testCases : defaultChallengeDraft().testCases)
+      .map((testCase, index) => ({
+        ...testCase,
+        stdin: testCase.stdin ?? "",
+        expectedOutput: testCase.expectedOutput ?? "",
+        weight: testCase.weight ?? 10,
+        ordinal: testCase.ordinal ?? index + 1
+      }))
+  };
+}
+
+function challengePayload(draft: ChallengeDraftState, active: boolean) {
+  return {
+    title: draft.title,
+    level: draft.level,
+    language: draft.language,
+    prompt: draft.prompt,
+    constraints: draft.constraints,
+    starterCode: draft.starterCode,
+    skills: splitCsvInput(draft.skillsCsv),
+    requiredSignals: splitCsvInput(draft.requiredSignalsCsv),
+    maxScore: draft.maxScore,
+    active,
+    referenceSolution: draft.referenceSolution,
+    testCases: draft.testCases.map((testCase, index) => ({
+      name: testCase.name,
+      visibility: testCase.visibility,
+      stdin: testCase.stdin,
+      expectedOutput: testCase.expectedOutput,
+      weight: testCase.weight,
+      ordinal: index + 1,
+      setupSql: testCase.setupSql,
+      expectedRowsJson: testCase.expectedRowsJson
+    }))
+  };
+}
+
+function splitCsvInput(value: string) {
+  return value
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
 }
 
 function countBy<T>(items: T[], selector: (item: T) => string) {

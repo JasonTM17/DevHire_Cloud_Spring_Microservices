@@ -237,16 +237,23 @@ export type CodeRunCaseResult = {
   name: string;
   visibility: "VISIBLE" | "HIDDEN";
   passed: boolean;
+  verdict: string;
   output?: string;
+  stdout?: string;
+  stderr?: string;
+  compileOutput?: string;
   error?: string;
   executionTimeMs: number;
   memoryKb: number;
+  timeLimitMs: number;
+  memoryLimitKb: number;
 };
 
 export type CodeRun = {
   id: string;
   status: string;
   sandboxStatus: string;
+  verdict: string;
   visiblePassed: number;
   visibleTotal: number;
   hiddenPassed: number;
@@ -254,6 +261,12 @@ export type CodeRun = {
   executionTimeMs: number;
   memoryKb: number;
   failureReason?: string;
+  compileOutput?: string;
+  stdout?: string;
+  stderr?: string;
+  timeLimitMs: number;
+  memoryLimitKb: number;
+  runnerVersion?: string;
   integrityRiskScore: number;
   similarityScore: number;
   results: CodeRunCaseResult[];
@@ -267,6 +280,7 @@ export type CodeAssessment = {
   candidateName: string;
   jobTitle: string;
   challengeTitle: string;
+  challengeVersion: number;
   level: string;
   language: string;
   prompt: string;
@@ -298,6 +312,81 @@ export type CodeAssessment = {
   submittedAt?: string;
 };
 
+export type CodeSubmissionSummary = {
+  id: string;
+  assignmentId: string;
+  runId?: string;
+  language: string;
+  finalScore?: number;
+  decision?: string;
+  rubric: RubricScore[];
+  riskFlags: string[];
+  feedback?: string;
+  attemptNumber?: number;
+  codeHash?: string;
+  graderVersion?: string;
+  rubricVersion?: string;
+  submittedCode?: string;
+  submittedCodePreview?: string;
+  hasSubmittedCode: boolean;
+  verdict?: string;
+  visiblePassed: number;
+  visibleTotal: number;
+  hiddenPassed: number;
+  hiddenTotal: number;
+  executionTimeMs: number;
+  memoryKb: number;
+  submittedAt: string;
+};
+
+export type CodeChallenge = {
+  id: string;
+  slug: string;
+  title: string;
+  version: number;
+  level: string;
+  language: string;
+  prompt: string;
+  constraints: string;
+  starterCode: string;
+  skills: string[];
+  requiredSignals: string[];
+  maxScore: number;
+  active: boolean;
+  referenceSolution?: string;
+  visibleCaseCount: number;
+  hiddenCaseCount: number;
+  testCases: CodeChallengeTestCase[];
+  createdAt: string;
+};
+
+export type CodeChallengeTestCase = {
+  id?: string;
+  name: string;
+  visibility: "VISIBLE" | "HIDDEN" | string;
+  stdin: string;
+  expectedOutput: string;
+  weight: number;
+  ordinal: number;
+  setupSql?: string;
+  expectedRowsJson?: string;
+};
+
+export type CodeAssessmentRunnerHealth = {
+  status: string;
+  mode: string;
+  runnerVersion: string;
+  judge0Configured: boolean;
+  failClosed: boolean;
+  networkDisabled: boolean;
+  queueDepth: number;
+  failClosedReason?: string;
+  checkedAt: string;
+  lastSmokeAt?: string;
+  lastSmokeStatus?: string;
+  lastSmokeMessage?: string;
+};
+
 export type CodeAssessmentSummary = {
   totalAssignments: number;
   submitted: number;
@@ -309,9 +398,18 @@ export type CodeAssessmentSummary = {
   riskySubmissions: number;
   runQueueDepth: number;
   sandboxFailureRate: number;
+  acceptedRate: number;
+  wrongAnswerRate: number;
+  compileErrorRate: number;
+  timeoutRate: number;
+  runnerUnavailableRate: number;
+  policyBlockedRate: number;
+  averageRuntimeMs: number;
+  p95ExecutionMs: number;
   averageIntegrityRisk: number;
   averageSimilarityScore: number;
   statusDistribution: StatusCount[];
+  runnerHealth: CodeAssessmentRunnerHealth;
 };
 
 export type EmployerPipelineSummary = {

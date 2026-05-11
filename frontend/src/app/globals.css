@@ -865,6 +865,46 @@ textarea {
   background: #ffffff;
 }
 
+.challenge-authoring-form {
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.challenge-authoring-form textarea {
+  min-height: 96px;
+  font-family: var(--font-mono);
+}
+
+.code-authoring-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.code-authoring-grid label {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.challenge-case-list {
+  display: grid;
+  gap: 10px;
+}
+
+.challenge-case-editor {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-muted);
+}
+
 .notification,
 .audit-item,
 .demo-account,
@@ -1493,6 +1533,34 @@ textarea {
   background: rgba(79, 193, 255, 0.35);
 }
 
+.assessment-monaco-frame {
+  position: relative;
+  grid-column: 1 / -1;
+  min-width: 0;
+  min-height: 100%;
+}
+
+.assessment-editor-preparing {
+  display: grid;
+  min-height: 100%;
+  place-items: center;
+  color: #9ca3af;
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+}
+
+.assessment-code-input-shadow {
+  position: absolute;
+  inset: 12px auto auto 12px;
+  width: 2px;
+  height: 2px;
+  min-height: 2px;
+  padding: 0;
+  opacity: 0.01;
+  pointer-events: auto;
+  z-index: 1;
+}
+
 .assessment-terminal {
   min-height: 0;
   display: grid;
@@ -1731,9 +1799,9 @@ textarea {
 }
 
 .assessment-test-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  justify-content: space-between;
   gap: 12px;
   border: 1px solid #bdc9c6;
   border-radius: 8px;
@@ -1752,6 +1820,15 @@ textarea {
   color: #181c1c;
   font-size: 18px;
   font-weight: 500;
+}
+
+.assessment-test-row small {
+  grid-column: 1 / -1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: #4f5c59;
+  font-size: 14px;
+  line-height: 1.45;
 }
 
 .assessment-test-row em,
@@ -1794,6 +1871,48 @@ textarea {
 .assessment-test-row.pending em {
   background: #e5e9e7;
   color: #3e4947;
+}
+
+.assessment-runner-footnote {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+  color: #4f5c59;
+  font-size: 14px;
+}
+
+.assessment-runner-footnote span {
+  border-radius: 8px;
+  background: #eef3f0;
+  padding: 6px 9px;
+}
+
+.assessment-custom-input {
+  display: grid;
+  gap: 8px;
+  color: #181c1c;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.assessment-custom-input textarea {
+  min-height: 72px;
+  resize: vertical;
+  border: 1px solid #bdc9c6;
+  border-radius: 8px;
+  background: #f7faf8;
+  padding: 10px;
+  color: #181c1c;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.assessment-code-input:disabled,
+.assessment-custom-input textarea:disabled {
+  opacity: 0.72;
+  cursor: not-allowed;
 }
 
 .assessment-meta-grid {
@@ -2346,6 +2465,10 @@ textarea {
 
   .assessment-meta-grid,
   .assessment-example-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .code-authoring-grid {
     grid-template-columns: 1fr;
   }
 

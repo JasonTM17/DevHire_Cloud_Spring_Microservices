@@ -85,6 +85,21 @@ test.describe("Mobile recruiter demo smoke", () => {
     await page.screenshot({ path: path.join(mobileScreenshotsDir, "assistant-mobile.png"), fullPage: true });
   });
 
+  test("candidate code studio remains usable and redacted on mobile", async ({ page }) => {
+    await login(page, "candidate");
+    await page.goto("/candidate/assessments");
+
+    await expect(page.getByTestId("candidate-assessments-page")).toBeVisible();
+    await expect(page.getByRole("tab", { name: /CandidateSolution\.java|solution\.sql|solution\.ts/ }).first()).toBeVisible();
+    await expect(page.getByLabel("Candidate code submission")).toBeVisible();
+    await expect(page.getByLabel("Custom stdin")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Submission history" })).toBeVisible();
+    await expect(page.getByText(/hidden results redacted|Hidden tests server-side/i).first()).toBeVisible();
+    await expect(page.locator("body")).not.toContainText(/expected_output|hidden reviewer evidence|private job leak/i);
+    await assertPrimaryEvidenceReady(page);
+    await expectNoHorizontalOverflow(page);
+  });
+
   for (const { route, role } of mobileRoutes) {
     test(`primary route ${route} has no mobile overflow`, async ({ page }) => {
       if (role) {

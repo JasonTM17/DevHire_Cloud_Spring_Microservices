@@ -16,38 +16,18 @@ import {
   Upload,
   X
 } from "lucide-react";
+import { CandidateCodeEditor } from "@/components/CandidateCodeEditor";
 import { statusLabel } from "@/components/StatusPill";
 import { api } from "@/lib/api";
 import { formatShortDate } from "@/lib/dateFormat";
 import { previewCodeAssessments } from "@/lib/previewData";
-import type { CodeAssessment, CodeIntegrityEvent, CodeRun } from "@/types/domain";
+import type { CodeAssessment, CodeIntegrityEvent, CodeRun, CodeRunCaseResult, CodeSubmissionSummary } from "@/types/domain";
 
 const FINAL_STATUSES = new Set(["PASSED", "FAILED"]);
-const DEFAULT_CODE = `package com.devhire.cloud;
-
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
-
-/**
- * Main application class for the DevHire Cloud Resource Manager.
- * TASK 1: Provide the ResourceValidator bean below.
- */
-@SpringBootApplication
-public class CloudServiceApplication {
-
-  public static void main(String[] args) {
-    SpringApplication.run(CloudServiceApplication.class, args);
-  }
-
-  @Bean
-  public ResourceValidator resourceValidator() {
-    return new ResourceValidator(EnterpriseSecurityPolicy.STRICT, "production");
-  }
-
-  @Test
-  void validatesProductionResourcesWithStrictPolicy() {
-    assert resourceValidator().policy() == EnterpriseSecurityPolicy.STRICT;
+const LOCKED_STATUSES = new Set(["SUBMITTED", "AUTO_REVIEWED", "REVIEWED", "EMPLOYER_REVIEWED", "PASSED", "FAILED"]);
+const DEFAULT_CODE = `class CandidateSolution {
+  String solve(String input) {
+    return "";
   }
 }`;
 
@@ -61,8 +41,14 @@ type AnalysisResult = {
   label: string;
   detail: string;
   matched: boolean;
+  verdict?: string;
   output?: string;
+  stdout?: string;
+  stderr?: string;
+  compileOutput?: string;
   error?: string;
+  executionTimeMs?: number;
+  memoryKb?: number;
 };
 
 type IntegrityCounters = {
@@ -88,6 +74,8 @@ export default function CandidateAssessmentsPage() {
   const [analysisMessage, setAnalysisMessage] = useState("");
   const [analysisResults, setAnalysisResults] = useState<AnalysisResult[]>([]);
   const [latestRun, setLatestRun] = useState<CodeRun | undefined>(previewCodeAssessments[0]?.latestRun);
+  const [submissionAttempts, setSubmissionAttempts] = useState<CodeSubmissionSummary[]>([]);
+  const [customInput, setCustomInput] = useState("");
   const [integrityCounters, setIntegrityCounters] = useState<IntegrityCounters>({ focusLoss: 0, pasteBurst: 0, tabHidden: 0 });
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [running, setRunning] = useState(false);
@@ -99,12 +87,14 @@ export default function CandidateAssessmentsPage() {
     api.candidateCodeAssessments()
       .then((items) => {
         const next = items.length ? items : previewCodeAssessments;
-        const flagship = next.find((item) => item.challengeTitle.toLowerCase().includes("cloud architecture"));
-        const preferred = flagship ?? next.find((item) => !FINAL_STATUSES.has(item.status)) ?? next[0];
+        const preferred = preferredCodeAssessment(next);
         setAssessments(next);
         setSelectedId(preferred?.id ?? "");
       })
-      .catch(() => setAssessments(previewCodeAssessments));
+      .catch(() => {
+        setAssessments(previewCodeAssessments);
+        setSelectedId(preferredCodeAssessment(previewCodeAssessments)?.id ?? "");
+      });
   }, []);
 
   useEffect(() => {
@@ -151,18 +141,26 @@ export default function CandidateAssessmentsPage() {
     ? analysisResults
     : (selectedRun?.results ?? []).map((result) => ({
         label: result.name,
-        detail: result.error ?? result.output ?? `${result.executionTimeMs} ms / ${Math.round(result.memoryKb / 1024)} MB`,
+        detail: runtimeResultDetail(result),
         matched: result.passed,
+        verdict: result.verdict,
         output: result.output,
-        error: result.error
+        stdout: result.stdout,
+        stderr: result.stderr,
+        compileOutput: result.compileOutput,
+        error: result.error,
+        executionTimeMs: result.executionTimeMs,
+        memoryKb: result.memoryKb
       }));
-  const testResultRows = displayedResults.length
+  const testResultRows: AnalysisResult[] = displayedResults.length
     ? displayedResults
     : visibleCases.map((testCase, index) => ({
         label: testCase.label,
         detail: testCase.detail,
         matched: index === 0
       }));
+  const isFinalDecision = selected ? FINAL_STATUSES.has(selected.status) : false;
+  const isSubmissionLocked = selected ? LOCKED_STATUSES.has(selected.status) : false;
 
   useEffect(() => {
     if (!selected) {
@@ -173,15 +171,26 @@ export default function CandidateAssessmentsPage() {
     setAnalysisMessage("");
     setAnalysisResults([]);
     setLatestRun(selected.latestRun);
+    setSubmissionAttempts([]);
+    setCustomInput("");
     setIntegrityCounters({ focusLoss: 0, pasteBurst: 0, tabHidden: 0 });
     sessionStartedAt.current = Date.now();
 
     if (!isUuid(selected.id) || selected.submittedCode) {
+      if (isUuid(selected.id)) {
+        api.candidateCodeAssessmentSubmissions(selected.id)
+          .then(setSubmissionAttempts)
+          .catch(() => setSubmissionAttempts([]));
+      }
       return;
     }
     setLoadingDetail(true);
-    api.candidateCodeAssessment(selected.id)
-      .then((detail) => {
+    Promise.all([
+      api.candidateCodeAssessment(selected.id),
+      api.candidateCodeAssessmentSubmissions(selected.id).catch(() => [] as CodeSubmissionSummary[])
+    ])
+      .then(([detail, attempts]) => {
+        setSubmissionAttempts(attempts);
         setAssessments((current) => current.map((item) => (item.id === detail.id ? detail : item)));
         setCode(detail.submittedCode || detail.submittedCodePreview || detail.starterCode || DEFAULT_CODE);
         setLatestRun(detail.latestRun);
@@ -196,6 +205,10 @@ export default function CandidateAssessmentsPage() {
     if (!selected) {
       return;
     }
+    if (isSubmissionLocked) {
+      setAnalysisMessage("This assessment is already submitted; visible runs are locked.");
+      return;
+    }
     if (isUuid(selected.id)) {
       try {
         setRunning(true);
@@ -205,7 +218,8 @@ export default function CandidateAssessmentsPage() {
           code,
           integrityEvents(integrityCounters),
           await clientFingerprintHash(),
-          elapsedSeconds(sessionStartedAt.current)
+          elapsedSeconds(sessionStartedAt.current),
+          customInput.trim() || undefined
         );
         setLatestRun(run);
         setAssessments((current) => current.map((item) => (item.id === selected.id
@@ -219,36 +233,42 @@ export default function CandidateAssessmentsPage() {
           : item)));
         setAnalysisResults(run.results.map((result) => ({
           label: result.name,
-          detail: result.error ?? result.output ?? `${result.executionTimeMs} ms / ${Math.round(result.memoryKb / 1024)} MB`,
+          detail: runtimeResultDetail(result),
           matched: result.passed,
+          verdict: result.verdict,
           output: result.output,
-          error: result.error
+          stdout: result.stdout,
+          stderr: result.stderr,
+          compileOutput: result.compileOutput,
+          error: result.error,
+          executionTimeMs: result.executionTimeMs,
+          memoryKb: result.memoryKb
         })));
         setAnalysisMessage(
-          `${run.visiblePassed}/${run.visibleTotal} visible cases passed in ${run.executionTimeMs} ms; hidden cases remain server-side for final submit.`
+          `${formatVerdict(run.verdict)}: ${run.visiblePassed}/${run.visibleTotal} visible cases passed in ${run.executionTimeMs} ms; hidden cases remain server-side for final submit.`
         );
         return;
       } catch (ex) {
         setAnalysisMessage(ex instanceof Error && ex.message !== "Failed to fetch"
           ? ex.message
-          : "Local static judge is active while the sandbox runner is unreachable.");
+          : "Runtime judge is unavailable; final scoring remains locked server-side.");
       } finally {
         setRunning(false);
       }
     }
-    const hasTest = /(@test|assert|expect\()/i.test(code);
     const hasRisk = /(api[_-]?key|password|secret|runtime\.getruntime|processbuilder|system\.exit)/i.test(code);
     const cases = assessmentEvidenceCases(selected);
     const results = cases.map((testCase) => ({
       label: testCase.label,
       detail: testCase.detail,
-      matched: testCase.matched(code)
+      matched: testCase.matched(code),
+      verdict: testCase.matched(code) ? "ACCEPTED" : "WRONG_ANSWER"
     }));
     const caseCount = results.filter((testCase) => testCase.matched).length;
     setAnalysisResults(results);
     setAnalysisMessage(
-      `${caseCount}/${cases.length} static judge cases matched; ${
-        hasRisk ? "security review required" : hasTest ? "test evidence present" : "add assertion evidence"
+      `${caseCount}/${cases.length} local preview cases matched; ${
+        hasRisk ? "security review required" : "visible-case readiness preview"
       }.`
     );
   }
@@ -257,12 +277,66 @@ export default function CandidateAssessmentsPage() {
     if (!selected) {
       return;
     }
-    if (FINAL_STATUSES.has(selected.status)) {
-      setMessage("Employer decision is already locked for this challenge.");
+    if (isSubmissionLocked) {
+      setMessage("This assessment is already submitted and locked for employer review.");
       return;
     }
     if (code.trim().length < 40) {
       setMessage("Add a meaningful implementation before submitting for review.");
+      return;
+    }
+    if (!isUuid(selected.id)) {
+      const previewRun = buildPreviewRun(selected, code, integrityCounters);
+      const finalScore = Math.round((previewRun.visiblePassed / Math.max(1, previewRun.visibleTotal)) * selected.maxScore);
+      const submittedAt = new Date().toISOString();
+      const updated: CodeAssessment = {
+        ...selected,
+        status: "SUBMITTED",
+        latestScore: finalScore,
+        submittedCode: code,
+        submittedCodePreview: code.slice(0, 180),
+        hasSubmittedCode: true,
+        latestRun: previewRun,
+        attemptNumber: (selected.attemptNumber ?? 0) + 1,
+        submittedAt
+      };
+      setAssessments((current) => current.map((item) => (item.id === selected.id ? updated : item)));
+      setLatestRun(previewRun);
+      setAnalysisResults(previewRun.results.map((result) => ({
+        label: result.name,
+        detail: runtimeResultDetail(result),
+        matched: result.passed,
+        verdict: result.verdict,
+        output: result.output,
+        stdout: result.stdout,
+        stderr: result.stderr,
+        compileOutput: result.compileOutput,
+        error: result.error,
+        executionTimeMs: result.executionTimeMs,
+        memoryKb: result.memoryKb
+      })));
+      setSubmissionAttempts((current) => [{
+        id: `${selected.id}-attempt-${updated.attemptNumber}`,
+        assignmentId: selected.id,
+        language,
+        finalScore,
+        decision: finalScore >= 75 ? "HOLD" : undefined,
+        rubric: updated.rubric,
+        riskFlags: updated.riskFlags,
+        feedback: updated.feedback,
+        attemptNumber: updated.attemptNumber,
+        submittedCodePreview: updated.submittedCodePreview,
+        hasSubmittedCode: true,
+        verdict: previewRun.verdict,
+        visiblePassed: previewRun.visiblePassed,
+        visibleTotal: previewRun.visibleTotal,
+        hiddenPassed: 0,
+        hiddenTotal: 0,
+        executionTimeMs: previewRun.executionTimeMs,
+        memoryKb: previewRun.memoryKb,
+        submittedAt
+      }, ...current]);
+      setMessage(`Server-side grading complete: preview score ${finalScore}/${selected.maxScore}; hidden tests remain redacted in candidate view.`);
       return;
     }
     try {
@@ -278,7 +352,12 @@ export default function CandidateAssessmentsPage() {
       );
       setAssessments((current) => current.map((item) => (item.id === updated.id ? updated : item)));
       setLatestRun(updated.latestRun);
-      setMessage(`Server-side grading complete: rubric score ${updated.latestScore ?? 0}/${updated.maxScore}; hidden tests were scored server-side.`);
+      if (isUuid(updated.id)) {
+        api.candidateCodeAssessmentSubmissions(updated.id)
+          .then(setSubmissionAttempts)
+          .catch(() => setSubmissionAttempts([]));
+      }
+      setMessage(`Server-side grading complete: rubric score ${updated.latestScore ?? 0}/${updated.maxScore}; hidden tests were scored server-side by the runtime judge.`);
     } catch (ex) {
       setMessage(ex instanceof Error && ex.message !== "Failed to fetch"
         ? ex.message
@@ -310,7 +389,7 @@ export default function CandidateAssessmentsPage() {
           <span className="assessment-brand">DevHire Cloud</span>
           <span className="assessment-divider" aria-hidden="true" />
           <h1>{selected.challengeTitle}</h1>
-          <span className="assessment-language">{language} / Spring Boot</span>
+          <span className="assessment-language">{language}</span>
         </div>
         <div className="assessment-top-actions">
           <div className="assessment-timer" aria-label="Assessment time remaining">
@@ -331,7 +410,7 @@ export default function CandidateAssessmentsPage() {
             type="button"
             aria-label="Submit for rubric score"
             onClick={submitCode}
-            disabled={submitting || FINAL_STATUSES.has(selected.status)}
+            disabled={submitting || isSubmissionLocked}
           >
             <Upload size={20} />
             {submitting ? "Scoring" : "Submit Code"}
@@ -344,30 +423,27 @@ export default function CandidateAssessmentsPage() {
           <div className="assessment-file-tabs" role="tablist" aria-label="Assessment files">
             <button className="assessment-file-tab active" type="button" role="tab" aria-selected="true">
               <Code2 size={18} />
-              CloudServiceApplication.java
+              {solutionFileName(selected)}
               <X size={15} />
             </button>
             <button className="assessment-file-tab" type="button" role="tab" aria-selected="false">
-              <Code2 size={18} />
-              ResourceController.java
+              <ListChecks size={18} />
+              VisibleCases.json
             </button>
             <button className="assessment-file-tab" type="button" role="tab" aria-selected="false">
               <FileText size={18} />
-              application.yml
+              Notes.md
             </button>
           </div>
 
           <div className="assessment-editor-body">
-            <div className="assessment-line-numbers" aria-hidden="true">
-              {lineNumbers.map((line) => <span key={line}>{line}</span>)}
-            </div>
-            <textarea
-              className="assessment-code-input"
-              aria-label="Candidate code submission"
+            <CandidateCodeEditor
               value={code}
-              onChange={(event) => setCode(event.target.value)}
-              placeholder="Write the solution, edge-case handling, and assertion evidence here."
-              spellCheck={false}
+              language={language}
+              disabled={isSubmissionLocked}
+              placeholder="Implement class CandidateSolution with String solve(String input)."
+              lineNumbers={lineNumbers}
+              onChange={setCode}
             />
           </div>
 
@@ -378,9 +454,9 @@ export default function CandidateAssessmentsPage() {
               <span>PROBLEMS</span>
             </div>
             <div className="assessment-terminal-output" aria-live="polite">
-              <p><span>devhire@cloud</span>:<strong>~/project</strong>$ ./mvnw clean test</p>
-              <p>[INFO] Scanning for projects...</p>
-              <p>[INFO] Building DevHire Cloud Service 1.0.0</p>
+              <p><span>devhire@judge</span>:<strong>~/assessment</strong>$ run visible-cases CandidateSolution.java</p>
+              <p>[INFO] Compiling candidate solve contract</p>
+              <p>[INFO] Running stdout comparison with normalized line endings</p>
               {analysisMessage ? <p className="terminal-success">{analysisMessage}</p> : null}
               {message ? <p className="terminal-success">{message}</p> : null}
               {loadingDetail ? <p>[INFO] Syncing owner-only assessment detail...</p> : null}
@@ -397,21 +473,21 @@ export default function CandidateAssessmentsPage() {
             <button type="button" role="tab" aria-selected="false">
               <ListChecks size={20} />
               Test Cases
-              <span>{visibleCases.length + 2}</span>
+              <span>{visibleCases.length}</span>
             </button>
           </div>
 
           <div className="assessment-side-content">
             <section className="assessment-instruction-block">
-              <h2>Task 1: Resource Validation Bean</h2>
+              <h2>Task 1: {selected.challengeTitle}</h2>
               <div className="assessment-task-meta">
                 <span>{difficultyLabel(selected)}</span>
                 <span>{selected.language}</span>
                 <span>Due {formatDate(selected.dueAt)}</span>
               </div>
               <p>
-                In this scenario, implement a custom <code>ResourceValidator</code> bean in the main application class.
-                The default validator must enforce the security policies required for enterprise deployments.
+                In this scenario, implement <code>CandidateSolution.solve(String input)</code> so the runtime judge can execute
+                visible examples and server-side hidden cases with strict resource validation.
               </p>
               <p>{selected.prompt}</p>
               <div className="assessment-requirements">
@@ -420,9 +496,9 @@ export default function CandidateAssessmentsPage() {
                   Requirements
                 </h3>
                 <ul>
-                  <li>Define the bean using the <code>@Bean</code> annotation.</li>
-                  <li>Initialize it with <code>EnterpriseSecurityPolicy.STRICT</code>.</li>
-                  <li>Ensure it only validates resources tagged with <code>production</code>.</li>
+                  {challengeRequirements(selected).map((requirement) => (
+                    <li key={requirement}>{requirement}</li>
+                  ))}
                 </ul>
               </div>
               <div className="assessment-targets">
@@ -443,30 +519,45 @@ export default function CandidateAssessmentsPage() {
 
             <section className="assessment-instruction-block">
               <h3>Example Output</h3>
-              <pre className="assessment-example-output">{`[INFO] Validating Resource: res-9982
-[DEBUG] Policy: STRICT applied.
-[INFO] Validation Status: PASSED`}</pre>
+              <pre className="assessment-example-output">{exampleOutputBlock(examples[0])}</pre>
             </section>
 
             <section className="assessment-test-panel">
               <div className="assessment-panel-heading">
                 <h2>Test Results</h2>
-                <button className="assessment-link-button" type="button" onClick={runStaticAnalysis} disabled={running}>
+                <button className="assessment-link-button" type="button" onClick={runStaticAnalysis} disabled={running || isSubmissionLocked}>
                   <PlayCircle size={16} />
-                  {running ? "Running Tests" : "Run Tests"}
+                  {isSubmissionLocked ? "Decision Locked" : running ? "Running Tests" : customInput.trim() ? "Run Custom Input" : "Run Tests"}
                 </button>
               </div>
+              <label className="assessment-custom-input">
+                Custom stdin
+                <textarea
+                  aria-label="Custom stdin"
+                  value={customInput}
+                  onChange={(event) => setCustomInput(event.target.value)}
+                  placeholder="Optional. Leave blank to run visible test cases."
+                  disabled={isSubmissionLocked}
+                />
+              </label>
               <div className="assessment-test-list" aria-label="Static judge case results">
-                {testResultRows.slice(0, 3).map((result, index) => (
-                  <div className={`assessment-test-row ${result.matched ? "passed" : index === 1 ? "failed" : "pending"}`} key={result.label}>
+                {testResultRows.map((result) => (
+                  <div className={`assessment-test-row ${result.matched ? "passed" : result.verdict ? "failed" : "pending"}`} key={result.label}>
                     <span>
-                      {result.matched ? <CheckCircle2 size={20} /> : index === 1 ? <CircleX size={20} /> : <Hourglass size={20} />}
+                      {result.matched ? <CheckCircle2 size={20} /> : result.verdict ? <CircleX size={20} /> : <Hourglass size={20} />}
                       <strong>{result.label}</strong>
                     </span>
-                    <em>{result.matched ? "Passed" : index === 1 ? "Failed" : "Pending"}</em>
+                    <em>{result.matched ? "Accepted" : result.verdict ? formatVerdict(result.verdict) : "Pending"}</em>
+                    <small>{result.detail}</small>
                   </div>
                 ))}
               </div>
+              {selectedRun ? (
+                <div className="assessment-runner-footnote">
+                  <span>Runner {selectedRun.runnerVersion ?? "devhire-runtime-v0.7"}</span>
+                  <span>Limit {selectedRun.timeLimitMs} ms / {Math.round(selectedRun.memoryLimitKb / 1024)} MB</span>
+                </div>
+              ) : null}
             </section>
 
             <section className="assessment-meta-grid">
@@ -528,11 +619,11 @@ export default function CandidateAssessmentsPage() {
                 className="assessment-secondary-submit"
                 type="button"
                 onClick={submitCode}
-                disabled={submitting || FINAL_STATUSES.has(selected.status)}
+                disabled={submitting || isSubmissionLocked}
               >
-                {FINAL_STATUSES.has(selected.status)
+                {isFinalDecision
                   ? "Employer decision locked"
-                  : submitting ? "Scoring" : "Send rubric evidence"}
+                  : isSubmissionLocked ? "Submission locked" : submitting ? "Scoring" : "Send rubric evidence"}
               </button>
             </section>
 
@@ -542,6 +633,16 @@ export default function CandidateAssessmentsPage() {
                 <SquareTerminal size={18} />
               </div>
               <div className="assessment-history-list">
+                {submissionAttempts.map((attempt) => (
+                  <div key={attempt.id}>
+                    <span className="done" />
+                    <strong>Attempt {attempt.attemptNumber ?? "?"} - {formatVerdict(attempt.verdict)}</strong>
+                    <small>
+                      Score {attempt.finalScore ?? 0}/{selected.maxScore}; visible {attempt.visiblePassed}/{attempt.visibleTotal}; hidden results redacted for candidate view.
+                    </small>
+                    <em>{attempt.submittedAt ? formatDate(attempt.submittedAt) : "Submitted"}</em>
+                  </div>
+                ))}
                 {submissionHistory(selected).map((event) => (
                   <div key={event.title}>
                     <span className={event.completed ? "done" : ""} />
@@ -583,7 +684,7 @@ function emptyRubric() {
     { category: "Maintainability and readability", score: 0, maxScore: 20, evidence: "Waiting for candidate submission." },
     { category: "Complexity and performance", score: 0, maxScore: 15, evidence: "Waiting for candidate submission." },
     { category: "Security posture", score: 0, maxScore: 15, evidence: "Waiting for candidate submission." },
-    { category: "Test and evidence quality", score: 0, maxScore: 10, evidence: "Waiting for candidate submission." }
+    { category: "Input parsing and edge cases", score: 0, maxScore: 10, evidence: "Waiting for candidate submission." }
   ];
 }
 
@@ -596,6 +697,114 @@ function visibleJudgeCases(item: CodeAssessment) {
     }));
   }
   return assessmentEvidenceCases(item);
+}
+
+function preferredCodeAssessment(items: CodeAssessment[]) {
+  const flagship = items.find((item) => item.challengeTitle.toLowerCase().includes("cloud architecture"));
+  const runnableJava = items.find((item) => item.language.toLowerCase() === "java" && !LOCKED_STATUSES.has(item.status));
+  const runnableAny = items.find((item) => !LOCKED_STATUSES.has(item.status));
+  return flagship ?? runnableJava ?? runnableAny ?? items[0];
+}
+
+function buildPreviewRun(item: CodeAssessment, code: string, counters: IntegrityCounters): CodeRun {
+  const startedAt = Date.now();
+  const cases = visibleJudgeCases(item);
+  const results: CodeRunCaseResult[] = cases.map((testCase, index) => {
+    const passed = testCase.matched(code);
+    return {
+      caseId: item.visibleTestCases?.[index]?.id ?? `${item.id}-visible-${index + 1}`,
+      name: testCase.label,
+      visibility: "VISIBLE",
+      passed,
+      verdict: passed ? "ACCEPTED" : "WRONG_ANSWER",
+      output: passed ? "preview accepted" : "preview mismatch",
+      stdout: passed ? "preview accepted" : "",
+      stderr: passed ? "" : "Visible-case preview did not match the expected signal.",
+      executionTimeMs: 42 + index * 9,
+      memoryKb: 18_432,
+      timeLimitMs: 2_000,
+      memoryLimitKb: 131_072
+    };
+  });
+  const visiblePassed = results.filter((result) => result.passed).length;
+  return {
+    id: `${item.id}-preview-run-${startedAt}`,
+    status: "COMPLETED",
+    sandboxStatus: "deterministic-preview",
+    verdict: visiblePassed === results.length ? "ACCEPTED" : "WRONG_ANSWER",
+    visiblePassed,
+    visibleTotal: results.length,
+    hiddenPassed: 0,
+    hiddenTotal: 0,
+    executionTimeMs: results.reduce((total, result) => total + result.executionTimeMs, 0),
+    memoryKb: Math.max(...results.map((result) => result.memoryKb), 0),
+    timeLimitMs: 2_000,
+    memoryLimitKb: 131_072,
+    runnerVersion: "deterministic-preview",
+    integrityRiskScore: counters.focusLoss * 3 + counters.pasteBurst * 5 + counters.tabHidden * 2,
+    similarityScore: 0,
+    results,
+    createdAt: new Date(startedAt).toISOString(),
+    completedAt: new Date().toISOString()
+  };
+}
+
+function solutionFileName(item: CodeAssessment) {
+  if (item.language.toLowerCase() === "sql") {
+    return "solution.sql";
+  }
+  if (item.language.toLowerCase() === "typescript") {
+    return "solution.ts";
+  }
+  return "CandidateSolution.java";
+}
+
+function challengeRequirements(item: CodeAssessment) {
+  if (item.language.toLowerCase() === "sql") {
+    return [
+      "Scope rows to the employer before aggregating.",
+      "Return deterministic status counts.",
+      "Keep the query bounded and index-aware."
+    ];
+  }
+  if (item.challengeTitle.toLowerCase().includes("cloud architecture")) {
+    return [
+      "Return PASSED only for production-tagged resources.",
+      "Use EnterpriseSecurityPolicy.STRICT in the validator boundary.",
+      "Keep network, filesystem, and process execution out of the solution."
+    ];
+  }
+  return [
+    "Implement the required solve contract for the assigned language.",
+    "Handle visible examples and hidden edge cases deterministically.",
+    "Keep unsafe runtime boundaries out of the solution."
+  ];
+}
+
+function exampleOutputBlock(example?: ChallengeExample) {
+  if (!example) {
+    return "stdin: <pending>\nstdout: <pending>\nverdict: PENDING";
+  }
+  return `stdin: ${example.input}
+stdout: ${example.output}
+verdict: ACCEPTED`;
+}
+
+function runtimeResultDetail(result: CodeRunCaseResult) {
+  const signal = result.error ?? result.compileOutput ?? result.stderr ?? result.stdout ?? result.output;
+  const limits = `${result.executionTimeMs} ms / ${Math.round(result.memoryKb / 1024)} MB`;
+  return signal ? `${formatVerdict(result.verdict)} - ${signal} (${limits})` : `${formatVerdict(result.verdict)} - ${limits}`;
+}
+
+function formatVerdict(value?: string) {
+  if (!value) {
+    return "Pending";
+  }
+  const normalized = value.trim().toUpperCase();
+  if (!normalized || normalized === "UNKNOWN") {
+    return "Needs Review";
+  }
+  return normalized.replaceAll("_", " ").toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
 function integrityEvents(counters: IntegrityCounters): CodeIntegrityEvent[] {
@@ -649,7 +858,7 @@ function assessmentEvidenceCases(item: CodeAssessment) {
   }
   if (item.challengeTitle.toLowerCase().includes("cloud architecture")) {
     return [
-      { label: "Bean Initialization", detail: "Defines ResourceValidator as a Spring bean.", matched: (code: string) => /@bean[\s\S]*resourcevalidator/i.test(code) },
+      { label: "Runtime solve contract", detail: "Defines CandidateSolution.solve for the judge harness.", matched: (code: string) => /class\s+CandidateSolution[\s\S]*solve\s*\(\s*String\s+input/i.test(code) },
       { label: "Policy Enforcement", detail: "Applies EnterpriseSecurityPolicy.STRICT.", matched: (code: string) => /enterprisesecuritypolicy\.strict/i.test(code) },
       { label: "Tag Filtering", detail: "Restricts validation to production resources.", matched: (code: string) => /production/i.test(code) }
     ];
@@ -664,7 +873,7 @@ function assessmentEvidenceCases(item: CodeAssessment) {
   return [
     { label: "Transaction or batch boundary", detail: "Protects publish state with an atomic batch boundary.", matched: (code: string) => /transaction|batch/i.test(code) },
     { label: "Retry and max attempt handling", detail: "Handles bounded retry and poison-message safety.", matched: (code: string) => /retry|maxattempt/i.test(code) },
-    { label: "Assertion-style test evidence", detail: "Includes executable-style assertions or test annotations.", matched: (code: string) => /@test|assert|expect\(/i.test(code) }
+    { label: "Solve output contract", detail: "Returns a deterministic stdout value from solve(String input).", matched: (code: string) => /return\s+[\s\S]*;/i.test(code) }
   ];
 }
 
@@ -689,15 +898,15 @@ function challengeExamples(item: CodeAssessment): ChallengeExample[] {
     return [
       {
         title: "Example 1",
-        input: "Resource res-9982 tagged production",
-        output: "Validation Status: PASSED",
-        explanation: "The validator applies strict policy to production resources."
+        input: "resource=res-9982;policy=STRICT;tag=production",
+        output: "PASSED",
+        explanation: "Production resources pass the strict validation boundary."
       },
       {
         title: "Example 2",
-        input: "Resource tagged staging",
-        output: "Skipped by production filter",
-        explanation: "Non-production resources must not be scored by this task."
+        input: "resource=res-4411;policy=STRICT;tag=staging",
+        output: "REJECTED",
+        explanation: "Non-production resources are rejected by the same runtime contract."
       }
     ];
   }
@@ -738,12 +947,12 @@ function complexityTargets(item: CodeAssessment) {
     return ["Expected: indexed WHERE + GROUP BY", "Watch: tenant isolation", "Evidence: bounded result set"];
   }
   if (item.challengeTitle.toLowerCase().includes("cloud architecture")) {
-    return ["Expected: @Bean ResourceValidator", "Watch: strict policy enforcement", "Evidence: production tag assertion"];
+    return ["Expected: CandidateSolution.solve", "Watch: strict policy enforcement", "Evidence: visible stdout cases"];
   }
   if (item.challengeTitle.toLowerCase().includes("search")) {
     return ["Expected: adapter failover", "Watch: private result leakage", "Evidence: published-only test"];
   }
-  return ["Expected: O(n) batch pass", "Watch: duplicate publish risk", "Evidence: retry and assertion coverage"];
+  return ["Expected: O(n) batch pass", "Watch: duplicate publish risk", "Evidence: visible stdout cases"];
 }
 
 function difficultyLabel(item: CodeAssessment) {
@@ -789,16 +998,16 @@ function submissionHistory(item: CodeAssessment) {
       title: "Candidate submission",
       description: submitted
         ? `Submitted ${formatDate(item.submittedAt ?? item.assignedAt)} with ${item.language} evidence.`
-        : `Due ${formatDate(item.dueAt)} with code, notes, and test evidence.`,
+        : `Due ${formatDate(item.dueAt)} with code, notes, and visible-case evidence.`,
       status: submitted ? "SUBMITTED" : "SCHEDULED",
       completed: submitted
     },
     {
       title: "Rubric review",
       description: item.latestScore == null
-        ? "Deterministic rubric is generated after submission."
-        : `Latest rubric score ${item.latestScore}/${item.maxScore} across correctness, maintainability, security, and tests.`,
-      status: item.latestScore == null ? "PENDING" : "AUTO_REVIEWED",
+        ? "Runtime rubric is generated after submission."
+        : `Latest rubric score ${item.latestScore}/${item.maxScore} across correctness, maintainability, security, and input handling.`,
+      status: item.latestScore == null ? "PENDING" : "REVIEWED",
       completed: item.latestScore != null
     },
     {
@@ -806,7 +1015,7 @@ function submissionHistory(item: CodeAssessment) {
       description: finalized
         ? `Employer decision recorded as ${statusLabel(item.status).toLowerCase()}.`
         : "Employer review queue will decide advance, hold, or reject after rubric review.",
-      status: finalized ? item.status : "REVIEW_QUEUE",
+      status: finalized ? item.status : "REVIEWING",
       completed: finalized
     }
   ];
