@@ -1,0 +1,33 @@
+services:
+  frontend:
+    image: docker.io/${DOCKERHUB_NAMESPACE:-nguyenson1710}/devhire-cloud-frontend:${IMAGE_TAG:?set IMAGE_TAG}
+
+  api-gateway:
+    image: docker.io/${DOCKERHUB_NAMESPACE:-nguyenson1710}/devhire-cloud-api-gateway:${IMAGE_TAG:?set IMAGE_TAG}
+
+  auth-service:
+    image: docker.io/${DOCKERHUB_NAMESPACE:-nguyenson1710}/devhire-cloud-auth-service:${IMAGE_TAG:?set IMAGE_TAG}
+
+  user-service:
+    image: docker.io/${DOCKERHUB_NAMESPACE:-nguyenson1710}/devhire-cloud-user-service:${IMAGE_TAG:?set IMAGE_TAG}
+
+  company-service:
+    image: docker.io/${DOCKERHUB_NAMESPACE:-nguyenson1710}/devhire-cloud-company-service:${IMAGE_TAG:?set IMAGE_TAG}
+
+  job-service:
+    image: docker.io/${DOCKERHUB_NAMESPACE:-nguyenson1710}/devhire-cloud-job-service:${IMAGE_TAG:?set IMAGE_TAG}
+
+  application-service:
+    image: docker.io/${DOCKERHUB_NAMESPACE:-nguyenson1710}/devhire-cloud-application-service:${IMAGE_TAG:?set IMAGE_TAG}
+
+  notification-service:
+    image: docker.io/${DOCKERHUB_NAMESPACE:-nguyenson1710}/devhire-cloud-notification-service:${IMAGE_TAG:?set IMAGE_TAG}
+
+  audit-service:
+    image: docker.io/${DOCKERHUB_NAMESPACE:-nguyenson1710}/devhire-cloud-audit-service:${IMAGE_TAG:?set IMAGE_TAG}
+
+  ai-service:
+    image: docker.io/${DOCKERHUB_NAMESPACE:-nguyenson1710}/devhire-cloud-ai-service:${IMAGE_TAG:?set IMAGE_TAG}
+
+  assessment-runner-service:
+    image: docker.io/${DOCKERHUB_NAMESPACE:-nguyenson1710}/devhire-cloud-assessment-runner-service:${IMAGE_TAG:?set IMAGE_TAG}

@@ -12,21 +12,21 @@
       "type": "bargauge",
       "title": "Applications By Status",
       "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
-      "targets": [{"expr": "devhire_applications_total", "legendFormat": "{{status}}"}]
+      "targets": [{"expr": "devhire_applications", "legendFormat": "{{status}}"}]
     },
     {
       "id": 2,
       "type": "bargauge",
       "title": "Application Status Transitions",
       "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
-      "targets": [{"expr": "devhire_application_status_transitions_total > 0", "legendFormat": "{{from}} -> {{to}}"}]
+      "targets": [{"expr": "devhire_application_status_transitions > 0", "legendFormat": "{{from}} -> {{to}}"}]
     },
     {
       "id": 3,
       "type": "bargauge",
       "title": "Notifications By Type / Read",
       "gridPos": {"h": 8, "w": 24, "x": 0, "y": 8},
-      "targets": [{"expr": "devhire_notifications_total", "legendFormat": "{{type}} read={{read}}"}]
+      "targets": [{"expr": "devhire_notifications", "legendFormat": "{{type}} read={{read}}"}]
     }
   ]
 }

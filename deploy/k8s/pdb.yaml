@@ -127,3 +127,16 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: ai-service
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: assessment-runner-service
+  labels:
+    app.kubernetes.io/name: assessment-runner-service
+    app.kubernetes.io/part-of: devhire-cloud
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: assessment-runner-service

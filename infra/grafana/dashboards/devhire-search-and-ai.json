@@ -26,7 +26,7 @@
       "type": "stat",
       "title": "AI Conversations / Usage Events",
       "gridPos": {"h": 6, "w": 8, "x": 0, "y": 8},
-      "targets": [{"expr": "devhire_ai_conversations_total", "legendFormat": "conversations"}, {"expr": "devhire_ai_usage_events_total", "legendFormat": "usage events"}]
+      "targets": [{"expr": "devhire_ai_conversations", "legendFormat": "conversations"}, {"expr": "devhire_ai_usage_events", "legendFormat": "usage events"}]
     },
     {
       "id": 4,

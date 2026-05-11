@@ -39,14 +39,25 @@ services:
       - /bin/sh
       - -ec
       - |
+        until psql -h postgres -U "$$POSTGRES_USER" -d postgres -tAc "SELECT 1" >/dev/null 2>&1; do
+          echo "Waiting for postgres bootstrap database"
+          sleep 2
+        done
         for db in $$DEVHIRE_DATABASES; do
           case "$$db" in
             devhire_*) ;;
             *) echo "Refusing unexpected database name: $$db" >&2; exit 1 ;;
           esac
-          if ! psql -h postgres -U "$$POSTGRES_USER" -d "$$POSTGRES_DB" -tAc "SELECT 1 FROM pg_database WHERE datname = '$$db'" | grep -q 1; then
+          if ! psql -h postgres -U "$$POSTGRES_USER" -d postgres -tAc "SELECT 1 FROM pg_database WHERE datname = '$$db'" | grep -q 1; then
             echo "Creating database $$db"
-            psql -h postgres -U "$$POSTGRES_USER" -d "$$POSTGRES_DB" -c "CREATE DATABASE \"$$db\""
+            create_output=$$(psql -h postgres -U "$$POSTGRES_USER" -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE \"$$db\"" 2>&1) || {
+              if echo "$$create_output" | grep -qi "already exists"; then
+                echo "Database $$db already exists"
+              else
+                echo "$$create_output" >&2
+                exit 1
+              fi
+            }
           else
             echo "Database $$db already exists"
           fi
@@ -546,17 +557,44 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-docker}
       OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://otel-collector:4318}
+      DEVHIRE_RUNNER_MODE: ${DEVHIRE_RUNNER_MODE:-deterministic}
+      JUDGE0_BASE_URL: ${JUDGE0_BASE_URL:-http://judge0-runtime:2358}
+      JUDGE0_AUTH_TOKEN: ${JUDGE0_AUTH_TOKEN:-}
       DEVHIRE_RUNNER_NETWORK_DISABLED: "true"
-      DEVHIRE_RUNNER_MAX_CPU_MILLIS: "2000"
-      DEVHIRE_RUNNER_MAX_MEMORY_KB: "131072"
+      DEVHIRE_RUNNER_DEFAULT_TIME_LIMIT_MS: ${DEVHIRE_RUNNER_DEFAULT_TIME_LIMIT_MS:-2000}
+      DEVHIRE_RUNNER_DEFAULT_MEMORY_KB: ${DEVHIRE_RUNNER_DEFAULT_MEMORY_KB:-131072}
+      DEVHIRE_RUNNER_MAX_OUTPUT_BYTES: ${DEVHIRE_RUNNER_MAX_OUTPUT_BYTES:-12000}
+      DEVHIRE_RUNNER_CONNECT_TIMEOUT_MS: ${DEVHIRE_RUNNER_CONNECT_TIMEOUT_MS:-2000}
+      DEVHIRE_RUNNER_READ_TIMEOUT_MS: ${DEVHIRE_RUNNER_READ_TIMEOUT_MS:-10000}
+      DEVHIRE_RUNNER_POLL_INTERVAL_MS: ${DEVHIRE_RUNNER_POLL_INTERVAL_MS:-250}
+      DEVHIRE_RUNNER_POLL_MAX_ATTEMPTS: ${DEVHIRE_RUNNER_POLL_MAX_ATTEMPTS:-20}
+      DEVHIRE_RUNNER_VERSION: devhire-runtime-v0.7
       DEVHIRE_GATEWAY_INTERNAL_TOKEN: ${DEVHIRE_GATEWAY_INTERNAL_TOKEN:-devhire-local-gateway-boundary-token}
     expose:
       - "8089"
+    ports:
+      - "${ASSESSMENT_RUNNER_HOST_PORT:-8089}:8089"
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:8089/actuator/health/readiness | grep UP"]
       interval: 15s
       timeout: 5s
       retries: 20
+    networks:
+      - devhire
+
+  judge0-runtime:
+    image: judge0/judge0:1.13.1
+    profiles:
+      - judge0
+    environment:
+      ENABLE_WAIT_RESULT: "false"
+      ENABLE_COMPILER_OPTIONS: "false"
+      ENABLE_COMMAND_LINE_ARGUMENTS: "false"
+      ENABLE_NETWORK: "false"
+      MAX_CPU_TIME_LIMIT: ${JUDGE0_MAX_CPU_TIME_LIMIT:-2}
+      MAX_MEMORY_LIMIT: ${DEVHIRE_RUNNER_DEFAULT_MEMORY_KB:-131072}
+    expose:
+      - "2358"
     networks:
       - devhire
 
