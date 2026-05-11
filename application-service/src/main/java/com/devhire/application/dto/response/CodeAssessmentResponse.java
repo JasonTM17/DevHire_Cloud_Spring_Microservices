@@ -10,6 +10,7 @@ public record CodeAssessmentResponse(
         String candidateName,
         String jobTitle,
         String challengeTitle,
+        int challengeVersion,
         String level,
         String language,
         String prompt,

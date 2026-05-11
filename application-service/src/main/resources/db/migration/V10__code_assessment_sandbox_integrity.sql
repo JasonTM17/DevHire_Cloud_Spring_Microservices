@@ -86,11 +86,11 @@ VALUES
     ('55000000-0000-0000-0001-000000000001', '52000000-0000-0000-0001-000000000001', 'Visible batch boundary', 'VISIBLE', '3 pending outbox events', 'transaction,batch', 15, 1),
     ('55000000-0000-0000-0001-000000000002', '52000000-0000-0000-0001-000000000001', 'Visible retry cap', 'VISIBLE', 'poison event at max attempts', 'retry,maxAttempts,lastError', 15, 2),
     ('55000000-0000-0000-0001-000000000003', '52000000-0000-0000-0001-000000000001', 'Hidden idempotent publish state', 'HIDDEN', 'duplicate publish replay', 'publishedAt,idempotent', 30, 3),
-    ('55000000-0000-0000-0001-000000000004', '52000000-0000-0000-0001-000000000001', 'Hidden assertion evidence', 'HIDDEN', 'reviewer edge case', '@Test,assert', 20, 4),
+    ('55000000-0000-0000-0001-000000000004', '52000000-0000-0000-0001-000000000001', 'Hidden executable evidence', 'HIDDEN', 'reviewer edge case', 'PASSED', 20, 4),
     ('55000000-0000-0000-0001-000000000005', '52000000-0000-0000-0001-000000000002', 'Visible tenant scope', 'VISIBLE', 'employer scoped rows', 'employer_id,where', 20, 1),
     ('55000000-0000-0000-0001-000000000006', '52000000-0000-0000-0001-000000000002', 'Visible grouped status', 'VISIBLE', 'status funnel', 'GROUP BY,status,count', 20, 2),
     ('55000000-0000-0000-0001-000000000007', '52000000-0000-0000-0001-000000000002', 'Hidden bounded scan', 'HIDDEN', 'large employer history', 'LIMIT,index', 30, 3),
     ('55000000-0000-0000-0001-000000000008', '52000000-0000-0000-0001-000000000003', 'Visible OpenSearch adapter', 'VISIBLE', 'primary search dependency', 'OpenSearch,search', 20, 1),
     ('55000000-0000-0000-0001-000000000009', '52000000-0000-0000-0001-000000000003', 'Visible Postgres recovery', 'VISIBLE', 'dependency outage', 'PostgreSQL,recovery', 20, 2),
-    ('55000000-0000-0000-0001-000000000010', '52000000-0000-0000-0001-000000000003', 'Hidden published-only guard', 'HIDDEN', 'private job leak attempt', 'published,@Test,assert', 30, 3)
+    ('55000000-0000-0000-0001-000000000010', '52000000-0000-0000-0001-000000000003', 'Hidden published-only guard', 'HIDDEN', 'private job leak attempt', 'published,executable-evidence', 30, 3)
 ON CONFLICT (id) DO NOTHING;

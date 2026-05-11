@@ -1,11 +1,11 @@
 UPDATE code_challenges
 SET slug = 'cloud-architecture-challenge',
     title = 'Cloud Architecture Challenge',
-    prompt = 'Implement a custom ResourceValidator bean in the main Spring Boot application class.',
-    constraints_text = 'Use @Bean, apply EnterpriseSecurityPolicy.STRICT, and validate production-tagged resources only.',
-    starter_code = E'package com.devhire.cloud;\n\nimport org.springframework.boot.SpringApplication;\nimport org.springframework.boot.autoconfigure.SpringBootApplication;\nimport org.springframework.context.annotation.Bean;\n\n@SpringBootApplication\npublic class CloudServiceApplication {\n  public static void main(String[] args) {\n    SpringApplication.run(CloudServiceApplication.class, args);\n  }\n\n  /* TODO: Implement ResourceValidator Bean here */\n  public ResourceValidator resourceValidator() {\n    return new DefaultResourceValidator();\n  }\n}',
-    skills_csv = 'Java,Spring Boot,Bean Validation,Security',
-    required_signals_csv = '@Bean,ResourceValidator,EnterpriseSecurityPolicy.STRICT,production,@Test,assert'
+    prompt = 'Implement CandidateSolution.solve(String input) so it validates production-tagged resources with EnterpriseSecurityPolicy.STRICT and returns PASSED or REJECTED.',
+    constraints_text = 'The runtime harness calls CandidateSolution.solve(String input). Keep network/filesystem/process calls out of the solution. Return exactly PASSED or REJECTED on stdout-equivalent output.',
+    starter_code = E'class CandidateSolution {\n  String solve(String input) {\n    ResourceValidator validator = new ResourceValidator(EnterpriseSecurityPolicy.STRICT, "production");\n    return validator.validate(input) ? "PASSED" : "REJECTED";\n  }\n}\n\nenum EnterpriseSecurityPolicy { STRICT }\n\nclass ResourceValidator {\n  private final EnterpriseSecurityPolicy policy;\n  private final String requiredTag;\n\n  ResourceValidator(EnterpriseSecurityPolicy policy, String requiredTag) {\n    this.policy = policy;\n    this.requiredTag = requiredTag;\n  }\n\n  boolean validate(String input) {\n    return this.policy == EnterpriseSecurityPolicy.STRICT && input != null && input.contains("policy=STRICT") && input.contains("tag=" + this.requiredTag);\n  }\n}',
+    skills_csv = 'Java,Runtime Validation,Security',
+    required_signals_csv = 'CandidateSolution,solve,ResourceValidator,EnterpriseSecurityPolicy.STRICT,production,PASSED,REJECTED'
 WHERE id = '52000000-0000-0000-0001-000000000001';
 
 UPDATE code_assessment_assignments
@@ -60,17 +60,17 @@ SET status = 'ASSIGNED',
     updated_at = now();
 
 UPDATE code_challenge_test_cases
-SET name = 'Bean Initialization',
-    input_text = '@Bean ResourceValidator',
-    expected_output = '@Bean,ResourceValidator',
+SET name = 'Runtime solve contract',
+    input_text = 'resource=res-9982;policy=STRICT;tag=production',
+    expected_output = 'PASSED',
     weight = 15,
     ordinal = 1
 WHERE id = '55000000-0000-0000-0001-000000000001';
 
 UPDATE code_challenge_test_cases
 SET name = 'Policy Enforcement',
-    input_text = 'EnterpriseSecurityPolicy.STRICT',
-    expected_output = 'EnterpriseSecurityPolicy.STRICT,production',
+    input_text = 'resource=res-2211;policy=RELAXED;tag=production',
+    expected_output = 'REJECTED',
     weight = 15,
     ordinal = 2
 WHERE id = '55000000-0000-0000-0001-000000000002';
@@ -78,16 +78,16 @@ WHERE id = '55000000-0000-0000-0001-000000000002';
 UPDATE code_challenge_test_cases
 SET name = 'Tag Filtering',
     visibility = 'VISIBLE',
-    input_text = 'production resources only',
-    expected_output = 'ResourceValidator,production',
+    input_text = 'resource=res-4420;policy=STRICT;tag=staging',
+    expected_output = 'REJECTED',
     weight = 10,
     ordinal = 3
 WHERE id = '55000000-0000-0000-0001-000000000003';
 
 UPDATE code_challenge_test_cases
 SET name = 'Hidden strict policy guard',
-    input_text = 'hidden strict resource validation',
-    expected_output = 'EnterpriseSecurityPolicy.STRICT,@Test,assert',
+    input_text = 'resource=res-hidden-1;policy=STRICT;tag=production',
+    expected_output = 'PASSED',
     weight = 25,
     ordinal = 4
 WHERE id = '55000000-0000-0000-0001-000000000004';
@@ -96,10 +96,10 @@ INSERT INTO code_challenge_test_cases (id, challenge_id, name, visibility, input
 VALUES (
     '55000000-0000-0000-0001-000000000011',
     '52000000-0000-0000-0001-000000000001',
-    'Hidden reviewer evidence',
+    'Hidden malformed resource rejection',
     'HIDDEN',
-    'hidden assertion evidence',
-    '@Test,assert,ResourceValidator',
+    'resource=res-hidden-2;policy=STRICT',
+    'REJECTED',
     20,
     5
 )
@@ -113,13 +113,13 @@ SET name = EXCLUDED.name,
 
 WITH cloud_submission AS (
     SELECT
-        E'package com.devhire.cloud;\n\nimport org.springframework.boot.SpringApplication;\nimport org.springframework.boot.autoconfigure.SpringBootApplication;\nimport org.springframework.context.annotation.Bean;\n\n@SpringBootApplication\npublic class CloudServiceApplication {\n\n  public static void main(String[] args) {\n    SpringApplication.run(CloudServiceApplication.class, args);\n  }\n\n  @Bean\n  public ResourceValidator resourceValidator() {\n    return new ResourceValidator(EnterpriseSecurityPolicy.STRICT, "production");\n  }\n\n  @Test\n  void validatesProductionResourcesWithStrictPolicy() {\n    assert resourceValidator().policy() == EnterpriseSecurityPolicy.STRICT;\n  }\n}'::text AS code_text
+        E'class CandidateSolution {\n  String solve(String input) {\n    ResourceValidator validator = new ResourceValidator(EnterpriseSecurityPolicy.STRICT, "production");\n    return validator.validate(input) ? "PASSED" : "REJECTED";\n  }\n}\n\nenum EnterpriseSecurityPolicy { STRICT }\n\nclass ResourceValidator {\n  private final EnterpriseSecurityPolicy policy;\n  private final String requiredTag;\n\n  ResourceValidator(EnterpriseSecurityPolicy policy, String requiredTag) {\n    this.policy = policy;\n    this.requiredTag = requiredTag;\n  }\n\n  boolean validate(String input) {\n    return this.policy == EnterpriseSecurityPolicy.STRICT && input != null && input.contains("policy=STRICT") && input.contains("tag=" + this.requiredTag);\n  }\n}'::text AS code_text
 )
 UPDATE code_submissions s
 SET code_text = cloud_submission.code_text,
     candidate_notes = 'Submission explains strict production resource validation and reviewer-safe test evidence.',
     code_hash = lpad(md5(cloud_submission.code_text), 64, '0'),
-    feedback = 'Reviewer-safe deterministic rubric indicates the cloud architecture submission is ready for employer review.',
+    feedback = 'Server-side runner evidence and rubric scoring indicate the cloud architecture submission is ready for employer review.',
     risk_flags_csv = '',
     grader_version = 'static-rubric-v1',
     rubric_version = 'devhire-code-rubric-v1'

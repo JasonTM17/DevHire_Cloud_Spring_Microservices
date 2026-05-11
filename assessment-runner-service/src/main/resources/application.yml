@@ -7,10 +7,18 @@ spring:
 
 devhire:
   assessment-runner:
+    mode: ${DEVHIRE_RUNNER_MODE:deterministic}
     judge0-base-url: ${JUDGE0_BASE_URL:}
+    judge0-auth-token: ${JUDGE0_AUTH_TOKEN:}
     network-disabled: ${DEVHIRE_RUNNER_NETWORK_DISABLED:true}
-    max-cpu-millis: ${DEVHIRE_RUNNER_MAX_CPU_MILLIS:2000}
-    max-memory-kb: ${DEVHIRE_RUNNER_MAX_MEMORY_KB:131072}
+    default-time-limit-ms: ${DEVHIRE_RUNNER_DEFAULT_TIME_LIMIT_MS:${DEVHIRE_RUNNER_MAX_CPU_MILLIS:2000}}
+    default-memory-kb: ${DEVHIRE_RUNNER_DEFAULT_MEMORY_KB:${DEVHIRE_RUNNER_MAX_MEMORY_KB:131072}}
+    max-output-bytes: ${DEVHIRE_RUNNER_MAX_OUTPUT_BYTES:12000}
+    connect-timeout-ms: ${DEVHIRE_RUNNER_CONNECT_TIMEOUT_MS:2000}
+    read-timeout-ms: ${DEVHIRE_RUNNER_READ_TIMEOUT_MS:10000}
+    poll-interval-ms: ${DEVHIRE_RUNNER_POLL_INTERVAL_MS:250}
+    poll-max-attempts: ${DEVHIRE_RUNNER_POLL_MAX_ATTEMPTS:20}
+    runner-version: ${DEVHIRE_RUNNER_VERSION:devhire-runtime-v0.7}
 
 management:
   endpoints:

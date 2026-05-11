@@ -3,10 +3,13 @@ package com.devhire.application.controller;
 import com.devhire.application.dto.request.CodeReviewRequest;
 import com.devhire.application.dto.request.CodeRunRequest;
 import com.devhire.application.dto.request.CodeSubmissionRequest;
+import com.devhire.application.dto.request.AssignCodeAssessmentRequest;
 import com.devhire.application.dto.response.CodeAssessmentResponse;
 import com.devhire.application.dto.response.CodeAssessmentSummaryResponse;
+import com.devhire.application.dto.response.CodeChallengeResponse;
 import com.devhire.application.dto.response.CodeRunCaseResultResponse;
 import com.devhire.application.dto.response.CodeRunResponse;
+import com.devhire.application.dto.response.CodeSubmissionSummaryResponse;
 import com.devhire.application.dto.response.CodeTestCaseResponse;
 import com.devhire.application.dto.response.RubricScoreResponse;
 import com.devhire.application.dto.response.StatusCountResponse;
@@ -50,6 +53,7 @@ class CodeAssessmentControllerTest {
         when(service.submit(any(), eq(assignmentId), any())).thenReturn(response(assignmentId, "AUTO_REVIEWED"));
         when(service.runVisibleCases(any(), eq(assignmentId), any())).thenReturn(run(runId));
         when(service.runStatus(any(), eq(assignmentId), eq(runId))).thenReturn(run(runId));
+        when(service.candidateSubmissions(any(), eq(assignmentId))).thenReturn(List.of(submission(assignmentId, 0)));
 
         mockMvc.perform(candidateGet("/candidate/code-assessments"))
                 .andExpect(status().isOk())
@@ -79,6 +83,11 @@ class CodeAssessmentControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.id", is(runId.toString())));
 
+        mockMvc.perform(candidateGet("/candidate/code-assessments/%s/submissions".formatted(assignmentId)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].attemptNumber", is(1)))
+                .andExpect(jsonPath("$.data[0].hiddenTotal", is(0)));
+
         mockMvc.perform(post("/candidate/code-assessments/{id}/submissions", assignmentId)
                         .headers(candidateHeaders())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -93,18 +102,34 @@ class CodeAssessmentControllerTest {
     @Test
     void employerCanReviewSubmissionAndAdminCanReadSummary() throws Exception {
         UUID assignmentId = UUID.randomUUID();
+        UUID applicationId = UUID.randomUUID();
+        when(service.assignToApplication(any(), eq(applicationId), any())).thenReturn(response(assignmentId, "ASSIGNED"));
+        when(service.employerSubmissions(any(), eq(assignmentId))).thenReturn(List.of(submission(assignmentId, 2)));
         when(service.review(any(), eq(assignmentId), any())).thenReturn(response(assignmentId, "PASSED"));
+        when(service.adminCodeChallenges(any())).thenReturn(List.of(challenge()));
         when(service.adminSummary(any())).thenReturn(new CodeAssessmentSummaryResponse(
                 18, 14, 6, 4, 3, 1, 84.5, 2,
                 1, 3.4, 12.8, 9.1,
                 List.of(new StatusCountResponse("AUTO_REVIEWED", 6))));
 
+        mockMvc.perform(post("/employer/applications/{applicationId}/code-assessments", applicationId)
+                        .headers(employerHeaders())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new AssignCodeAssessmentRequest(null, null))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.status", is("ASSIGNED")));
+
         mockMvc.perform(patch("/employer/code-assessments/{id}/review", assignmentId)
                         .headers(employerHeaders())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new CodeReviewRequest("ADVANCE", "Strong rubric evidence", 91))))
+                        .content(objectMapper.writeValueAsString(new CodeReviewRequest("PASS", "Strong rubric evidence", 91))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.status", is("PASSED")));
+
+        mockMvc.perform(get("/employer/code-assessments/{id}/submissions", assignmentId)
+                        .headers(employerHeaders()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].hiddenTotal", is(2)));
 
         mockMvc.perform(get("/admin/code-assessments/summary")
                         .header(AppHeaders.USER_ID, UUID.randomUUID())
@@ -113,6 +138,14 @@ class CodeAssessmentControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.totalAssignments", is(18)))
                 .andExpect(jsonPath("$.data.averageScore", is(84.5)));
+
+        mockMvc.perform(get("/admin/code-challenges")
+                        .header(AppHeaders.USER_ID, UUID.randomUUID())
+                        .header(AppHeaders.USER_EMAIL, "admin@devhire.local")
+                        .header(AppHeaders.USER_ROLE, UserRole.ADMIN.name()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].version", is(1)))
+                .andExpect(jsonPath("$.data[0].visibleCaseCount", is(3)));
     }
 
     private static CodeAssessmentResponse response(UUID id, String status) {
@@ -122,6 +155,7 @@ class CodeAssessmentControllerTest {
                 "Linh Nguyen",
                 "Senior Java Platform Engineer",
                 "Java outbox retry reviewer",
+                1,
                 "Senior",
                 "Java",
                 "Implement retry-safe outbox review.",
@@ -130,10 +164,10 @@ class CodeAssessmentControllerTest {
                 status,
                 100,
                 88,
-                "ADVANCE",
+                "PASS",
                 List.of("Java", "Kafka", "Outbox"),
                 List.of(new RubricScoreResponse("Correctness and completeness", 34, 40, "Signals found")),
-                List.of("missing-test-evidence"),
+                List.of("low-signal-code"),
                 "Strong submission with employer review ready evidence.",
                 true,
                 "class CandidateSolution { assert true; }",
@@ -151,6 +185,56 @@ class CodeAssessmentControllerTest {
                 Instant.now().plusSeconds(1_209_600),
                 Instant.parse("2026-05-01T00:00:00Z"),
                 Instant.parse("2026-05-06T00:00:00Z"));
+    }
+
+    private static CodeSubmissionSummaryResponse submission(UUID assignmentId, int hiddenTotal) {
+        return new CodeSubmissionSummaryResponse(
+                UUID.randomUUID(),
+                assignmentId,
+                UUID.randomUUID(),
+                "Java",
+                88,
+                "PASS",
+                List.of(new RubricScoreResponse("Correctness and completeness", 34, 40, "Signals found")),
+                List.of(),
+                "Strong submission",
+                1,
+                "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+                "static-rubric-v1",
+                "devhire-code-rubric-v1",
+                "class CandidateSolution { String solve(String input) { return \"PASSED\"; } }",
+                "class CandidateSolution { String solve(String input) { return \"PASSED\"; } }",
+                true,
+                "ACCEPTED",
+                3,
+                3,
+                hiddenTotal,
+                hiddenTotal,
+                146,
+                24_576,
+                Instant.parse("2026-05-06T00:00:00Z"));
+    }
+
+    private static CodeChallengeResponse challenge() {
+        return new CodeChallengeResponse(
+                UUID.randomUUID(),
+                "cloud-architecture-challenge",
+                "Cloud Architecture Challenge",
+                1,
+                "Senior",
+                "Java",
+                "Implement CandidateSolution.solve.",
+                "No unsafe boundaries.",
+                "class CandidateSolution { String solve(String input) { return \"\"; } }",
+                List.of("Java", "Security"),
+                List.of("CandidateSolution", "solve"),
+                100,
+                true,
+                "class CandidateSolution { String solve(String input) { return \"PASSED\"; } }",
+                3,
+                2,
+                List.of(),
+                Instant.parse("2026-05-01T00:00:00Z"));
     }
 
     private static CodeRunResponse run(UUID id) {

@@ -51,7 +51,7 @@ CREATE TABLE code_submissions (
     submitted_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     reviewed_at TIMESTAMPTZ,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-    CONSTRAINT chk_code_submission_decision CHECK (decision IN ('ADVANCE', 'REVIEW', 'HOLD', 'REJECT')),
+    CONSTRAINT chk_code_submission_decision CHECK (decision IN ('PASS', 'HOLD', 'REJECT', 'ADVANCE', 'REVIEW')),
     CONSTRAINT chk_code_submission_status CHECK (status IN ('SUBMITTED', 'AUTO_REVIEWED', 'EMPLOYER_REVIEWED'))
 );
 
@@ -85,7 +85,7 @@ VALUES
     'Do not execute untrusted code. Show transaction boundaries, idempotency thinking, max attempts, and clear failure handling.',
     'class OutboxRetryReviewer {\n    ReviewResult review(List<OutboxEvent> events) {\n        // implement retry-safe review\n    }\n}',
     'Java,Spring Boot,Kafka,PostgreSQL,Outbox',
-    'transaction,batch,maxAttempts,publishedAt,lastError,Map,@Test,assert'
+    'transaction,batch,maxAttempts,publishedAt,lastError,Map,executable-evidence'
 ),
 (
     '52000000-0000-0000-0001-000000000002',
@@ -97,7 +97,7 @@ VALUES
     'Prefer indexed filters and pagination-safe aggregation. Explain how the query avoids scanning unrelated employers.',
     'SELECT status, count(*)\nFROM job_applications\nWHERE employer_id = :employerId\nGROUP BY status;',
     'SQL,PostgreSQL,Indexes,Analytics',
-    'employer_id,GROUP BY,index,LIMIT,status,count,assert'
+    'employer_id,GROUP BY,index,LIMIT,status,count,executable-evidence'
 ),
 (
     '52000000-0000-0000-0001-000000000003',
@@ -109,7 +109,7 @@ VALUES
     'Include adapter status, timing, exception handling, and tests for published-only behavior.',
     'class JobSearchResilience {\n    SearchResult search(SearchCriteria criteria) {\n        // implement adapter recovery\n    }\n}',
     'Java,OpenSearch,PostgreSQL,Observability',
-    'OpenSearch,PostgreSQL,published,Timer,recovery,@Test,assert'
+    'OpenSearch,PostgreSQL,published,Timer,recovery,executable-evidence'
 )
 ON CONFLICT (id) DO NOTHING;
 
@@ -182,23 +182,23 @@ SELECT
     id,
     CASE WHEN rn % 3 = 2 THEN 'SQL' ELSE 'Java' END,
     CASE WHEN rn % 3 = 2 THEN
-        'SELECT status, count(*) AS total FROM job_applications WHERE employer_id = :employerId GROUP BY status ORDER BY status LIMIT 50; -- indexed employer_id status aggregate with assert coverage'
+        'SELECT status, count(*) AS total FROM job_applications WHERE employer_id = :employerId GROUP BY status ORDER BY status LIMIT 50; -- indexed employer_id status aggregate with executable evidence'
     ELSE
-        'class CandidateSolution { Map<String, Integer> review(List<Event> events) { /* transaction batch maxAttempts publishedAt lastError */ return Map.of("published", events.size()); } @Test void givenPendingEvents_whenReviewed_thenPublishesBatch() { assert true; } }'
+        'class CandidateSolution { String solve(String input) { return input != null && input.contains("published") ? "PASSED" : "REJECTED"; } }'
     END,
     'Submission explains transaction boundary, indexed lookup, and reviewer-safe test evidence.',
     78 + (rn % 17),
     CASE WHEN status = 'FAILED' THEN 62 ELSE 78 + (rn % 17) END,
-    CASE WHEN status = 'FAILED' THEN 'REJECT' WHEN status = 'PASSED' THEN 'ADVANCE' ELSE 'REVIEW' END,
+    CASE WHEN status = 'FAILED' THEN 'REJECT' WHEN status = 'PASSED' THEN 'PASS' ELSE 'HOLD' END,
     jsonb_build_array(
         jsonb_build_object('category','Correctness and completeness','score',32 + (rn % 7),'maxScore',40,'evidence','Required implementation signals found'),
         jsonb_build_object('category','Maintainability and readability','score',16,'maxScore',20,'evidence','Readable structure and named boundaries'),
         jsonb_build_object('category','Complexity and performance','score',12,'maxScore',15,'evidence','Indexed/batched approach described'),
         jsonb_build_object('category','Security posture','score',15,'maxScore',15,'evidence','No high-risk static smells detected'),
-        jsonb_build_object('category','Test and evidence quality','score',8,'maxScore',10,'evidence','Assertion evidence included')
+        jsonb_build_object('category','Input parsing and edge cases','score',8,'maxScore',10,'evidence','Executable stdin/stdout evidence included')
     ),
-    CASE WHEN rn % 6 = 0 THEN 'missing-test-evidence' ELSE '' END,
-    'Reviewer-safe deterministic rubric indicates the submission is ready for employer review.',
+    CASE WHEN rn % 6 = 0 THEN 'low-signal-code' ELSE '' END,
+    'Server-side runner evidence and rubric scoring indicate the submission is ready for employer review.',
     CASE WHEN status IN ('PASSED','FAILED','EMPLOYER_REVIEWED') THEN 'Employer review recorded with rubric evidence.' ELSE NULL END,
     true,
     CASE WHEN status IN ('PASSED','FAILED','EMPLOYER_REVIEWED') THEN 'EMPLOYER_REVIEWED' ELSE 'AUTO_REVIEWED' END,
