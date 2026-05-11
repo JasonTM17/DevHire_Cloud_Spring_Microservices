@@ -157,7 +157,15 @@ try {
         $config = $serviceCatalog[$service]
         $database = $config.Database
         $migrationRoot = Join-Path $repoRoot $config.MigrationPath
-        $migrations = Get-ChildItem -Path $migrationRoot -Filter "*.sql" | Sort-Object Name
+        $migrations = Get-ChildItem -Path $migrationRoot -Filter "*.sql" | Sort-Object `
+            @{ Expression = {
+                    if ($_.Name -match '^V(\d+)__') {
+                        [int]$Matches[1]
+                    } else {
+                        [int]::MaxValue
+                    }
+                } },
+            Name
         if (-not $migrations) {
             throw "No SQL migrations found for $service in $migrationRoot"
         }

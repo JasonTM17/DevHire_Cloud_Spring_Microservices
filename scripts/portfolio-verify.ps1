@@ -332,6 +332,9 @@ try {
         Invoke-PortfolioStep "api smoke" ".\scripts\api-smoke.ps1 -GatewayUrl $GatewayUrl" {
             & "$PSScriptRoot\api-smoke.ps1" -GatewayUrl $GatewayUrl
         }
+        Invoke-PortfolioStep "code assessment smoke" ".\scripts\code-assessment-smoke.ps1 -GatewayUrl $GatewayUrl" {
+            & "$PSScriptRoot\code-assessment-smoke.ps1" -GatewayUrl $GatewayUrl
+        }
         Invoke-PortfolioStep "runtime reliability acceptance" ".\scripts\runtime-reliability.ps1 -GatewayUrl $GatewayUrl" {
             & "$PSScriptRoot\runtime-reliability.ps1" -GatewayUrl $GatewayUrl
         }
@@ -346,6 +349,11 @@ try {
         }
         Invoke-PortfolioStep "runtime observability smoke" ".\scripts\runtime-observability-smoke.ps1 -GatewayUrl $GatewayUrl -SkipTraffic" {
             & "$PSScriptRoot\runtime-observability-smoke.ps1" -GatewayUrl $GatewayUrl -SkipTraffic
+        }
+        if ($env:RUN_JUDGE0_SMOKE -eq "1") {
+            Invoke-PortfolioStep "judge0 live smoke" ".\scripts\judge0-smoke.ps1" {
+                & "$PSScriptRoot\judge0-smoke.ps1"
+            }
         }
         Invoke-PortfolioStep "role based perf smoke" ".\scripts\perf-suite.ps1 -GatewayUrl $GatewayUrl -Scenario all -Vus $PerfVus -Duration $PerfDuration" {
             & "$PSScriptRoot\perf-suite.ps1" -GatewayUrl $GatewayUrl -Scenario all -Vus $PerfVus -Duration $PerfDuration

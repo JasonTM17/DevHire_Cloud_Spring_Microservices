@@ -94,7 +94,7 @@ $services = @(
     @{
         name = "application-service"
         portOffset = 5
-        expectedPaths = @("/jobs/{jobId}/applications", "/applications/me", "/employer/jobs/{jobId}/applications", "/applications/{id}/status", "/applications/{id}/withdraw", "/candidate/code-assessments", "/candidate/code-assessments/{id}", "/candidate/code-assessments/{id}/submissions", "/employer/code-assessments", "/employer/code-assessments/{id}", "/employer/code-assessments/{id}/review", "/admin/code-assessments/summary")
+        expectedPaths = @("/jobs/{jobId}/applications", "/applications/me", "/employer/jobs/{jobId}/applications", "/applications/{id}/status", "/applications/{id}/withdraw", "/candidate/code-assessments", "/candidate/code-assessments/{id}", "/candidate/code-assessments/{id}/run", "/candidate/code-assessments/{id}/runs", "/candidate/code-assessments/{id}/runs/{runId}", "/candidate/code-assessments/{id}/submit", "/candidate/code-assessments/{id}/submissions", "/employer/applications/{applicationId}/code-assessments", "/employer/code-assessments", "/employer/code-assessments/{id}", "/employer/code-assessments/{id}/submissions", "/employer/code-assessments/{id}/review", "/admin/code-assessments/summary", "/admin/code-challenges", "/admin/code-challenges/{id}")
     },
     @{
         name = "notification-service"
@@ -110,6 +110,11 @@ $services = @(
         name = "ai-service"
         portOffset = 8
         expectedPaths = @("/ai/chat", "/ai/chat/stream", "/ai/conversations", "/ai/conversations/{id}", "/admin/ai/knowledge/reindex", "/admin/ai/provider/status")
+    },
+    @{
+        name = "assessment-runner-service"
+        portOffset = 9
+        expectedPaths = @("/internal/assessment-runs", "/internal/assessment-runs/health")
     }
 )
 

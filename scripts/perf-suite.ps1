@@ -38,13 +38,13 @@ if (-not $UseDocker -and $null -ne $k6Command) {
     return
 }
 
-$isWindows = [System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform(
+$runningOnWindows = [System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform(
     [System.Runtime.InteropServices.OSPlatform]::Windows
 )
 
 if ([string]::IsNullOrWhiteSpace($ContainerGatewayUrl)) {
     $ContainerGatewayUrl = $GatewayUrl
-    if ($isWindows) {
+    if ($runningOnWindows) {
         $ContainerGatewayUrl = $ContainerGatewayUrl -replace "localhost", "host.docker.internal"
         $ContainerGatewayUrl = $ContainerGatewayUrl -replace "127\.0\.0\.1", "host.docker.internal"
     }
@@ -60,7 +60,7 @@ $dockerArgs = @(
     "-w", "/workspace"
 )
 
-if (-not $isWindows) {
+if (-not $runningOnWindows) {
     $dockerArgs += "--network=host"
 }
 

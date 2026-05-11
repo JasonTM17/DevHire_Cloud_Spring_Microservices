@@ -23,15 +23,26 @@ $outputRoot = if ([System.IO.Path]::IsPathRooted($OutputDir)) {
 }
 New-Item -ItemType Directory -Force -Path $outputRoot | Out-Null
 
-$token = if (-not [string]::IsNullOrWhiteSpace($env:GITHUB_TOKEN)) {
-    $env:GITHUB_TOKEN
+$token = $null
+$tokenSource = "none"
+if (-not [string]::IsNullOrWhiteSpace($env:GITHUB_TOKEN)) {
+    $token = $env:GITHUB_TOKEN
+    $tokenSource = "GITHUB_TOKEN"
 } elseif (-not [string]::IsNullOrWhiteSpace($env:REPO_GOVERNANCE_TOKEN)) {
-    $env:REPO_GOVERNANCE_TOKEN
-} else {
-    $null
+    $token = $env:REPO_GOVERNANCE_TOKEN
+    $tokenSource = "REPO_GOVERNANCE_TOKEN"
+} elseif (-not $Apply) {
+    $ghCommand = Get-Command gh -ErrorAction SilentlyContinue
+    if ($ghCommand) {
+        $ghToken = (& gh auth token 2>$null | Select-Object -First 1)
+        if ($LASTEXITCODE -eq 0 -and -not [string]::IsNullOrWhiteSpace($ghToken)) {
+            $token = [string]$ghToken
+            $tokenSource = "gh auth"
+        }
+    }
 }
 $hasToken = -not [string]::IsNullOrWhiteSpace($token)
-if ($Apply -and -not $hasToken) {
+if ($Apply -and $tokenSource -eq "none") {
     throw "GITHUB_TOKEN or REPO_GOVERNANCE_TOKEN is required for -Apply. Set a short-lived owner token in the current shell; never commit it."
 }
 
@@ -385,6 +396,7 @@ $summary = [ordered]@{
     repository = "$Owner/$Repo"
     mode = if ($Apply) { "apply" } else { "dry-run" }
     hasToken = $hasToken
+    tokenSource = $tokenSource
     openDependabotPullRequests = $plans.Count
     mergeCandidates = @($plans | Where-Object { $_.action -eq "merge-squash" }).Count
     closeCandidates = @($plans | Where-Object { $_.action -ne "merge-squash" }).Count
@@ -400,6 +412,7 @@ $lines.Add("- Generated: $($summary.generatedAt)")
 $lines.Add("- Repository: $Owner/$Repo")
 $lines.Add("- Mode: $($summary.mode)")
 $lines.Add("- Token present: $hasToken")
+$lines.Add("- Token source: $tokenSource")
 $lines.Add("- Open Dependabot PRs: $($plans.Count)")
 $lines.Add("- Merge candidates: $($summary.mergeCandidates)")
 $lines.Add("- Close/defer candidates: $($summary.closeCandidates)")
@@ -424,6 +437,7 @@ Write-Host "Dependabot zero-noise summary:"
 Write-Host ("  repository       : {0}/{1}" -f $Owner, $Repo)
 Write-Host ("  mode             : {0}" -f $summary.mode)
 Write-Host ("  token present     : {0}" -f $hasToken)
+Write-Host ("  token source      : {0}" -f $tokenSource)
 Write-Host ("  open PRs          : {0}" -f $plans.Count)
 Write-Host ("  merge candidates  : {0}" -f $summary.mergeCandidates)
 Write-Host ("  close candidates  : {0}" -f $summary.closeCandidates)
