@@ -8,7 +8,7 @@ import { StatusPill, statusLabel } from "@/components/StatusPill";
 import { api } from "@/lib/api";
 import { brandForCompany } from "@/lib/demoCompanies";
 import { previewApplications, previewCodeAssessments, previewCompanies, previewEmployerPipelineSummary, previewJobs } from "@/lib/previewData";
-import type { Application, CodeAssessment, Company, EmployerPipelineSummary, Job, PageResponse } from "@/types/domain";
+import type { Application, CodeAssessment, CodeSubmissionSummary, Company, EmployerPipelineSummary, Job, PageResponse } from "@/types/domain";
 
 export default function EmployerPage() {
   const [companies, setCompanies] = useState<PageResponse<Company>>(previewCompanies);
@@ -20,8 +20,9 @@ export default function EmployerPage() {
   const [codeAssessments, setCodeAssessments] = useState<CodeAssessment[]>([]);
   const [selectedReviewId, setSelectedReviewId] = useState(previewCodeAssessments[0]?.id ?? "");
   const [selectedReviewDetail, setSelectedReviewDetail] = useState<CodeAssessment | null>(previewCodeAssessments[0] ?? null);
-  const [reviewNote, setReviewNote] = useState("Advance if rubric evidence matches production expectations.");
-  const [codeStatusFilter, setCodeStatusFilter] = useState("AUTO_REVIEWED");
+  const [selectedReviewAttempts, setSelectedReviewAttempts] = useState<CodeSubmissionSummary[]>([]);
+  const [reviewNote, setReviewNote] = useState("Record pass, hold, or reject with the reviewer rationale.");
+  const [codeStatusFilter, setCodeStatusFilter] = useState("SUBMITTED");
   const [codeJobFilter, setCodeJobFilter] = useState("ALL");
   const [pipelineSummary, setPipelineSummary] = useState<EmployerPipelineSummary>(previewEmployerPipelineSummary);
   const [message, setMessage] = useState("");
@@ -177,15 +178,33 @@ export default function EmployerPage() {
     await loadApplications();
   }
 
+  async function assignCodeAssessment(application: Application) {
+    if (!isUuid(application.id)) {
+      setMessage("Code assessment assigned for preview candidate.");
+      return;
+    }
+    try {
+      const assignment = await api.assignCodeAssessment(application.id);
+      setCodeAssessments((current) => [assignment, ...current.filter((item) => item.id !== assignment.id)]);
+      setSelectedReviewId(assignment.id);
+      setSelectedReviewDetail(assignment);
+      setSelectedReviewAttempts([]);
+      setCodeStatusFilter("ALL");
+      setMessage(`Code assessment assigned for ${candidateDisplayName(application.candidateId)}.`);
+    } catch (ex) {
+      setMessage(ex instanceof Error ? ex.message : "Cannot assign code assessment");
+    }
+  }
+
   async function reviewCodeAssessment(id: string, decision: string) {
     if (!isUuid(id)) {
       setCodeAssessments((current) => current.map((item) => (
         item.id === id
-          ? { ...item, status: decision === "ADVANCE" ? "PASSED" : "EMPLOYER_REVIEWED", latestDecision: decision }
+          ? { ...item, status: statusForReviewDecision(decision), latestDecision: decision }
           : item
       )));
       setSelectedReviewDetail((current) => current?.id === id
-        ? { ...current, status: decision === "ADVANCE" ? "PASSED" : "EMPLOYER_REVIEWED", latestDecision: decision }
+        ? { ...current, status: statusForReviewDecision(decision), latestDecision: decision }
         : current);
       setMessage("Code review recorded for the selected candidate.");
       return;
@@ -197,10 +216,10 @@ export default function EmployerPage() {
       setMessage(`Code review recorded for ${updated.candidateName}.`);
     } catch (ex) {
       setCodeAssessments((current) => current.map((item) => (
-        item.id === id ? { ...item, status: decision === "ADVANCE" ? "PASSED" : "EMPLOYER_REVIEWED", latestDecision: decision } : item
+        item.id === id ? { ...item, status: statusForReviewDecision(decision), latestDecision: decision } : item
       )));
       setSelectedReviewDetail((current) => current?.id === id
-        ? { ...current, status: decision === "ADVANCE" ? "PASSED" : "EMPLOYER_REVIEWED", latestDecision: decision }
+        ? { ...current, status: statusForReviewDecision(decision), latestDecision: decision }
         : current);
       setMessage(ex instanceof Error && ex.message !== "Failed to fetch"
         ? ex.message
@@ -211,12 +230,17 @@ export default function EmployerPage() {
   async function selectCodeAssessment(item: CodeAssessment) {
     setSelectedReviewId(item.id);
     setSelectedReviewDetail(item);
+    setSelectedReviewAttempts([]);
     if (!isUuid(item.id)) {
       return;
     }
     try {
-      const detail = await api.employerCodeAssessment(item.id);
+      const [detail, attempts] = await Promise.all([
+        api.employerCodeAssessment(item.id),
+        api.employerCodeAssessmentSubmissions(item.id).catch(() => [] as CodeSubmissionSummary[])
+      ]);
       setSelectedReviewDetail(detail);
+      setSelectedReviewAttempts(attempts);
       setCodeAssessments((current) => current.map((candidate) => (candidate.id === detail.id ? detail : candidate)));
     } catch {
       setSelectedReviewDetail(item);
@@ -327,6 +351,14 @@ export default function EmployerPage() {
                 <button className="button ghost" type="button" onClick={() => moveApplication(item.id)}>
                   <StatusPill value={item.status} />
                 </button>
+                <button
+                  className="button secondary"
+                  type="button"
+                  disabled={["WITHDRAWN", "REJECTED"].includes(item.status)}
+                  onClick={() => assignCodeAssessment(item)}
+                >
+                  Assign code
+                </button>
               </div>
             ))}
           </div>
@@ -343,8 +375,10 @@ export default function EmployerPage() {
             value={codeStatusFilter}
             onChange={(event) => setCodeStatusFilter(event.target.value)}
           >
-            <option value="AUTO_REVIEWED">Ready for review</option>
-            <option value="EMPLOYER_REVIEWED">Reviewed</option>
+            <option value="SUBMITTED">Ready for review</option>
+            <option value="AUTO_REVIEWED">Rubric reviewed</option>
+            <option value="REVIEWED">Reviewed</option>
+            <option value="EMPLOYER_REVIEWED">Decision recorded</option>
             <option value="PASSED">Passed</option>
             <option value="FAILED">Failed</option>
             <option value="ALL">All statuses</option>
@@ -365,7 +399,7 @@ export default function EmployerPage() {
         </div>
         <div className="assessment-review-grid">
           {visibleCodeAssessments.length === 0 ? (
-            <div className="empty-state compact">Syncing rubric-scored submissions...</div>
+            <div className="empty-state compact">No submissions match the current filters.</div>
           ) : null}
           {visibleCodeAssessments.slice(0, 4).map((item) => {
             const reviewable = isReviewableCodeAssessment(item);
@@ -424,13 +458,22 @@ export default function EmployerPage() {
                     Hold
                   </button>
                   <button
-                    aria-label={`Advance ${item.candidateName}`}
+                    aria-label={`Reject ${item.candidateName}`}
+                    className="button secondary"
+                    disabled={!reviewable}
+                    type="button"
+                    onClick={() => reviewCodeAssessment(item.id, "REJECT")}
+                  >
+                    Reject
+                  </button>
+                  <button
+                    aria-label={`Pass ${item.candidateName}`}
                     className="button primary"
                     disabled={!reviewable}
                     type="button"
-                    onClick={() => reviewCodeAssessment(item.id, "ADVANCE")}
+                    onClick={() => reviewCodeAssessment(item.id, "PASS")}
                   >
-                    Advance
+                    Pass
                   </button>
                 </div>
               </div>
@@ -454,13 +497,27 @@ export default function EmployerPage() {
                 <strong>Review safety</strong>
                 <span>{selectedReview.graderVersion ?? "static-rubric-v1"}</span>
                 <span>{selectedReview.rubricVersion ?? "devhire-code-rubric-v1"}</span>
-                <span>{selectedReview.sandboxStatus ?? selectedReview.latestRun?.sandboxStatus ?? "JUDGE0_COMPATIBLE_LOCAL_SANDBOX"}</span>
+                <span>{selectedReview.sandboxStatus ?? selectedReview.latestRun?.sandboxStatus ?? "JUDGE0_ISOLATED_SANDBOX"}</span>
                 <span>Visible {selectedReview.latestRun?.visiblePassed ?? 0}/{selectedReview.latestRun?.visibleTotal ?? selectedReview.visibleTestCases?.length ?? 0} / hidden {selectedReview.latestRun?.hiddenPassed ?? 0}/{selectedReview.latestRun?.hiddenTotal ?? 0}</span>
                 <span>Integrity {Math.round((selectedReview.integrityRiskScore ?? 0) * 10) / 10}% / similarity {Math.round((selectedReview.similarityScore ?? 0) * 10) / 10}%</span>
                 {selectedReview.codeHash ? <span>Hash {selectedReview.codeHash.slice(0, 12)}</span> : <span>No submitted hash yet</span>}
               </div>
             </div>
             <pre className="code-preview">{(selectedReview.submittedCode ?? selectedReview.submittedCodePreview ?? selectedReview.starterCode).slice(0, 900)}</pre>
+            {selectedReviewAttempts.length ? (
+              <div className="assessment-history-list employer-attempts">
+                {selectedReviewAttempts.map((attempt) => (
+                  <div key={attempt.id}>
+                    <span className="done" />
+                    <strong>Attempt {attempt.attemptNumber ?? "?"} - {statusLabel(attempt.verdict ?? "UNKNOWN")}</strong>
+                    <small>
+                      Score {attempt.finalScore ?? 0}/{selectedReview.maxScore}; visible {attempt.visiblePassed}/{attempt.visibleTotal}; hidden {attempt.hiddenPassed}/{attempt.hiddenTotal}; runtime {attempt.executionTimeMs} ms
+                    </small>
+                    <em>{attempt.codeHash ? `Hash ${attempt.codeHash.slice(0, 10)}` : "No hash"}</em>
+                  </div>
+                ))}
+              </div>
+            ) : null}
             <div className="rubric-grid">
               {(selectedReview.rubric.length ? selectedReview.rubric : []).map((row) => (
                 <div className="rubric-card" key={row.category}>
@@ -489,12 +546,20 @@ export default function EmployerPage() {
                   Hold for follow-up
                 </button>
                 <button
+                  className="button secondary"
+                  disabled={!isReviewableCodeAssessment(selectedReview)}
+                  type="button"
+                  onClick={() => reviewCodeAssessment(selectedReview.id, "REJECT")}
+                >
+                  Reject candidate
+                </button>
+                <button
                   className="button primary"
                   disabled={!isReviewableCodeAssessment(selectedReview)}
                   type="button"
-                  onClick={() => reviewCodeAssessment(selectedReview.id, "ADVANCE")}
+                  onClick={() => reviewCodeAssessment(selectedReview.id, "PASS")}
                 >
-                  Advance candidate
+                  Pass candidate
                 </button>
               </div>
             </div>
@@ -508,12 +573,23 @@ export default function EmployerPage() {
 function isPositiveMessage(message: string) {
   return message.includes("submitted")
     || message.includes("recorded")
+    || message.includes("assigned")
     || message.includes("preview")
     || message.includes("selected portfolio");
 }
 
 function isReviewableCodeAssessment(item: CodeAssessment) {
   return Boolean(item.submittedAt) && !["PASSED", "FAILED"].includes(item.status);
+}
+
+function statusForReviewDecision(decision: string) {
+  if (decision === "PASS" || decision === "ADVANCE") {
+    return "PASSED";
+  }
+  if (decision === "REJECT") {
+    return "FAILED";
+  }
+  return "REVIEWED";
 }
 
 function isUuid(value: string) {

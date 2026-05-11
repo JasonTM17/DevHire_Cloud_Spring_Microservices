@@ -65,6 +65,14 @@ test.describe("DevHire Cloud portfolio smoke", () => {
   });
 
   test("candidate can sign in and view the application workspace", async ({ page }) => {
+    const consoleErrors: string[] = [];
+    page.on("console", (message) => {
+      const knownPreviewApiMiss = process.env.E2E_REQUIRE_LIVE_API !== "1"
+        && message.text().includes("ERR_CONNECTION_REFUSED");
+      if (message.type() === "error" && !knownPreviewApiMiss) {
+        consoleErrors.push(message.text());
+      }
+    });
     await login(page, "candidate");
     await expect(page.getByRole("heading", { name: "Application tracker" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Notifications" })).toBeVisible();
@@ -77,11 +85,23 @@ test.describe("DevHire Cloud portfolio smoke", () => {
     if (process.env.E2E_REQUIRE_LIVE_API === "1") {
       await expect(page.getByTestId("candidate-assessments-page")).toHaveAttribute("data-assessment-source", "api");
     }
-    await expect(page.getByRole("heading", { name: "Cloud Architecture Challenge" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Challenge|implementation|diagnostics/i }).first()).toBeVisible();
     await expect(page.getByRole("heading", { name: "Submission history" })).toBeVisible();
     await expect(page.getByLabel("Candidate code submission")).toBeVisible();
-    await page.getByRole("button", { name: "Submit for rubric score" }).click();
-    await expect(page.getByText(/server-side grading/i)).toBeVisible();
+    const runButton = page.getByRole("button", { name: /Run Tests|Decision Locked/ });
+    if (await runButton.isEnabled()) {
+      await runButton.click();
+    }
+    await expect(page.getByText(/Accepted|Wrong Answer|Decision Locked|local preview cases/i).first()).toBeVisible();
+    await expect(page.locator("body")).not.toContainText(/Hidden reviewer evidence|duplicate publish replay|private job leak|expected_output/i);
+    const submitButton = page.getByRole("button", { name: "Submit for rubric score" });
+    if (await submitButton.isEnabled()) {
+      await submitButton.click();
+      await expect(page.getByText(/server-side grading/i)).toBeVisible();
+    } else {
+      await expect(page.getByText(/Submission locked|Decision Locked|Employer decision/i).first()).toBeVisible();
+    }
+    expect(consoleErrors).toEqual([]);
   });
 
   test("employer can sign in and view company and job workflow", async ({ page }) => {
@@ -97,16 +117,16 @@ test.describe("DevHire Cloud portfolio smoke", () => {
     await expect(page.locator(".review-dossier")).toBeVisible();
     await expect(page.getByText("Review safety")).toBeVisible();
     await expect(page.getByText("devhire-code-rubric-v1")).toBeVisible();
-    await expect(page.getByLabel("Employer review notes")).toHaveValue(/Advance if rubric evidence/);
+    await expect(page.getByLabel("Employer review notes")).toHaveValue(/pass, hold, or reject/i);
     await expect(page.locator(".rubric-card").first()).toBeVisible();
-    await page.getByLabel("Code review status").selectOption("EMPLOYER_REVIEWED");
+    await page.getByLabel("Code review status").selectOption("REVIEWED");
     await page.getByRole("button", { name: "Apply filters" }).click();
     await expect(page.locator(".review-card").first()).toBeVisible();
-    await page.getByLabel("Code review status").selectOption("AUTO_REVIEWED");
+    await page.getByLabel("Code review status").selectOption("ALL");
     await page.getByRole("button", { name: "Apply filters" }).click();
     const resetReadyReview = page.locator(".review-card").filter({ hasText: "Ready for employer decision" }).first();
     await expect(resetReadyReview).toBeVisible();
-    await resetReadyReview.getByRole("button", { name: /Advance/ }).click();
+    await resetReadyReview.getByRole("button", { name: /Pass/ }).click();
     await expect(page.getByText(/Code review recorded/i)).toBeVisible();
     await expect(page.getByPlaceholder("Job ID")).toHaveCount(0);
   });

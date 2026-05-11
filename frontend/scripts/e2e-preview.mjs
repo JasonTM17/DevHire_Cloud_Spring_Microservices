@@ -186,6 +186,7 @@ try {
       "playwright",
       "test",
       "e2e/devhire-smoke.spec.ts",
+      "e2e/code-assessment-flow.spec.ts",
       "e2e/assistant-smoke.spec.ts",
       "e2e/stitch-route-matrix.spec.ts",
       "--project=chromium"

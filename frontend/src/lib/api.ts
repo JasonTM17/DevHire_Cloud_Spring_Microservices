@@ -8,10 +8,12 @@ import type {
   AuthResponse,
   CandidateApplicationsSummary,
   CandidateAssessment,
+  CodeChallenge,
   CodeAssessment,
   CodeIntegrityEvent,
   CodeRun,
   CodeAssessmentSummary,
+  CodeSubmissionSummary,
   CandidateDashboardSummary,
   CandidateOffer,
   CandidateRoadmap,
@@ -116,14 +118,17 @@ export const api = {
     code: string,
     integrityEvents: CodeIntegrityEvent[] = [],
     clientFingerprintHash?: string,
-    elapsedSeconds?: number
+    elapsedSeconds?: number,
+    customInput?: string
   ) =>
     request<CodeRun>(`/api/candidate/code-assessments/${id}/runs`, {
       method: "POST",
-      body: JSON.stringify({ language, code, integrityEvents, clientFingerprintHash, elapsedSeconds })
+      body: JSON.stringify({ language, code, integrityEvents, clientFingerprintHash, elapsedSeconds, customInput })
     }),
   codeAssessmentRun: (id: string, runId: string) =>
     request<CodeRun>(`/api/candidate/code-assessments/${id}/runs/${runId}`),
+  candidateCodeAssessmentSubmissions: (id: string) =>
+    request<CodeSubmissionSummary[]>(`/api/candidate/code-assessments/${id}/submissions`),
   submitCodeAssessment: (
     id: string,
     language: string,
@@ -164,8 +169,15 @@ export const api = {
   employerPipelineSummary: () => request<EmployerPipelineSummary>("/api/employer/pipeline/summary"),
   employerCodeAssessments: (params = new URLSearchParams()) =>
     request<CodeAssessment[]>(`/api/employer/code-assessments${params.toString() ? `?${params}` : ""}`),
+  assignCodeAssessment: (applicationId: string, challengeId?: string, dueAt?: string) =>
+    request<CodeAssessment>(`/api/employer/applications/${applicationId}/code-assessments`, {
+      method: "POST",
+      body: JSON.stringify({ challengeId, dueAt })
+    }),
   employerCodeAssessment: (id: string) =>
     request<CodeAssessment>(`/api/employer/code-assessments/${id}`),
+  employerCodeAssessmentSubmissions: (id: string) =>
+    request<CodeSubmissionSummary[]>(`/api/employer/code-assessments/${id}/submissions`),
   reviewCodeAssessment: (id: string, decision: string, note: string) =>
     request<CodeAssessment>(`/api/employer/code-assessments/${id}/review`, {
       method: "PATCH",
@@ -180,6 +192,11 @@ export const api = {
   auditLogs: () => request<PageResponse<AuditLog>>("/api/admin/audit-logs"),
   operationsSummary: () => request<OperationsSummary>("/api/admin/operations/summary"),
   codeAssessmentSummary: () => request<CodeAssessmentSummary>("/api/admin/code-assessments/summary"),
+  codeChallenges: () => request<CodeChallenge[]>("/api/admin/code-challenges"),
+  createCodeChallenge: (payload: Partial<CodeChallenge> & Record<string, unknown>) =>
+    request<CodeChallenge>("/api/admin/code-challenges", { method: "POST", body: JSON.stringify(payload) }),
+  updateCodeChallenge: (id: string, payload: Partial<CodeChallenge> & Record<string, unknown>) =>
+    request<CodeChallenge>(`/api/admin/code-challenges/${id}`, { method: "PATCH", body: JSON.stringify(payload) }),
   aiProviderStatus: () => request<AiProviderStatus>("/api/admin/ai/provider/status"),
   reindexAiKnowledge: () =>
     request<AiReindexResponse>("/api/admin/ai/knowledge/reindex", { method: "POST" }),
