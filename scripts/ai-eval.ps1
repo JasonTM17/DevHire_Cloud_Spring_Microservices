@@ -25,6 +25,9 @@ function Set-EnvDefault {
     }
 }
 
+$explicitGatewayHostPort = -not [string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable("GATEWAY_HOST_PORT", "Process"))
+$explicitAiHostPort = -not [string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable("AI_HOST_PORT", "Process"))
+
 function Wait-HttpOk {
     param(
         [Parameter(Mandatory = $true)][string]$Url,
@@ -130,6 +133,18 @@ foreach ($entry in $portDefaults.GetEnumerator()) {
 
 if ([string]::IsNullOrWhiteSpace($GatewayUrl)) {
     $GatewayUrl = "http://localhost:$env:GATEWAY_HOST_PORT"
+} else {
+    $gatewayUri = $null
+    if ([System.Uri]::TryCreate($GatewayUrl, [System.UriKind]::Absolute, [ref]$gatewayUri) `
+        -and $gatewayUri.Host -in @("localhost", "127.0.0.1", "::1") `
+        -and $gatewayUri.Port -gt 0) {
+        if (-not $explicitGatewayHostPort) {
+            [Environment]::SetEnvironmentVariable("GATEWAY_HOST_PORT", [string]$gatewayUri.Port, "Process")
+        }
+        if (-not $explicitAiHostPort) {
+            [Environment]::SetEnvironmentVariable("AI_HOST_PORT", [string]($gatewayUri.Port + 8), "Process")
+        }
+    }
 }
 
 Push-Location $repoRoot
