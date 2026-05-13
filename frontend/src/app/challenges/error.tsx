@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { ErrorState } from "@/components/ui/feedback";
 
-export default function CandidateError({
+export default function ChallengesError({
   error,
   reset,
 }: {
@@ -12,7 +12,7 @@ export default function CandidateError({
 }) {
   useEffect(() => {
     if (process.env.NODE_ENV === "development") {
-      console.error("[Candidate Route Error]", error);
+      console.error("[Challenges Route Error]", error);
     }
   }, [error]);
 
