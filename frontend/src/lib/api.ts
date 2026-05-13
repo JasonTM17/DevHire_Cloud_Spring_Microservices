@@ -204,5 +204,7 @@ export const api = {
     request<AiChatResponse>("/api/ai/chat", {
       method: "POST",
       body: JSON.stringify({ message, conversationId })
-    })
+    }),
+  codeSubmissionHistory: (challengeId: string) =>
+    request<CodeSubmissionSummary[]>(`/api/candidate/challenges/${encodeURIComponent(challengeId)}/submissions`),
 };

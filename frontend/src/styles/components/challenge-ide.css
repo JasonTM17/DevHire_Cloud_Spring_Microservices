@@ -1,0 +1,72 @@
+/* ChallengeIDE — Main IDE shell layout
+   Uses --dh-* design tokens throughout.
+   Requirements: 4.1, 4.3, 4.5, 4.7 */
+
+.dh-challenge-ide {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+  background: var(--dh-color-bg-canvas, #0f1419);
+  color: var(--dh-color-fg-primary, #f0f4f8);
+}
+
+/* Main content area fills remaining space below top bar */
+.dh-challenge-ide__content {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Ensure split panes fill their container */
+.dh-challenge-ide__content > .dh-split-pane {
+  height: 100%;
+}
+
+/* Problem panel in left pane */
+.dh-challenge-ide__problem {
+  height: 100%;
+  overflow-y: auto;
+  background: var(--dh-color-bg-surface, #1a2332);
+}
+
+/* Editor section (tabs + editor) in top-right pane */
+.dh-challenge-ide__editor-section {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Editor wrapper fills remaining space below file tabs */
+.dh-challenge-ide__editor-wrapper {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.dh-challenge-ide__editor-wrapper .dh-code-editor {
+  height: 100%;
+}
+
+/* Terminal in bottom-right pane */
+.dh-challenge-ide__terminal {
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Ensure nested split panes fill height */
+.dh-challenge-ide__content .dh-split-pane--horizontal {
+  height: 100%;
+}
+
+.dh-challenge-ide__content .dh-split-pane--vertical {
+  height: 100%;
+}
+
+/* Panel overflow handling */
+.dh-challenge-ide__content .dh-split-pane__panel {
+  overflow: hidden;
+}

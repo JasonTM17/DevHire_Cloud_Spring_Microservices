@@ -19,3 +19,6 @@ export type {
 
 export { FileTab, FILE_TABS } from "./FileTab";
 export type { FileTabProps, FileTabItem, EditorTabId } from "./FileTab";
+
+export { ChallengeIDE } from "./ChallengeIDE";
+export type { ChallengeIDEProps } from "./ChallengeIDE";
