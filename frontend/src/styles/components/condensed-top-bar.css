@@ -1,0 +1,131 @@
+/* ==========================================================================
+   Component: CondensedTopBar
+   Tablet navigation bar for viewport 768–1023px.
+   Icon-only nav links with tooltips, "More" dropdown for overflow links.
+   Uses --dh-* design tokens.
+   ========================================================================== */
+
+.dh-condensed-top-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--dh-space-2);
+  height: 56px;
+  padding: 0 var(--dh-space-4);
+  background: var(--dh-color-bg-surface);
+  border-bottom: 1px solid var(--dh-color-border-default);
+  box-shadow: var(--dh-shadow-sm);
+}
+
+/* Logo */
+.dh-condensed-top-bar__logo {
+  display: flex;
+  align-items: center;
+  gap: var(--dh-space-2);
+  text-decoration: none;
+  color: var(--dh-color-fg-primary);
+  font-weight: 700;
+  font-size: var(--dh-font-size-lg);
+  font-family: var(--dh-font-sans);
+  flex-shrink: 0;
+}
+
+.dh-condensed-top-bar__logo-icon {
+  color: var(--dh-color-brand);
+}
+
+/* Nav section */
+.dh-condensed-top-bar__nav {
+  display: flex;
+  align-items: center;
+  gap: var(--dh-space-1);
+  margin-left: var(--dh-space-4);
+}
+
+/* Icon nav link */
+.dh-condensed-top-bar__nav-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--dh-radius-md);
+  color: var(--dh-color-fg-muted);
+  text-decoration: none;
+  transition:
+    background-color var(--dh-motion-duration-fast) var(--dh-motion-easing-standard),
+    color var(--dh-motion-duration-fast) var(--dh-motion-easing-standard);
+}
+
+.dh-condensed-top-bar__nav-link:hover {
+  background: var(--dh-color-bg-muted);
+  color: var(--dh-color-fg-primary);
+}
+
+.dh-condensed-top-bar__nav-link:focus-visible {
+  outline: 2px solid var(--dh-color-focus-ring);
+  outline-offset: 2px;
+}
+
+.dh-condensed-top-bar__nav-link--active {
+  background: var(--dh-color-brand-soft);
+  color: var(--dh-color-brand);
+}
+
+.dh-condensed-top-bar__nav-link--active:hover {
+  background: var(--dh-color-brand-soft);
+  color: var(--dh-color-brand);
+}
+
+/* More button */
+.dh-condensed-top-bar__more-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: var(--dh-radius-md);
+  background: transparent;
+  color: var(--dh-color-fg-muted);
+  cursor: pointer;
+  transition:
+    background-color var(--dh-motion-duration-fast) var(--dh-motion-easing-standard),
+    color var(--dh-motion-duration-fast) var(--dh-motion-easing-standard);
+}
+
+.dh-condensed-top-bar__more-btn:hover {
+  background: var(--dh-color-bg-muted);
+  color: var(--dh-color-fg-primary);
+}
+
+.dh-condensed-top-bar__more-btn:focus-visible {
+  outline: 2px solid var(--dh-color-focus-ring);
+  outline-offset: 2px;
+}
+
+/* Spacer pushes right-side actions */
+.dh-condensed-top-bar__spacer {
+  flex: 1;
+}
+
+/* User avatar button */
+.dh-condensed-top-bar__user-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  transition: opacity var(--dh-motion-duration-fast) var(--dh-motion-easing-standard);
+}
+
+.dh-condensed-top-bar__user-btn:hover {
+  opacity: 0.8;
+}
+
+.dh-condensed-top-bar__user-btn:focus-visible {
+  outline: 2px solid var(--dh-color-focus-ring);
+  outline-offset: 2px;
+}

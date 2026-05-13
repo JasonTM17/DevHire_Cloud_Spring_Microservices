@@ -1,0 +1,169 @@
+/* ==========================================================================
+   Component: MobileDrawer
+   Mobile navigation drawer (< 768px). Slides in from left.
+   Groups nav links by section. Uses --dh-* design tokens.
+   Built on top of the Drawer primitive styles.
+   ========================================================================== */
+
+/* Nav section grouping */
+.dh-mobile-drawer__section {
+  margin-bottom: var(--dh-space-4);
+}
+
+.dh-mobile-drawer__section:last-child {
+  margin-bottom: 0;
+}
+
+.dh-mobile-drawer__section-title {
+  display: block;
+  padding: var(--dh-space-2) var(--dh-space-3);
+  font-family: var(--dh-font-sans);
+  font-size: var(--dh-font-size-xs);
+  font-weight: var(--dh-font-weight-semibold);
+  color: var(--dh-color-fg-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Nav link items */
+.dh-mobile-drawer__link {
+  display: flex;
+  align-items: center;
+  gap: var(--dh-space-3);
+  padding: var(--dh-space-3) var(--dh-space-3);
+  border-radius: var(--dh-radius-md);
+  font-family: var(--dh-font-sans);
+  font-size: var(--dh-font-size-sm);
+  font-weight: var(--dh-font-weight-medium);
+  color: var(--dh-color-fg-secondary);
+  text-decoration: none;
+  transition:
+    background-color var(--dh-motion-duration-fast) var(--dh-motion-easing-standard),
+    color var(--dh-motion-duration-fast) var(--dh-motion-easing-standard);
+}
+
+.dh-mobile-drawer__link:hover {
+  background: var(--dh-color-bg-muted);
+  color: var(--dh-color-fg-primary);
+}
+
+.dh-mobile-drawer__link:focus-visible {
+  outline: 2px solid var(--dh-color-focus-ring);
+  outline-offset: -2px;
+}
+
+.dh-mobile-drawer__link--active {
+  background: var(--dh-color-brand-soft);
+  color: var(--dh-color-brand);
+  font-weight: var(--dh-font-weight-semibold);
+}
+
+.dh-mobile-drawer__link--active:hover {
+  background: var(--dh-color-brand-soft);
+  color: var(--dh-color-brand);
+}
+
+.dh-mobile-drawer__link-icon {
+  flex-shrink: 0;
+  color: inherit;
+}
+
+/* Divider between sections */
+.dh-mobile-drawer__divider {
+  height: 1px;
+  margin: var(--dh-space-3) 0;
+  background: var(--dh-color-border-default);
+  border: none;
+}
+
+/* Auth section at bottom */
+.dh-mobile-drawer__auth {
+  margin-top: auto;
+  padding-top: var(--dh-space-4);
+  border-top: 1px solid var(--dh-color-border-default);
+}
+
+.dh-mobile-drawer__auth-link {
+  display: flex;
+  align-items: center;
+  gap: var(--dh-space-3);
+  padding: var(--dh-space-3) var(--dh-space-3);
+  border-radius: var(--dh-radius-md);
+  font-family: var(--dh-font-sans);
+  font-size: var(--dh-font-size-sm);
+  font-weight: var(--dh-font-weight-medium);
+  color: var(--dh-color-fg-secondary);
+  text-decoration: none;
+  transition:
+    background-color var(--dh-motion-duration-fast) var(--dh-motion-easing-standard),
+    color var(--dh-motion-duration-fast) var(--dh-motion-easing-standard);
+}
+
+.dh-mobile-drawer__auth-link:hover {
+  background: var(--dh-color-bg-muted);
+  color: var(--dh-color-fg-primary);
+}
+
+.dh-mobile-drawer__auth-link:focus-visible {
+  outline: 2px solid var(--dh-color-focus-ring);
+  outline-offset: -2px;
+}
+
+.dh-mobile-drawer__auth-link--primary {
+  background: var(--dh-color-brand);
+  color: var(--dh-color-fg-inverse);
+  font-weight: var(--dh-font-weight-semibold);
+  justify-content: center;
+}
+
+.dh-mobile-drawer__auth-link--primary:hover {
+  background: var(--dh-color-brand-hover);
+  color: var(--dh-color-fg-inverse);
+}
+
+/* User info section when logged in */
+.dh-mobile-drawer__user-info {
+  display: flex;
+  align-items: center;
+  gap: var(--dh-space-3);
+  padding: var(--dh-space-3);
+  margin-bottom: var(--dh-space-2);
+}
+
+.dh-mobile-drawer__user-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--dh-radius-full);
+  background: var(--dh-color-brand-soft);
+  color: var(--dh-color-brand);
+  font-family: var(--dh-font-sans);
+  font-size: var(--dh-font-size-sm);
+  font-weight: var(--dh-font-weight-bold);
+  flex-shrink: 0;
+}
+
+.dh-mobile-drawer__user-details {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.dh-mobile-drawer__user-role {
+  font-family: var(--dh-font-sans);
+  font-size: var(--dh-font-size-xs);
+  font-weight: var(--dh-font-weight-semibold);
+  color: var(--dh-color-fg-primary);
+  text-transform: capitalize;
+}
+
+.dh-mobile-drawer__user-email {
+  font-family: var(--dh-font-sans);
+  font-size: var(--dh-font-size-xs);
+  color: var(--dh-color-fg-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

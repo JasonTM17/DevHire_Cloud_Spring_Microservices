@@ -1,0 +1,32 @@
+/**
+ * SkipLink — visually hidden link that becomes visible on focus.
+ * Allows keyboard users to skip navigation and jump to main content.
+ */
+
+.dh-skip-link {
+  position: absolute;
+  top: -100%;
+  left: 0;
+  z-index: var(--dh-z-modal, 1000);
+  padding: var(--dh-space-3, 12px) var(--dh-space-4, 16px);
+  background: var(--dh-color-bg-primary, #ffffff);
+  color: var(--dh-color-fg-primary, #101828);
+  border: 2px solid var(--dh-color-brand, #0f766e);
+  border-radius: var(--dh-radius-md, 8px);
+  font-size: var(--dh-font-size-sm, 14px);
+  font-weight: 600;
+  text-decoration: none;
+  outline: none;
+  opacity: 0;
+  pointer-events: none;
+  transition: top var(--dh-duration-fast, 150ms) var(--dh-easing-standard, ease),
+              opacity var(--dh-duration-fast, 150ms) var(--dh-easing-standard, ease);
+}
+
+.dh-skip-link:focus {
+  top: var(--dh-space-3, 12px);
+  left: var(--dh-space-3, 12px);
+  opacity: 1;
+  pointer-events: auto;
+  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.3);
+}

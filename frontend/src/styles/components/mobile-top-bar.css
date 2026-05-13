@@ -1,0 +1,86 @@
+/* ==========================================================================
+   Component: MobileTopBar
+   Mobile navigation bar for viewport < 768px.
+   Logo + hamburger toggle button. Uses --dh-* design tokens.
+   ========================================================================== */
+
+.dh-mobile-top-bar {
+  position: sticky;
+  top: 0;
+  z-index: var(--dh-z-dropdown);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+  padding: 0 var(--dh-space-4);
+  background: var(--dh-color-bg-surface);
+  border-bottom: 1px solid var(--dh-color-border-default);
+  box-shadow: var(--dh-shadow-sm);
+}
+
+/* Logo */
+.dh-mobile-top-bar__logo {
+  display: flex;
+  align-items: center;
+  gap: var(--dh-space-2);
+  text-decoration: none;
+  color: var(--dh-color-brand);
+  flex-shrink: 0;
+  transition: color var(--dh-motion-duration-fast) var(--dh-motion-easing-standard);
+}
+
+.dh-mobile-top-bar__logo:hover {
+  color: var(--dh-color-brand-hover);
+}
+
+.dh-mobile-top-bar__logo:focus-visible {
+  outline: 2px solid var(--dh-color-focus-ring);
+  outline-offset: 2px;
+  border-radius: var(--dh-radius-sm);
+}
+
+.dh-mobile-top-bar__logo-text {
+  font-family: var(--dh-font-sans);
+  font-size: var(--dh-font-size-md);
+  font-weight: var(--dh-font-weight-bold);
+  color: var(--dh-color-fg-primary);
+}
+
+/* Hamburger toggle button */
+.dh-mobile-top-bar__toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: var(--dh-radius-md);
+  background: transparent;
+  color: var(--dh-color-fg-secondary);
+  cursor: pointer;
+  transition:
+    background-color var(--dh-motion-duration-fast) var(--dh-motion-easing-standard),
+    color var(--dh-motion-duration-fast) var(--dh-motion-easing-standard);
+}
+
+.dh-mobile-top-bar__toggle:hover {
+  background: var(--dh-color-bg-muted);
+  color: var(--dh-color-fg-primary);
+}
+
+.dh-mobile-top-bar__toggle:focus-visible {
+  outline: 2px solid var(--dh-color-focus-ring);
+  outline-offset: 2px;
+}
+
+.dh-mobile-top-bar__toggle[aria-expanded="true"] {
+  background: var(--dh-color-bg-muted);
+  color: var(--dh-color-fg-primary);
+}
+
+/* Responsive: only show on mobile */
+@media (min-width: 768px) {
+  .dh-mobile-top-bar {
+    display: none;
+  }
+}
