@@ -89,6 +89,16 @@ test.describe("Accessibility — WCAG AA compliance", () => {
     expect(results.violations).toEqual([]);
   });
 
+  test("/employer/pipeline passes axe accessibility checks", async ({ page }) => {
+    await login(page, "employer");
+    await page.waitForLoadState("domcontentloaded");
+    await page.goto("/employer/pipeline");
+    await page.waitForLoadState("domcontentloaded");
+
+    const results = await buildAxeScanner(page).analyze();
+    expect(results.violations).toEqual([]);
+  });
+
   test("/candidate passes axe accessibility checks", async ({ page }) => {
     await login(page, "candidate");
     await page.waitForLoadState("domcontentloaded");
@@ -97,5 +107,23 @@ test.describe("Accessibility — WCAG AA compliance", () => {
 
     const results = await buildAxeScanner(page).analyze();
     expect(results.violations).toEqual([]);
+  });
+
+  test("/candidate/assessments/[id] passes axe accessibility checks", async ({ page }) => {
+    await login(page, "candidate");
+    await page.waitForLoadState("domcontentloaded");
+    // Navigate to assessments list first to find an available assessment
+    await page.goto("/candidate/assessments");
+    await page.waitForLoadState("domcontentloaded");
+
+    // Try to navigate to the first assessment link if available
+    const assessmentLink = page.locator('a[href*="/candidate/assessments/"]').first();
+    if (await assessmentLink.isVisible({ timeout: 3000 }).catch(() => false)) {
+      await assessmentLink.click();
+      await page.waitForLoadState("domcontentloaded");
+
+      const results = await buildAxeScanner(page).analyze();
+      expect(results.violations).toEqual([]);
+    }
   });
 });

@@ -89,6 +89,9 @@
 /* Design System v2 — Leaderboard component styles */
 @import '../styles/components/leaderboard.css';
 
+/* Design System v2 — Kanban component styles */
+@import '../styles/components/kanban.css';
+
 /* Design System v2 — OPS Dashboard component styles */
 @import '../styles/components/ops-shell.css';
 @import '../styles/components/ops-widget-grid.css';
