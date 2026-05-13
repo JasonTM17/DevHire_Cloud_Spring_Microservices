@@ -1,0 +1,117 @@
+/* ==========================================================================
+   OPS Pages Layout — Admin Overview, AI Ops, Observability
+   Uses design tokens: --dh-*
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Admin Overview Page
+   -------------------------------------------------------------------------- */
+.ops-overview-page {
+  display: grid;
+  gap: var(--dh-space-6, 24px);
+}
+
+.ops-overview-page__header {
+  display: grid;
+  gap: var(--dh-space-2, 8px);
+}
+
+.ops-overview-page__title {
+  margin: 0;
+  font-size: var(--dh-font-size-2xl, 1.5rem);
+  font-weight: var(--dh-font-weight-bold, 700);
+  color: var(--dh-color-fg-primary);
+}
+
+.ops-overview-page__subtitle {
+  margin: 0;
+  font-size: var(--dh-font-size-sm, 0.875rem);
+  color: var(--dh-color-fg-secondary);
+}
+
+.ops-overview-page__health-matrix {
+  grid-column: 1 / -1;
+}
+
+.ops-overview-page__sparklines {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--dh-space-4, 16px);
+}
+
+/* --------------------------------------------------------------------------
+   AI Ops Page
+   -------------------------------------------------------------------------- */
+.ops-ai-page {
+  display: grid;
+  gap: var(--dh-space-6, 24px);
+}
+
+.ops-ai-page__header {
+  display: grid;
+  gap: var(--dh-space-2, 8px);
+}
+
+.ops-ai-page__title {
+  margin: 0;
+  font-size: var(--dh-font-size-2xl, 1.5rem);
+  font-weight: var(--dh-font-weight-bold, 700);
+  color: var(--dh-color-fg-primary);
+}
+
+.ops-ai-page__subtitle {
+  margin: 0;
+  font-size: var(--dh-font-size-sm, 0.875rem);
+  color: var(--dh-color-fg-secondary);
+}
+
+.ops-ai-page__panels {
+  display: grid;
+  gap: var(--dh-space-4, 16px);
+}
+
+/* --------------------------------------------------------------------------
+   Observability Page
+   -------------------------------------------------------------------------- */
+.obs-page {
+  display: grid;
+  gap: var(--dh-space-6, 24px);
+}
+
+.obs-page__header {
+  display: grid;
+  gap: var(--dh-space-2, 8px);
+}
+
+.obs-page__title {
+  margin: 0;
+  font-size: var(--dh-font-size-2xl, 1.5rem);
+  font-weight: var(--dh-font-weight-bold, 700);
+  color: var(--dh-color-fg-primary);
+}
+
+.obs-page__subtitle {
+  margin: 0;
+  font-size: var(--dh-font-size-sm, 0.875rem);
+  color: var(--dh-color-fg-secondary);
+}
+
+.obs-page__sparklines {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--dh-space-4, 16px);
+}
+
+.obs-page__audit-feed {
+  grid-column: 1 / -1;
+}
+
+/* --------------------------------------------------------------------------
+   Responsive
+   -------------------------------------------------------------------------- */
+@media (max-width: 767px) {
+  .ops-overview-page__sparklines,
+  .obs-page__sparklines {
+    grid-template-columns: 1fr;
+  }
+}

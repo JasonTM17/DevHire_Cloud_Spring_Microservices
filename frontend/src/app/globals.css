@@ -84,6 +84,8 @@
 @import '../styles/components/ops-shell.css';
 @import '../styles/components/ai-ops-panels.css';
 @import '../styles/components/service-health.css';
+@import '../styles/components/sparkline-widget.css';
+@import '../styles/components/audit-feed.css';
 
 /* Existing stylesheets */
 @import '../styles/design-system.css';
@@ -93,6 +95,7 @@
 @import '../styles/pages/job-listing.css';
 @import '../styles/pages/challenge-library.css';
 @import '../styles/pages/job-detail.css';
+@import '../styles/pages/ops-pages.css';
 
 :root {
   color-scheme: light;

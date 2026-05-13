@@ -1,0 +1,95 @@
+/* ==========================================================================
+   SparklineWidget — OPS Sparkline with TimeRangeToggle
+   Uses design tokens: --dh-*
+   ========================================================================== */
+
+.dh-sparkline-widget {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dh-space-3, 12px);
+  padding: var(--dh-space-4, 16px);
+  background: var(--dh-color-bg-surface);
+  border: 1px solid var(--dh-color-border-default);
+  border-radius: var(--dh-radius-md, 8px);
+  min-width: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Header: title + time range toggle
+   -------------------------------------------------------------------------- */
+.dh-sparkline-widget__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--dh-space-2, 8px);
+  flex-wrap: wrap;
+}
+
+.dh-sparkline-widget__title {
+  margin: 0;
+  font-size: var(--dh-font-size-sm, 0.875rem);
+  font-weight: var(--dh-font-weight-medium, 500);
+  color: var(--dh-color-fg-secondary);
+  white-space: nowrap;
+}
+
+/* --------------------------------------------------------------------------
+   Time Range Toggle
+   -------------------------------------------------------------------------- */
+.dh-sparkline-widget__time-range {
+  display: flex;
+  gap: var(--dh-space-1, 4px);
+}
+
+.dh-sparkline-widget__range-btn {
+  appearance: none;
+  border: 1px solid var(--dh-color-border-default);
+  background: transparent;
+  color: var(--dh-color-fg-tertiary);
+  font-size: var(--dh-font-size-xs, 0.75rem);
+  font-family: var(--dh-font-sans);
+  padding: var(--dh-space-1, 4px) var(--dh-space-2, 8px);
+  border-radius: var(--dh-radius-sm, 4px);
+  cursor: pointer;
+  transition: background var(--dh-duration-fast, 100ms) var(--dh-ease-standard, ease),
+              color var(--dh-duration-fast, 100ms) var(--dh-ease-standard, ease),
+              border-color var(--dh-duration-fast, 100ms) var(--dh-ease-standard, ease);
+}
+
+.dh-sparkline-widget__range-btn:hover {
+  background: var(--dh-color-bg-hover);
+  color: var(--dh-color-fg-primary);
+}
+
+.dh-sparkline-widget__range-btn:focus-visible {
+  outline: 2px solid var(--dh-color-focus-ring);
+  outline-offset: 1px;
+}
+
+.dh-sparkline-widget__range-btn--active {
+  background: var(--dh-color-accent);
+  color: var(--dh-color-fg-on-accent, #fff);
+  border-color: var(--dh-color-accent);
+}
+
+.dh-sparkline-widget__range-btn--active:hover {
+  background: var(--dh-color-accent);
+  color: var(--dh-color-fg-on-accent, #fff);
+}
+
+/* --------------------------------------------------------------------------
+   Body: sparkline or empty state
+   -------------------------------------------------------------------------- */
+.dh-sparkline-widget__body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 56px;
+}
+
+.dh-sparkline-widget__empty {
+  margin: 0;
+  font-size: var(--dh-font-size-sm, 0.875rem);
+  color: var(--dh-color-fg-tertiary);
+  font-style: italic;
+}
