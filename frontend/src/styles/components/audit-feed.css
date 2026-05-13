@@ -1,0 +1,197 @@
+/* ==========================================================================
+   AuditFeedPanel — OPS Audit Log Feed
+   Uses design tokens: --dh-*
+   ========================================================================== */
+
+.dh-audit-feed {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dh-space-3, 12px);
+  padding: var(--dh-space-4, 16px);
+  background: var(--dh-color-bg-surface);
+  border: 1px solid var(--dh-color-border-default);
+  border-radius: var(--dh-radius-md, 8px);
+}
+
+/* --------------------------------------------------------------------------
+   Header
+   -------------------------------------------------------------------------- */
+.dh-audit-feed__header {
+  display: flex;
+  align-items: center;
+  gap: var(--dh-space-3, 12px);
+}
+
+.dh-audit-feed__title {
+  margin: 0;
+  font-size: var(--dh-font-size-md, 1rem);
+  font-weight: var(--dh-font-weight-semibold, 600);
+  color: var(--dh-color-fg-primary);
+}
+
+.dh-audit-feed__count {
+  font-size: var(--dh-font-size-xs, 0.75rem);
+  color: var(--dh-color-fg-tertiary);
+  background: var(--dh-color-bg-hover);
+  padding: var(--dh-space-1, 4px) var(--dh-space-2, 8px);
+  border-radius: var(--dh-radius-full, 9999px);
+}
+
+.dh-audit-feed__loading {
+  font-size: var(--dh-font-size-xs, 0.75rem);
+  color: var(--dh-color-fg-tertiary);
+  margin-left: auto;
+}
+
+/* --------------------------------------------------------------------------
+   List Header (column labels)
+   -------------------------------------------------------------------------- */
+.dh-audit-feed__list-header {
+  display: grid;
+  grid-template-columns: 140px 1fr 1fr 1fr 80px;
+  gap: var(--dh-space-2, 8px);
+  padding: var(--dh-space-2, 8px) var(--dh-space-3, 12px);
+  font-size: var(--dh-font-size-xs, 0.75rem);
+  font-weight: var(--dh-font-weight-medium, 500);
+  color: var(--dh-color-fg-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--dh-color-border-default);
+}
+
+/* --------------------------------------------------------------------------
+   Row
+   -------------------------------------------------------------------------- */
+.dh-audit-feed__row {
+  display: grid;
+  grid-template-columns: 140px 1fr 1fr 1fr 80px;
+  gap: var(--dh-space-2, 8px);
+  align-items: center;
+  padding: var(--dh-space-2, 8px) var(--dh-space-3, 12px);
+  font-size: var(--dh-font-size-sm, 0.875rem);
+  border-bottom: 1px solid var(--dh-color-border-subtle, var(--dh-color-border-default));
+  transition: background var(--dh-duration-fast, 100ms) var(--dh-ease-standard, ease);
+}
+
+.dh-audit-feed__row:hover {
+  background: var(--dh-color-bg-hover);
+}
+
+.dh-audit-feed__timestamp {
+  font-family: var(--dh-font-mono);
+  font-size: var(--dh-font-size-xs, 0.75rem);
+  color: var(--dh-color-fg-tertiary);
+  white-space: nowrap;
+}
+
+.dh-audit-feed__actor {
+  color: var(--dh-color-fg-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dh-audit-feed__action {
+  color: var(--dh-color-fg-secondary);
+  text-transform: capitalize;
+}
+
+.dh-audit-feed__resource {
+  font-family: var(--dh-font-mono);
+  font-size: var(--dh-font-size-xs, 0.75rem);
+  color: var(--dh-color-fg-tertiary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dh-audit-feed__status-badge {
+  justify-self: end;
+}
+
+/* --------------------------------------------------------------------------
+   Virtual list container
+   -------------------------------------------------------------------------- */
+.dh-audit-feed__virtual-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.dh-audit-feed__simple-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+/* --------------------------------------------------------------------------
+   Pagination
+   -------------------------------------------------------------------------- */
+.dh-audit-feed__pagination {
+  display: flex;
+  justify-content: center;
+  padding-top: var(--dh-space-2, 8px);
+}
+
+.dh-audit-feed__load-more {
+  appearance: none;
+  border: 1px solid var(--dh-color-border-default);
+  background: transparent;
+  color: var(--dh-color-fg-secondary);
+  font-size: var(--dh-font-size-sm, 0.875rem);
+  font-family: var(--dh-font-sans);
+  padding: var(--dh-space-2, 8px) var(--dh-space-4, 16px);
+  border-radius: var(--dh-radius-sm, 4px);
+  cursor: pointer;
+  transition: background var(--dh-duration-fast, 100ms) var(--dh-ease-standard, ease);
+}
+
+.dh-audit-feed__load-more:hover {
+  background: var(--dh-color-bg-hover);
+  color: var(--dh-color-fg-primary);
+}
+
+.dh-audit-feed__load-more:focus-visible {
+  outline: 2px solid var(--dh-color-focus-ring);
+  outline-offset: 1px;
+}
+
+.dh-audit-feed__load-more:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* --------------------------------------------------------------------------
+   States: empty and error
+   -------------------------------------------------------------------------- */
+.dh-audit-feed--empty,
+.dh-audit-feed--error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 120px;
+}
+
+.dh-audit-feed__empty-message,
+.dh-audit-feed__error-message {
+  margin: 0;
+  font-size: var(--dh-font-size-sm, 0.875rem);
+  color: var(--dh-color-fg-tertiary);
+  font-style: italic;
+}
+
+.dh-audit-feed__error-message {
+  color: var(--dh-color-fg-danger, var(--dh-color-fg-tertiary));
+}
+
+/* --------------------------------------------------------------------------
+   Responsive
+   -------------------------------------------------------------------------- */
+@media (max-width: 767px) {
+  .dh-audit-feed__list-header {
+    display: none;
+  }
+
+  .dh-audit-feed__row {
+    grid-template-columns: 1fr;
+    gap: var(--dh-space-1, 4px);
+  }
+}
