@@ -1,0 +1,90 @@
+/* ==========================================================================
+   OPS Dashboard Shell
+   Forces dark theme via [data-theme-scope="ops-dark"] which overrides
+   all --dh-color-* tokens to the ops-dark palette (see tokens/colors.css).
+   ========================================================================== */
+
+.ops-shell {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  min-height: 100vh;
+  background: var(--dh-color-bg-canvas);
+  color: var(--dh-color-fg-primary);
+}
+
+/* --------------------------------------------------------------------------
+   Sidebar
+   -------------------------------------------------------------------------- */
+.ops-shell__sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: var(--dh-space-4, 16px);
+  padding: var(--dh-space-5, 20px) var(--dh-space-4, 16px);
+  background: var(--dh-color-bg-surface);
+  border-right: 1px solid var(--dh-color-border-default);
+  overflow-y: auto;
+}
+
+/* --------------------------------------------------------------------------
+   Main area (status bar + content)
+   -------------------------------------------------------------------------- */
+.ops-shell__main {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  min-width: 0;
+  min-height: 100vh;
+}
+
+/* --------------------------------------------------------------------------
+   Global status bar
+   -------------------------------------------------------------------------- */
+.ops-shell__status-bar {
+  position: sticky;
+  top: 0;
+  z-index: var(--dh-z-dropdown, 10);
+  display: flex;
+  align-items: center;
+  gap: var(--dh-space-4, 16px);
+  min-height: 48px;
+  padding: var(--dh-space-2, 8px) var(--dh-space-6, 24px);
+  background: var(--dh-color-bg-elevated);
+  border-bottom: 1px solid var(--dh-color-border-default);
+}
+
+/* --------------------------------------------------------------------------
+   Content area
+   -------------------------------------------------------------------------- */
+.ops-shell__content {
+  padding: var(--dh-space-6, 24px);
+  overflow-y: auto;
+}
+
+/* --------------------------------------------------------------------------
+   Responsive: collapse sidebar on smaller viewports
+   -------------------------------------------------------------------------- */
+@media (max-width: 1023px) {
+  .ops-shell {
+    grid-template-columns: 64px minmax(0, 1fr);
+  }
+
+  .ops-shell__sidebar {
+    padding: var(--dh-space-3, 12px) var(--dh-space-2, 8px);
+  }
+}
+
+@media (max-width: 767px) {
+  .ops-shell {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ops-shell__sidebar {
+    display: none;
+  }
+
+  .ops-shell__content {
+    padding: var(--dh-space-4, 16px);
+  }
+}

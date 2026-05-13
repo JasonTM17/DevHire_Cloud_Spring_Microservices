@@ -1,0 +1,205 @@
+/* ============================================================
+   AI Ops Panels — AiProviderPanel, AiKnowledgePanel, AiRequestMetricsPanel
+   Uses --dh-* design tokens for consistent theming.
+   ============================================================ */
+
+/* --- Shared panel styles --- */
+.dh-ai-provider-panel,
+.dh-ai-knowledge-panel,
+.dh-ai-metrics-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dh-space-4);
+}
+
+.dh-ai-provider-panel__header,
+.dh-ai-knowledge-panel__header,
+.dh-ai-metrics-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--dh-space-3);
+}
+
+.dh-ai-provider-panel__title,
+.dh-ai-knowledge-panel__title,
+.dh-ai-metrics-panel__title {
+  font-size: var(--dh-font-size-lg);
+  font-weight: var(--dh-font-weight-semibold);
+  color: var(--dh-color-fg-primary);
+  margin: 0;
+}
+
+/* --- AiProviderPanel --- */
+.dh-ai-provider-panel__alert-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dh-space-2);
+}
+
+.dh-ai-provider-panel__alert-content p {
+  margin: 0;
+}
+
+.dh-ai-provider-panel__cooldown {
+  font-family: var(--dh-font-mono);
+  font-size: var(--dh-font-size-sm);
+  color: var(--dh-color-fg-secondary);
+}
+
+.dh-ai-provider-panel__fields,
+.dh-ai-knowledge-panel__fields {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--dh-space-3);
+  margin: 0;
+  padding: 0;
+}
+
+.dh-ai-provider-panel__field,
+.dh-ai-knowledge-panel__field {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: var(--dh-space-2) 0;
+  border-bottom: 1px solid var(--dh-color-border-subtle);
+}
+
+.dh-ai-provider-panel__field:last-child,
+.dh-ai-knowledge-panel__field:last-child {
+  border-bottom: none;
+}
+
+.dh-ai-provider-panel__field dt,
+.dh-ai-knowledge-panel__field dt {
+  font-size: var(--dh-font-size-sm);
+  color: var(--dh-color-fg-secondary);
+  font-weight: var(--dh-font-weight-medium);
+}
+
+.dh-ai-provider-panel__field dd,
+.dh-ai-knowledge-panel__field dd {
+  font-size: var(--dh-font-size-sm);
+  color: var(--dh-color-fg-primary);
+  font-weight: var(--dh-font-weight-semibold);
+  margin: 0;
+  text-align: right;
+}
+
+.dh-ai-provider-panel__failure-reason {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--dh-color-fg-danger) !important;
+}
+
+/* --- AiKnowledgePanel --- */
+.dh-ai-knowledge-panel__progress {
+  padding: var(--dh-space-2) 0;
+}
+
+.dh-ai-knowledge-panel__error {
+  font-size: var(--dh-font-size-sm);
+  color: var(--dh-color-fg-danger);
+  margin: 0;
+  padding: var(--dh-space-2);
+  background: var(--dh-color-bg-danger-subtle);
+  border-radius: var(--dh-radius-sm);
+}
+
+/* --- AiRequestMetricsPanel --- */
+.dh-ai-metrics-panel__time-range {
+  display: flex;
+  gap: 0;
+  border: 1px solid var(--dh-color-border-default);
+  border-radius: var(--dh-radius-md);
+  overflow: hidden;
+}
+
+.dh-ai-metrics-panel__range-btn {
+  padding: var(--dh-space-1) var(--dh-space-3);
+  font-size: var(--dh-font-size-xs);
+  font-weight: var(--dh-font-weight-medium);
+  font-family: inherit;
+  background: var(--dh-color-bg-secondary);
+  color: var(--dh-color-fg-secondary);
+  border: none;
+  cursor: pointer;
+  transition: background var(--dh-duration-fast) var(--dh-easing-standard),
+    color var(--dh-duration-fast) var(--dh-easing-standard);
+}
+
+.dh-ai-metrics-panel__range-btn:hover {
+  background: var(--dh-color-bg-hover);
+  color: var(--dh-color-fg-primary);
+}
+
+.dh-ai-metrics-panel__range-btn--active {
+  background: var(--dh-color-bg-brand);
+  color: var(--dh-color-fg-on-brand);
+}
+
+.dh-ai-metrics-panel__range-btn--active:hover {
+  background: var(--dh-color-bg-brand);
+  color: var(--dh-color-fg-on-brand);
+}
+
+.dh-ai-metrics-panel__range-btn + .dh-ai-metrics-panel__range-btn {
+  border-left: 1px solid var(--dh-color-border-default);
+}
+
+.dh-ai-metrics-panel__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: var(--dh-space-4);
+}
+
+.dh-ai-metrics-panel__stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dh-space-1);
+}
+
+.dh-ai-metrics-panel__stat-label {
+  font-size: var(--dh-font-size-xs);
+  color: var(--dh-color-fg-secondary);
+  font-weight: var(--dh-font-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.dh-ai-metrics-panel__stat-value {
+  font-size: var(--dh-font-size-xl);
+  font-weight: var(--dh-font-weight-bold);
+  color: var(--dh-color-fg-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.dh-ai-metrics-panel__stat--tokens .dh-ai-metrics-panel__stat-value {
+  font-size: var(--dh-font-size-sm);
+}
+
+.dh-ai-metrics-panel__token-usage {
+  display: flex;
+  gap: var(--dh-space-2);
+  flex-wrap: wrap;
+}
+
+/* --- OPS dark theme scope overrides --- */
+[data-theme-scope="ops-dark"] .dh-ai-provider-panel__title,
+[data-theme-scope="ops-dark"] .dh-ai-knowledge-panel__title,
+[data-theme-scope="ops-dark"] .dh-ai-metrics-panel__title {
+  color: var(--dh-color-fg-primary);
+}
+
+[data-theme-scope="ops-dark"] .dh-ai-metrics-panel__range-btn {
+  background: var(--dh-color-bg-tertiary);
+  color: var(--dh-color-fg-secondary);
+  border-color: var(--dh-color-border-subtle);
+}
+
+[data-theme-scope="ops-dark"] .dh-ai-metrics-panel__range-btn--active {
+  background: var(--dh-color-bg-brand);
+  color: var(--dh-color-fg-on-brand);
+}

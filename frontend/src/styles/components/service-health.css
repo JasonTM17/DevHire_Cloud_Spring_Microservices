@@ -1,0 +1,286 @@
+/* ==========================================================================
+   Service Health — OPS Dashboard Component Styles
+   Uses design tokens: --dh-* (ops-dark scope)
+   
+   Components: ServiceHealthMatrix, KafkaConsumerLagPanel, HikariPoolPanel
+   Requirements: 7.1, 7.2, 7.3, 7.4
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Service Health Matrix
+   -------------------------------------------------------------------------- */
+
+.dh-service-health-matrix {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--dh-space-4);
+}
+
+.dh-service-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dh-space-3);
+  padding: var(--dh-space-4);
+  background-color: var(--dh-color-bg-surface);
+  border: 1px solid var(--dh-color-border-default);
+  border-radius: var(--dh-radius-lg);
+  transition: border-color var(--dh-motion-duration-fast) var(--dh-motion-easing-standard),
+              box-shadow var(--dh-motion-duration-fast) var(--dh-motion-easing-standard);
+}
+
+.dh-service-card:hover {
+  border-color: var(--dh-color-border-strong);
+}
+
+.dh-service-card--unhealthy {
+  border-color: var(--dh-color-danger);
+  box-shadow: 0 0 0 1px var(--dh-color-danger-soft);
+}
+
+.dh-service-card--unhealthy .dh-service-card__indicator {
+  animation: dh-service-pulse 2s ease-in-out infinite;
+}
+
+@keyframes dh-service-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 1px var(--dh-color-danger-soft);
+  }
+  50% {
+    box-shadow: 0 0 0 4px var(--dh-color-danger-soft);
+  }
+}
+
+.dh-service-card__header {
+  display: flex;
+  align-items: center;
+  gap: var(--dh-space-2);
+}
+
+.dh-service-card__name {
+  font-family: var(--dh-font-sans);
+  font-size: var(--dh-font-size-sm);
+  font-weight: var(--dh-font-weight-semibold);
+  color: var(--dh-color-fg-primary);
+  margin: 0;
+}
+
+.dh-service-card__metrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--dh-space-2);
+}
+
+.dh-service-card__metric {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dh-space-1);
+}
+
+.dh-service-card__metric-label {
+  font-family: var(--dh-font-sans);
+  font-size: var(--dh-font-size-xs);
+  color: var(--dh-color-fg-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.dh-service-card__metric-value {
+  font-family: var(--dh-font-mono);
+  font-size: var(--dh-font-size-sm);
+  font-weight: var(--dh-font-weight-medium);
+  color: var(--dh-color-fg-primary);
+}
+
+/* --------------------------------------------------------------------------
+   Transition Timeline
+   -------------------------------------------------------------------------- */
+
+.dh-transition-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dh-space-2);
+  margin-top: var(--dh-space-4);
+  padding-top: var(--dh-space-4);
+  border-top: 1px solid var(--dh-color-border-default);
+}
+
+.dh-transition-timeline__title {
+  font-family: var(--dh-font-sans);
+  font-size: var(--dh-font-size-xs);
+  font-weight: var(--dh-font-weight-semibold);
+  color: var(--dh-color-fg-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0;
+}
+
+.dh-transition-timeline__item {
+  display: flex;
+  align-items: center;
+  gap: var(--dh-space-2);
+  padding: var(--dh-space-2);
+  background-color: var(--dh-color-bg-muted);
+  border-radius: var(--dh-radius-md);
+  font-family: var(--dh-font-sans);
+  font-size: var(--dh-font-size-xs);
+  color: var(--dh-color-fg-secondary);
+}
+
+.dh-transition-timeline__service-name {
+  font-weight: var(--dh-font-weight-medium);
+  color: var(--dh-color-fg-primary);
+}
+
+.dh-transition-timeline__arrow {
+  color: var(--dh-color-fg-muted);
+}
+
+.dh-transition-timeline__status--healthy {
+  color: var(--dh-color-success);
+}
+
+.dh-transition-timeline__status--degraded {
+  color: var(--dh-color-warn);
+}
+
+.dh-transition-timeline__status--critical {
+  color: var(--dh-color-danger);
+}
+
+.dh-transition-timeline__timestamp {
+  margin-left: auto;
+  font-family: var(--dh-font-mono);
+  font-size: var(--dh-font-size-xs);
+  color: var(--dh-color-fg-muted);
+}
+
+/* --------------------------------------------------------------------------
+   Kafka Consumer Lag Panel
+   -------------------------------------------------------------------------- */
+
+.dh-kafka-lag-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dh-space-3);
+}
+
+.dh-kafka-lag-panel__title {
+  font-family: var(--dh-font-sans);
+  font-size: var(--dh-font-size-sm);
+  font-weight: var(--dh-font-weight-semibold);
+  color: var(--dh-color-fg-primary);
+  margin: 0;
+}
+
+.dh-kafka-lag-group {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--dh-space-3);
+  background-color: var(--dh-color-bg-surface);
+  border: 1px solid var(--dh-color-border-default);
+  border-radius: var(--dh-radius-md);
+}
+
+.dh-kafka-lag-group__info {
+  display: flex;
+  align-items: center;
+  gap: var(--dh-space-2);
+}
+
+.dh-kafka-lag-group__name {
+  font-family: var(--dh-font-mono);
+  font-size: var(--dh-font-size-sm);
+  color: var(--dh-color-fg-primary);
+}
+
+.dh-kafka-lag-group__value {
+  font-family: var(--dh-font-mono);
+  font-size: var(--dh-font-size-sm);
+  font-weight: var(--dh-font-weight-medium);
+  color: var(--dh-color-fg-secondary);
+}
+
+.dh-kafka-lag-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: var(--dh-radius-full);
+  flex-shrink: 0;
+}
+
+.dh-kafka-lag-dot--green {
+  background-color: var(--dh-color-success);
+}
+
+.dh-kafka-lag-dot--yellow {
+  background-color: var(--dh-color-warn);
+}
+
+.dh-kafka-lag-dot--red {
+  background-color: var(--dh-color-danger);
+  animation: dh-service-pulse 2s ease-in-out infinite;
+}
+
+/* --------------------------------------------------------------------------
+   HikariCP Pool Panel
+   -------------------------------------------------------------------------- */
+
+.dh-hikari-pool-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dh-space-3);
+}
+
+.dh-hikari-pool-panel__title {
+  font-family: var(--dh-font-sans);
+  font-size: var(--dh-font-size-sm);
+  font-weight: var(--dh-font-weight-semibold);
+  color: var(--dh-color-fg-primary);
+  margin: 0;
+}
+
+.dh-hikari-pool-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dh-space-2);
+  padding: var(--dh-space-3);
+  background-color: var(--dh-color-bg-surface);
+  border: 1px solid var(--dh-color-border-default);
+  border-radius: var(--dh-radius-md);
+}
+
+.dh-hikari-pool-item__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dh-hikari-pool-item__name {
+  font-family: var(--dh-font-mono);
+  font-size: var(--dh-font-size-sm);
+  color: var(--dh-color-fg-primary);
+}
+
+.dh-hikari-pool-item__classification {
+  font-family: var(--dh-font-sans);
+  font-size: var(--dh-font-size-xs);
+  font-weight: var(--dh-font-weight-medium);
+  padding: var(--dh-space-1) var(--dh-space-2);
+  border-radius: var(--dh-radius-sm);
+}
+
+.dh-hikari-pool-item__classification--normal {
+  color: var(--dh-color-success);
+  background-color: var(--dh-color-success-soft);
+}
+
+.dh-hikari-pool-item__classification--warning {
+  color: var(--dh-color-warn);
+  background-color: var(--dh-color-warn-soft);
+}
+
+.dh-hikari-pool-item__classification--critical {
+  color: var(--dh-color-danger);
+  background-color: var(--dh-color-danger-soft);
+}

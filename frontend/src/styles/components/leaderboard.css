@@ -145,3 +145,147 @@
     font-size: var(--dh-font-size-sm);
   }
 }
+
+/* ==========================================================================
+   Leaderboard Filters — Period Toggle + Topic Select
+   Requirements: 5.4
+   ========================================================================== */
+
+.dh-leaderboard-filters {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--dh-space-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--dh-space-4);
+}
+
+.dh-leaderboard-filters__period-group {
+  display: flex;
+  border: 1px solid var(--dh-color-border-default);
+  border-radius: var(--dh-radius-md);
+  overflow: hidden;
+}
+
+.dh-leaderboard-filters__period-btn {
+  padding: var(--dh-space-2) var(--dh-space-4);
+  font-family: var(--dh-font-sans);
+  font-size: var(--dh-font-size-sm);
+  font-weight: var(--dh-font-weight-medium);
+  color: var(--dh-color-fg-secondary);
+  background: var(--dh-color-bg-surface);
+  border: none;
+  cursor: pointer;
+  transition:
+    background-color var(--dh-motion-duration-fast) var(--dh-motion-easing-standard),
+    color var(--dh-motion-duration-fast) var(--dh-motion-easing-standard);
+}
+
+.dh-leaderboard-filters__period-btn:not(:last-child) {
+  border-right: 1px solid var(--dh-color-border-default);
+}
+
+.dh-leaderboard-filters__period-btn:hover {
+  background: var(--dh-color-bg-muted);
+}
+
+.dh-leaderboard-filters__period-btn:focus-visible {
+  outline: 2px solid var(--dh-color-focus-ring);
+  outline-offset: -2px;
+  z-index: 1;
+}
+
+.dh-leaderboard-filters__period-btn--active {
+  background: var(--dh-color-brand);
+  color: var(--dh-color-fg-on-brand);
+}
+
+.dh-leaderboard-filters__period-btn--active:hover {
+  background: var(--dh-color-brand);
+  color: var(--dh-color-fg-on-brand);
+}
+
+.dh-leaderboard-filters__topic {
+  min-width: 180px;
+}
+
+/* ==========================================================================
+   Current User Banner — Sticky bottom rank display
+   Requirements: 5.4
+   ========================================================================== */
+
+.dh-current-user-banner {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--dh-space-3);
+  padding: var(--dh-space-3) var(--dh-space-4);
+  background: var(--dh-color-accent-subtle);
+  border-top: 1px solid var(--dh-color-accent);
+  border-radius: var(--dh-radius-md) var(--dh-radius-md) 0 0;
+  font-family: var(--dh-font-sans);
+  font-size: var(--dh-font-size-base);
+  color: var(--dh-color-fg-primary);
+}
+
+.dh-current-user-banner__trophy {
+  font-size: var(--dh-font-size-lg);
+}
+
+.dh-current-user-banner__text {
+  font-weight: var(--dh-font-weight-medium);
+}
+
+.dh-current-user-banner__text strong {
+  font-weight: var(--dh-font-weight-bold);
+  color: var(--dh-color-accent-fg);
+}
+
+.dh-current-user-banner__username {
+  margin-left: auto;
+  font-size: var(--dh-font-size-sm);
+  color: var(--dh-color-fg-secondary);
+}
+
+/* ==========================================================================
+   Leaderboard Page Layout
+   Requirements: 5.3, 5.4
+   ========================================================================== */
+
+.dh-leaderboard-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dh-space-4);
+  padding: var(--dh-space-6);
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.dh-leaderboard-page__header {
+  display: flex;
+  align-items: center;
+  gap: var(--dh-space-3);
+}
+
+.dh-leaderboard-page__title {
+  font-family: var(--dh-font-sans);
+  font-size: var(--dh-font-size-2xl);
+  font-weight: var(--dh-font-weight-bold);
+  color: var(--dh-color-fg-primary);
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .dh-leaderboard-page {
+    padding: var(--dh-space-4);
+  }
+
+  .dh-leaderboard-filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .dh-leaderboard-filters__topic {
+    min-width: unset;
+  }
+}
