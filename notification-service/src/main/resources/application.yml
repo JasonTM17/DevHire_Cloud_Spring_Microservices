@@ -17,6 +17,10 @@ spring:
           time_zone: UTC
   flyway:
     enabled: true
+  data:
+    redis:
+      host: ${SPRING_REDIS_HOST:localhost}
+      port: ${SPRING_REDIS_PORT:6379}
   kafka:
     bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:29092}
     consumer:
@@ -49,6 +53,11 @@ spring:
 user-service:
   url: ${USER_SERVICE_URL:http://localhost:8082}
 devhire:
+  jwt:
+    secret: ${DEVHIRE_JWT_SECRET:devhire-default-secret-change-in-production-32chars}
+  websocket:
+    allowed-origins: ${DEVHIRE_WEBSOCKET_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:8080}
+    instance-id: ${DEVHIRE_WEBSOCKET_INSTANCE_ID:${HOSTNAME:notification-service-local}}
   outbox:
     publisher:
       enabled: ${DEVHIRE_OUTBOX_PUBLISHER_ENABLED:true}
