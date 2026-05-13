@@ -11,6 +11,7 @@ $requiredPaths = @(
     ".editorconfig",
     ".java-version",
     ".nvmrc",
+    "docs/INDEX.md",
     "docs/README_EN.md",
     "docs/README_JA.md",
     "docs/status.md",
@@ -165,6 +166,7 @@ try {
 
     $primaryReviewFiles = @(
         "README.md",
+        "docs/INDEX.md",
         "docs/README_EN.md",
         "docs/status.md",
         "docs/REVIEW_EVIDENCE.md",

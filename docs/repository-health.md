@@ -13,7 +13,7 @@ This page summarizes the public GitHub presentation state for DevHire Cloud.
 | Topics | 20 production-engineering topics |
 | Default branch | `master` |
 | Branch protection | Enabled; public branch API reports `protected=true` |
-| Dependabot PRs | 0 open PRs after curated cleanup |
+| Dependabot PRs | 20 open Dependabot PRs at the 2026-05-13 live scan; all require owner-token zero-noise cleanup or a scheduled dependency refresh |
 | Runtime evidence | Domain metrics, runtime smoke, and portfolio runtime report scripts |
 | Cloud posture | AWS blueprint apply-ready as code; no AWS apply claimed |
 | Tracked source hygiene | Clean; reports, targets, `.next`, Playwright output, and local `.env` remain ignored |

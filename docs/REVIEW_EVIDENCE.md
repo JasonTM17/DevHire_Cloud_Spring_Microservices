@@ -10,7 +10,7 @@ This is the curated proof pack for recruiters and senior engineering reviewers. 
 | Current development cycle | `0.6.0-SNAPSHOT` after the `v0.5.1` release |
 | GitHub About/Homepage/Topics | Applied through owner-authenticated GitHub API |
 | Branch protection | `master` is protected and release changes go through PR review |
-| Dependabot posture | 0 open PRs after curated cleanup |
+| Dependabot posture | 20 open Dependabot PRs at the 2026-05-13 live scan; zero-noise dry-run classifies all as blocked/manual/defer and owner-token cleanup is pending |
 | Release notes | `docs/release-notes/v0.5.1.md` is the canonical release body |
 | v1 posture | Roadmap and acceptance checklist only; no `v1.0.0` release is claimed |
 | v0.6 Stitch/code-assessment stack | Merged into `master`; [pr-stack-v0.6.md](pr-stack-v0.6.md) is now the historical merge record |
@@ -21,7 +21,7 @@ See [status.md](status.md) for the single source of truth.
 
 | Time | Route |
 |---:|---|
-| 5 minutes | README first viewport, screenshots, [production scorecard](production-engineering-scorecard.md) |
+| 5 minutes | README first viewport, [documentation index](INDEX.md), screenshots, [production scorecard](production-engineering-scorecard.md) |
 | 15 minutes | [Service catalog](service-catalog.md), [architecture review index](architecture-review-index.md), [security evidence](security-evidence.md) |
 | 30 minutes | `.\scripts\portfolio-verify.ps1 -Docs -Docker -Cloud`, [cloud readiness](cloud-readiness-review.md), [runtime matrix](runtime-acceptance-matrix.md) |
 

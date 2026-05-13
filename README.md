@@ -26,13 +26,14 @@ DevHire Cloud is a production-engineering portfolio for a recruitment platform: 
 | Current development cycle | `0.6.0-SNAPSHOT` |
 | v0.6 Stitch app | Merged into `master`; Code Assessment Studio is the flagship candidate grading, employer review, and admin health workflow |
 | Default branch | `master`, protected and PR-governed |
-| Dependabot queue | 0 open PRs at latest cleanup scan |
+| Dependabot queue | 20 open Dependabot PRs at the 2026-05-13 live scan; zero-noise dry-run classifies all as blocked/manual/defer until owner-token cleanup |
 | v1 status | Roadmap and acceptance checklist only, not a released tag |
 
 ## Reviewer Quick Links
 
 | Need | Link |
 |---|---|
+| Documentation index | [docs/INDEX.md](docs/INDEX.md) |
 | English docs | [docs/README_EN.md](docs/README_EN.md) |
 | Japanese docs | [docs/README_JA.md](docs/README_JA.md) |
 | Current status | [docs/status.md](docs/status.md) |
