@@ -1,0 +1,57 @@
+/* ==========================================================================
+   StatusDot — Data Display Component Styles
+   Uses design tokens: --dh-*
+   ========================================================================== */
+
+.dh-status-dot {
+  display: inline-block;
+  border-radius: var(--dh-radius-full);
+  flex-shrink: 0;
+}
+
+/* Sizes */
+.dh-status-dot--sm {
+  width: 6px;
+  height: 6px;
+}
+
+.dh-status-dot--md {
+  width: 8px;
+  height: 8px;
+}
+
+.dh-status-dot--lg {
+  width: 12px;
+  height: 12px;
+}
+
+/* Status colors */
+.dh-status-dot--healthy {
+  background-color: var(--dh-color-success);
+  box-shadow: 0 0 0 3px var(--dh-color-success-soft);
+}
+
+.dh-status-dot--degraded {
+  background-color: var(--dh-color-warn);
+  box-shadow: 0 0 0 3px var(--dh-color-warn-soft);
+}
+
+.dh-status-dot--critical {
+  background-color: var(--dh-color-danger);
+  box-shadow: 0 0 0 3px var(--dh-color-danger-soft);
+  animation: dh-status-dot-pulse 2s ease-in-out infinite;
+}
+
+.dh-status-dot--unknown {
+  background-color: var(--dh-color-fg-muted);
+  box-shadow: 0 0 0 3px var(--dh-color-bg-muted);
+}
+
+@keyframes dh-status-dot-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}

@@ -1,0 +1,105 @@
+/* Challenge Library Page */
+.challenge-library {
+  display: flex;
+  gap: var(--space-6);
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-6);
+}
+
+.challenge-library__sidebar {
+  flex-shrink: 0;
+}
+
+.challenge-library__content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.challenge-library__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.challenge-library__search {
+  flex: 1;
+  max-width: 400px;
+}
+
+.challenge-library__search input {
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  background: var(--color-white);
+  color: var(--color-text-primary);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.challenge-library__search input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(237, 27, 47, 0.1);
+}
+
+.challenge-library__search input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.challenge-library__count {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.challenge-library__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--space-4);
+}
+
+.challenge-library__empty {
+  text-align: center;
+  padding: var(--space-12);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-base);
+}
+
+/* Responsive */
+@media (max-width: 1023px) {
+  .challenge-library {
+    flex-direction: column;
+  }
+
+  .challenge-library__sidebar {
+    width: 100%;
+  }
+
+  .challenge-library__grid {
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  .challenge-library {
+    padding: var(--space-4) var(--space-4);
+  }
+
+  .challenge-library__header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .challenge-library__search {
+    max-width: 100%;
+  }
+
+  .challenge-library__grid {
+    grid-template-columns: 1fr;
+  }
+}

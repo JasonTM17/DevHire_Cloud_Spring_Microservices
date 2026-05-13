@@ -1,0 +1,214 @@
+/* ==========================================================================
+   Design Tokens — Colors
+   Prefix: --dh-color-*
+   
+   Light theme (default) under :root
+   Dark theme override under :root[data-theme=dark]
+   OPS dark scope under [data-theme-scope=ops-dark]
+   
+   All foreground/background pairs maintain WCAG 2.1 AA contrast ratios:
+   - Normal text: >= 4.5:1
+   - Large text (18px+ or 14px bold): >= 3:1
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Light Theme (default)
+   -------------------------------------------------------------------------- */
+:root {
+  /* Backgrounds */
+  --dh-color-bg-canvas: #f4f7fb;
+  --dh-color-bg-surface: #ffffff;
+  --dh-color-bg-elevated: #ffffff;
+  --dh-color-bg-muted: #f8fafc;
+
+  /* Foregrounds */
+  --dh-color-fg-primary: #101828;
+  --dh-color-fg-secondary: #344054;
+  --dh-color-fg-muted: #667085;
+  --dh-color-fg-inverse: #ffffff;
+
+  /* Borders */
+  --dh-color-border-default: #d8e1ec;
+  --dh-color-border-strong: #c6d2e0;
+  --dh-color-border-focus: #2563eb;
+
+  /* Brand */
+  --dh-color-brand: #0f766e;
+  --dh-color-brand-hover: #0d6560;
+  --dh-color-brand-soft: #e7f8f4;
+  --dh-color-brand-dark: #0b4f49;
+
+  /* Accent */
+  --dh-color-accent: #2563eb;
+  --dh-color-accent-hover: #1d4ed8;
+  --dh-color-accent-soft: #e8f0ff;
+
+  /* Semantic — Success */
+  --dh-color-success: #047857;
+  --dh-color-success-soft: #ecfdf5;
+  --dh-color-success-border: #a7f3d0;
+
+  /* Semantic — Warning */
+  --dh-color-warn: #b45309;
+  --dh-color-warn-soft: #fff7ed;
+  --dh-color-warn-border: #fed7aa;
+
+  /* Semantic — Danger */
+  --dh-color-danger: #b42318;
+  --dh-color-danger-soft: #fff1f2;
+  --dh-color-danger-border: #fecdd3;
+
+  /* Semantic — Info */
+  --dh-color-info: #075985;
+  --dh-color-info-soft: #f0f9ff;
+  --dh-color-info-border: #bae6fd;
+
+  /* Focus ring (>= 3:1 contrast on both light and dark backgrounds) */
+  --dh-color-focus-ring: #2563eb;
+
+  /* Difficulty badges */
+  --dh-color-difficulty-easy: #047857;
+  --dh-color-difficulty-easy-bg: #ecfdf5;
+  --dh-color-difficulty-medium: #b45309;
+  --dh-color-difficulty-medium-bg: #fff7ed;
+  --dh-color-difficulty-hard: #b42318;
+  --dh-color-difficulty-hard-bg: #fff1f2;
+}
+
+/* --------------------------------------------------------------------------
+   Dark Theme
+   -------------------------------------------------------------------------- */
+:root[data-theme="dark"] {
+  /* Backgrounds */
+  --dh-color-bg-canvas: #0f1419;
+  --dh-color-bg-surface: #1a2332;
+  --dh-color-bg-elevated: #243044;
+  --dh-color-bg-muted: #151d28;
+
+  /* Foregrounds — contrast >= 4.5:1 against bg-canvas/bg-surface */
+  --dh-color-fg-primary: #f0f4f8;
+  --dh-color-fg-secondary: #c9d7e8;
+  --dh-color-fg-muted: #8a97aa;
+  --dh-color-fg-inverse: #101828;
+
+  /* Borders */
+  --dh-color-border-default: #2d3d52;
+  --dh-color-border-strong: #3d5068;
+  --dh-color-border-focus: #60a5fa;
+
+  /* Brand */
+  --dh-color-brand: #2dd4bf;
+  --dh-color-brand-hover: #5eead4;
+  --dh-color-brand-soft: rgba(45, 212, 191, 0.12);
+  --dh-color-brand-dark: #99f6e4;
+
+  /* Accent */
+  --dh-color-accent: #60a5fa;
+  --dh-color-accent-hover: #93c5fd;
+  --dh-color-accent-soft: rgba(96, 165, 250, 0.12);
+
+  /* Semantic — Success */
+  --dh-color-success: #34d399;
+  --dh-color-success-soft: rgba(52, 211, 153, 0.12);
+  --dh-color-success-border: rgba(52, 211, 153, 0.3);
+
+  /* Semantic — Warning */
+  --dh-color-warn: #fbbf24;
+  --dh-color-warn-soft: rgba(251, 191, 36, 0.12);
+  --dh-color-warn-border: rgba(251, 191, 36, 0.3);
+
+  /* Semantic — Danger */
+  --dh-color-danger: #f87171;
+  --dh-color-danger-soft: rgba(248, 113, 113, 0.12);
+  --dh-color-danger-border: rgba(248, 113, 113, 0.3);
+
+  /* Semantic — Info */
+  --dh-color-info: #38bdf8;
+  --dh-color-info-soft: rgba(56, 189, 248, 0.12);
+  --dh-color-info-border: rgba(56, 189, 248, 0.3);
+
+  /* Focus ring */
+  --dh-color-focus-ring: #60a5fa;
+
+  /* Difficulty badges */
+  --dh-color-difficulty-easy: #34d399;
+  --dh-color-difficulty-easy-bg: rgba(52, 211, 153, 0.12);
+  --dh-color-difficulty-medium: #fbbf24;
+  --dh-color-difficulty-medium-bg: rgba(251, 191, 36, 0.12);
+  --dh-color-difficulty-hard: #f87171;
+  --dh-color-difficulty-hard-bg: rgba(248, 113, 113, 0.12);
+}
+
+/* --------------------------------------------------------------------------
+   OPS Dark Scope (forced dark for /admin, /platform/observability)
+   Darker, more data-dense palette inspired by Datadog/Grafana
+   -------------------------------------------------------------------------- */
+[data-theme-scope="ops-dark"] {
+  /* Backgrounds — deeper than standard dark */
+  --dh-color-bg-canvas: #0a0e14;
+  --dh-color-bg-surface: #111820;
+  --dh-color-bg-elevated: #1a2230;
+  --dh-color-bg-muted: #0d1218;
+
+  /* Foregrounds */
+  --dh-color-fg-primary: #e8edf4;
+  --dh-color-fg-secondary: #b0bfcf;
+  --dh-color-fg-muted: #7f91a8;
+  --dh-color-fg-inverse: #0a0e14;
+
+  /* Borders */
+  --dh-color-border-default: #1e2a3a;
+  --dh-color-border-strong: #2d3f54;
+  --dh-color-border-focus: #60a5fa;
+
+  /* Brand */
+  --dh-color-brand: #2dd4bf;
+  --dh-color-brand-hover: #5eead4;
+  --dh-color-brand-soft: rgba(45, 212, 191, 0.1);
+  --dh-color-brand-dark: #99f6e4;
+
+  /* Accent */
+  --dh-color-accent: #60a5fa;
+  --dh-color-accent-hover: #93c5fd;
+  --dh-color-accent-soft: rgba(96, 165, 250, 0.1);
+
+  /* Semantic — Success */
+  --dh-color-success: #22c55e;
+  --dh-color-success-soft: rgba(34, 197, 94, 0.1);
+  --dh-color-success-border: rgba(34, 197, 94, 0.25);
+
+  /* Semantic — Warning */
+  --dh-color-warn: #eab308;
+  --dh-color-warn-soft: rgba(234, 179, 8, 0.1);
+  --dh-color-warn-border: rgba(234, 179, 8, 0.25);
+
+  /* Semantic — Danger */
+  --dh-color-danger: #ef4444;
+  --dh-color-danger-soft: rgba(239, 68, 68, 0.1);
+  --dh-color-danger-border: rgba(239, 68, 68, 0.25);
+
+  /* Semantic — Info */
+  --dh-color-info: #38bdf8;
+  --dh-color-info-soft: rgba(56, 189, 248, 0.1);
+  --dh-color-info-border: rgba(56, 189, 248, 0.25);
+
+  /* Focus ring */
+  --dh-color-focus-ring: #60a5fa;
+
+  /* OPS-specific tokens */
+  --dh-color-ops-bg: #0a0e14;
+  --dh-color-ops-surface: #111820;
+  --dh-color-ops-grid-line: rgba(255, 255, 255, 0.06);
+  --dh-color-ops-accent: #38bdf8;
+  --dh-color-ops-status-healthy: #22c55e;
+  --dh-color-ops-status-degraded: #eab308;
+  --dh-color-ops-status-critical: #ef4444;
+
+  /* Difficulty badges */
+  --dh-color-difficulty-easy: #34d399;
+  --dh-color-difficulty-easy-bg: rgba(52, 211, 153, 0.1);
+  --dh-color-difficulty-medium: #fbbf24;
+  --dh-color-difficulty-medium-bg: rgba(251, 191, 36, 0.1);
+  --dh-color-difficulty-hard: #ef4444;
+  --dh-color-difficulty-hard-bg: rgba(239, 68, 68, 0.1);
+}

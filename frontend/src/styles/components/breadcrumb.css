@@ -1,0 +1,54 @@
+/* ==========================================================================
+   Breadcrumb — Navigation Component Styles
+   Uses design tokens: --dh-*
+   ========================================================================== */
+
+.dh-breadcrumb {
+  font-family: var(--dh-font-sans);
+  font-size: var(--dh-font-size-sm);
+  line-height: var(--dh-line-height-normal);
+}
+
+.dh-breadcrumb__list {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.dh-breadcrumb__item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--dh-space-2);
+}
+
+.dh-breadcrumb__link {
+  color: var(--dh-color-fg-muted);
+  text-decoration: none;
+  transition: color var(--dh-motion-duration-fast) var(--dh-motion-easing-standard);
+}
+
+.dh-breadcrumb__link:hover {
+  color: var(--dh-color-brand);
+  text-decoration: underline;
+}
+
+.dh-breadcrumb__link:focus-visible {
+  outline: 2px solid var(--dh-color-focus-ring);
+  outline-offset: 2px;
+  border-radius: var(--dh-radius-sm);
+}
+
+.dh-breadcrumb__current {
+  color: var(--dh-color-fg-primary);
+  font-weight: var(--dh-font-weight-medium);
+}
+
+.dh-breadcrumb__separator {
+  color: var(--dh-color-fg-muted);
+  margin: 0 var(--dh-space-1);
+  user-select: none;
+}

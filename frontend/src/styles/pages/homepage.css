@@ -1,0 +1,215 @@
+/* ============================================
+   Homepage Styles — ITViec-Inspired
+   ============================================ */
+
+/* ---- Hero Section ---- */
+
+.hero-section {
+  width: 100%;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 40%, #ED1B2F 100%);
+  color: var(--color-white);
+  text-align: center;
+  padding: 80px var(--space-6);
+}
+
+.hero-section__heading {
+  font-size: var(--font-size-3xl);
+  font-weight: 700;
+  color: var(--color-white);
+  margin-bottom: var(--space-6);
+  line-height: var(--line-height-tight);
+}
+
+.hero-section__heading span {
+  color: var(--color-primary);
+}
+
+.hero-section__search {
+  max-width: 700px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.hero-section__search .search-bar {
+  flex: 1;
+}
+
+.hero-section__city-select {
+  min-height: 44px;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-white);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-family);
+  cursor: pointer;
+  min-width: 140px;
+}
+
+.hero-section__city-select:focus {
+  border-color: var(--color-primary);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(237, 27, 47, 0.08);
+}
+
+/* ---- Trending Skills Section ---- */
+
+.trending-section {
+  padding: var(--space-6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  background: var(--color-white);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.trending-section__label {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  margin-right: var(--space-2);
+}
+
+/* ---- Top Employers Section ---- */
+
+.top-employers {
+  padding: var(--space-10) var(--space-6);
+  max-width: var(--container-max);
+  margin: 0 auto;
+}
+
+.top-employers__grid {
+  display: flex;
+  gap: var(--space-6);
+  overflow-x: auto;
+  padding-bottom: var(--space-4);
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.top-employers__grid::-webkit-scrollbar {
+  height: 6px;
+}
+
+.top-employers__grid::-webkit-scrollbar-track {
+  background: var(--color-bg);
+  border-radius: 3px;
+}
+
+.top-employers__grid::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+
+.employer-card {
+  min-width: 200px;
+  max-width: 220px;
+  flex-shrink: 0;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  text-align: center;
+  text-decoration: none;
+  color: inherit;
+}
+
+.employer-card__logo {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg);
+}
+
+.employer-card__logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.employer-card__logo-fallback {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.employer-card__name {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  line-height: var(--line-height-tight);
+}
+
+.employer-card__industry {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.employer-card__jobs {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+/* ---- Featured Jobs Section ---- */
+
+.featured-jobs {
+  padding: var(--space-10) var(--space-6);
+  max-width: var(--container-max);
+  margin: 0 auto;
+}
+
+.featured-jobs__grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-4);
+}
+
+/* ---- Responsive ---- */
+
+@media (max-width: 768px) {
+  .hero-section {
+    padding: 48px var(--space-4);
+  }
+
+  .hero-section__heading {
+    font-size: var(--font-size-2xl);
+  }
+
+  .hero-section__search {
+    flex-direction: column;
+  }
+
+  .hero-section__city-select {
+    width: 100%;
+  }
+
+  .trending-section {
+    padding: var(--space-4);
+    gap: var(--space-2);
+  }
+
+  .top-employers__grid {
+    gap: var(--space-4);
+  }
+
+  .employer-card {
+    min-width: 160px;
+  }
+
+  .featured-jobs__grid {
+    grid-template-columns: 1fr;
+  }
+}

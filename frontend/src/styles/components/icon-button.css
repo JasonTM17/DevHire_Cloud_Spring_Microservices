@@ -1,0 +1,66 @@
+/* ==========================================================================
+   IconButton — Primitive Component Styles
+   Uses design tokens: --dh-*
+   ========================================================================== */
+
+.dh-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--dh-space-2);
+  border: 1px solid transparent;
+  border-radius: var(--dh-radius-md);
+  background-color: transparent;
+  color: var(--dh-color-fg-secondary);
+  cursor: pointer;
+  transition:
+    background-color var(--dh-motion-duration-fast) var(--dh-motion-easing-standard),
+    color var(--dh-motion-duration-fast) var(--dh-motion-easing-standard);
+}
+
+.dh-icon-btn:hover:not(:disabled) {
+  background-color: var(--dh-color-bg-muted);
+  color: var(--dh-color-fg-primary);
+}
+
+.dh-icon-btn:focus-visible {
+  outline: 2px solid var(--dh-color-focus-ring);
+  outline-offset: 2px;
+}
+
+.dh-icon-btn:active:not(:disabled) {
+  transform: scale(0.92);
+}
+
+.dh-icon-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Sizes */
+.dh-icon-btn--sm {
+  padding: var(--dh-space-1);
+}
+
+.dh-icon-btn--md {
+  padding: var(--dh-space-2);
+}
+
+.dh-icon-btn--lg {
+  padding: var(--dh-space-3);
+}
+
+/* Variants */
+.dh-icon-btn--ghost {
+  background-color: transparent;
+}
+
+.dh-icon-btn--filled {
+  background-color: var(--dh-color-bg-muted);
+  border-color: var(--dh-color-border-default);
+}
+
+.dh-icon-btn--filled:hover:not(:disabled) {
+  background-color: var(--dh-color-bg-surface);
+  border-color: var(--dh-color-border-strong);
+}

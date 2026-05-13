@@ -1,0 +1,17 @@
+/* ==========================================================================
+   Sparkline — Data Display Component Styles
+   Uses design tokens: --dh-*
+   ========================================================================== */
+
+.dh-sparkline {
+  display: inline-flex;
+  align-items: center;
+}
+
+.dh-sparkline__svg {
+  display: block;
+}
+
+.dh-sparkline--empty {
+  opacity: 0.5;
+}

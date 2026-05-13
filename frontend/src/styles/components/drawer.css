@@ -1,0 +1,104 @@
+/* ==========================================================================
+   Component: Drawer
+   Slide-in panel from left or right with backdrop, focus trap, Escape-to-close.
+   Uses --dh-z-overlay for z-index layering.
+   ========================================================================== */
+
+.dh-drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: var(--dh-z-overlay);
+  background-color: rgba(0, 0, 0, 0.4);
+  animation: dh-drawer-backdrop-in var(--dh-motion-duration-fast) var(--dh-motion-easing-standard);
+}
+
+.dh-drawer {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  z-index: var(--dh-z-overlay);
+  display: flex;
+  flex-direction: column;
+  width: 320px;
+  max-width: 85vw;
+  background: var(--dh-color-bg-elevated);
+  border: 1px solid var(--dh-color-border-default);
+  box-shadow: var(--dh-shadow-overlay);
+}
+
+.dh-drawer--left {
+  left: 0;
+  border-right: 1px solid var(--dh-color-border-default);
+  border-left: none;
+  animation: dh-drawer-slide-left-in var(--dh-motion-duration-normal) var(--dh-motion-easing-emphasized);
+}
+
+.dh-drawer--right {
+  right: 0;
+  border-left: 1px solid var(--dh-color-border-default);
+  border-right: none;
+  animation: dh-drawer-slide-right-in var(--dh-motion-duration-normal) var(--dh-motion-easing-emphasized);
+}
+
+.dh-drawer__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--dh-space-4) var(--dh-space-5);
+  border-bottom: 1px solid var(--dh-color-border-default);
+  flex-shrink: 0;
+}
+
+.dh-drawer__title {
+  margin: 0;
+  font-size: var(--dh-font-size-lg);
+  font-weight: var(--dh-font-weight-semibold);
+  color: var(--dh-color-fg-primary);
+  line-height: var(--dh-line-height-tight);
+}
+
+.dh-drawer__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: var(--dh-radius-sm);
+  background: transparent;
+  color: var(--dh-color-fg-muted);
+  cursor: pointer;
+  transition: background-color var(--dh-motion-duration-fast) var(--dh-motion-easing-standard),
+              color var(--dh-motion-duration-fast) var(--dh-motion-easing-standard);
+}
+
+.dh-drawer__close:hover {
+  background: var(--dh-color-bg-muted);
+  color: var(--dh-color-fg-primary);
+}
+
+.dh-drawer__close:focus-visible {
+  outline: 2px solid var(--dh-color-focus-ring);
+  outline-offset: 2px;
+}
+
+.dh-drawer__body {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--dh-space-5);
+}
+
+@keyframes dh-drawer-backdrop-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes dh-drawer-slide-left-in {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes dh-drawer-slide-right-in {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}

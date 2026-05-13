@@ -1,0 +1,87 @@
+/* ==========================================================================
+   DataTable — Data Display Component Styles
+   Uses design tokens: --dh-*
+   ========================================================================== */
+
+.dh-data-table__wrapper {
+  overflow-x: auto;
+  border: 1px solid var(--dh-color-border-default);
+  border-radius: var(--dh-radius-md);
+  background: var(--dh-color-bg-surface);
+}
+
+.dh-data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--dh-font-sans);
+  font-size: var(--dh-font-size-base);
+  line-height: var(--dh-line-height-normal);
+}
+
+.dh-data-table__head {
+  background: var(--dh-color-bg-muted);
+  border-bottom: 1px solid var(--dh-color-border-default);
+}
+
+.dh-data-table__th {
+  padding: var(--dh-space-3) var(--dh-space-4);
+  text-align: left;
+  font-weight: var(--dh-font-weight-semibold);
+  font-size: var(--dh-font-size-sm);
+  color: var(--dh-color-fg-secondary);
+  white-space: nowrap;
+}
+
+.dh-data-table__th--sortable {
+  padding: 0;
+}
+
+.dh-data-table__sort-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--dh-space-1);
+  width: 100%;
+  padding: var(--dh-space-3) var(--dh-space-4);
+  border: none;
+  background: transparent;
+  color: var(--dh-color-fg-secondary);
+  font-family: var(--dh-font-sans);
+  font-size: var(--dh-font-size-sm);
+  font-weight: var(--dh-font-weight-semibold);
+  cursor: pointer;
+  text-align: left;
+  transition: color var(--dh-motion-duration-fast) var(--dh-motion-easing-standard);
+}
+
+.dh-data-table__sort-btn:hover {
+  color: var(--dh-color-fg-primary);
+}
+
+.dh-data-table__sort-btn:focus-visible {
+  outline: 2px solid var(--dh-color-focus-ring);
+  outline-offset: -2px;
+  border-radius: var(--dh-radius-sm);
+}
+
+.dh-data-table__sort-icon {
+  font-size: var(--dh-font-size-xs);
+  color: var(--dh-color-fg-muted);
+}
+
+.dh-data-table__row {
+  border-bottom: 1px solid var(--dh-color-border-default);
+  transition: background-color var(--dh-motion-duration-fast) var(--dh-motion-easing-standard);
+}
+
+.dh-data-table__row:last-child {
+  border-bottom: none;
+}
+
+.dh-data-table__row:hover {
+  background-color: var(--dh-color-bg-muted);
+}
+
+.dh-data-table__td {
+  padding: var(--dh-space-3) var(--dh-space-4);
+  color: var(--dh-color-fg-primary);
+}

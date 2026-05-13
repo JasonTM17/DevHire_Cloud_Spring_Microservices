@@ -1,0 +1,25 @@
+/* ==========================================================================
+   Design Tokens — Shadows (Elevation Scale)
+   Prefix: --dh-shadow-*
+   ========================================================================== */
+
+:root {
+  --dh-shadow-sm: 0 1px 2px rgba(11, 18, 32, 0.05);
+  --dh-shadow-md: 0 4px 12px rgba(11, 18, 32, 0.08);
+  --dh-shadow-lg: 0 10px 24px rgba(11, 18, 32, 0.06);
+  --dh-shadow-overlay: 0 16px 48px rgba(11, 18, 32, 0.12);
+}
+
+:root[data-theme="dark"] {
+  --dh-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --dh-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --dh-shadow-lg: 0 10px 24px rgba(0, 0, 0, 0.35);
+  --dh-shadow-overlay: 0 16px 48px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme-scope="ops-dark"] {
+  --dh-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --dh-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
+  --dh-shadow-lg: 0 10px 24px rgba(0, 0, 0, 0.45);
+  --dh-shadow-overlay: 0 16px 48px rgba(0, 0, 0, 0.6);
+}

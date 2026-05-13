@@ -1,0 +1,107 @@
+/* ==========================================================================
+   Pagination — Navigation Component Styles
+   Uses design tokens: --dh-*
+   ========================================================================== */
+
+.dh-pagination {
+  display: flex;
+  align-items: center;
+  gap: var(--dh-space-2);
+  font-family: var(--dh-font-sans);
+  font-size: var(--dh-font-size-sm);
+}
+
+.dh-pagination__list {
+  display: flex;
+  align-items: center;
+  gap: var(--dh-space-1);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.dh-pagination__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--dh-space-2) var(--dh-space-3);
+  border: 1px solid var(--dh-color-border-default);
+  border-radius: var(--dh-radius-md);
+  background: var(--dh-color-bg-surface);
+  color: var(--dh-color-fg-secondary);
+  font-family: var(--dh-font-sans);
+  font-size: var(--dh-font-size-sm);
+  font-weight: var(--dh-font-weight-medium);
+  cursor: pointer;
+  transition:
+    background-color var(--dh-motion-duration-fast) var(--dh-motion-easing-standard),
+    border-color var(--dh-motion-duration-fast) var(--dh-motion-easing-standard),
+    color var(--dh-motion-duration-fast) var(--dh-motion-easing-standard);
+}
+
+.dh-pagination__btn:hover:not(:disabled) {
+  background-color: var(--dh-color-bg-muted);
+  border-color: var(--dh-color-border-strong);
+  color: var(--dh-color-fg-primary);
+}
+
+.dh-pagination__btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.dh-pagination__btn:focus-visible {
+  outline: 2px solid var(--dh-color-focus-ring);
+  outline-offset: 2px;
+}
+
+.dh-pagination__page {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  height: 2rem;
+  padding: 0 var(--dh-space-2);
+  border: 1px solid transparent;
+  border-radius: var(--dh-radius-md);
+  background: transparent;
+  color: var(--dh-color-fg-secondary);
+  font-family: var(--dh-font-sans);
+  font-size: var(--dh-font-size-sm);
+  font-weight: var(--dh-font-weight-medium);
+  cursor: pointer;
+  transition:
+    background-color var(--dh-motion-duration-fast) var(--dh-motion-easing-standard),
+    color var(--dh-motion-duration-fast) var(--dh-motion-easing-standard);
+}
+
+.dh-pagination__page:hover {
+  background-color: var(--dh-color-bg-muted);
+  color: var(--dh-color-fg-primary);
+}
+
+.dh-pagination__page--active {
+  background-color: var(--dh-color-brand);
+  color: var(--dh-color-fg-inverse);
+  font-weight: var(--dh-font-weight-semibold);
+  border-color: var(--dh-color-brand);
+}
+
+.dh-pagination__page--active:hover {
+  background-color: var(--dh-color-brand-hover);
+  color: var(--dh-color-fg-inverse);
+}
+
+.dh-pagination__page:focus-visible {
+  outline: 2px solid var(--dh-color-focus-ring);
+  outline-offset: 2px;
+}
+
+.dh-pagination__ellipsis {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  height: 2rem;
+  color: var(--dh-color-fg-muted);
+}

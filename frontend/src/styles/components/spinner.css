@@ -1,0 +1,84 @@
+/* ==========================================================================
+   Spinner — Primitive Component Styles
+   Uses design tokens: --dh-*
+   ========================================================================== */
+
+@keyframes dh-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.dh-spinner {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dh-spinner-circle {
+  border-radius: var(--dh-radius-full);
+  border: 2px solid var(--dh-color-border-default);
+  border-top-color: var(--dh-color-brand);
+  animation: dh-spin 0.6s linear infinite;
+}
+
+/* Sizes */
+.dh-spinner--xs .dh-spinner-circle {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-width: 1.5px;
+}
+
+.dh-spinner--sm .dh-spinner-circle {
+  width: 1rem;
+  height: 1rem;
+  border-width: 2px;
+}
+
+.dh-spinner--md .dh-spinner-circle {
+  width: 1.5rem;
+  height: 1.5rem;
+  border-width: 2px;
+}
+
+.dh-spinner--lg .dh-spinner-circle {
+  width: 2rem;
+  height: 2rem;
+  border-width: 3px;
+}
+
+.dh-spinner--xl .dh-spinner-circle {
+  width: 3rem;
+  height: 3rem;
+  border-width: 3px;
+}
+
+/* Color variants */
+.dh-spinner--brand .dh-spinner-circle {
+  border-top-color: var(--dh-color-brand);
+}
+
+.dh-spinner--accent .dh-spinner-circle {
+  border-top-color: var(--dh-color-accent);
+}
+
+.dh-spinner--inverse .dh-spinner-circle {
+  border-color: rgba(255, 255, 255, 0.25);
+  border-top-color: var(--dh-color-fg-inverse);
+}
+
+/* With label */
+.dh-spinner-container {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--dh-space-2);
+}
+
+.dh-spinner-label {
+  font-family: var(--dh-font-sans);
+  font-size: var(--dh-font-size-sm);
+  color: var(--dh-color-fg-muted);
+}

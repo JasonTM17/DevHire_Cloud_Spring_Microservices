@@ -1,0 +1,13 @@
+/* ==========================================================================
+   Stack — Layout Primitive
+   Flex stack (vertical or horizontal) with configurable gap, align, justify.
+   Uses --dh-* design tokens exclusively.
+   ========================================================================== */
+
+.dh-stack {
+  display: flex;
+  flex-direction: var(--dh-stack-direction, column);
+  gap: var(--dh-stack-gap, var(--dh-space-4));
+  align-items: var(--dh-stack-align, stretch);
+  justify-content: var(--dh-stack-justify, flex-start);
+}

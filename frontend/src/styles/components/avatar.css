@@ -1,0 +1,88 @@
+/* ==========================================================================
+   Avatar — Primitive Component Styles
+   Uses design tokens: --dh-*
+   ========================================================================== */
+
+.dh-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+  border-radius: var(--dh-radius-full);
+  background-color: var(--dh-color-brand-soft);
+  color: var(--dh-color-brand);
+  font-family: var(--dh-font-sans);
+  font-weight: var(--dh-font-weight-semibold);
+  user-select: none;
+}
+
+.dh-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Sizes */
+.dh-avatar--xs {
+  width: 1.5rem;
+  height: 1.5rem;
+  font-size: var(--dh-font-size-xs);
+}
+
+.dh-avatar--sm {
+  width: 2rem;
+  height: 2rem;
+  font-size: var(--dh-font-size-sm);
+}
+
+.dh-avatar--md {
+  width: 2.5rem;
+  height: 2.5rem;
+  font-size: var(--dh-font-size-base);
+}
+
+.dh-avatar--lg {
+  width: 3rem;
+  height: 3rem;
+  font-size: var(--dh-font-size-md);
+}
+
+.dh-avatar--xl {
+  width: 4rem;
+  height: 4rem;
+  font-size: var(--dh-font-size-xl);
+}
+
+/* Shape variants */
+.dh-avatar--square {
+  border-radius: var(--dh-radius-md);
+}
+
+/* Status indicator */
+.dh-avatar-container {
+  position: relative;
+  display: inline-flex;
+}
+
+.dh-avatar-status {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 0.625rem;
+  height: 0.625rem;
+  border-radius: var(--dh-radius-full);
+  border: 2px solid var(--dh-color-bg-surface);
+}
+
+.dh-avatar-status--online {
+  background-color: var(--dh-color-success);
+}
+
+.dh-avatar-status--offline {
+  background-color: var(--dh-color-fg-muted);
+}
+
+.dh-avatar-status--busy {
+  background-color: var(--dh-color-danger);
+}

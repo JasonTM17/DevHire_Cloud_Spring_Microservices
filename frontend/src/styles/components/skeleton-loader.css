@@ -1,0 +1,87 @@
+/* ==========================================================================
+   SkeletonLoader — Primitive Component Styles
+   Uses design tokens: --dh-*
+   ========================================================================== */
+
+@keyframes dh-skeleton-pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes dh-skeleton-wave {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.dh-skeleton {
+  display: block;
+  background-color: var(--dh-color-border-default);
+  border-radius: var(--dh-radius-md);
+  animation: dh-skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+.dh-skeleton--wave {
+  position: relative;
+  overflow: hidden;
+  animation: none;
+}
+
+.dh-skeleton--wave::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  animation: dh-skeleton-wave 1.5s ease-in-out infinite;
+}
+
+/* Shape variants */
+.dh-skeleton--text {
+  height: 0.875rem;
+  border-radius: var(--dh-radius-sm);
+}
+
+.dh-skeleton--heading {
+  height: 1.5rem;
+  border-radius: var(--dh-radius-sm);
+}
+
+.dh-skeleton--circle {
+  border-radius: var(--dh-radius-full);
+}
+
+.dh-skeleton--rect {
+  border-radius: var(--dh-radius-md);
+}
+
+/* Predefined sizes */
+.dh-skeleton--sm {
+  height: 1rem;
+}
+
+.dh-skeleton--md {
+  height: 2rem;
+}
+
+.dh-skeleton--lg {
+  height: 4rem;
+}
+
+.dh-skeleton--full {
+  width: 100%;
+}

@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import { AppShell } from "@/components/AppShell";
+import { ErrorBoundaryClient } from "@/components/ErrorBoundaryClient";
+import { ThemeProvider } from "@/components/ThemeProvider";
+import { ToastProvider } from "@/components/ui/feedback/ToastProvider";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -11,7 +14,13 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en">
       <body>
-        <AppShell>{children}</AppShell>
+        <ThemeProvider>
+          <ToastProvider>
+            <ErrorBoundaryClient>
+              <AppShell>{children}</AppShell>
+            </ErrorBoundaryClient>
+          </ToastProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
