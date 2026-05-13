@@ -6,8 +6,10 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.kafka.annotation.EnableKafka;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @EnableKafka
+@EnableScheduling
 @EnableFeignClients
 @EnableJpaAuditing
 @ConfigurationPropertiesScan
