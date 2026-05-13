@@ -7,6 +7,7 @@ This index is a guided path for a senior backend, DevOps, or solution architectu
 Open:
 
 - `README.md`
+- `docs/INDEX.md`
 - `docs/status.md`
 - `docs/REVIEW_EVIDENCE.md`
 - `docs/service-catalog.md`

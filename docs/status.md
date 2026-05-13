@@ -8,8 +8,8 @@ This page is the single source of truth for the current public state of DevHire 
 | GitHub release | https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.5.1 |
 | Default branch | `master` |
 | Branch protection | Enabled |
-| Open pull requests | 0 open PRs after the v0.6 Stitch/code-assessment consolidation |
-| Dependabot queue | 0 open PRs after curated cleanup |
+| Open pull requests | 20 open PRs at the 2026-05-13 live GitHub scan, all authored by Dependabot |
+| Dependabot queue | Zero-noise dry-run classifies all 20 as blocked, manual-review, or close/defer candidates; owner-token cleanup remains pending |
 | Maven development version | `0.6.0-SNAPSHOT` |
 | Frontend development version | `0.6.0` |
 | Helm chart version | `0.6.0` |
@@ -31,11 +31,12 @@ This page is the single source of truth for the current public state of DevHire 
 ## Reviewer Path
 
 1. Start with [README](../README.md), [English README](README_EN.md), or [Japanese README](README_JA.md).
-2. Review [REVIEW_EVIDENCE](REVIEW_EVIDENCE.md) for the curated proof pack.
-3. Review [v0.5.1 release evidence](release-evidence/v0.5.1.md) and [v0.5.1 release notes](release-notes/v0.5.1.md).
-4. Review the [v0.6 merge record](pr-stack-v0.6.md) to understand how the Stitch/code-assessment stack was consolidated.
-5. Review [production engineering scorecard](production-engineering-scorecard.md).
-6. Use [v1 reviewer guide](v1-reviewer-guide.md) only as the future roadmap toward `v1.0.0`.
+2. Use [documentation index](INDEX.md) to choose the right review path.
+3. Review [REVIEW_EVIDENCE](REVIEW_EVIDENCE.md) for the curated proof pack.
+4. Review [v0.5.1 release evidence](release-evidence/v0.5.1.md) and [v0.5.1 release notes](release-notes/v0.5.1.md).
+5. Review the [v0.6 merge record](pr-stack-v0.6.md) to understand how the Stitch/code-assessment stack was consolidated.
+6. Review [production engineering scorecard](production-engineering-scorecard.md).
+7. Use [v1 reviewer guide](v1-reviewer-guide.md) only as the future roadmap toward `v1.0.0`.
 
 ## Verification
 

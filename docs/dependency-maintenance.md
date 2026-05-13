@@ -14,7 +14,21 @@ DevHire Cloud keeps Dependabot enabled because dependency hygiene is part of the
 | Node major | Defer until Docker/frontend compatibility review | Runtime major upgrades can affect Next.js build and image behavior. |
 | Spring platform major | Defer until compatibility matrix review | Spring Boot/Spring Cloud compatibility is a hard production constraint. |
 
-## Current v0.4 Strategy
+## Current v0.6 Release-Readiness State
+
+The 2026-05-13 live GitHub scan reports 20 open Dependabot pull requests. `scripts/dependabot-zero-noise.ps1 -DryRun` classifies the current queue as blocked, manual-review, or close/defer candidates; no PR is currently a clean safe merge candidate.
+
+Do not claim a zero Dependabot queue until the owner-token apply path has been run and verified. The intended cleanup command is:
+
+```powershell
+$env:GITHUB_TOKEN = "<short-lived-owner-token>"
+.\scripts\dependabot-zero-noise.ps1 -Apply
+Remove-Item Env:\GITHUB_TOKEN
+```
+
+Run this only after the release branch has green CI and runtime smoke evidence.
+
+## v0.4 Strategy Background
 
 - Use curated batches instead of merging all open PRs at once.
 - Prioritize GitHub Actions and Docker patch/minor updates.
