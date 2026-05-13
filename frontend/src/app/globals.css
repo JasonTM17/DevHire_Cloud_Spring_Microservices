@@ -77,6 +77,14 @@
 @import '../styles/components/error-state.css';
 @import '../styles/components/inline-alert.css';
 
+/* Design System v2 — Leaderboard component styles */
+@import '../styles/components/leaderboard.css';
+
+/* Design System v2 — OPS Dashboard component styles */
+@import '../styles/components/ops-shell.css';
+@import '../styles/components/ai-ops-panels.css';
+@import '../styles/components/service-health.css';
+
 /* Existing stylesheets */
 @import '../styles/design-system.css';
 @import '../styles/layout.css';
