@@ -67,6 +67,7 @@ $candidates = [System.Collections.Generic.List[object]]::new()
 
 foreach ($path in @(
     "reports",
+    ".kiro",
     ".stitch",
     ".github/java-upgrade",
     "frontend/.next",
@@ -75,7 +76,12 @@ foreach ($path in @(
     "frontend/test-results",
     "frontend/tsconfig.tsbuildinfo"
 )) {
-    $candidate = New-Candidate -Path $path -Reason "Generated local verification/build artifact." -DeleteByDefault $true
+    $reason = if ($path -eq ".kiro") {
+        "Local AI/spec workspace artifact; keep implementation and reviewer docs in tracked project paths."
+    } else {
+        "Generated local verification/build artifact."
+    }
+    $candidate = New-Candidate -Path $path -Reason $reason -DeleteByDefault $true
     if ($null -ne $candidate) { $candidates.Add($candidate) }
 }
 
