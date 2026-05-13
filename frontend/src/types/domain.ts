@@ -8,6 +8,8 @@ export type PublicChallenge = {
   acceptanceRate: number;
   totalSubmissions: number;
   solved: boolean;
+  /** Brief description shown on the card */
+  description?: string;
   /** Problem statement text (used for tooltip preview) */
   statement?: string;
 };

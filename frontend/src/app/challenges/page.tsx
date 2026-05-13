@@ -3,6 +3,7 @@
 import { useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useDataFetcher } from "@/hooks/useDataFetcher";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { filterChallenges, type ChallengeFilter } from "@/lib/challenges/filter";
 import type { PublicChallenge } from "@/types/domain";
 import { FilterSidebar } from "@/components/challenges/FilterSidebar";
@@ -19,6 +20,50 @@ interface ChallengesApiResponse {
   challenges: PublicChallenge[];
   availableLanguages: string[];
   availableTopics: string[];
+}
+
+// --- Filter Toggle Button (mobile) ---
+
+interface FilterToggleButtonProps {
+  isOpen: boolean;
+  activeFilterCount: number;
+  onClick: () => void;
+}
+
+function FilterToggleButton({ isOpen, activeFilterCount, onClick }: FilterToggleButtonProps) {
+  return (
+    <button
+      type="button"
+      className="dh-challenges__filter-toggle"
+      onClick={onClick}
+      aria-expanded={isOpen}
+      aria-controls="challenges-sidebar"
+      aria-label={`${isOpen ? "Hide" : "Show"} filters${activeFilterCount > 0 ? ` (${activeFilterCount} active)` : ""}`}
+    >
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 18 18"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
+      >
+        <path
+          d="M2.25 4.5h13.5M4.5 9h9M6.75 13.5h4.5"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+      <span>Filters</span>
+      {activeFilterCount > 0 && (
+        <span className="dh-challenges__filter-badge" aria-hidden="true">
+          {activeFilterCount}
+        </span>
+      )}
+    </button>
+  );
 }
 
 // --- Skeleton Loading Component ---
@@ -44,15 +89,30 @@ function ChallengePageSkeleton() {
   );
 }
 
+// --- Utility: count active filters ---
+
+function countActiveFilters(filters: ChallengeFilter): number {
+  let count = 0;
+  if (filters.difficulty) count++;
+  if (filters.language) count++;
+  if (filters.topic) count++;
+  if (filters.solved !== undefined) count++;
+  return count;
+}
+
 // --- Main Page Component ---
 
 /**
  * ChallengeLibraryPage — Wires all challenge library components together.
  *
+ * Layout: FilterSidebar on the left (collapsible on mobile), ChallengeGrid in the main area,
+ * ProgressSummaryPanel in the sidebar.
+ *
  * - Fetches public challenges via useDataFetcher
  * - Maintains filter state with useState<ChallengeFilter>
  * - Applies filterChallenges via useMemo for instant filtering (< 100ms)
  * - Renders responsive layout: sidebar (FilterSidebar + ProgressSummaryPanel) + main (SearchInput + ChallengeGrid)
+ * - Sidebar collapses to a filter button on mobile (< 768px)
  * - Shows SkeletonLoader during initial load
  * - Shows EmptyState when filtered results are empty
  * - Shows ErrorState with retry on fetch failure
@@ -62,6 +122,14 @@ function ChallengePageSkeleton() {
  */
 export default function ChallengeLibraryPage() {
   const router = useRouter();
+  const isMobile = useMediaQuery("(max-width: 767px)");
+
+  // --- Mobile sidebar toggle ---
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const toggleSidebar = useCallback(() => {
+    setSidebarOpen((prev) => !prev);
+  }, []);
 
   // --- Data Fetching ---
   const { data, error, isValidating, mutate } = useDataFetcher<ChallengesApiResponse>(
@@ -117,6 +185,9 @@ export default function ChallengeLibraryPage() {
     mutate();
   }, [mutate]);
 
+  // --- Active filter count for badge ---
+  const activeFilterCount = countActiveFilters(filters);
+
   // --- Error State ---
   if (error && !data) {
     return (
@@ -139,22 +210,39 @@ export default function ChallengeLibraryPage() {
   const availableLanguages = data?.availableLanguages ?? [];
   const availableTopics = data?.availableTopics ?? [];
 
+  // --- Determine sidebar visibility ---
+  const showSidebar = !isMobile || sidebarOpen;
+
   // --- Render ---
   return (
     <div className="dh-challenges">
+      {/* Mobile filter toggle button */}
+      {isMobile && (
+        <FilterToggleButton
+          isOpen={sidebarOpen}
+          activeFilterCount={activeFilterCount}
+          onClick={toggleSidebar}
+        />
+      )}
+
       {/* Sidebar: Filters + Progress */}
-      <aside className="dh-challenges__sidebar">
-        <FilterSidebar
-          filters={filters}
-          onFilterChange={handleFilterChange}
-          availableLanguages={availableLanguages}
-          availableTopics={availableTopics}
-        />
-        <ProgressSummaryPanel
-          className="dh-challenges__progress"
-          data-testid="challenges-progress"
-        />
-      </aside>
+      {showSidebar && (
+        <aside
+          id="challenges-sidebar"
+          className={`dh-challenges__sidebar${isMobile ? " dh-challenges__sidebar--mobile-open" : ""}`}
+        >
+          <FilterSidebar
+            filters={filters}
+            onChange={handleFilterChange}
+            availableLanguages={availableLanguages}
+            availableTopics={availableTopics}
+          />
+          <ProgressSummaryPanel
+            className="dh-challenges__progress"
+            data-testid="challenges-progress"
+          />
+        </aside>
+      )}
 
       {/* Main Content: Search + Grid */}
       <main className="dh-challenges__main">

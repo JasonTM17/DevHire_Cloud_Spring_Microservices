@@ -11,6 +11,8 @@ import { extractPreview } from "@/lib/challenges/preview";
 export interface ChallengeCardProps {
   challenge: PublicChallenge;
   isFocused?: boolean;
+  /** Display mode: compact card or expanded list row */
+  viewMode?: "grid" | "list";
   onSelect?: () => void;
 }
 
@@ -27,11 +29,24 @@ const difficultyLabel: Record<string, string> = {
 };
 
 /**
- * ChallengeCard — Displays a single challenge with difficulty badge,
- * acceptance rate, language/topic tags, and solved status.
+ * ChallengeCard — Displays a single coding challenge with:
+ * - Title
+ * - Difficulty badge (Easy/Medium/Hard with color coding)
+ * - Language tags
+ * - Topic tags
+ * - Solved/unsolved status indicator
+ * - Brief description
+ * - Acceptance rate
+ *
  * On hover, shows a tooltip with the first 2 lines of the problem statement.
+ * Supports both grid (compact card) and list (horizontal row) view modes.
  */
-export function ChallengeCard({ challenge, isFocused = false, onSelect }: ChallengeCardProps) {
+export function ChallengeCard({
+  challenge,
+  isFocused = false,
+  viewMode = "grid",
+  onSelect,
+}: ChallengeCardProps) {
   const handleClick = useCallback(() => {
     onSelect?.();
   }, [onSelect]);
@@ -50,11 +65,24 @@ export function ChallengeCard({ challenge, isFocused = false, onSelect }: Challe
     ? extractPreview(challenge.statement, 2)
     : undefined;
 
+  const isListMode = viewMode === "list";
+  const wrapperClass = isListMode
+    ? "dh-challenge-card__wrapper dh-challenge-card__wrapper--list"
+    : "dh-challenge-card__wrapper";
+
+  const cardClass = [
+    "dh-challenge-card",
+    isFocused && "dh-challenge-card--focused",
+    isListMode && "dh-challenge-card--list",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   const cardContent = (
     <Card
       variant="outlined"
       padding="md"
-      className={`dh-challenge-card${isFocused ? " dh-challenge-card--focused" : ""}`}
+      className={cardClass}
       onClick={handleClick}
     >
       <div className="dh-challenge-card__header">
@@ -62,22 +90,29 @@ export function ChallengeCard({ challenge, isFocused = false, onSelect }: Challe
         <span
           className={`dh-challenge-card__solved ${challenge.solved ? "dh-challenge-card__solved--yes" : ""}`}
           aria-label={challenge.solved ? "Solved" : "Not solved"}
+          role="img"
         >
           {challenge.solved ? "✔" : "○"}
         </span>
       </div>
 
+      {challenge.description && (
+        <p className="dh-challenge-card__description">
+          {challenge.description}
+        </p>
+      )}
+
       <div className="dh-challenge-card__meta">
         <Badge variant={difficultyVariant[challenge.difficulty]}>
           {difficultyLabel[challenge.difficulty]}
         </Badge>
-        <span className="dh-challenge-card__acceptance">
+        <span className="dh-challenge-card__acceptance" aria-label={`Acceptance rate ${challenge.acceptanceRate.toFixed(1)} percent`}>
           {challenge.acceptanceRate.toFixed(1)}%
         </span>
       </div>
 
       {challenge.languages.length > 0 && (
-        <div className="dh-challenge-card__tags">
+        <div className="dh-challenge-card__tags" aria-label="Languages">
           {challenge.languages.map((lang) => (
             <Tag key={lang} variant="brand">
               {lang}
@@ -87,7 +122,7 @@ export function ChallengeCard({ challenge, isFocused = false, onSelect }: Challe
       )}
 
       {challenge.topics.length > 0 && (
-        <div className="dh-challenge-card__tags">
+        <div className="dh-challenge-card__tags" aria-label="Topics">
           {challenge.topics.map((topic) => (
             <Tag key={topic} variant="neutral">
               {topic}
@@ -102,10 +137,11 @@ export function ChallengeCard({ challenge, isFocused = false, onSelect }: Challe
     <div
       role="option"
       aria-selected={isFocused}
+      aria-label={`${challenge.title}, ${difficultyLabel[challenge.difficulty]}, ${challenge.solved ? "solved" : "not solved"}`}
       tabIndex={isFocused ? 0 : -1}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
-      className="dh-challenge-card__wrapper"
+      className={wrapperClass}
       data-testid={`challenge-card-${challenge.id}`}
     >
       {cardContent}

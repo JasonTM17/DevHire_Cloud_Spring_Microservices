@@ -1,6 +1,7 @@
 /* ==========================================================================
    ChallengeCard — Challenge Library Card Component
    Uses --dh-* design tokens for consistent theming.
+   Supports grid (compact card) and list (horizontal row) view modes.
    ========================================================================== */
 
 .dh-challenge-card__wrapper {
@@ -52,6 +53,19 @@
   color: var(--dh-color-fg-primary);
 }
 
+/* Brief description */
+.dh-challenge-card__description {
+  margin: 0;
+  font-family: var(--dh-font-sans);
+  font-size: var(--dh-font-size-xs);
+  line-height: var(--dh-line-height-normal);
+  color: var(--dh-color-fg-muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 /* Solved status icon */
 .dh-challenge-card__solved {
   flex-shrink: 0;
@@ -82,4 +96,70 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--dh-space-1);
+}
+
+/* ==========================================================================
+   List View Mode — Horizontal row layout
+   ========================================================================== */
+
+.dh-challenge-card__wrapper--list {
+  border-radius: var(--dh-radius-sm);
+}
+
+.dh-challenge-card--list {
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto;
+  align-items: center;
+  gap: var(--dh-space-2) var(--dh-space-4);
+}
+
+.dh-challenge-card--list:hover {
+  transform: none;
+}
+
+.dh-challenge-card--list .dh-challenge-card__header {
+  grid-column: 1 / -1;
+}
+
+.dh-challenge-card--list .dh-challenge-card__description {
+  grid-column: 1 / -1;
+  -webkit-line-clamp: 1;
+}
+
+.dh-challenge-card--list .dh-challenge-card__meta {
+  grid-column: 1 / -1;
+}
+
+.dh-challenge-card--list .dh-challenge-card__tags {
+  grid-column: 1 / -1;
+}
+
+/* On wider screens, list mode uses a more horizontal layout */
+@media (min-width: 768px) {
+  .dh-challenge-card--list {
+    grid-template-columns: 1fr auto auto;
+    column-gap: var(--dh-space-4);
+  }
+
+  .dh-challenge-card--list .dh-challenge-card__header {
+    grid-column: 1 / 2;
+  }
+
+  .dh-challenge-card--list .dh-challenge-card__meta {
+    grid-column: 2 / 3;
+    grid-row: 1;
+  }
+
+  .dh-challenge-card--list .dh-challenge-card__solved {
+    grid-column: 3 / 4;
+    grid-row: 1;
+  }
+
+  .dh-challenge-card--list .dh-challenge-card__description {
+    grid-column: 1 / -1;
+  }
+
+  .dh-challenge-card--list .dh-challenge-card__tags {
+    grid-column: 1 / -1;
+  }
 }

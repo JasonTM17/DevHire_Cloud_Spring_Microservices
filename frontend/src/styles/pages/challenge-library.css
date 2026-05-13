@@ -98,15 +98,28 @@
   }
 }
 
-/* Mobile: compact layout */
+/* Mobile: compact layout — sidebar collapses to filter button */
 @media (max-width: 767px) {
   .dh-challenges {
+    grid-template-columns: 1fr;
     padding: var(--dh-space-4);
     gap: var(--dh-space-4);
   }
 
   .dh-challenges__sidebar {
+    display: none;
+  }
+
+  .dh-challenges__sidebar--mobile-open {
+    display: flex;
     flex-direction: column;
+    position: static;
+    max-height: none;
+    gap: var(--dh-space-4);
+    padding: var(--dh-space-4);
+    border: 1px solid var(--dh-color-border-default);
+    border-radius: var(--dh-radius-md);
+    background: var(--dh-color-bg-surface);
   }
 
   .dh-challenges__toolbar {
@@ -122,6 +135,54 @@
   .dh-challenges__grid-skeleton {
     grid-template-columns: 1fr;
   }
+}
+
+/* --- Filter Toggle Button (mobile only) --- */
+
+.dh-challenges__filter-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--dh-space-2);
+  padding: var(--dh-space-2) var(--dh-space-4);
+  font-family: var(--dh-font-sans);
+  font-size: var(--dh-font-size-sm);
+  font-weight: 500;
+  color: var(--dh-color-fg-default);
+  background: var(--dh-color-bg-surface);
+  border: 1px solid var(--dh-color-border-default);
+  border-radius: var(--dh-radius-md);
+  cursor: pointer;
+  transition: background-color var(--dh-duration-fast) var(--dh-easing-standard),
+              border-color var(--dh-duration-fast) var(--dh-easing-standard);
+}
+
+.dh-challenges__filter-toggle:hover {
+  background: var(--dh-color-bg-hover);
+  border-color: var(--dh-color-border-hover);
+}
+
+.dh-challenges__filter-toggle:focus-visible {
+  outline: 2px solid var(--dh-color-focus-ring);
+  outline-offset: 2px;
+}
+
+.dh-challenges__filter-toggle[aria-expanded="true"] {
+  background: var(--dh-color-bg-active);
+  border-color: var(--dh-color-brand-primary);
+}
+
+.dh-challenges__filter-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  padding: 0 var(--dh-space-1);
+  font-size: var(--dh-font-size-xs);
+  font-weight: 600;
+  color: var(--dh-color-fg-on-brand);
+  background: var(--dh-color-brand-primary);
+  border-radius: var(--dh-radius-full);
 }
 
 /* ==========================================================================

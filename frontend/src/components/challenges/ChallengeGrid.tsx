@@ -5,16 +5,25 @@ import type { PublicChallenge } from "@/types/domain";
 import { nextIndex } from "@/lib/keyboardNav";
 import { ChallengeCard } from "./ChallengeCard";
 
+export type ViewMode = "grid" | "list";
+
 export interface ChallengeGridProps {
   challenges: PublicChallenge[];
+  /** Display mode: responsive grid or vertical list */
+  viewMode?: ViewMode;
   onSelectChallenge?: (id: string) => void;
 }
 
 /**
- * ChallengeGrid — Renders a responsive grid of ChallengeCard components
- * with keyboard navigation (ArrowUp/Down/Home/End) and focused index state.
+ * ChallengeGrid — Renders a responsive layout of ChallengeCard components.
+ * Supports both grid (multi-column cards) and list (single-column rows) view modes.
+ * Includes keyboard navigation (ArrowUp/Down/Home/End) with focused index state.
  */
-export function ChallengeGrid({ challenges, onSelectChallenge }: ChallengeGridProps) {
+export function ChallengeGrid({
+  challenges,
+  viewMode = "grid",
+  onSelectChallenge,
+}: ChallengeGridProps) {
   const [focusedIndex, setFocusedIndex] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -63,12 +72,17 @@ export function ChallengeGrid({ challenges, onSelectChallenge }: ChallengeGridPr
     return null;
   }
 
+  const containerClass = viewMode === "list"
+    ? "dh-challenge-grid dh-challenge-grid--list"
+    : "dh-challenge-grid";
+
   return (
     <div
       ref={containerRef}
       role="listbox"
       aria-label="Challenge list"
-      className="dh-challenge-grid"
+      aria-orientation="vertical"
+      className={containerClass}
       onKeyDown={handleKeyDown}
       tabIndex={0}
     >
@@ -77,6 +91,7 @@ export function ChallengeGrid({ challenges, onSelectChallenge }: ChallengeGridPr
           key={challenge.id}
           challenge={challenge}
           isFocused={index === focusedIndex}
+          viewMode={viewMode}
           onSelect={() => handleCardSelect(index)}
         />
       ))}
