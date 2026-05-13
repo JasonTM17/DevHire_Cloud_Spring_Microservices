@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card } from "@/components/ui/layout/Card";
 import { Badge } from "@/components/ui/primitives/Badge";
 import { InlineAlert } from "@/components/ui/feedback/InlineAlert";
+import { OpsWidget } from "./OpsWidget";
+import "@/styles/components/ai-ops-panels.css";
 
 export type CircuitState = "CLOSED" | "OPEN" | "HALF_OPEN";
 
@@ -18,6 +19,7 @@ export interface AiProviderStatus {
 
 export interface AiProviderPanelProps {
   provider: AiProviderStatus;
+  loading?: boolean;
   "data-testid"?: string;
 }
 
@@ -34,7 +36,7 @@ function getCircuitBadgeVariant(state: CircuitState) {
 
 /**
  * Determines whether the circuit-open banner should be visible.
- * Pure function for testability.
+ * Pure function for testability (Property 23).
  */
 export function showCircuitOpenBanner(state: CircuitState): boolean {
   return state === "OPEN";
@@ -57,10 +59,13 @@ function formatCooldownRemaining(cooldownEndsAt: string): string {
  * When circuit is OPEN, shows a prominent error alert with cooldown timer
  * and fallback mode indicator.
  *
+ * Wrapped in OpsWidget for consistent dark theme styling and error isolation.
+ *
  * Requirements: 8.1, 8.2
  */
 export function AiProviderPanel({
   provider,
+  loading = false,
   "data-testid": testId,
 }: AiProviderPanelProps) {
   const [cooldownDisplay, setCooldownDisplay] = useState<string>("");
@@ -80,24 +85,24 @@ export function AiProviderPanel({
     return () => clearInterval(interval);
   }, [provider.cooldownEndsAt, provider.circuitState]);
 
+  const headerActions = (
+    <Badge
+      variant={getCircuitBadgeVariant(provider.circuitState)}
+      dot
+      data-testid="circuit-state-badge"
+    >
+      {provider.circuitState.replace("_", " ")}
+    </Badge>
+  );
+
   return (
-    <Card
-      variant="outlined"
-      padding="md"
+    <OpsWidget
+      title="AI Provider"
+      headerActions={headerActions}
+      loading={loading}
       data-testid={testId ?? "ai-provider-panel"}
     >
       <div className="dh-ai-provider-panel">
-        <div className="dh-ai-provider-panel__header">
-          <h3 className="dh-ai-provider-panel__title">AI Provider</h3>
-          <Badge
-            variant={getCircuitBadgeVariant(provider.circuitState)}
-            dot
-            data-testid="circuit-state-badge"
-          >
-            {provider.circuitState.replace("_", " ")}
-          </Badge>
-        </div>
-
         {showCircuitOpenBanner(provider.circuitState) && (
           <InlineAlert
             variant="error"
@@ -153,6 +158,6 @@ export function AiProviderPanel({
           )}
         </dl>
       </div>
-    </Card>
+    </OpsWidget>
   );
 }

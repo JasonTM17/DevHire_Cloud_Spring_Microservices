@@ -1,33 +1,17 @@
 /* ============================================================
    AI Ops Panels — AiProviderPanel, AiKnowledgePanel, AiRequestMetricsPanel
    Uses --dh-* design tokens for consistent theming.
+   Panels are wrapped in OpsWidget which provides header, error boundary,
+   and loading/empty states.
    ============================================================ */
 
-/* --- Shared panel styles --- */
+/* --- Shared panel body styles --- */
 .dh-ai-provider-panel,
 .dh-ai-knowledge-panel,
 .dh-ai-metrics-panel {
   display: flex;
   flex-direction: column;
   gap: var(--dh-space-4);
-}
-
-.dh-ai-provider-panel__header,
-.dh-ai-knowledge-panel__header,
-.dh-ai-metrics-panel__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--dh-space-3);
-}
-
-.dh-ai-provider-panel__title,
-.dh-ai-knowledge-panel__title,
-.dh-ai-metrics-panel__title {
-  font-size: var(--dh-font-size-lg);
-  font-weight: var(--dh-font-weight-semibold);
-  color: var(--dh-color-fg-primary);
-  margin: 0;
 }
 
 /* --- AiProviderPanel --- */
@@ -62,7 +46,7 @@
   justify-content: space-between;
   align-items: baseline;
   padding: var(--dh-space-2) 0;
-  border-bottom: 1px solid var(--dh-color-border-subtle);
+  border-bottom: 1px solid var(--dh-color-border-default);
 }
 
 .dh-ai-provider-panel__field:last-child,
@@ -91,7 +75,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: var(--dh-color-fg-danger) !important;
+  color: var(--dh-color-danger) !important;
 }
 
 /* --- AiKnowledgePanel --- */
@@ -101,10 +85,10 @@
 
 .dh-ai-knowledge-panel__error {
   font-size: var(--dh-font-size-sm);
-  color: var(--dh-color-fg-danger);
+  color: var(--dh-color-danger);
   margin: 0;
   padding: var(--dh-space-2);
-  background: var(--dh-color-bg-danger-subtle);
+  background: var(--dh-color-danger-soft);
   border-radius: var(--dh-radius-sm);
 }
 
@@ -122,7 +106,7 @@
   font-size: var(--dh-font-size-xs);
   font-weight: var(--dh-font-weight-medium);
   font-family: inherit;
-  background: var(--dh-color-bg-secondary);
+  background: var(--dh-color-bg-muted);
   color: var(--dh-color-fg-secondary);
   border: none;
   cursor: pointer;
@@ -131,18 +115,18 @@
 }
 
 .dh-ai-metrics-panel__range-btn:hover {
-  background: var(--dh-color-bg-hover);
+  background: var(--dh-color-bg-elevated);
   color: var(--dh-color-fg-primary);
 }
 
 .dh-ai-metrics-panel__range-btn--active {
-  background: var(--dh-color-bg-brand);
-  color: var(--dh-color-fg-on-brand);
+  background: var(--dh-color-accent);
+  color: var(--dh-color-fg-inverse);
 }
 
 .dh-ai-metrics-panel__range-btn--active:hover {
-  background: var(--dh-color-bg-brand);
-  color: var(--dh-color-fg-on-brand);
+  background: var(--dh-color-accent-hover);
+  color: var(--dh-color-fg-inverse);
 }
 
 .dh-ai-metrics-panel__range-btn + .dh-ai-metrics-panel__range-btn {
@@ -163,7 +147,7 @@
 
 .dh-ai-metrics-panel__stat-label {
   font-size: var(--dh-font-size-xs);
-  color: var(--dh-color-fg-secondary);
+  color: var(--dh-color-fg-muted);
   font-weight: var(--dh-font-weight-medium);
   text-transform: uppercase;
   letter-spacing: 0.025em;
@@ -187,19 +171,23 @@
 }
 
 /* --- OPS dark theme scope overrides --- */
-[data-theme-scope="ops-dark"] .dh-ai-provider-panel__title,
-[data-theme-scope="ops-dark"] .dh-ai-knowledge-panel__title,
-[data-theme-scope="ops-dark"] .dh-ai-metrics-panel__title {
+[data-theme-scope="ops-dark"] .dh-ai-metrics-panel__range-btn {
+  background: var(--dh-color-bg-elevated);
+  color: var(--dh-color-fg-muted);
+  border-color: var(--dh-color-border-default);
+}
+
+[data-theme-scope="ops-dark"] .dh-ai-metrics-panel__range-btn:hover {
+  background: var(--dh-color-bg-surface);
   color: var(--dh-color-fg-primary);
 }
 
-[data-theme-scope="ops-dark"] .dh-ai-metrics-panel__range-btn {
-  background: var(--dh-color-bg-tertiary);
-  color: var(--dh-color-fg-secondary);
-  border-color: var(--dh-color-border-subtle);
+[data-theme-scope="ops-dark"] .dh-ai-metrics-panel__range-btn--active {
+  background: var(--dh-color-accent);
+  color: var(--dh-color-fg-inverse);
 }
 
-[data-theme-scope="ops-dark"] .dh-ai-metrics-panel__range-btn--active {
-  background: var(--dh-color-bg-brand);
-  color: var(--dh-color-fg-on-brand);
+[data-theme-scope="ops-dark"] .dh-ai-provider-panel__field,
+[data-theme-scope="ops-dark"] .dh-ai-knowledge-panel__field {
+  border-bottom-color: var(--dh-color-border-default);
 }

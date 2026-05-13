@@ -20,3 +20,14 @@ export type { AiKnowledgePanelProps, AiKnowledgeStatus } from "./AiKnowledgePane
 
 export { AiRequestMetricsPanel } from "./AiRequestMetricsPanel";
 export type { AiRequestMetricsPanelProps, AiRequestMetrics, MetricsTimeRange } from "./AiRequestMetricsPanel";
+
+export { OpsWidget } from "./OpsWidget";
+export type { OpsWidgetProps } from "./OpsWidget";
+
+export { ServiceDetailDrawer } from "./ServiceDetailDrawer";
+export type { ServiceDetailDrawerProps, ServiceDetailMetrics, ErrorLogEntry } from "./ServiceDetailDrawer";
+
+export { StalenessBadge } from "./StalenessBadge";
+export type { StalenessBadgeProps } from "./StalenessBadge";
+
+export { OpsDashboardShell } from "./OpsDashboardShell";

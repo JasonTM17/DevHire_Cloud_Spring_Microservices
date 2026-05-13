@@ -1,0 +1,128 @@
+/* ==========================================================================
+   OpsSidebar — OPS Dashboard navigation sidebar
+   Uses design tokens: --dh-*
+   Dark theme forced via parent [data-theme-scope="ops-dark"]
+   ========================================================================== */
+
+.ops-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dh-space-5, 20px);
+  height: 100%;
+}
+
+/* --------------------------------------------------------------------------
+   Brand / Logo area
+   -------------------------------------------------------------------------- */
+.ops-sidebar__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--dh-space-2, 8px);
+  padding-bottom: var(--dh-space-4, 16px);
+  border-bottom: 1px solid var(--dh-color-border-default);
+}
+
+.ops-sidebar__logo {
+  font-size: var(--dh-font-size-xl, 1.25rem);
+  color: var(--dh-color-ops-accent, var(--dh-color-accent));
+}
+
+.ops-sidebar__title {
+  font-size: var(--dh-font-size-sm, 0.875rem);
+  font-weight: var(--dh-font-weight-semibold, 600);
+  color: var(--dh-color-fg-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* --------------------------------------------------------------------------
+   Nav list
+   -------------------------------------------------------------------------- */
+.ops-sidebar__nav-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--dh-space-1, 4px);
+}
+
+.ops-sidebar__nav-item {
+  margin: 0;
+}
+
+/* --------------------------------------------------------------------------
+   OpsNavLink
+   -------------------------------------------------------------------------- */
+.ops-nav-link {
+  display: flex;
+  align-items: center;
+  gap: var(--dh-space-3, 12px);
+  padding: var(--dh-space-2, 8px) var(--dh-space-3, 12px);
+  border-radius: var(--dh-radius-md, 8px);
+  text-decoration: none;
+  color: var(--dh-color-fg-secondary);
+  font-size: var(--dh-font-size-sm, 0.875rem);
+  font-weight: var(--dh-font-weight-normal, 400);
+  transition: background var(--dh-duration-fast, 100ms) var(--dh-ease-standard, ease),
+              color var(--dh-duration-fast, 100ms) var(--dh-ease-standard, ease);
+}
+
+.ops-nav-link:hover {
+  background: var(--dh-color-bg-elevated);
+  color: var(--dh-color-fg-primary);
+}
+
+.ops-nav-link:focus-visible {
+  outline: 2px solid var(--dh-color-focus-ring);
+  outline-offset: -2px;
+}
+
+.ops-nav-link--active {
+  background: var(--dh-color-accent-soft, rgba(96, 165, 250, 0.1));
+  color: var(--dh-color-ops-accent, var(--dh-color-accent));
+  font-weight: var(--dh-font-weight-medium, 500);
+}
+
+.ops-nav-link--active:hover {
+  background: var(--dh-color-accent-soft, rgba(96, 165, 250, 0.15));
+}
+
+.ops-nav-link__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  font-size: var(--dh-font-size-base, 1rem);
+  flex-shrink: 0;
+}
+
+.ops-nav-link__label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* --------------------------------------------------------------------------
+   Responsive: condensed sidebar (icon-only)
+   -------------------------------------------------------------------------- */
+@media (max-width: 1023px) {
+  .ops-sidebar__title {
+    display: none;
+  }
+
+  .ops-nav-link__label {
+    display: none;
+  }
+
+  .ops-nav-link {
+    justify-content: center;
+    padding: var(--dh-space-2, 8px);
+  }
+
+  .ops-sidebar__brand {
+    justify-content: center;
+  }
+}

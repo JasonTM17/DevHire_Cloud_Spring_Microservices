@@ -1,8 +1,9 @@
 "use client";
 
-import { Card } from "@/components/ui/layout/Card";
 import { Badge } from "@/components/ui/primitives/Badge";
 import { ProgressBar } from "@/components/ui/primitives/ProgressBar";
+import { OpsWidget } from "./OpsWidget";
+import "@/styles/components/ai-ops-panels.css";
 
 export type MetricsTimeRange = "1h" | "6h" | "24h";
 
@@ -22,6 +23,7 @@ export interface AiRequestMetricsPanelProps {
   metrics: AiRequestMetrics;
   timeRange: MetricsTimeRange;
   onTimeRangeChange: (range: MetricsTimeRange) => void;
+  loading?: boolean;
   "data-testid"?: string;
 }
 
@@ -38,9 +40,47 @@ function getSuccessRateVariant(rate: number) {
 }
 
 /**
+ * TimeRangeSelector — Toggle group for selecting metrics time window.
+ */
+function TimeRangeSelector({
+  value,
+  onChange,
+}: {
+  value: MetricsTimeRange;
+  onChange: (range: MetricsTimeRange) => void;
+}) {
+  return (
+    <div
+      className="dh-ai-metrics-panel__time-range"
+      role="group"
+      aria-label="Time range selector"
+    >
+      {TIME_RANGE_OPTIONS.map((option) => (
+        <button
+          key={option.value}
+          type="button"
+          className={`dh-ai-metrics-panel__range-btn${
+            value === option.value
+              ? " dh-ai-metrics-panel__range-btn--active"
+              : ""
+          }`}
+          onClick={() => onChange(option.value)}
+          aria-pressed={value === option.value}
+          data-testid={`time-range-${option.value}`}
+        >
+          {option.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/**
  * AiRequestMetricsPanel — Displays AI request metrics including
  * total requests, success rate, average latency, and token usage.
  * Includes a time range selector for filtering the metrics window.
+ *
+ * Wrapped in OpsWidget for consistent dark theme styling and error isolation.
  *
  * Requirements: 8.5
  */
@@ -48,41 +88,21 @@ export function AiRequestMetricsPanel({
   metrics,
   timeRange,
   onTimeRangeChange,
+  loading = false,
   "data-testid": testId,
 }: AiRequestMetricsPanelProps) {
+  const headerActions = (
+    <TimeRangeSelector value={timeRange} onChange={onTimeRangeChange} />
+  );
+
   return (
-    <Card
-      variant="outlined"
-      padding="md"
+    <OpsWidget
+      title="Request Metrics"
+      headerActions={headerActions}
+      loading={loading}
       data-testid={testId ?? "ai-request-metrics-panel"}
     >
       <div className="dh-ai-metrics-panel">
-        <div className="dh-ai-metrics-panel__header">
-          <h3 className="dh-ai-metrics-panel__title">Request Metrics</h3>
-          <div
-            className="dh-ai-metrics-panel__time-range"
-            role="group"
-            aria-label="Time range selector"
-          >
-            {TIME_RANGE_OPTIONS.map((option) => (
-              <button
-                key={option.value}
-                type="button"
-                className={`dh-ai-metrics-panel__range-btn${
-                  timeRange === option.value
-                    ? " dh-ai-metrics-panel__range-btn--active"
-                    : ""
-                }`}
-                onClick={() => onTimeRangeChange(option.value)}
-                aria-pressed={timeRange === option.value}
-                data-testid={`time-range-${option.value}`}
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
         <div className="dh-ai-metrics-panel__grid">
           <div className="dh-ai-metrics-panel__stat">
             <span className="dh-ai-metrics-panel__stat-label">
@@ -145,6 +165,6 @@ export function AiRequestMetricsPanel({
           </div>
         </div>
       </div>
-    </Card>
+    </OpsWidget>
   );
 }

@@ -1,0 +1,224 @@
+/* ==========================================================================
+   ServiceDetailDrawer — OPS Dashboard service detail panel
+   Uses design tokens: --dh-* (ops-dark scope)
+   
+   Requirements: 7.5, 10.6
+   ========================================================================== */
+
+.dh-service-detail-drawer {
+  width: 420px;
+  max-width: 90vw;
+}
+
+.dh-service-detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dh-space-5);
+}
+
+/* Status header */
+.dh-service-detail__status {
+  display: flex;
+  align-items: center;
+  gap: var(--dh-space-3);
+  padding: var(--dh-space-3);
+  background-color: var(--dh-color-bg-muted);
+  border-radius: var(--dh-radius-md);
+}
+
+.dh-service-detail__status-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dh-space-1);
+}
+
+.dh-service-detail__service-name {
+  font-family: var(--dh-font-sans);
+  font-size: var(--dh-font-size-md);
+  font-weight: var(--dh-font-weight-semibold);
+  color: var(--dh-color-fg-primary);
+}
+
+.dh-service-detail__status-label {
+  font-family: var(--dh-font-sans);
+  font-size: var(--dh-font-size-xs);
+  font-weight: var(--dh-font-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.dh-service-detail__status-label--healthy {
+  color: var(--dh-color-success);
+}
+
+.dh-service-detail__status-label--degraded {
+  color: var(--dh-color-warn);
+}
+
+.dh-service-detail__status-label--critical {
+  color: var(--dh-color-danger);
+}
+
+/* Sections */
+.dh-service-detail__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dh-space-3);
+}
+
+.dh-service-detail__section-title {
+  margin: 0;
+  font-family: var(--dh-font-sans);
+  font-size: var(--dh-font-size-xs);
+  font-weight: var(--dh-font-weight-semibold);
+  color: var(--dh-color-fg-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  gap: var(--dh-space-2);
+}
+
+.dh-service-detail__error-count {
+  font-weight: var(--dh-font-weight-normal);
+  color: var(--dh-color-danger);
+}
+
+/* Metrics grid */
+.dh-service-detail__metrics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--dh-space-2);
+}
+
+.dh-service-detail__metric {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dh-space-1);
+  padding: var(--dh-space-2) var(--dh-space-3);
+  background-color: var(--dh-color-bg-surface);
+  border: 1px solid var(--dh-color-border-default);
+  border-radius: var(--dh-radius-sm);
+}
+
+.dh-service-detail__metric--highlight {
+  border-color: var(--dh-color-danger);
+  background-color: var(--dh-color-danger-soft);
+}
+
+.dh-service-detail__metric-label {
+  font-family: var(--dh-font-sans);
+  font-size: var(--dh-font-size-xs);
+  color: var(--dh-color-fg-muted);
+}
+
+.dh-service-detail__metric-value {
+  font-family: var(--dh-font-mono);
+  font-size: var(--dh-font-size-sm);
+  font-weight: var(--dh-font-weight-medium);
+  color: var(--dh-color-fg-primary);
+}
+
+/* Loading state */
+.dh-service-detail__loading {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dh-space-3);
+}
+
+.dh-service-detail__skeleton {
+  height: 16px;
+  background: var(--dh-color-bg-muted);
+  border-radius: var(--dh-radius-sm);
+  animation: dh-service-detail-pulse 1.5s ease-in-out infinite;
+}
+
+.dh-service-detail__skeleton--short {
+  width: 60%;
+}
+
+@keyframes dh-service-detail-pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+/* Empty state */
+.dh-service-detail__empty {
+  margin: 0;
+  font-family: var(--dh-font-sans);
+  font-size: var(--dh-font-size-sm);
+  color: var(--dh-color-fg-muted);
+  font-style: italic;
+}
+
+/* Error log list */
+.dh-service-detail__error-list {
+  height: 320px;
+  overflow-y: auto;
+}
+
+.dh-service-detail__error-list--static {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dh-space-2);
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.dh-service-detail__error-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dh-space-1);
+  padding: var(--dh-space-2) var(--dh-space-3);
+  border-radius: var(--dh-radius-sm);
+  border-left: 3px solid transparent;
+}
+
+.dh-service-detail__error-row--error {
+  background-color: var(--dh-color-danger-soft);
+  border-left-color: var(--dh-color-danger);
+}
+
+.dh-service-detail__error-row--warn {
+  background-color: var(--dh-color-warn-soft);
+  border-left-color: var(--dh-color-warn);
+}
+
+.dh-service-detail__error-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dh-service-detail__error-level {
+  font-family: var(--dh-font-mono);
+  font-size: var(--dh-font-size-xs);
+  font-weight: var(--dh-font-weight-semibold);
+  color: var(--dh-color-fg-primary);
+}
+
+.dh-service-detail__error-time {
+  font-family: var(--dh-font-mono);
+  font-size: var(--dh-font-size-xs);
+  color: var(--dh-color-fg-muted);
+}
+
+.dh-service-detail__error-message {
+  margin: 0;
+  font-family: var(--dh-font-sans);
+  font-size: var(--dh-font-size-xs);
+  color: var(--dh-color-fg-secondary);
+  line-height: var(--dh-line-height-normal);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dh-service-detail__error-stack {
+  font-family: var(--dh-font-mono);
+  font-size: var(--dh-font-size-xs);
+  color: var(--dh-color-fg-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
