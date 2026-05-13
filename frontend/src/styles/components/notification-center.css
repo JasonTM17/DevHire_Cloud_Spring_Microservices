@@ -1,0 +1,229 @@
+/* ==========================================================================
+   Component: NotificationCenter
+   Bell icon with badge, drawer with paginated notification list.
+   Uses --dh-* design tokens consistent with existing component styles.
+   ========================================================================== */
+
+/* ---- Bell Icon Trigger ---- */
+
+.dh-notification-bell {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: var(--dh-radius-sm);
+  background: transparent;
+  color: var(--dh-color-fg-secondary);
+  cursor: pointer;
+  transition: background-color var(--dh-motion-duration-fast) var(--dh-motion-easing-standard),
+    color var(--dh-motion-duration-fast) var(--dh-motion-easing-standard);
+}
+
+.dh-notification-bell:hover {
+  background: var(--dh-color-bg-muted);
+  color: var(--dh-color-fg-primary);
+}
+
+.dh-notification-bell:focus-visible {
+  outline: 2px solid var(--dh-color-focus-ring);
+  outline-offset: 2px;
+}
+
+/* Badge */
+.dh-notification-bell__badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: var(--dh-radius-full);
+  background-color: var(--dh-color-danger);
+  color: #fff;
+  font-size: 10px;
+  font-weight: var(--dh-font-weight-bold);
+  line-height: 1;
+  pointer-events: none;
+  animation: dh-badge-pop var(--dh-motion-duration-fast) var(--dh-motion-easing-emphasized);
+}
+
+@keyframes dh-badge-pop {
+  0% {
+    transform: scale(0);
+  }
+  60% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* ---- Notification Center (inside drawer) ---- */
+
+.dh-notification-center {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  margin: calc(-1 * var(--dh-space-5));
+  margin-top: 0;
+}
+
+/* Actions bar */
+.dh-notification-center__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: var(--dh-space-3) var(--dh-space-4);
+  border-bottom: 1px solid var(--dh-color-border-default);
+}
+
+.dh-notification-center__mark-all {
+  border: none;
+  background: transparent;
+  color: var(--dh-color-primary);
+  font-size: var(--dh-font-size-sm);
+  font-weight: var(--dh-font-weight-semibold);
+  cursor: pointer;
+  padding: var(--dh-space-1) var(--dh-space-2);
+  border-radius: var(--dh-radius-sm);
+  transition: background-color var(--dh-motion-duration-fast) var(--dh-motion-easing-standard);
+}
+
+.dh-notification-center__mark-all:hover {
+  background: var(--dh-color-bg-muted);
+}
+
+.dh-notification-center__mark-all:focus-visible {
+  outline: 2px solid var(--dh-color-focus-ring);
+  outline-offset: 2px;
+}
+
+/* Scrollable list */
+.dh-notification-center__list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0;
+}
+
+/* ---- Individual Notification Item ---- */
+
+.dh-notification-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--dh-space-3);
+  width: 100%;
+  padding: var(--dh-space-4);
+  border: none;
+  border-bottom: 1px solid var(--dh-color-border-default);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--dh-motion-duration-fast) var(--dh-motion-easing-standard);
+}
+
+.dh-notification-item:hover {
+  background: var(--dh-color-bg-muted);
+}
+
+.dh-notification-item:focus-visible {
+  outline: 2px solid var(--dh-color-focus-ring);
+  outline-offset: -2px;
+}
+
+/* Unread state — slightly highlighted background */
+.dh-notification-item--unread {
+  background: var(--dh-color-info-soft, rgba(23, 162, 184, 0.04));
+}
+
+.dh-notification-item--unread:hover {
+  background: var(--dh-color-info-soft, rgba(23, 162, 184, 0.08));
+}
+
+/* Read state — default background */
+.dh-notification-item--read {
+  opacity: 0.75;
+}
+
+/* Unread indicator dot */
+.dh-notification-item__indicator {
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  margin-top: 6px;
+  border-radius: var(--dh-radius-full);
+  background: transparent;
+}
+
+.dh-notification-item--unread .dh-notification-item__indicator {
+  background: var(--dh-color-primary);
+}
+
+/* Content */
+.dh-notification-item__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.dh-notification-item__title {
+  margin: 0;
+  font-size: var(--dh-font-size-sm);
+  font-weight: var(--dh-font-weight-semibold);
+  color: var(--dh-color-fg-primary);
+  line-height: var(--dh-line-height-tight);
+}
+
+.dh-notification-item--read .dh-notification-item__title {
+  font-weight: var(--dh-font-weight-normal);
+}
+
+.dh-notification-item__body {
+  margin: var(--dh-space-1) 0 0;
+  font-size: var(--dh-font-size-xs);
+  color: var(--dh-color-fg-muted);
+  line-height: var(--dh-line-height-normal);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.dh-notification-item__time {
+  display: block;
+  margin-top: var(--dh-space-1);
+  font-size: var(--dh-font-size-xs);
+  color: var(--dh-color-fg-muted);
+}
+
+/* ---- Empty State ---- */
+
+.dh-notification-center__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--dh-space-3);
+  padding: var(--dh-space-8) var(--dh-space-4);
+  color: var(--dh-color-fg-muted);
+}
+
+.dh-notification-center__empty p {
+  margin: 0;
+  font-size: var(--dh-font-size-sm);
+}
+
+/* ---- Loading / End States ---- */
+
+.dh-notification-center__loading,
+.dh-notification-center__end {
+  padding: var(--dh-space-4);
+  text-align: center;
+  font-size: var(--dh-font-size-xs);
+  color: var(--dh-color-fg-muted);
+}

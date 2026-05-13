@@ -77,6 +77,9 @@
 @import '../styles/components/error-state.css';
 @import '../styles/components/inline-alert.css';
 
+/* Design System v2 — Notification component styles */
+@import '../styles/components/notification-center.css';
+
 /* Design System v2 — Leaderboard component styles */
 @import '../styles/components/leaderboard.css';
 

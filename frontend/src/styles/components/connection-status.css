@@ -1,0 +1,89 @@
+/* ==========================================================================
+   ConnectionStatusIndicator — Real-time connection state display
+   Uses design tokens from design-system.css
+   ========================================================================== */
+
+.dh-conn-status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  line-height: 1;
+  transition: background-color 0.2s ease, opacity 0.3s ease;
+}
+
+/* Connected state — minimal, unobtrusive */
+.dh-conn-status--connected {
+  opacity: 0.6;
+}
+
+.dh-conn-status--connected:hover {
+  opacity: 1;
+}
+
+/* Connecting state — subtle warning */
+.dh-conn-status--connecting {
+  background-color: rgba(255, 165, 0, 0.08);
+  color: var(--color-warning);
+}
+
+/* Disconnected state — alert */
+.dh-conn-status--disconnected {
+  background-color: rgba(220, 53, 69, 0.08);
+  color: var(--color-error);
+}
+
+/* Polling fallback state — informational */
+.dh-conn-status--polling {
+  background-color: rgba(23, 162, 184, 0.08);
+  color: var(--color-info);
+}
+
+/* Dot indicator */
+.dh-conn-status__dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.dh-conn-status__dot--connected {
+  background-color: var(--color-success);
+  box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.2);
+}
+
+.dh-conn-status__dot--connecting {
+  background-color: var(--color-warning);
+  box-shadow: 0 0 0 2px rgba(255, 165, 0, 0.2);
+  animation: dh-conn-pulse 1.5s ease-in-out infinite;
+}
+
+.dh-conn-status__dot--disconnected {
+  background-color: var(--color-error);
+  box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.2);
+  animation: dh-conn-pulse 2s ease-in-out infinite;
+}
+
+.dh-conn-status__dot--polling {
+  background-color: var(--color-info);
+  box-shadow: 0 0 0 2px rgba(23, 162, 184, 0.2);
+}
+
+/* Label text */
+.dh-conn-status__label {
+  white-space: nowrap;
+}
+
+/* Pulse animation for connecting/disconnected states */
+@keyframes dh-conn-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
