@@ -1,3 +1,15 @@
+export type PublicChallenge = {
+  id: string;
+  slug: string;
+  title: string;
+  difficulty: "EASY" | "MEDIUM" | "HARD";
+  languages: string[];
+  topics: string[];
+  acceptanceRate: number;
+  totalSubmissions: number;
+  solved: boolean;
+};
+
 export type UserRole = "ADMIN" | "EMPLOYER" | "CANDIDATE";
 
 export type AuthResponse = {
@@ -229,6 +241,7 @@ export type CodeTestCase = {
   name: string;
   visibility: "VISIBLE" | "HIDDEN";
   input: string;
+  expectedOutput?: string;
   weight: number;
 };
 

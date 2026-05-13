@@ -1,190 +1,365 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { BriefcaseBusiness, CheckCircle2, MapPin, SendHorizonal, ServerCog } from "lucide-react";
-import { useParams } from "next/navigation";
-import { CompanyLogo } from "@/components/CompanyLogo";
-import { StatusPill } from "@/components/StatusPill";
+import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
+import { MapPin, Briefcase, Clock, Calendar, Building2, Users, ExternalLink } from "lucide-react";
+import { SkillTag } from "@/components/ui/SkillTag";
+import { JobCard } from "@/components/JobCard";
 import { api } from "@/lib/api";
-import { brandForJob } from "@/lib/demoCompanies";
-import { previewJobs } from "@/lib/previewData";
 import { getSession } from "@/lib/session";
-import type { Job } from "@/types/domain";
+import type { Job, Company } from "@/types/domain";
+
+function formatSalary(min?: number, max?: number): string {
+  if (!min && !max) return "Thương lượng";
+  if (min && max) return `${min} - ${max} triệu`;
+  if (min) return `Từ ${min} triệu`;
+  return `Đến ${max} triệu`;
+}
+
+function formatDate(dateStr: string): string {
+  const date = new Date(dateStr);
+  return date.toLocaleDateString("vi-VN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+}
+
+function getCompanyInitial(name?: string): string {
+  return name ? name.charAt(0).toUpperCase() : "C";
+}
 
 export default function JobDetailPage() {
   const params = useParams<{ id: string }>();
+  const router = useRouter();
+
   const [job, setJob] = useState<Job | null>(null);
+  const [company, setCompany] = useState<Company | null>(null);
+  const [similarJobs, setSimilarJobs] = useState<Job[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Application modal state
+  const [showModal, setShowModal] = useState(false);
   const [cvUrl, setCvUrl] = useState("");
-  const [coverLetter, setCoverLetter] = useState("I am interested in this role and available for interview.");
-  const [hasSession, setHasSession] = useState(false);
+  const [coverLetter, setCoverLetter] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState("");
   const [messageTone, setMessageTone] = useState<"success" | "error">("success");
 
   useEffect(() => {
-    setHasSession(Boolean(getSession()?.accessToken));
-    api.job(params.id)
-      .then((value) => {
-        setJob(value);
-      })
-      .catch(() => {
-        setJob(previewJobs.content.find((item) => item.id === params.id) ?? previewJobs.content[0]);
-      });
+    async function fetchData() {
+      setLoading(true);
+      try {
+        const jobData = await api.job(params.id);
+        setJob(jobData);
+
+        // Fetch company info
+        try {
+          const companiesRes = await api.companies();
+          const found = companiesRes.content.find((c) => c.id === jobData.companyId);
+          if (found) setCompany(found);
+        } catch {
+          // Company fetch is optional
+        }
+
+        // Fetch similar jobs (same skills)
+        try {
+          const allJobsRes = await api.jobs(new URLSearchParams({ size: "50" }));
+          const similar = allJobsRes.content
+            .filter(
+              (j) =>
+                j.id !== jobData.id &&
+                j.status === "PUBLISHED" &&
+                j.skills.some((s) => jobData.skills.includes(s))
+            )
+            .slice(0, 4);
+          setSimilarJobs(similar);
+        } catch {
+          // Similar jobs fetch is optional
+        }
+      } catch {
+        setJob(null);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchData();
   }, [params.id]);
 
-  async function apply() {
+  function handleApplyClick() {
+    const session = getSession();
+    if (!session?.accessToken) {
+      router.push(`/auth/login?returnUrl=/jobs/${params.id}`);
+      return;
+    }
+    setShowModal(true);
     setMessage("");
-    const normalizedCvUrl = cvUrl.trim();
-    if (!hasSession) {
+    setCvUrl("");
+    setCoverLetter("");
+  }
+
+  async function handleSubmitApplication() {
+    const trimmedCv = cvUrl.trim();
+    if (!trimmedCv) {
       setMessageTone("error");
-      setMessage("Sign in as Candidate before submitting an application through the Gateway.");
+      setMessage("Vui lòng nhập đường dẫn CV của bạn.");
       return;
     }
-    if (!normalizedCvUrl) {
-      setMessageTone("error");
-      setMessage("Add a secure CV URL before submitting. The platform stores metadata only, not the CV file.");
-      return;
-    }
+
     setSubmitting(true);
+    setMessage("");
     try {
-      await api.apply(params.id, normalizedCvUrl, coverLetter.trim());
+      await api.apply(params.id, trimmedCv, coverLetter.trim());
       setMessageTone("success");
-      setMessage("Application submitted. Notification and audit events will be created by the platform.");
+      setMessage("Ứng tuyển thành công! Nhà tuyển dụng sẽ liên hệ bạn sớm.");
+      setTimeout(() => setShowModal(false), 2000);
     } catch (ex) {
       setMessageTone("error");
-      setMessage(applicationMessage(ex));
+      const msg = ex instanceof Error ? ex.message : "Có lỗi xảy ra. Vui lòng thử lại.";
+      if (msg.toLowerCase().includes("already")) {
+        setMessage("Bạn đã ứng tuyển vị trí này rồi.");
+      } else {
+        setMessage(msg);
+      }
     } finally {
       setSubmitting(false);
     }
   }
 
-  if (!job) {
-    return <section className="panel">Syncing job...</section>;
+  if (loading) {
+    return (
+      <div className="job-detail-page__loading">
+        <span>Đang tải thông tin việc làm...</span>
+      </div>
+    );
   }
 
-  const brand = brandForJob(job);
+  if (!job) {
+    return (
+      <div className="job-detail-page__loading">
+        <span>Không tìm thấy việc làm này.</span>
+      </div>
+    );
+  }
+
+  const isExpired = job.status !== "PUBLISHED";
+  const postedDate = job.publishedAt || job.createdAt;
 
   return (
-    <section className="detail-layout" data-testid="job-detail-page">
-      <article className="panel job-detail">
-        <div className="detail-heading">
-          <CompanyLogo brand={brand} size="lg" />
-          <div>
-            <p className="eyebrow">{brand.name} hiring workflow</p>
-            <h1>{job.title}</h1>
-            <div className="job-meta">
-              <span>
-                <MapPin size={13} /> {job.location ?? "Remote"}
+    <div className="job-detail-page" data-testid="job-detail-page">
+      {/* Main Content */}
+      <div className="job-detail-page__main">
+        {/* Expired Banner */}
+        {isExpired && (
+          <div className="job-detail-page__expired">
+            Việc làm này đã hết hạn
+          </div>
+        )}
+
+        {/* Job Header */}
+        <div className="job-detail-page__header">
+          <h1 className="job-detail-page__title">{job.title}</h1>
+          <div className="job-detail-page__salary">
+            {formatSalary(job.salaryMin, job.salaryMax)}
+          </div>
+          <div className="job-detail-page__meta">
+            {job.location && (
+              <span className="job-detail-page__meta-item">
+                <MapPin size={14} />
+                {job.location}
               </span>
-              <span>{job.level ?? "Any level"}</span>
-              <span>{job.type ?? "Full-time"}</span>
+            )}
+            {job.level && (
+              <span className="job-detail-page__meta-item">
+                <Briefcase size={14} />
+                {job.level}
+              </span>
+            )}
+            {job.type && (
+              <span className="job-detail-page__meta-item">
+                <Clock size={14} />
+                {job.type}
+              </span>
+            )}
+            <span className="job-detail-page__meta-item">
+              <Calendar size={14} />
+              {formatDate(postedDate)}
+            </span>
+          </div>
+          <div className="job-detail-page__skills">
+            {job.skills.map((skill) => (
+              <SkillTag key={skill} skill={skill} />
+            ))}
+          </div>
+        </div>
+
+        {/* Description */}
+        {job.description && (
+          <div className="job-detail-page__section">
+            <h2>Mô tả công việc</h2>
+            <div className="job-detail-page__section-content">
+              {job.description}
             </div>
           </div>
-          <StatusPill value={job.status} />
-        </div>
-        <div className="dashboard-grid">
-          <div className="panel">
-            <p className="eyebrow">Salary band</p>
-            <h2>{salary(job)}</h2>
-            <span className="muted">Visible to candidates after approval</span>
+        )}
+
+        {/* Requirements */}
+        {job.requirements && (
+          <div className="job-detail-page__section">
+            <h2>Yêu cầu ứng viên</h2>
+            <div className="job-detail-page__section-content">
+              {job.requirements}
+            </div>
           </div>
-          <div className="panel">
-            <p className="eyebrow">Company signal</p>
-            <h2>{brand.signal}</h2>
-            <span className="muted">{brand.industry}</span>
+        )}
+
+        {/* Benefits */}
+        {job.benefits && (
+          <div className="job-detail-page__section">
+            <h2>Quyền lợi</h2>
+            <div className="job-detail-page__section-content">
+              {job.benefits}
+            </div>
           </div>
-          <div className="panel">
-            <p className="eyebrow">Service path</p>
-            <h2>Gateway to Job</h2>
-            <span className="muted">JWT, RBAC, audit events</span>
+        )}
+
+        {/* Similar Jobs */}
+        {similarJobs.length > 0 && (
+          <div className="job-detail-page__similar">
+            <h2>Việc làm tương tự</h2>
+            <div className="job-detail-page__similar-grid">
+              {similarJobs.map((sJob) => (
+                <JobCard key={sJob.id} job={sJob} />
+              ))}
+            </div>
           </div>
-        </div>
-        <h2>Description</h2>
-        <p>{job.description}</p>
-        <h2>Requirements</h2>
-        <p>{job.requirements}</p>
-        <h2>Benefits</h2>
-        <p>{job.benefits}</p>
-        <div className="tag-row">
-          {job.skills.map((skill) => (
-            <span className="tag" key={skill}>
-              {skill}
-            </span>
-          ))}
-        </div>
-        <div className="infra-row">
-          <span className="infra-tag">Spring Boot 3.5</span>
-          <span className="infra-tag">Kafka events</span>
-          <span className="infra-tag">OpenSearch</span>
-          <span className="infra-tag">Prometheus SLO</span>
-        </div>
-      </article>
-      <aside className="panel apply-panel">
-        <div className="section-title">
-          <BriefcaseBusiness size={20} />
-          <h2>Apply</h2>
-        </div>
-        <div className="mini-stat">
-          <span>Duplicate protection</span>
-          <strong>Enabled</strong>
-        </div>
-        <label>
-          CV URL
-          <input
-            aria-describedby="cv-url-help"
-            placeholder="https://storage.devhire.local/cv/your-name.pdf"
-            type="url"
-            value={cvUrl}
-            onChange={(event) => setCvUrl(event.target.value)}
-          />
-        </label>
-        <small className="muted" id="cv-url-help">
-          Paste a private storage link. DevHire stores the URL metadata and enforces duplicate application protection.
-        </small>
-        <label>
-          Cover letter
-          <textarea value={coverLetter} onChange={(event) => setCoverLetter(event.target.value)} />
-        </label>
-        {!hasSession ? <p className="error">Sign in with the demo Candidate account to submit through the live API.</p> : null}
-        <button className="button primary" type="button" disabled={submitting} onClick={apply}>
-          <SendHorizonal size={16} />
-          {submitting ? "Submitting..." : "Submit application"}
-        </button>
-        {message ? <p className={messageTone}>{message}</p> : null}
-        <div className="insight-list">
-          <div className="insight-line">
-            <span>
-              <CheckCircle2 size={13} /> Transaction
-            </span>
-            <span>Required</span>
+        )}
+
+        {/* Sticky Apply Button (mobile-friendly) */}
+        {!isExpired && (
+          <button
+            className="job-detail-page__apply-btn"
+            onClick={handleApplyClick}
+            type="button"
+          >
+            Ứng tuyển ngay
+          </button>
+        )}
+      </div>
+
+      {/* Sidebar */}
+      <aside className="job-detail-page__sidebar">
+        <div className="job-detail-page__company-card">
+          <div className="job-detail-page__company-logo">
+            {company?.logoUrl ? (
+              <img src={company.logoUrl} alt={company.name} />
+            ) : (
+              <span>{getCompanyInitial(company?.name)}</span>
+            )}
           </div>
-          <div className="insight-line">
-            <span>
-              <ServerCog size={13} /> Events
-            </span>
-            <span>Notification + audit</span>
+          <div className="job-detail-page__company-name">
+            {company?.name || "Công ty"}
           </div>
+          <div className="job-detail-page__company-info">
+            {company?.industry && (
+              <span>
+                <Building2 size={14} style={{ display: "inline", marginRight: 4 }} />
+                {company.industry}
+              </span>
+            )}
+            {company?.size && (
+              <span>
+                <Users size={14} style={{ display: "inline", marginRight: 4 }} />
+                {company.size}
+              </span>
+            )}
+          </div>
+          {company?.slug && (
+            <Link
+              href={`/companies/${company.slug}`}
+              className="job-detail-page__company-link"
+            >
+              <ExternalLink size={14} />
+              Xem công ty
+            </Link>
+          )}
         </div>
+
+        {/* Sidebar Apply Button */}
+        {!isExpired && (
+          <button
+            className="job-detail-page__apply-btn"
+            onClick={handleApplyClick}
+            type="button"
+            style={{ marginTop: "var(--space-4)" }}
+          >
+            Ứng tuyển ngay
+          </button>
+        )}
       </aside>
-    </section>
+
+      {/* Application Modal */}
+      {showModal && (
+        <div
+          className="job-detail-page__modal-overlay"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowModal(false);
+          }}
+        >
+          <div className="job-detail-page__modal">
+            <h2>Ứng tuyển - {job.title}</h2>
+
+            <div className="job-detail-page__modal-field">
+              <label htmlFor="cv-url">Đường dẫn CV (URL)</label>
+              <input
+                id="cv-url"
+                type="url"
+                placeholder="https://example.com/cv.pdf"
+                value={cvUrl}
+                onChange={(e) => setCvUrl(e.target.value)}
+              />
+            </div>
+
+            <div className="job-detail-page__modal-field">
+              <label htmlFor="cover-letter">Thư giới thiệu</label>
+              <textarea
+                id="cover-letter"
+                placeholder="Giới thiệu bản thân và lý do bạn phù hợp với vị trí này..."
+                value={coverLetter}
+                onChange={(e) => setCoverLetter(e.target.value)}
+              />
+            </div>
+
+            {message && (
+              <div
+                className={`job-detail-page__modal-message job-detail-page__modal-message--${messageTone}`}
+              >
+                {message}
+              </div>
+            )}
+
+            <div className="job-detail-page__modal-actions">
+              <button
+                className="job-detail-page__modal-cancel"
+                onClick={() => setShowModal(false)}
+                type="button"
+              >
+                Hủy
+              </button>
+              <button
+                className="job-detail-page__modal-submit"
+                onClick={handleSubmitApplication}
+                disabled={submitting}
+                type="button"
+              >
+                {submitting ? "Đang gửi..." : "Gửi ứng tuyển"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
-}
-
-function salary(job: Job) {
-  if (!job.salaryMin && !job.salaryMax) return "Negotiable";
-  return `$${job.salaryMin ?? 0} - $${job.salaryMax ?? 0}`;
-}
-
-function applicationMessage(ex: unknown) {
-  const message = ex instanceof Error ? ex.message : "";
-  if (!message || message === "Failed to fetch") {
-    return "Runtime submission needs the Docker stack. The application form remains ready for reviewer inspection.";
-  }
-  if (message.toLowerCase().includes("already")) {
-    return "This candidate has already applied for the job. Duplicate prevention is working.";
-  }
-  if (message.toLowerCase().includes("unauthorized") || message.toLowerCase().includes("forbidden")) {
-    return "Your session is missing or does not have Candidate access. Sign in again and retry.";
-  }
-  return message;
 }

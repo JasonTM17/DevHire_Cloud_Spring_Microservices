@@ -1,356 +1,279 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import {
-  Activity,
-  BriefcaseBusiness,
-  ChevronLeft,
-  ChevronRight,
-  Clock3,
-  Database,
-  Filter,
-  Loader2,
-  MapPin,
-  Search,
-  ShieldCheck,
-  SlidersHorizontal,
-  X
-} from "lucide-react";
-import Link from "next/link";
-import { CompanyLogo } from "@/components/CompanyLogo";
-import { MetricCard } from "@/components/MetricCard";
-import { StatusPill } from "@/components/StatusPill";
+import { Suspense, useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { Loader2 } from "lucide-react";
+import { JobCard } from "@/components/JobCard";
+import { FilterSidebar, type FilterGroup, type FilterState } from "@/components/FilterSidebar";
 import { api } from "@/lib/api";
-import { brandForJob } from "@/lib/demoCompanies";
-import { previewJobs } from "@/lib/previewData";
-import type { Job, PageResponse } from "@/types/domain";
+import type { Job } from "@/types/domain";
+
+const PAGE_SIZE = 20;
+
+const FILTER_GROUPS: FilterGroup[] = [
+  {
+    id: "skills",
+    title: "Kỹ năng",
+    type: "checkbox",
+    options: [
+      { label: "Java", value: "Java" },
+      { label: "ReactJS", value: "ReactJS" },
+      { label: "Python", value: "Python" },
+      { label: "NodeJS", value: "NodeJS" },
+      { label: ".NET", value: ".NET" },
+      { label: "TypeScript", value: "TypeScript" },
+      { label: "PHP", value: "PHP" },
+      { label: "Go", value: "Go" },
+      { label: "AWS", value: "AWS" },
+      { label: "Docker", value: "Docker" },
+    ],
+  },
+  {
+    id: "salary",
+    title: "Mức lương (triệu)",
+    type: "range",
+    min: 0,
+    max: 100,
+    step: 5,
+  },
+  {
+    id: "level",
+    title: "Cấp bậc",
+    type: "radio",
+    options: [
+      { label: "Junior", value: "Junior" },
+      { label: "Mid", value: "Mid" },
+      { label: "Senior", value: "Senior" },
+      { label: "Lead", value: "Lead" },
+    ],
+  },
+  {
+    id: "type",
+    title: "Loại hình",
+    type: "radio",
+    options: [
+      { label: "Full-time", value: "Full-time" },
+      { label: "Part-time", value: "Part-time" },
+      { label: "Contract", value: "Contract" },
+      { label: "Remote", value: "Remote" },
+    ],
+  },
+  {
+    id: "location",
+    title: "Địa điểm",
+    type: "select",
+    options: [
+      { label: "Ho Chi Minh", value: "Ho Chi Minh" },
+      { label: "Ha Noi", value: "Ha Noi" },
+      { label: "Da Nang", value: "Da Nang" },
+      { label: "Remote", value: "Remote" },
+    ],
+  },
+];
+
+function buildSearchParams(filters: FilterState, page: number): URLSearchParams {
+  const params = new URLSearchParams();
+  params.set("page", String(page));
+  params.set("size", String(PAGE_SIZE));
+  params.set("sort", "publishedAt,desc");
+
+  const skills = filters.skills as string[] | undefined;
+  if (skills && skills.length > 0) {
+    params.set("skill", skills.join(","));
+  }
+
+  const salary = filters.salary as [number, number] | undefined;
+  if (salary) {
+    if (salary[0] > 0) params.set("salaryMin", String(salary[0]));
+    if (salary[1] > 0 && salary[1] < 100) params.set("salaryMax", String(salary[1]));
+  }
+
+  const level = filters.level as string | undefined;
+  if (level) params.set("level", level);
+
+  const type = filters.type as string | undefined;
+  if (type) params.set("type", type);
+
+  const location = filters.location as string | undefined;
+  if (location) params.set("location", location);
+
+  return params;
+}
+
+function getInitialFilters(searchParams: URLSearchParams): FilterState {
+  const state: FilterState = {};
+
+  const skill = searchParams.get("skill");
+  if (skill) {
+    state.skills = skill.split(",").filter(Boolean);
+  }
+
+  const level = searchParams.get("level");
+  if (level) state.level = level;
+
+  const type = searchParams.get("type");
+  if (type) state.type = type;
+
+  const location = searchParams.get("location");
+  if (location) state.location = location;
+
+  const salaryMin = searchParams.get("salaryMin");
+  const salaryMax = searchParams.get("salaryMax");
+  if (salaryMin || salaryMax) {
+    state.salary = [
+      salaryMin ? Number(salaryMin) : 0,
+      salaryMax ? Number(salaryMax) : 100,
+    ];
+  }
+
+  return state;
+}
 
 export default function JobsPage() {
-  const [keyword, setKeyword] = useState("");
-  const [skill, setSkill] = useState("");
-  const [location, setLocation] = useState("");
-  const [level, setLevel] = useState("");
-  const [jobType, setJobType] = useState("");
-  const [companyId, setCompanyId] = useState("");
-  const [salaryMin, setSalaryMin] = useState("");
-  const [pageNumber, setPageNumber] = useState(0);
-  const [sortOrder, setSortOrder] = useState<"publishedAt,desc" | "salaryMax,desc">("publishedAt,desc");
-  const [jobs, setJobs] = useState<PageResponse<Job> | null>(null);
+  return (
+    <Suspense
+      fallback={
+        <div className="job-listing__loading">
+          <Loader2 size={20} className="job-listing__spinner" />
+          <span>Đang tải...</span>
+        </div>
+      }
+    >
+      <JobListingContent />
+    </Suspense>
+  );
+}
+
+function JobListingContent() {
+  const searchParams = useSearchParams();
+  const [filters, setFilters] = useState<FilterState>(() => getInitialFilters(searchParams));
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [totalElements, setTotalElements] = useState(0);
+  const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(false);
 
-  const params = useMemo(() => {
-    const value = new URLSearchParams({ page: String(pageNumber), size: "12", sort: sortOrder });
-    if (keyword.trim()) value.set("keyword", keyword.trim());
-    if (skill.trim()) value.set("skill", skill.trim());
-    if (location.trim()) value.set("location", location.trim());
-    if (level.trim()) value.set("level", level.trim());
-    if (jobType.trim()) value.set("type", jobType.trim());
-    if (companyId.trim()) value.set("companyId", companyId.trim());
-    if (salaryMin.trim()) value.set("salaryMin", salaryMin.trim());
-    return value;
-  }, [keyword, skill, location, level, jobType, companyId, salaryMin, pageNumber, sortOrder]);
+  const fetchJobs = useCallback(
+    async (currentPage: number, append: boolean) => {
+      const isLoadMore = append;
+      if (isLoadMore) {
+        setLoadingMore(true);
+      } else {
+        setLoading(true);
+      }
 
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    setKeyword(params.get("keyword") ?? "");
-    setSkill(params.get("skill") ?? "");
-    setLocation(params.get("location") ?? "");
-    setLevel(params.get("level") ?? "");
-    setJobType(params.get("type") ?? "");
-    setCompanyId(params.get("companyId") ?? "");
-  }, []);
+      try {
+        const params = buildSearchParams(filters, currentPage);
+        const response = await api.jobs(params);
+        const newJobs = response.content ?? [];
 
-  useEffect(() => {
-    setLoading(true);
-    api.jobs(params)
-      .then((page) => {
-        setJobs(page);
-      })
-      .catch(() => {
-        setJobs(previewJobs);
-      })
-      .finally(() => setLoading(false));
-  }, [params]);
+        if (append) {
+          setJobs((prev) => [...prev, ...newJobs]);
+        } else {
+          setJobs(newJobs);
+        }
 
-  const visibleJobs = jobs?.content ?? [];
-  const totalPages = Math.max(jobs?.totalPages ?? 1, 1);
-  const currentPage = Math.min((jobs?.number ?? pageNumber) + 1, totalPages);
-  const hasFilters = Boolean(
-    keyword.trim() || skill.trim() || location.trim() || level.trim() || jobType.trim() || companyId.trim() || salaryMin.trim()
+        setTotalElements(response.totalElements ?? 0);
+        setHasMore(currentPage < (response.totalPages ?? 1) - 1);
+      } catch {
+        if (!append) {
+          setJobs([]);
+          setTotalElements(0);
+          setHasMore(false);
+        }
+      } finally {
+        setLoading(false);
+        setLoadingMore(false);
+      }
+    },
+    [filters]
   );
 
-  function updateFilter(next: () => void) {
-    setPageNumber(0);
-    next();
-  }
+  useEffect(() => {
+    setPage(0);
+    fetchJobs(0, false);
+  }, [fetchJobs]);
 
-  function clearFilters() {
-    setKeyword("");
-    setSkill("");
-    setLocation("");
-    setLevel("");
-    setJobType("");
-    setCompanyId("");
-    setSalaryMin("");
-    setPageNumber(0);
-  }
+  const handleFilterChange = (newFilters: FilterState) => {
+    setFilters(newFilters);
+  };
+
+  const handleClearFilters = () => {
+    setFilters({});
+  };
+
+  const handleLoadMore = () => {
+    const nextPage = page + 1;
+    setPage(nextPage);
+    fetchJobs(nextPage, true);
+  };
 
   return (
-    <section className="page-stack" data-testid="jobs-page">
-      <div className="hero-strip">
-        <div>
-          <p className="eyebrow">Published opportunities</p>
-          <h1>Jobs</h1>
-          <p>
-            Search production-ready backend roles across approved companies. The UI keeps recruitment data, search
-            state, and platform health visible without turning into a marketing page.
-          </p>
-        </div>
-        <div className="hero-actions">
-          <span className="badge live">
-            <Activity size={13} />
-            Gateway route
-          </span>
-          <span className="badge">
-            <Database size={13} />
-            OpenSearch ready
-          </span>
-          <Link className="button secondary" href="/login">
-            Sign in
-          </Link>
-        </div>
+    <div className="job-listing" data-testid="jobs-page">
+      <div className="job-listing__sidebar">
+        <FilterSidebar
+          filters={FILTER_GROUPS}
+          value={filters}
+          onChange={handleFilterChange}
+        />
       </div>
 
-      <div className="filter-bar">
-        <label>
-          <Search size={16} />
-          <input
-            value={keyword}
-            onChange={(event) => updateFilter(() => setKeyword(event.target.value))}
-            placeholder="Keyword"
-          />
-        </label>
-        <label>
-          <Filter size={16} />
-          <input
-            value={skill}
-            onChange={(event) => updateFilter(() => setSkill(event.target.value))}
-            placeholder="Skill"
-          />
-        </label>
-        <label>
-          <MapPin size={16} />
-          <input
-            value={location}
-            onChange={(event) => updateFilter(() => setLocation(event.target.value))}
-            placeholder="Location"
-          />
-        </label>
-        <label>
-          <ShieldCheck size={16} />
-          <select
-            aria-label="Level"
-            value={level}
-            onChange={(event) => updateFilter(() => setLevel(event.target.value))}
-          >
-            <option value="">Any level</option>
-            <option value="Junior">Junior</option>
-            <option value="Middle">Middle</option>
-            <option value="Mid-Senior">Mid-Senior</option>
-            <option value="Senior">Senior</option>
-            <option value="Lead">Lead</option>
-          </select>
-        </label>
-        <label>
-          <BriefcaseBusiness size={16} />
-          <select
-            aria-label="Job type"
-            value={jobType}
-            onChange={(event) => updateFilter(() => setJobType(event.target.value))}
-          >
-            <option value="">Any type</option>
-            <option value="Full-time">Full-time</option>
-            <option value="Contract">Contract</option>
-            <option value="Part-time">Part-time</option>
-            <option value="Remote">Remote</option>
-          </select>
-        </label>
-        <label>
-          <BriefcaseBusiness size={16} />
-          <input
-            min="0"
-            type="number"
-            value={salaryMin}
-            onChange={(event) => updateFilter(() => setSalaryMin(event.target.value))}
-            placeholder="Minimum salary"
-          />
-        </label>
-      </div>
-
-      <div className="toolbar">
-        <div className="filter-tabs" aria-label="Job filters">
-          <button className={!hasFilters ? "tab active" : "tab"} type="button" onClick={clearFilters}>Published</button>
-          <button className={location.toLowerCase().includes("remote") ? "tab active" : "tab"} type="button" onClick={() => updateFilter(() => setLocation("Remote"))}>Remote</button>
-          <button className={level === "Senior" ? "tab active" : "tab"} type="button" onClick={() => updateFilter(() => {
-            setLevel("Senior");
-            setLocation("");
-          })}>Senior</button>
-          <button className={jobType === "Full-time" ? "tab active" : "tab"} type="button" onClick={() => updateFilter(() => setJobType("Full-time"))}>Full-time</button>
-          <button className={skill === "Java" ? "tab active" : "tab"} type="button" onClick={() => updateFilter(() => setSkill("Java"))}>Java</button>
+      <div className="job-listing__results">
+        <div className="job-listing__header">
+          <span className="job-listing__count">
+            Tìm thấy {totalElements} việc làm
+          </span>
         </div>
-        <div className="toolbar-actions">
-          <span className="muted">Page {currentPage} of {totalPages}</span>
-          {hasFilters ? (
-            <button className="button outline" type="button" onClick={clearFilters}>
-              <X size={16} />
-              Clear filters
+
+        {loading && (
+          <div className="job-listing__loading">
+            <Loader2 size={20} className="job-listing__spinner" />
+            <span>Đang tải...</span>
+          </div>
+        )}
+
+        {!loading && jobs.length === 0 && (
+          <div className="job-listing__empty">
+            <div className="job-listing__empty-icon">🔍</div>
+            <p className="job-listing__empty-text">
+              Không tìm thấy việc làm phù hợp
+            </p>
+            <button
+              className="job-listing__empty-btn"
+              type="button"
+              onClick={handleClearFilters}
+            >
+              Xóa bộ lọc
             </button>
-          ) : null}
-          <button
-            className="button outline"
-            type="button"
-            onClick={() => updateFilter(() => setSortOrder((value) => value === "publishedAt,desc" ? "salaryMax,desc" : "publishedAt,desc"))}
-          >
-            <SlidersHorizontal size={16} />
-            Sort: {sortOrder === "publishedAt,desc" ? "newest" : "salary"}
-          </button>
-        </div>
-      </div>
+          </div>
+        )}
 
-      <div className="metrics-row">
-        <MetricCard icon={BriefcaseBusiness} label="Results" value={jobs?.totalElements ?? 0} helper="Paginated search" />
-        <MetricCard icon={Database} label="Page size" value={jobs?.size ?? 12} helper={`${jobs?.totalPages ?? 1} result pages`} />
-        <MetricCard icon={Clock3} label="Search p95" value="128ms" helper="Prometheus target" />
-        <MetricCard icon={ShieldCheck} label="Workflow" value="Approved" helper="Admin reviewed" />
-      </div>
+        {!loading &&
+          jobs.map((job) => (
+            <JobCard key={job.id} job={job} />
+          ))}
 
-      <div className="results-layout">
-        <div className="results-main">
-          <div className="job-grid" data-testid="job-grid">
-            {loading ? (
-              <div className="empty-state">
-                <Loader2 className="spin" size={18} />
-                <strong>Syncing published jobs</strong>
-                <span>Calling Gateway, search adapter, and job-service.</span>
-              </div>
-            ) : null}
-            {!loading && visibleJobs.length === 0 ? (
-              <div className="empty-state">
-                <Search size={18} />
-                <strong>No jobs match this filter</strong>
-                <span>Try a broader keyword, skill, location, level, or salary range.</span>
-              </div>
-            ) : null}
-            {!loading && visibleJobs.map((job) => {
-              const brand = brandForJob(job);
-              return (
-                <Link className="job-card" data-testid="job-card" href={`/jobs/${job.id}`} key={job.id}>
-                  <div className="job-card-top">
-                    <div className="company-line">
-                      <CompanyLogo brand={brand} />
-                      <span>
-                        <strong>{brand.name}</strong>
-                        <span>{brand.industry}</span>
-                      </span>
-                    </div>
-                    <StatusPill value={job.status} />
-                  </div>
-                  <div>
-                    <h2>{job.title}</h2>
-                    <div className="job-meta">
-                      <span>{job.location ?? "Remote"}</span>
-                      <span>{job.level ?? "Any level"}</span>
-                      <strong>{salary(job)}</strong>
-                    </div>
-                  </div>
-                  <p>{job.description}</p>
-                  <div className="tag-row">
-                    {(job.skills ?? []).slice(0, 4).map((item) => (
-                      <span className="tag" key={item}>
-                        {item}
-                      </span>
-                    ))}
-                  </div>
-                  <div className="infra-row">
-                    {infraBadges(job).map((item) => (
-                      <span className="infra-tag" key={item}>
-                        {item}
-                      </span>
-                    ))}
-                  </div>
-                </Link>
-              );
-            })}
+        {!loading && hasMore && (
+          <div className="job-listing__load-more">
+            <button
+              className="job-listing__load-more-btn"
+              type="button"
+              onClick={handleLoadMore}
+              disabled={loadingMore}
+            >
+              {loadingMore ? (
+                <>
+                  <Loader2 size={16} className="job-listing__spinner" />
+                  Đang tải...
+                </>
+              ) : (
+                "Tải thêm"
+              )}
+            </button>
           </div>
-          <div className="pagination-bar" aria-label="Jobs pagination">
-            <span>
-              Showing {visibleJobs.length} of {jobs?.totalElements ?? 0} published jobs
-            </span>
-            <div className="pagination-actions">
-              <button
-                className="button outline"
-                disabled={loading || currentPage <= 1}
-                type="button"
-                onClick={() => setPageNumber((value) => Math.max(value - 1, 0))}
-              >
-                <ChevronLeft size={16} />
-                Previous
-              </button>
-              <strong>{currentPage} / {totalPages}</strong>
-              <button
-                className="button outline"
-                disabled={loading || currentPage >= totalPages}
-                type="button"
-                onClick={() => setPageNumber((value) => Math.min(value + 1, totalPages - 1))}
-              >
-                Next
-                <ChevronRight size={16} />
-              </button>
-            </div>
-          </div>
-        </div>
-        <aside className="insight-panel">
-          <p className="eyebrow">Production insights</p>
-          <h2>Service readiness</h2>
-          <div className="insight-list">
-            <div className="mini-stat">
-              <span>Kafka outbox</span>
-              <strong>0 failed</strong>
-            </div>
-            <div className="mini-stat">
-              <span>Gateway 5xx</span>
-              <strong>{"< 0.2%"}</strong>
-            </div>
-            <div className="insight-line">
-              <span>Auth service</span>
-              <span className="badge live">JWT ready</span>
-            </div>
-            <div className="insight-line">
-              <span>Search adapter</span>
-              <span className="badge">OpenSearch</span>
-            </div>
-            <div className="insight-line">
-              <span>Audit stream</span>
-              <span className="badge">Kafka</span>
-            </div>
-          </div>
-        </aside>
+        )}
       </div>
-    </section>
+    </div>
   );
-}
-
-function salary(job: Job) {
-  if (!job.salaryMin && !job.salaryMax) return "Negotiable";
-  return `$${job.salaryMin ?? 0} - $${job.salaryMax ?? 0}`;
-}
-
-function infraBadges(job: Job) {
-  const text = `${job.title} ${job.description} ${(job.skills ?? []).join(" ")}`.toLowerCase();
-  const badges = [
-    text.includes("kafka") ? "Kafka" : "Spring Boot",
-    text.includes("opensearch") || text.includes("search") ? "OpenSearch" : "PostgreSQL",
-    text.includes("aws") || text.includes("cloud") ? "AWS" : "Docker"
-  ];
-  return Array.from(new Set(badges));
 }

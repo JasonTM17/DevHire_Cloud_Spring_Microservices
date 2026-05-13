@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Activity, Bot, Building2, CheckCircle2, ClipboardCheck, Gauge, RefreshCw, ScrollText, ShieldCheck } from "lucide-react";
 import { CompanyLogo } from "@/components/CompanyLogo";
 import { MetricCard } from "@/components/MetricCard";
@@ -33,6 +33,7 @@ export default function AdminPage() {
   const [operationsSummary, setOperationsSummary] = useState<OperationsSummary>(previewOperationsSummary);
   const [codeAssessmentSummary, setCodeAssessmentSummary] = useState<CodeAssessmentSummary>(previewCodeAssessmentSummary);
   const [codeChallenges, setCodeChallenges] = useState<CodeChallenge[]>([]);
+  const [challengeLoadError, setChallengeLoadError] = useState(false);
   const [editingChallengeId, setEditingChallengeId] = useState<string | null>(null);
   const [challengeDraft, setChallengeDraft] = useState<ChallengeDraftState>(defaultChallengeDraft());
   const [reviewJobs, setReviewJobs] = useState<PageResponse<Job>>(previewJobs);
@@ -41,6 +42,34 @@ export default function AdminPage() {
   const [reindexing, setReindexing] = useState(false);
   const [savingChallenge, setSavingChallenge] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const challengeListRef = useRef<HTMLDivElement>(null);
+
+  const PAGE_SIZE = 10;
+
+  function handleSearchChange(value: string) {
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+    searchTimeoutRef.current = setTimeout(() => {
+      setSearchQuery(value);
+      setCurrentPage(1);
+    }, 300);
+  }
+
+  const filteredChallenges = useMemo(
+    () => codeChallenges.filter((c) => c.title.toLowerCase().includes(searchQuery.toLowerCase())),
+    [codeChallenges, searchQuery]
+  );
+
+  const paginatedChallenges = useMemo(
+    () => filteredChallenges.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE),
+    [filteredChallenges, currentPage]
+  );
+
+  const totalPages = Math.ceil(filteredChallenges.length / PAGE_SIZE);
 
   function load() {
     setLoading(true);
@@ -51,7 +80,7 @@ export default function AdminPage() {
       api.adminJobs("PENDING_REVIEW"),
       api.operationsSummary(),
       api.codeAssessmentSummary(),
-      api.codeChallenges().catch(() => [] as CodeChallenge[])
+      api.codeChallenges().then((challenges) => { setChallengeLoadError(false); return challenges; }).catch(() => { setChallengeLoadError(true); return [] as CodeChallenge[]; })
     ])
       .then(([companyPage, auditPage, providerStatus, jobPage, ops, codeSummary, challenges]) => {
         setCompanies(companyPage);
@@ -71,6 +100,7 @@ export default function AdminPage() {
         setOperationsSummary(previewOperationsSummary);
         setCodeAssessmentSummary(previewCodeAssessmentSummary);
         setCodeChallenges([]);
+        setChallengeLoadError(true);
         setReviewJobs(previewJobs);
         setSelectedJobId(previewJobs.content[0]?.id ?? "");
         setMessage("");
@@ -112,6 +142,18 @@ export default function AdminPage() {
   }
 
   async function saveChallenge(activeOverride = challengeDraft.active) {
+    if (activeOverride && challengeDraft.language.toLowerCase() === "sql") {
+      const invalidCases = challengeDraft.testCases
+        .map((tc, index) => ({ tc, index }))
+        .filter(({ tc }) => !tc.setupSql?.trim() || !tc.expectedRowsJson?.trim());
+
+      if (invalidCases.length > 0) {
+        const caseNames = invalidCases.map(({ tc, index }) => `Case ${index + 1} (${tc.name})`).join(", ");
+        setMessage(`SQL challenge requires setupSql and expectedRowsJson for all test cases. Missing in: ${caseNames}`);
+        return;
+      }
+    }
+
     try {
       setSavingChallenge(true);
       const payload = challengePayload(challengeDraft, activeOverride);
@@ -346,11 +388,15 @@ export default function AdminPage() {
               value={challengeDraft.level}
               onChange={(event) => setChallengeDraft((current) => ({ ...current, level: event.target.value }))}
             />
-            <input
+            <select
               aria-label="Challenge language"
               value={challengeDraft.language}
               onChange={(event) => setChallengeDraft((current) => ({ ...current, language: event.target.value }))}
-            />
+            >
+              <option value="Java">Java</option>
+              <option value="TypeScript">TypeScript</option>
+              <option value="SQL">SQL</option>
+            </select>
           </div>
           <textarea
             aria-label="Problem statement"
@@ -444,6 +490,26 @@ export default function AdminPage() {
                     />
                   </label>
                 </div>
+                {challengeDraft.language.toLowerCase() === "sql" && (
+                  <div className="code-authoring-grid">
+                    <label>
+                      Setup SQL
+                      <textarea
+                        aria-label={`Case ${index + 1} setup SQL`}
+                        value={testCase.setupSql ?? ""}
+                        onChange={(event) => updateCase(index, { setupSql: event.target.value })}
+                      />
+                    </label>
+                    <label>
+                      Expected rows JSON
+                      <textarea
+                        aria-label={`Case ${index + 1} expected rows JSON`}
+                        value={testCase.expectedRowsJson ?? ""}
+                        onChange={(event) => updateCase(index, { expectedRowsJson: event.target.value })}
+                      />
+                    </label>
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -481,9 +547,23 @@ export default function AdminPage() {
             {codeAssessmentSummary.runnerHealth.failClosedReason ? <span>{codeAssessmentSummary.runnerHealth.failClosedReason}</span> : <span>Runner is accepting assessment work</span>}
           </div>
         </div>
-        <div className="table-list">
+        <div className="table-list" ref={challengeListRef}>
+          <input
+            type="text"
+            aria-label="Search challenges"
+            placeholder="Search challenges by title..."
+            onChange={(event) => handleSearchChange(event.target.value)}
+            className="search-input"
+          />
+          <small className="muted">
+            {searchQuery ? `${filteredChallenges.length} of ${codeChallenges.length} challenges` : `${codeChallenges.length} challenges`}
+          </small>
           {codeChallenges.length === 0 ? <div className="empty-state compact">No admin challenge registry returned yet.</div> : null}
-          {codeChallenges.slice(0, 6).map((challenge) => (
+          {filteredChallenges.length === 0 && searchQuery ? <div className="empty-state compact">No challenges match your search.</div> : null}
+          {challengeLoadError && (
+            <div className="empty-state compact">Challenge registry unavailable.</div>
+          )}
+          {!challengeLoadError && paginatedChallenges.map((challenge) => (
             <div className="table-row" key={challenge.id}>
               <div>
                 <strong>{challenge.title}</strong>
@@ -491,6 +571,7 @@ export default function AdminPage() {
                   {challenge.language} v{challenge.version} - visible {challenge.visibleCaseCount} / hidden {challenge.hiddenCaseCount}
                 </small>
               </div>
+              <span className="badge">{challenge.language}</span>
               <span className={challenge.active ? "badge live" : "badge"}>{challenge.active ? "Active" : "Draft"}</span>
               <button className="button secondary" type="button" onClick={() => loadChallengeIntoEditor(challenge)}>
                 Edit
@@ -500,6 +581,13 @@ export default function AdminPage() {
               </button>
             </div>
           ))}
+          {!challengeLoadError && totalPages > 1 && (
+            <div className="pagination-controls">
+              <button disabled={currentPage === 1} onClick={() => { setCurrentPage(p => p - 1); challengeListRef.current?.scrollIntoView({ behavior: 'smooth' }); }}>Previous</button>
+              <span>Page {currentPage} of {totalPages}</span>
+              <button disabled={currentPage >= totalPages} onClick={() => { setCurrentPage(p => p + 1); challengeListRef.current?.scrollIntoView({ behavior: 'smooth' }); }}>Next</button>
+            </div>
+          )}
         </div>
       </div>
       <div className="panel">
