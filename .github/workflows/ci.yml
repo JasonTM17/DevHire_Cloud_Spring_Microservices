@@ -54,6 +54,27 @@ jobs:
         working-directory: frontend
         run: npm run build
 
+      - name: Frontend unit tests
+        working-directory: frontend
+        run: npm run test
+
+      - name: Frontend property tests
+        working-directory: frontend
+        env:
+          FAST_CHECK_NUM_RUNS: 500
+        run: npm run test:properties
+
+      - name: Frontend contrast check
+        run: node frontend/scripts/check-contrast.mjs
+
+      - name: Frontend e2e tests
+        if: ${{ env.E2E_FRONTEND_URL != '' }}
+        working-directory: frontend
+        run: npm run e2e
+
+      - name: Frontend bundle size check
+        run: node frontend/scripts/check-bundle-size.mjs
+
       - name: Upload test reports on failure
         if: failure()
         uses: actions/upload-artifact@v6

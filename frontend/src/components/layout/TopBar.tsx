@@ -53,29 +53,29 @@ export function TopBar({ links, user, session }: TopBarProps) {
   }
 
   return (
-    <div className="itviec-header" data-testid="top-bar">
-      <div className="itviec-header__inner">
-        <Link href="/" className="itviec-header__logo">
+    <div className="dh-topbar" data-testid="top-bar">
+      <div className="dh-topbar__inner">
+        <Link href="/" className="dh-topbar__logo">
           <Code2 size={28} strokeWidth={2.5} />
-          <span className="itviec-header__logo-text">
+          <span className="dh-topbar__logo-text">
             <strong>DevHire</strong>
             <small>Cloud</small>
           </span>
         </Link>
 
-        <nav className="itviec-header__nav" aria-label="Main navigation">
+        <nav className="dh-topbar__nav" aria-label="Main navigation">
           {links.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className={`itviec-header__nav-link ${isActive(link.href) ? "active" : ""}`}
+              className={`dh-topbar__nav-link ${isActive(link.href) ? "dh-topbar__nav-link--active" : ""}`}
             >
               {link.label}
             </Link>
           ))}
         </nav>
 
-        <form className="itviec-header__search" onSubmit={submitSearch} aria-label="Job search">
+        <form className="dh-topbar__search-slot" onSubmit={submitSearch} aria-label="Job search">
           <Search size={16} />
           <input
             type="text"
@@ -85,34 +85,34 @@ export function TopBar({ links, user, session }: TopBarProps) {
           />
         </form>
 
-        <div className="itviec-header__actions">
+        <div className="dh-topbar__actions">
           {session ? (
             <>
-              <Link href="/candidate" className="itviec-header__icon-btn" aria-label="Notifications">
+              <Link href="/candidate" className="dh-topbar__bell" aria-label="Notifications">
                 <Bell size={20} />
               </Link>
-              <div className="itviec-header__user-menu">
+              <div className="dh-topbar__user-menu">
                 <button
-                  className="itviec-header__user-btn"
+                  className="dh-topbar__user-trigger"
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
                   type="button"
                   aria-expanded={userMenuOpen}
                   aria-haspopup="menu"
                 >
-                  <span className="itviec-header__avatar">
+                  <span className="dh-topbar__avatar">
                     {session.user.email.charAt(0).toUpperCase()}
                   </span>
                   <ChevronDown size={14} />
                 </button>
                 {userMenuOpen && (
-                  <div className="itviec-header__dropdown" role="menu">
-                    <div className="itviec-header__dropdown-info">
+                  <div className="dh-topbar__dropdown" role="menu">
+                    <div className="dh-topbar__dropdown-info">
                       <strong>{session.user.role}</strong>
                       <small>{session.user.email}</small>
                     </div>
-                    <div className="itviec-header__dropdown-divider" />
+                    <div className="dh-topbar__dropdown-divider" />
                     <button
-                      className="itviec-header__dropdown-item itviec-header__dropdown-item--danger"
+                      className="dh-topbar__dropdown-item dh-topbar__dropdown-item--danger"
                       onClick={handleLogout}
                       type="button"
                       role="menuitem"
@@ -125,14 +125,14 @@ export function TopBar({ links, user, session }: TopBarProps) {
               </div>
             </>
           ) : (
-            <>
-              <Link href="/login" className="itviec-header__login-btn">
+            <div className="dh-topbar__auth-links">
+              <Link href="/login" className="dh-topbar__auth-link">
                 Sign in
               </Link>
-              <Link href="/register" className="itviec-header__register-btn">
+              <Link href="/register" className="dh-topbar__auth-link dh-topbar__auth-link--primary">
                 Register
               </Link>
-            </>
+            </div>
           )}
         </div>
       </div>
