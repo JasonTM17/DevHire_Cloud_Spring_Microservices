@@ -4,10 +4,10 @@ import type { ChallengeFilter } from "@/lib/challenges/filter";
 import { Checkbox } from "@/components/ui/primitives";
 
 export interface FilterSidebarProps {
-  /** Current active filters */
+  /** Current active filters (controlled) */
   filters: ChallengeFilter;
-  /** Callback fired immediately on any filter change */
-  onFilterChange: (filters: ChallengeFilter) => void;
+  /** Callback fired immediately on any filter change with the new filter state */
+  onChange: (filters: ChallengeFilter) => void;
   /** Available programming languages for filter options */
   availableLanguages: string[];
   /** Available topics for filter options */
@@ -27,50 +27,49 @@ const STATUS_OPTIONS: Array<{ value: "solved" | "unsolved"; label: string }> = [
 
 /**
  * FilterSidebar for the Challenge Library.
- * Provides checkbox groups for difficulty, language, topic, and radio for solved status.
- * Each change calls onFilterChange immediately for < 100ms response via useMemo(filterChallenges).
+ * Provides checkbox groups for difficulty, language, topic, and solved/unsolved status.
+ * Each change calls onChange immediately for < 100ms response via useMemo(filterChallenges).
  * Accessible: uses fieldset/legend for each group, keyboard navigable via Tab.
  */
 export function FilterSidebar({
   filters,
-  onFilterChange,
+  onChange,
   availableLanguages,
   availableTopics,
 }: FilterSidebarProps) {
   const handleDifficultyChange = (value: "EASY" | "MEDIUM" | "HARD", checked: boolean) => {
     if (checked) {
-      onFilterChange({ ...filters, difficulty: value });
+      onChange({ ...filters, difficulty: value });
     } else {
-      // Uncheck clears the difficulty filter
       const { difficulty: _, ...rest } = filters;
-      onFilterChange(rest);
+      onChange(rest);
     }
   };
 
   const handleLanguageChange = (value: string, checked: boolean) => {
     if (checked) {
-      onFilterChange({ ...filters, language: value });
+      onChange({ ...filters, language: value });
     } else {
       const { language: _, ...rest } = filters;
-      onFilterChange(rest);
+      onChange(rest);
     }
   };
 
   const handleTopicChange = (value: string, checked: boolean) => {
     if (checked) {
-      onFilterChange({ ...filters, topic: value });
+      onChange({ ...filters, topic: value });
     } else {
       const { topic: _, ...rest } = filters;
-      onFilterChange(rest);
+      onChange(rest);
     }
   };
 
   const handleStatusChange = (value: "solved" | "unsolved", checked: boolean) => {
     if (checked) {
-      onFilterChange({ ...filters, solved: value === "solved" });
+      onChange({ ...filters, solved: value === "solved" });
     } else {
       const { solved: _, ...rest } = filters;
-      onFilterChange(rest);
+      onChange(rest);
     }
   };
 

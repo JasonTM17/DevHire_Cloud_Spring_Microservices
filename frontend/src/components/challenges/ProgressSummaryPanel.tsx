@@ -17,7 +17,25 @@ interface ProgressApiResponse {
   totalByDifficulty?: { easy: number; medium: number; hard: number };
 }
 
+/**
+ * External progress prop shape — allows the component to be used
+ * without internal data fetching (useful for testing and composition).
+ */
+export interface ProgressData {
+  total: number;
+  solved: number;
+  easy: { total: number; solved: number };
+  medium: { total: number; solved: number };
+  hard: { total: number; solved: number };
+}
+
 export interface ProgressSummaryPanelProps {
+  /** External progress data. When provided, skips internal data fetching. */
+  progress?: ProgressData;
+  /** Current streak in days (used with external progress prop) */
+  streak?: number;
+  /** Rank position from leaderboard (used with external progress prop) */
+  rank?: number;
   className?: string;
   "data-testid"?: string;
 }
@@ -29,12 +47,58 @@ export interface ProgressSummaryPanelProps {
  * total solved, breakdown by difficulty with progress bars,
  * current streak, and rank position.
  *
+ * Supports two modes:
+ * 1. External `progress` prop — renders directly from provided data (no fetch)
+ * 2. No `progress` prop — fetches from `/api/candidate/me/progress` internally
+ *
  * Requirements: 3.3
  */
 export function ProgressSummaryPanel({
+  progress: externalProgress,
+  streak: externalStreak,
+  rank: externalRank,
   className = "",
   "data-testid": testId,
 }: ProgressSummaryPanelProps) {
+  // If external progress is provided, render directly without fetching
+  if (externalProgress) {
+    return (
+      <ProgressSummaryContent
+        totalSolved={externalProgress.solved}
+        totalAvailable={externalProgress.total}
+        byDifficulty={{
+          easy: externalProgress.easy.solved,
+          medium: externalProgress.medium.solved,
+          hard: externalProgress.hard.solved,
+        }}
+        totalByDifficulty={{
+          easy: externalProgress.easy.total,
+          medium: externalProgress.medium.total,
+          hard: externalProgress.hard.total,
+        }}
+        streak={externalStreak ?? 0}
+        rank={externalRank}
+        className={className}
+        testId={testId}
+      />
+    );
+  }
+
+  // Internal data-fetching mode
+  return (
+    <ProgressSummaryFetcher className={className} testId={testId} />
+  );
+}
+
+// --- Internal fetcher wrapper ---
+
+function ProgressSummaryFetcher({
+  className,
+  testId,
+}: {
+  className: string;
+  testId?: string;
+}) {
   const { data, error, isValidating } = useDataFetcher<ProgressApiResponse>(
     "/api/candidate/me/progress",
     () =>
@@ -53,7 +117,7 @@ export function ProgressSummaryPanel({
     );
   }
 
-  // Error state — silently show empty if error
+  // Error state
   if (error && !data) {
     return (
       <Card className={`dh-progress-summary ${className}`} data-testid={testId}>
@@ -70,10 +134,7 @@ export function ProgressSummaryPanel({
   const submissions = data?.submissions ?? [];
   const progress: ProgressSummary = computeProgress(submissions);
 
-  // Attach rank from API response if available
   const rank = data?.rank;
-
-  // Total counts per difficulty (for ratio display)
   const totalByDifficulty = data?.totalByDifficulty ?? {
     easy: 0,
     medium: 0,
@@ -94,15 +155,60 @@ export function ProgressSummaryPanel({
   }
 
   return (
-    <Card className={`dh-progress-summary ${className}`} data-testid={testId}>
+    <ProgressSummaryContent
+      totalSolved={progress.totalSolved}
+      totalAvailable={
+        totalByDifficulty.easy + totalByDifficulty.medium + totalByDifficulty.hard
+      }
+      byDifficulty={progress.byDifficulty}
+      totalByDifficulty={totalByDifficulty}
+      streak={progress.streak}
+      rank={rank}
+      className={className}
+      testId={testId}
+    />
+  );
+}
+
+// --- Presentational content ---
+
+interface ProgressSummaryContentProps {
+  totalSolved: number;
+  totalAvailable: number;
+  byDifficulty: { easy: number; medium: number; hard: number };
+  totalByDifficulty: { easy: number; medium: number; hard: number };
+  streak: number;
+  rank?: number;
+  className: string;
+  testId?: string;
+}
+
+function ProgressSummaryContent({
+  totalSolved,
+  totalAvailable,
+  byDifficulty,
+  totalByDifficulty,
+  streak,
+  rank,
+  className,
+  testId,
+}: ProgressSummaryContentProps) {
+  return (
+    <Card
+      className={`dh-progress-summary ${className}`}
+      data-testid={testId}
+      aria-label="Challenge progress summary"
+    >
       {/* Header: Total solved + stats */}
       <div className="dh-progress-summary__header">
         <div className="dh-progress-summary__total">
           <span className="dh-progress-summary__total-count">
-            {progress.totalSolved}
+            {totalSolved}
           </span>
           <span className="dh-progress-summary__total-label">
-            Problems Solved
+            {totalAvailable > 0
+              ? `${totalSolved} / ${totalAvailable} Solved`
+              : "Problems Solved"}
           </span>
         </div>
 
@@ -113,7 +219,7 @@ export function ProgressSummaryPanel({
               🔥
             </span>
             <span className="dh-progress-summary__stat-value">
-              {progress.streak}
+              {streak}
             </span>
             <span>day streak</span>
           </div>
@@ -137,22 +243,26 @@ export function ProgressSummaryPanel({
         <h4 className="dh-progress-summary__breakdown-title">
           Breakdown by Difficulty
         </h4>
-        <div className="dh-progress-summary__difficulty">
+        <div
+          className="dh-progress-summary__difficulty"
+          role="list"
+          aria-label="Progress by difficulty level"
+        >
           <DifficultyRow
             label="Easy"
-            solved={progress.byDifficulty.easy}
+            solved={byDifficulty.easy}
             total={totalByDifficulty.easy}
             variant="success"
           />
           <DifficultyRow
             label="Medium"
-            solved={progress.byDifficulty.medium}
+            solved={byDifficulty.medium}
             total={totalByDifficulty.medium}
             variant="warning"
           />
           <DifficultyRow
             label="Hard"
-            solved={progress.byDifficulty.hard}
+            solved={byDifficulty.hard}
             total={totalByDifficulty.hard}
             variant="danger"
           />
@@ -176,7 +286,7 @@ function DifficultyRow({ label, solved, total, variant }: DifficultyRowProps) {
   const max = total > 0 ? total : 1;
 
   return (
-    <div className="dh-progress-summary__difficulty-row">
+    <div className="dh-progress-summary__difficulty-row" role="listitem">
       <span className="dh-progress-summary__difficulty-label">{label}</span>
       <div className="dh-progress-summary__difficulty-bar">
         <ProgressBar
