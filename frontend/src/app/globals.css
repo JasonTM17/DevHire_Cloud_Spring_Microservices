@@ -61,6 +61,8 @@
 /* Design System v2 — IDE component styles */
 @import '../styles/components/split-pane.css';
 @import '../styles/components/terminal.css';
+@import '../styles/components/submission-progress.css';
+@import '../styles/components/assessment-timer.css';
 
 /* Design System v2 — AppShell component styles */
 @import '../styles/components/skip-link.css';

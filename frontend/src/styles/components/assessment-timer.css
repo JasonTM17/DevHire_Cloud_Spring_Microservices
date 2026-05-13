@@ -1,0 +1,88 @@
+/* ==========================================================================
+   AssessmentTimer — Countdown Timer Component Styles
+   Uses design tokens: --dh-*
+   Severity-based visual states: normal, warning, critical, expired, locked
+   ========================================================================== */
+
+.dh-timer {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--dh-space-2);
+  padding: var(--dh-space-1) var(--dh-space-3);
+  font-family: var(--dh-font-mono);
+  font-size: var(--dh-font-size-md);
+  font-weight: var(--dh-font-weight-semibold);
+  line-height: var(--dh-line-height-tight);
+  border-radius: var(--dh-radius-md, 6px);
+  transition:
+    color var(--dh-motion-duration-normal) var(--dh-motion-easing-standard),
+    background-color var(--dh-motion-duration-normal) var(--dh-motion-easing-standard);
+  user-select: none;
+}
+
+/* --- Severity: Normal --- */
+.dh-timer--normal {
+  color: var(--dh-color-fg-primary);
+  background-color: var(--dh-color-bg-muted);
+}
+
+/* --- Severity: Warning --- */
+.dh-timer--warning {
+  color: var(--dh-color-warn);
+  background-color: var(--dh-color-warn-soft);
+}
+
+/* --- Severity: Critical (with pulse animation) --- */
+.dh-timer--critical {
+  color: var(--dh-color-danger);
+  background-color: var(--dh-color-danger-soft);
+  animation: dh-timer-pulse 1s ease-in-out infinite;
+}
+
+@keyframes dh-timer-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.03);
+  }
+}
+
+/* --- Severity: Expired --- */
+.dh-timer--expired {
+  color: var(--dh-color-fg-muted);
+  background-color: var(--dh-color-bg-muted);
+  text-decoration: line-through;
+}
+
+/* --- Severity: Locked --- */
+.dh-timer--locked {
+  color: var(--dh-color-fg-muted);
+  background-color: var(--dh-color-bg-muted);
+}
+
+.dh-timer__lock-icon {
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--dh-font-size-sm);
+}
+
+/* --- Timer display text --- */
+.dh-timer__display {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+
+/* --- Screen reader announcement (visually hidden but accessible) --- */
+.dh-timer__announce {
+  /* Visually hidden but accessible to screen readers */
+}
+
+/* Reduce motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .dh-timer--critical {
+    animation: none;
+  }
+}
