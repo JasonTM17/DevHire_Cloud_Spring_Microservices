@@ -46,6 +46,56 @@
   color: var(--dh-color-fg-primary);
 }
 
+/* Actions container (bell + hamburger) */
+.dh-mobile-top-bar__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--dh-space-1);
+}
+
+/* Notification bell */
+.dh-mobile-top-bar__bell {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--dh-radius-md);
+  color: var(--dh-color-fg-secondary);
+  text-decoration: none;
+  transition:
+    background-color var(--dh-motion-duration-fast) var(--dh-motion-easing-standard),
+    color var(--dh-motion-duration-fast) var(--dh-motion-easing-standard);
+}
+
+.dh-mobile-top-bar__bell:hover {
+  background: var(--dh-color-bg-muted);
+  color: var(--dh-color-fg-primary);
+}
+
+.dh-mobile-top-bar__bell:focus-visible {
+  outline: 2px solid var(--dh-color-focus-ring);
+  outline-offset: 2px;
+}
+
+.dh-mobile-top-bar__bell-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: var(--dh-radius-full);
+  background: var(--dh-color-danger);
+  color: var(--dh-color-fg-inverse);
+  font-family: var(--dh-font-sans);
+  font-size: 10px;
+  font-weight: var(--dh-font-weight-bold);
+  line-height: 16px;
+  text-align: center;
+}
+
 /* Hamburger toggle button */
 .dh-mobile-top-bar__toggle {
   display: inline-flex;
