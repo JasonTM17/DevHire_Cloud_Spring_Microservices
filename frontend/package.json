@@ -21,7 +21,9 @@
     "screenshots:promote": "powershell -NoProfile -ExecutionPolicy Bypass -File ../scripts/screenshot-promote.ps1 -Set All",
     "screenshots:ops": "playwright test e2e/ops-screenshots.spec.ts e2e/ops-evidence-render.spec.ts --project=chromium",
     "screenshots:ops-evidence": "playwright test e2e/ops-evidence-render.spec.ts --project=chromium",
-    "check:contrast": "node scripts/check-contrast.mjs"
+    "check:contrast": "node scripts/check-contrast.mjs",
+    "analyze": "ANALYZE=true next build",
+    "check:bundle-size": "node scripts/check-bundle-size.mjs"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
@@ -31,6 +33,8 @@
     "react-dom": "19.2.5"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.10.0",
+    "@next/bundle-analyzer": "^16.2.6",
     "@playwright/test": "1.57.0",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/react": "^16.3.0",

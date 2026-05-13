@@ -1,6 +1,7 @@
 "use client";
 
 import { forwardRef } from "react";
+import Image from "next/image";
 
 export type AvatarSize = "xs" | "sm" | "md" | "lg" | "xl";
 export type AvatarShape = "circle" | "square";
@@ -38,15 +39,18 @@ export const Avatar = forwardRef<HTMLDivElement, AvatarProps>(function Avatar(
     "dh-avatar",
     `dh-avatar--${size}`,
     shape === "square" && "dh-avatar--square",
+    src && "dh-avatar--has-image",
     className,
   ]
     .filter(Boolean)
     .join(" ");
 
+  const avatarStyle: React.CSSProperties = src ? { position: "relative" } : {};
+
   const avatar = (
-    <div ref={ref} className={avatarClasses} aria-label={alt} {...props}>
+    <div ref={ref} className={avatarClasses} aria-label={alt} style={avatarStyle} {...props}>
       {src ? (
-        <img src={src} alt={alt} />
+        <Image src={src} alt={alt} fill unoptimized className="dh-avatar__image" />
       ) : (
         <span aria-hidden="true">
           {initials || alt.charAt(0).toUpperCase()}

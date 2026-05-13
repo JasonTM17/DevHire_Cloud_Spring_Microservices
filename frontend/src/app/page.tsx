@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { api } from "@/lib/api";
 import { SearchBar } from "@/components/ui/SearchBar";
 import { SkillTag } from "@/components/ui/SkillTag";
@@ -115,7 +116,7 @@ export default function HomePage() {
               >
                 <div className="employer-card__logo">
                   {company.logoUrl ? (
-                    <img src={company.logoUrl} alt={company.name} />
+                    <Image src={company.logoUrl} alt={company.name} width={64} height={64} unoptimized />
                   ) : (
                     <span className="employer-card__logo-fallback">
                       {company.name.charAt(0).toUpperCase()}

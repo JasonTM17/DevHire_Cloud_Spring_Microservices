@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { MapPin, Briefcase, Clock, Calendar, Building2, Users, ExternalLink } from "lucide-react";
 import { SkillTag } from "@/components/ui/SkillTag";
 import { JobCard } from "@/components/JobCard";
@@ -254,7 +255,7 @@ export default function JobDetailPage() {
         <div className="job-detail-page__company-card">
           <div className="job-detail-page__company-logo">
             {company?.logoUrl ? (
-              <img src={company.logoUrl} alt={company.name} />
+              <Image src={company.logoUrl} alt={company.name} width={64} height={64} unoptimized />
             ) : (
               <span>{getCompanyInitial(company?.name)}</span>
             )}

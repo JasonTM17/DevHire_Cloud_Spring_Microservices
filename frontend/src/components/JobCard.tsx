@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { MapPin, Clock } from "lucide-react";
 import { SkillTag } from "./ui/SkillTag";
 import type { Job } from "@/types/domain";
@@ -43,7 +44,7 @@ export function JobCard({ job, companyName, companyLogoUrl }: JobCardProps) {
     <div className="card job-card">
       <div className="job-card__logo">
         {companyLogoUrl ? (
-          <img src={companyLogoUrl} alt={companyName || "Company"} />
+          <Image src={companyLogoUrl} alt={companyName || "Company"} width={48} height={48} unoptimized />
         ) : (
           <span className="job-card__logo-fallback">
             {getCompanyInitial(companyName)}
