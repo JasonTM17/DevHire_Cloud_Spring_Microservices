@@ -66,6 +66,7 @@
 @import '../styles/components/submission-progress.css';
 @import '../styles/components/assessment-timer.css';
 @import '../styles/components/problem-panel.css';
+@import '../styles/components/submission-history.css';
 
 /* Design System v2 — AppShell component styles */
 @import '../styles/components/app-shell.css';
