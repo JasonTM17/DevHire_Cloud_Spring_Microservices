@@ -106,6 +106,7 @@ export type Notification = {
   emailRecipient?: string;
   emailSentAt?: string;
   createdAt: string;
+  sequenceNumber?: number;
 };
 
 export type AuditLog = {
@@ -490,4 +491,22 @@ export type OperationsSummary = {
   latestEventAt?: string;
   topActions: { label: string; count: number }[];
   actorRoles: { label: string; count: number }[];
+};
+
+export type RankChangeEvent = {
+  candidateId: string;
+  newRank: number;
+  previousRank: number;
+  score: number;
+  assessmentId: string;
+};
+
+export type LeaderboardEntry = {
+  candidateId: string;
+  rank: number;
+  score: number;
+  /** Tracks animation direction: 'up' | 'down' | 'new' | 'none' */
+  transition: "up" | "down" | "new" | "none";
+  /** Timestamp when the transition was set — used to clear animation after duration */
+  transitionAt: number;
 };
