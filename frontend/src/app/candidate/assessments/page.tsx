@@ -223,8 +223,9 @@ export default function CandidateAssessmentsPage() {
   };
 
   const timer = useAssessmentTimer({
-    dueAt: selected?.dueAt,
-    status: selected?.status ?? "",
+    assignedAt: selected?.assignedAt ? new Date(selected.assignedAt).getTime() : Date.now(),
+    dueAt: selected?.dueAt ? new Date(selected.dueAt).getTime() : Date.now(),
+    status: selected?.status === 'SUBMITTED' || selected?.status === 'AUTO_REVIEWED' || selected?.status === 'REVIEWED' || selected?.status === 'EMPLOYER_REVIEWED' || selected?.status === 'PASSED' || selected?.status === 'FAILED' ? 'LOCKED' : (selected?.status ?? ''),
     onAutoSubmit: autoSubmitWithRetry,
   });
 
@@ -476,9 +477,9 @@ export default function CandidateAssessmentsPage() {
           </select>
         </div>
         <div className="assessment-top-actions">
-          <div className={`assessment-timer${timer.isWarning ? " timer-warning" : ""}${timer.isCritical ? " timer-critical" : ""}`} aria-label="Assessment time remaining">
+          <div className={`assessment-timer${timer.severity === 'warning' ? " timer-warning" : ""}${timer.severity === 'critical' ? " timer-critical" : ""}`} aria-label="Assessment time remaining" aria-live={timer.ariaLive} aria-atomic="true">
             <Clock3 size={20} />
-            <span>{timer.display}</span>
+            <span>{timer.formatted}</span>
           </div>
           <div className="assessment-progress" aria-label={`${progressCompleted} of ${progressTotal} tasks complete`}>
             <div>
@@ -494,7 +495,7 @@ export default function CandidateAssessmentsPage() {
             type="button"
             aria-label="Submit for rubric score"
             onClick={submitCode}
-            disabled={submitting || isSubmissionLocked || (timer.isExpired && !autoSubmitFailed)}
+            disabled={submitting || isSubmissionLocked || (timer.severity === 'expired' && !autoSubmitFailed)}
           >
             <Upload size={20} />
             {submitting ? "Scoring" : "Submit Code"}
@@ -592,7 +593,7 @@ export default function CandidateAssessmentsPage() {
               <p>[INFO] Running stdout comparison with normalized line endings</p>
               {analysisMessage ? <p className="terminal-success">{analysisMessage}</p> : null}
               {message ? <p className="terminal-success">{message}</p> : null}
-              {timer.isExpired && !autoSubmitFailed ? <p className="terminal-success">Time expired — submission locked for server-side grading.</p> : null}
+              {timer.severity === 'expired' && !autoSubmitFailed ? <p className="terminal-success">Time expired — submission locked for server-side grading.</p> : null}
               {loadingDetail ? <p>[INFO] Syncing owner-only assessment detail...</p> : null}
             </div>
           </div>
@@ -659,7 +660,7 @@ export default function CandidateAssessmentsPage() {
             <section className="assessment-test-panel">
               <div className="assessment-panel-heading">
                 <h2>Test Results</h2>
-                <button className="assessment-link-button" type="button" onClick={runStaticAnalysis} disabled={running || isSubmissionLocked || timer.isExpired}>
+                <button className="assessment-link-button" type="button" onClick={runStaticAnalysis} disabled={running || isSubmissionLocked || timer.severity === 'expired'}>
                   <PlayCircle size={16} />
                   {isSubmissionLocked ? "Decision Locked" : running ? "Running Tests" : customInput.trim() ? "Run Custom Input" : "Run Tests"}
                 </button>
@@ -753,7 +754,7 @@ export default function CandidateAssessmentsPage() {
                 className="assessment-secondary-submit"
                 type="button"
                 onClick={submitCode}
-                disabled={submitting || isSubmissionLocked || (timer.isExpired && !autoSubmitFailed)}
+                disabled={submitting || isSubmissionLocked || (timer.severity === 'expired' && !autoSubmitFailed)}
               >
                 {isFinalDecision
                   ? "Employer decision locked"
