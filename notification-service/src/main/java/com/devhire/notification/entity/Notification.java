@@ -61,6 +61,12 @@ public class Notification {
     @Column(name = "email_sent_at")
     private Instant emailSentAt;
 
+    @Column(name = "sequence_number")
+    private Long sequenceNumber;
+
+    @Column(name = "delivered_at")
+    private Instant deliveredAt;
+
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
@@ -146,6 +152,22 @@ public class Notification {
 
     public Instant getEmailLastAttemptAt() {
         return emailLastAttemptAt;
+    }
+
+    public Long getSequenceNumber() {
+        return sequenceNumber;
+    }
+
+    public void setSequenceNumber(Long sequenceNumber) {
+        this.sequenceNumber = sequenceNumber;
+    }
+
+    public Instant getDeliveredAt() {
+        return deliveredAt;
+    }
+
+    public void setDeliveredAt(Instant deliveredAt) {
+        this.deliveredAt = deliveredAt;
     }
 
     public Instant getCreatedAt() {
