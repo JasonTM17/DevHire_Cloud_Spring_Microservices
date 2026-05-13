@@ -91,6 +91,7 @@
 
 /* Design System v2 — OPS Dashboard component styles */
 @import '../styles/components/ops-shell.css';
+@import '../styles/components/ops-widget-grid.css';
 @import '../styles/components/ai-ops-panels.css';
 @import '../styles/components/service-health.css';
 @import '../styles/components/sparkline-widget.css';

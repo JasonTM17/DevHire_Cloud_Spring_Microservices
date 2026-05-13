@@ -1,0 +1,53 @@
+/* ==========================================================================
+   OPS Monitoring Page Layout
+   Uses design tokens: --dh-* (ops-dark scope)
+   
+   Requirements: 6.3, 7.1, 7.2, 7.3, 7.4, 7.5, 7.6
+   ========================================================================== */
+
+.ops-monitoring-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dh-space-6);
+}
+
+.ops-monitoring-page__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--dh-space-4);
+  flex-wrap: wrap;
+}
+
+.ops-monitoring-page__header-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dh-space-1);
+}
+
+.ops-monitoring-page__title {
+  margin: 0;
+  font-family: var(--dh-font-sans);
+  font-size: var(--dh-font-size-2xl);
+  font-weight: var(--dh-font-weight-bold);
+  color: var(--dh-color-fg-primary);
+}
+
+.ops-monitoring-page__subtitle {
+  margin: 0;
+  font-family: var(--dh-font-sans);
+  font-size: var(--dh-font-size-sm);
+  color: var(--dh-color-fg-muted);
+}
+
+.ops-monitoring-page__infra-panels {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: var(--dh-space-4);
+}
+
+@media (max-width: 767px) {
+  .ops-monitoring-page__infra-panels {
+    grid-template-columns: 1fr;
+  }
+}

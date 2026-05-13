@@ -1,0 +1,142 @@
+/* ==========================================================================
+   OpsGlobalStatusBar — Overall health pill, incidents, last refresh
+   Uses design tokens: --dh-*
+   Dark theme forced via parent [data-theme-scope="ops-dark"]
+   ========================================================================== */
+
+.ops-global-status-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--dh-space-5, 20px);
+  width: 100%;
+}
+
+/* --------------------------------------------------------------------------
+   Health Pill
+   -------------------------------------------------------------------------- */
+.ops-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--dh-space-2, 8px);
+  padding: var(--dh-space-1, 4px) var(--dh-space-3, 12px);
+  border-radius: var(--dh-radius-full, 9999px);
+  font-size: var(--dh-font-size-sm, 0.875rem);
+  font-weight: var(--dh-font-weight-medium, 500);
+  border: 1px solid transparent;
+}
+
+.ops-status-pill__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Healthy */
+.ops-status-pill--healthy {
+  background: var(--dh-color-success-soft);
+  color: var(--dh-color-success);
+  border-color: var(--dh-color-success-border);
+}
+
+.ops-status-pill--healthy .ops-status-pill__dot {
+  background: var(--dh-color-ops-status-healthy, var(--dh-color-success));
+}
+
+/* Degraded */
+.ops-status-pill--degraded {
+  background: var(--dh-color-warn-soft);
+  color: var(--dh-color-warn);
+  border-color: var(--dh-color-warn-border);
+}
+
+.ops-status-pill--degraded .ops-status-pill__dot {
+  background: var(--dh-color-ops-status-degraded, var(--dh-color-warn));
+  animation: ops-pulse 2s ease-in-out infinite;
+}
+
+/* Critical */
+.ops-status-pill--critical {
+  background: var(--dh-color-danger-soft);
+  color: var(--dh-color-danger);
+  border-color: var(--dh-color-danger-border);
+}
+
+.ops-status-pill--critical .ops-status-pill__dot {
+  background: var(--dh-color-ops-status-critical, var(--dh-color-danger));
+  animation: ops-pulse 1s ease-in-out infinite;
+}
+
+@keyframes ops-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* --------------------------------------------------------------------------
+   Incidents
+   -------------------------------------------------------------------------- */
+.ops-global-status-bar__incidents {
+  display: flex;
+  align-items: center;
+  gap: var(--dh-space-2, 8px);
+}
+
+.ops-global-status-bar__incidents-count {
+  font-size: var(--dh-font-size-base, 1rem);
+  font-weight: var(--dh-font-weight-semibold, 600);
+  color: var(--dh-color-fg-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.ops-global-status-bar__incidents-label {
+  font-size: var(--dh-font-size-sm, 0.875rem);
+  color: var(--dh-color-fg-muted);
+}
+
+/* --------------------------------------------------------------------------
+   Last Refresh
+   -------------------------------------------------------------------------- */
+.ops-global-status-bar__refresh {
+  display: flex;
+  align-items: center;
+  gap: var(--dh-space-2, 8px);
+  margin-left: auto;
+}
+
+.ops-global-status-bar__refresh-label {
+  font-size: var(--dh-font-size-xs, 0.75rem);
+  color: var(--dh-color-fg-muted);
+}
+
+.ops-global-status-bar__refresh-time {
+  font-size: var(--dh-font-size-xs, 0.75rem);
+  font-family: var(--dh-font-mono, monospace);
+  color: var(--dh-color-fg-secondary);
+}
+
+.ops-global-status-bar__loading {
+  display: inline-flex;
+  font-size: var(--dh-font-size-sm, 0.875rem);
+  color: var(--dh-color-ops-accent, var(--dh-color-accent));
+  animation: ops-spin 1s linear infinite;
+}
+
+@keyframes ops-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* --------------------------------------------------------------------------
+   Responsive
+   -------------------------------------------------------------------------- */
+@media (max-width: 767px) {
+  .ops-global-status-bar {
+    flex-wrap: wrap;
+    gap: var(--dh-space-3, 12px);
+  }
+
+  .ops-global-status-bar__refresh {
+    margin-left: 0;
+    width: 100%;
+  }
+}

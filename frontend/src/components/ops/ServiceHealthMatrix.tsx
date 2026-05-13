@@ -1,14 +1,16 @@
 "use client";
 
 import { StatusDot } from "@/components/ui/data-display";
-import { classifyPoolUtilization, detectTransitions } from "@/lib/ops/classifiers";
 import type { ServiceHealth, ServiceTransition } from "@/lib/ops/types";
+import "@/styles/components/service-health.css";
 
 export interface ServiceHealthMatrixProps {
   /** Array of service health snapshots */
   services: ServiceHealth[];
   /** Optional transition timeline entries */
   transitions?: ServiceTransition[];
+  /** Callback when a service card is clicked (opens detail drawer) */
+  onServiceClick?: (service: ServiceHealth) => void;
 }
 
 /**
@@ -17,12 +19,14 @@ export interface ServiceHealthMatrixProps {
  * Displays a card per service showing status dot, name, response time,
  * uptime percentage, and last health check timestamp.
  * Unhealthy services get a red border + pulsing indicator.
+ * Clicking a card triggers onServiceClick for opening the detail drawer.
  *
  * Requirements: 7.1, 7.2
  */
 export function ServiceHealthMatrix({
   services,
   transitions = [],
+  onServiceClick,
 }: ServiceHealthMatrixProps) {
   return (
     <div className="dh-service-health-matrix" data-testid="service-health-matrix">
@@ -30,8 +34,8 @@ export function ServiceHealthMatrix({
         const isUnhealthy = service.status === "critical" || service.status === "degraded";
         const cardClasses = [
           "dh-service-card",
-          "dh-service-card__indicator",
           isUnhealthy && "dh-service-card--unhealthy",
+          onServiceClick && "dh-service-card--clickable",
         ]
           .filter(Boolean)
           .join(" ");
@@ -42,7 +46,17 @@ export function ServiceHealthMatrix({
             className={cardClasses}
             aria-label={`${service.name} service health`}
             data-testid={`service-card-${service.name}`}
+            onClick={() => onServiceClick?.(service)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                onServiceClick?.(service);
+              }
+            }}
+            role={onServiceClick ? "button" : undefined}
+            tabIndex={onServiceClick ? 0 : undefined}
           >
+            {isUnhealthy && <div className="dh-service-card__indicator" />}
             <div className="dh-service-card__header">
               <StatusDot
                 status={service.status === "critical" ? "critical" : service.status === "degraded" ? "degraded" : "healthy"}

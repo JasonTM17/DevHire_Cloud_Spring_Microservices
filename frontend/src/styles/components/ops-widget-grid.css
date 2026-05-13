@@ -1,0 +1,179 @@
+/* ==========================================================================
+   WidgetGrid + OpsWidget — Responsive grid layout for OPS dashboard
+   Uses design tokens: --dh-*
+   Dark theme forced via parent [data-theme-scope="ops-dark"]
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   WidgetGrid — responsive auto-fit grid
+   -------------------------------------------------------------------------- */
+.ops-widget-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: var(--dh-space-5, 20px);
+  width: 100%;
+}
+
+/* --------------------------------------------------------------------------
+   OpsWidget — individual widget card
+   -------------------------------------------------------------------------- */
+.ops-widget {
+  display: flex;
+  flex-direction: column;
+  background: var(--dh-color-bg-surface);
+  border: 1px solid var(--dh-color-border-default);
+  border-radius: var(--dh-radius-md, 8px);
+  overflow: hidden;
+  min-width: 0;
+}
+
+.ops-widget--span-2 {
+  grid-column: span 2;
+}
+
+/* --------------------------------------------------------------------------
+   Widget Header
+   -------------------------------------------------------------------------- */
+.ops-widget__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--dh-space-3, 12px);
+  padding: var(--dh-space-3, 12px) var(--dh-space-4, 16px);
+  border-bottom: 1px solid var(--dh-color-border-default);
+  background: var(--dh-color-bg-elevated);
+}
+
+.ops-widget__title {
+  margin: 0;
+  font-size: var(--dh-font-size-sm, 0.875rem);
+  font-weight: var(--dh-font-weight-semibold, 600);
+  color: var(--dh-color-fg-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ops-widget__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--dh-space-2, 8px);
+  flex-shrink: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Widget Body
+   -------------------------------------------------------------------------- */
+.ops-widget__body {
+  flex: 1;
+  padding: var(--dh-space-4, 16px);
+  min-height: 120px;
+}
+
+/* --------------------------------------------------------------------------
+   Loading Skeleton
+   -------------------------------------------------------------------------- */
+.ops-widget__skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dh-space-3, 12px);
+}
+
+.ops-widget__skeleton-line {
+  height: 12px;
+  border-radius: var(--dh-radius-sm, 4px);
+  background: var(--dh-color-bg-muted);
+  animation: ops-widget-shimmer 1.5s ease-in-out infinite;
+}
+
+.ops-widget__skeleton-line--wide {
+  width: 90%;
+}
+
+.ops-widget__skeleton-line--medium {
+  width: 65%;
+}
+
+.ops-widget__skeleton-line--narrow {
+  width: 40%;
+}
+
+@keyframes ops-widget-shimmer {
+  0% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+  100% { opacity: 0.4; }
+}
+
+/* --------------------------------------------------------------------------
+   Error State
+   -------------------------------------------------------------------------- */
+.ops-widget__error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--dh-space-3, 12px);
+  padding: var(--dh-space-4, 16px);
+  text-align: center;
+  min-height: 80px;
+}
+
+.ops-widget__error-message {
+  margin: 0;
+  font-size: var(--dh-font-size-sm, 0.875rem);
+  color: var(--dh-color-danger);
+}
+
+.ops-widget__error-retry {
+  appearance: none;
+  border: 1px solid var(--dh-color-border-default);
+  background: transparent;
+  color: var(--dh-color-fg-secondary);
+  font-size: var(--dh-font-size-xs, 0.75rem);
+  font-family: var(--dh-font-sans);
+  padding: var(--dh-space-1, 4px) var(--dh-space-3, 12px);
+  border-radius: var(--dh-radius-sm, 4px);
+  cursor: pointer;
+  transition: background var(--dh-duration-fast, 100ms) var(--dh-ease-standard, ease),
+              color var(--dh-duration-fast, 100ms) var(--dh-ease-standard, ease);
+}
+
+.ops-widget__error-retry:hover {
+  background: var(--dh-color-bg-elevated);
+  color: var(--dh-color-fg-primary);
+}
+
+.ops-widget__error-retry:focus-visible {
+  outline: 2px solid var(--dh-color-focus-ring);
+  outline-offset: 1px;
+}
+
+/* --------------------------------------------------------------------------
+   Empty State
+   -------------------------------------------------------------------------- */
+.ops-widget__empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 80px;
+}
+
+.ops-widget__empty-message {
+  margin: 0;
+  font-size: var(--dh-font-size-sm, 0.875rem);
+  color: var(--dh-color-fg-muted);
+  font-style: italic;
+}
+
+/* --------------------------------------------------------------------------
+   Responsive: single column on small viewports
+   -------------------------------------------------------------------------- */
+@media (max-width: 767px) {
+  .ops-widget-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ops-widget--span-2 {
+    grid-column: span 1;
+  }
+}

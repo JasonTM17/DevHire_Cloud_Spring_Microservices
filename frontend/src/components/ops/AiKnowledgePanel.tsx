@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Card } from "@/components/ui/layout/Card";
 import { Button } from "@/components/ui/primitives/Button";
 import { ProgressBar } from "@/components/ui/primitives/ProgressBar";
+import { OpsWidget } from "./OpsWidget";
+import "@/styles/components/ai-ops-panels.css";
 
 export interface AiKnowledgeStatus {
   totalDocuments: number;
@@ -14,6 +15,7 @@ export interface AiKnowledgeStatus {
 export interface AiKnowledgePanelProps {
   knowledge: AiKnowledgeStatus;
   onReindex: () => Promise<void>;
+  loading?: boolean;
   "data-testid"?: string;
 }
 
@@ -27,11 +29,14 @@ function formatTimestamp(iso: string | null): string {
  * AiKnowledgePanel — Displays knowledge base statistics and provides
  * a reindex action with progress indication.
  *
+ * Wrapped in OpsWidget for consistent dark theme styling and error isolation.
+ *
  * Requirements: 8.3, 8.4
  */
 export function AiKnowledgePanel({
   knowledge,
   onReindex,
+  loading = false,
   "data-testid": testId,
 }: AiKnowledgePanelProps) {
   const [isReindexing, setIsReindexing] = useState(false);
@@ -51,27 +56,27 @@ export function AiKnowledgePanel({
     }
   }
 
+  const headerActions = (
+    <Button
+      size="sm"
+      variant="secondary"
+      onClick={handleReindex}
+      disabled={isReindexing}
+      aria-label="Reindex knowledge base"
+      data-testid="reindex-button"
+    >
+      {isReindexing ? "Reindexing…" : "Reindex"}
+    </Button>
+  );
+
   return (
-    <Card
-      variant="outlined"
-      padding="md"
+    <OpsWidget
+      title="Knowledge Base"
+      headerActions={headerActions}
+      loading={loading}
       data-testid={testId ?? "ai-knowledge-panel"}
     >
       <div className="dh-ai-knowledge-panel">
-        <div className="dh-ai-knowledge-panel__header">
-          <h3 className="dh-ai-knowledge-panel__title">Knowledge Base</h3>
-          <Button
-            size="sm"
-            variant="secondary"
-            onClick={handleReindex}
-            disabled={isReindexing}
-            aria-label="Reindex knowledge base"
-            data-testid="reindex-button"
-          >
-            {isReindexing ? "Reindexing…" : "Reindex"}
-          </Button>
-        </div>
-
         {isReindexing && (
           <div
             className="dh-ai-knowledge-panel__progress"
@@ -117,6 +122,6 @@ export function AiKnowledgePanel({
           </div>
         </dl>
       </div>
-    </Card>
+    </OpsWidget>
   );
 }

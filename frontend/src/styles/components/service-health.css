@@ -28,8 +28,18 @@
               box-shadow var(--dh-motion-duration-fast) var(--dh-motion-easing-standard);
 }
 
-.dh-service-card:hover {
+.dh-service-card--clickable {
+  cursor: pointer;
+}
+
+.dh-service-card--clickable:hover {
   border-color: var(--dh-color-border-strong);
+  background-color: var(--dh-color-bg-muted);
+}
+
+.dh-service-card--clickable:focus-visible {
+  outline: 2px solid var(--dh-color-focus-ring);
+  outline-offset: 2px;
 }
 
 .dh-service-card--unhealthy {
@@ -37,8 +47,16 @@
   box-shadow: 0 0 0 1px var(--dh-color-danger-soft);
 }
 
-.dh-service-card--unhealthy .dh-service-card__indicator {
+.dh-service-card__indicator {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--dh-radius-lg);
+  pointer-events: none;
   animation: dh-service-pulse 2s ease-in-out infinite;
+}
+
+.dh-service-card--unhealthy {
+  position: relative;
 }
 
 @keyframes dh-service-pulse {

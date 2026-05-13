@@ -107,11 +107,51 @@
 }
 
 /* --------------------------------------------------------------------------
+   Monitoring Page
+   -------------------------------------------------------------------------- */
+.ops-monitoring-page {
+  display: grid;
+  gap: var(--dh-space-6, 24px);
+}
+
+.ops-monitoring-page__header {
+  display: grid;
+  gap: var(--dh-space-2, 8px);
+}
+
+.ops-monitoring-page__title {
+  margin: 0;
+  font-size: var(--dh-font-size-2xl, 1.5rem);
+  font-weight: var(--dh-font-weight-bold, 700);
+  color: var(--dh-color-fg-primary);
+}
+
+.ops-monitoring-page__subtitle {
+  margin: 0;
+  font-size: var(--dh-font-size-sm, 0.875rem);
+  color: var(--dh-color-fg-secondary);
+}
+
+.ops-monitoring-page__health-matrix {
+  grid-column: 1 / -1;
+}
+
+.ops-monitoring-page__infra-panels {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: var(--dh-space-4, 16px);
+}
+
+/* --------------------------------------------------------------------------
    Responsive
    -------------------------------------------------------------------------- */
 @media (max-width: 767px) {
   .ops-overview-page__sparklines,
   .obs-page__sparklines {
+    grid-template-columns: 1fr;
+  }
+
+  .ops-monitoring-page__infra-panels {
     grid-template-columns: 1fr;
   }
 }
