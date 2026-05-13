@@ -1,0 +1,147 @@
+/* ==========================================================================
+   Leaderboard — Table & Row Component Styles
+   Uses design tokens: --dh-*
+   Requirements: 5.2, 5.3
+   ========================================================================== */
+
+/* --- Rank pulse animation (2s duration, scale + glow) --- */
+@keyframes dh-rank-pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 var(--dh-color-accent-subtle);
+  }
+  25% {
+    transform: scale(1.01);
+    box-shadow: 0 0 8px 2px var(--dh-color-accent-subtle);
+  }
+  50% {
+    transform: scale(1);
+    box-shadow: 0 0 4px 1px var(--dh-color-accent-subtle);
+  }
+  75% {
+    transform: scale(1.005);
+    box-shadow: 0 0 6px 1px var(--dh-color-accent-subtle);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+/* --- Table wrapper --- */
+.dh-leaderboard__wrapper {
+  overflow-x: auto;
+  border: 1px solid var(--dh-color-border-default);
+  border-radius: var(--dh-radius-md);
+  background: var(--dh-color-bg-surface);
+}
+
+/* --- Table --- */
+.dh-leaderboard__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--dh-font-sans);
+  font-size: var(--dh-font-size-base);
+  line-height: var(--dh-line-height-normal);
+}
+
+/* --- Table head --- */
+.dh-leaderboard__head {
+  background: var(--dh-color-bg-muted);
+  border-bottom: 1px solid var(--dh-color-border-default);
+}
+
+.dh-leaderboard__th {
+  padding: var(--dh-space-3) var(--dh-space-4);
+  text-align: left;
+  font-weight: var(--dh-font-weight-semibold);
+  font-size: var(--dh-font-size-sm);
+  color: var(--dh-color-fg-secondary);
+  white-space: nowrap;
+}
+
+.dh-leaderboard__th--numeric {
+  text-align: right;
+}
+
+/* --- Table rows --- */
+.dh-leaderboard__row {
+  border-bottom: 1px solid var(--dh-color-border-default);
+  transition: background-color var(--dh-motion-duration-fast) var(--dh-motion-easing-standard);
+}
+
+.dh-leaderboard__row:last-child {
+  border-bottom: none;
+}
+
+.dh-leaderboard__row:hover {
+  background-color: var(--dh-color-bg-muted);
+}
+
+/* Current user highlight */
+.dh-leaderboard__row--current-user {
+  background-color: var(--dh-color-accent-subtle);
+}
+
+.dh-leaderboard__row--current-user:hover {
+  background-color: var(--dh-color-accent-subtle);
+}
+
+/* Rank change pulse animation */
+.dh-rank-pulse {
+  animation: dh-rank-pulse 2s var(--dh-motion-easing-emphasized) 1;
+}
+
+/* --- Table cells --- */
+.dh-leaderboard__td {
+  padding: var(--dh-space-3) var(--dh-space-4);
+  color: var(--dh-color-fg-primary);
+}
+
+.dh-leaderboard__td--numeric {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.dh-leaderboard__td--rank {
+  font-weight: var(--dh-font-weight-semibold);
+  width: 3rem;
+  text-align: center;
+}
+
+/* --- User cell (avatar + username) --- */
+.dh-leaderboard__user-cell {
+  display: flex;
+  align-items: center;
+  gap: var(--dh-space-3);
+}
+
+.dh-leaderboard__username {
+  font-weight: var(--dh-font-weight-medium);
+  color: var(--dh-color-fg-primary);
+}
+
+.dh-leaderboard__username--current {
+  color: var(--dh-color-accent-fg);
+  font-weight: var(--dh-font-weight-semibold);
+}
+
+/* --- Last active (muted) --- */
+.dh-leaderboard__last-active {
+  color: var(--dh-color-fg-muted);
+  font-size: var(--dh-font-size-sm);
+}
+
+/* --- Responsive: stack on small screens --- */
+@media (max-width: 768px) {
+  .dh-leaderboard__th--hide-mobile,
+  .dh-leaderboard__td--hide-mobile {
+    display: none;
+  }
+
+  .dh-leaderboard__th,
+  .dh-leaderboard__td {
+    padding: var(--dh-space-2) var(--dh-space-3);
+    font-size: var(--dh-font-size-sm);
+  }
+}

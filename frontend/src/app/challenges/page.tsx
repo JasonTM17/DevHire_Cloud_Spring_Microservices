@@ -1,146 +1,188 @@
 "use client";
 
-import { useState, useMemo, useRef, useCallback } from "react";
-import { ChallengeCard } from "@/components/ChallengeCard";
-import { FilterSidebar, type FilterGroup, type FilterState } from "@/components/FilterSidebar";
+import { useState, useMemo, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import { useDataFetcher } from "@/hooks/useDataFetcher";
+import { filterChallenges, type ChallengeFilter } from "@/lib/challenges/filter";
 import type { PublicChallenge } from "@/types/domain";
+import { FilterSidebar } from "@/components/challenges/FilterSidebar";
+import { SearchInput } from "@/components/challenges/SearchInput";
+import { ProgressSummaryPanel } from "@/components/challenges/ProgressSummaryPanel";
+import { ChallengeGrid } from "@/components/challenges/ChallengeGrid";
+import { SkeletonLoader } from "@/components/ui/primitives/SkeletonLoader";
+import { EmptyState } from "@/components/ui/feedback/EmptyState";
+import { ErrorState } from "@/components/ui/feedback/ErrorState";
 
-const PREVIEW_CHALLENGES: PublicChallenge[] = [
-  { id: "1", slug: "two-sum", title: "Two Sum", difficulty: "EASY", languages: ["Java", "TypeScript"], topics: ["Arrays", "Hash Map"], acceptanceRate: 78.5, totalSubmissions: 1240, solved: true },
-  { id: "2", slug: "reverse-linked-list", title: "Reverse Linked List", difficulty: "EASY", languages: ["Java"], topics: ["Linked List"], acceptanceRate: 72.1, totalSubmissions: 890, solved: false },
-  { id: "3", slug: "longest-substring", title: "Longest Substring Without Repeating Characters", difficulty: "MEDIUM", languages: ["Java", "TypeScript"], topics: ["Strings", "Sliding Window"], acceptanceRate: 45.3, totalSubmissions: 2100, solved: false },
-  { id: "4", slug: "merge-intervals", title: "Merge Intervals", difficulty: "MEDIUM", languages: ["Java"], topics: ["Arrays", "Sorting"], acceptanceRate: 52.8, totalSubmissions: 1560, solved: true },
-  { id: "5", slug: "binary-tree-level-order", title: "Binary Tree Level Order Traversal", difficulty: "MEDIUM", languages: ["Java", "TypeScript"], topics: ["Trees", "BFS"], acceptanceRate: 61.2, totalSubmissions: 980, solved: false },
-  { id: "6", slug: "trapping-rain-water", title: "Trapping Rain Water", difficulty: "HARD", languages: ["Java"], topics: ["Arrays", "Dynamic Programming"], acceptanceRate: 28.7, totalSubmissions: 3200, solved: false },
-  { id: "7", slug: "sql-employee-salary", title: "Employee Salary Report", difficulty: "EASY", languages: ["SQL"], topics: ["SQL", "Aggregation"], acceptanceRate: 82.1, totalSubmissions: 560, solved: false },
-  { id: "8", slug: "system-design-cache", title: "Design a Cache System", difficulty: "HARD", languages: ["Java", "TypeScript"], topics: ["System Design"], acceptanceRate: 22.4, totalSubmissions: 450, solved: false },
-];
+// --- Types ---
 
-const FILTER_CONFIG: FilterGroup[] = [
-  {
-    id: "difficulty",
-    title: "Độ khó",
-    type: "checkbox",
-    options: [
-      { label: "Easy", value: "EASY" },
-      { label: "Medium", value: "MEDIUM" },
-      { label: "Hard", value: "HARD" },
-    ],
-  },
-  {
-    id: "language",
-    title: "Ngôn ngữ",
-    type: "checkbox",
-    options: [
-      { label: "Java", value: "Java" },
-      { label: "TypeScript", value: "TypeScript" },
-      { label: "SQL", value: "SQL" },
-    ],
-  },
-  {
-    id: "topic",
-    title: "Chủ đề",
-    type: "checkbox",
-    options: [
-      { label: "Arrays", value: "Arrays" },
-      { label: "Strings", value: "Strings" },
-      { label: "Trees", value: "Trees" },
-      { label: "Dynamic Programming", value: "Dynamic Programming" },
-      { label: "SQL", value: "SQL" },
-      { label: "System Design", value: "System Design" },
-    ],
-  },
-];
+interface ChallengesApiResponse {
+  challenges: PublicChallenge[];
+  availableLanguages: string[];
+  availableTopics: string[];
+}
 
+// --- Skeleton Loading Component ---
+
+function ChallengePageSkeleton() {
+  return (
+    <div className="dh-challenges" aria-label="Loading challenges">
+      <aside className="dh-challenges__sidebar">
+        <SkeletonLoader shape="rect" width="100%" height="2rem" aria-label="Loading filters" />
+        <SkeletonLoader shape="rect" width="100%" height="8rem" />
+        <SkeletonLoader shape="rect" width="100%" height="8rem" />
+        <SkeletonLoader shape="rect" width="100%" height="6rem" />
+      </aside>
+      <main className="dh-challenges__main">
+        <SkeletonLoader shape="rect" width="100%" height="2.5rem" aria-label="Loading search" />
+        <div className="dh-challenges__grid-skeleton">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <SkeletonLoader key={i} shape="rect" width="100%" height="10rem" />
+          ))}
+        </div>
+      </main>
+    </div>
+  );
+}
+
+// --- Main Page Component ---
+
+/**
+ * ChallengeLibraryPage — Wires all challenge library components together.
+ *
+ * - Fetches public challenges via useDataFetcher
+ * - Maintains filter state with useState<ChallengeFilter>
+ * - Applies filterChallenges via useMemo for instant filtering (< 100ms)
+ * - Renders responsive layout: sidebar (FilterSidebar + ProgressSummaryPanel) + main (SearchInput + ChallengeGrid)
+ * - Shows SkeletonLoader during initial load
+ * - Shows EmptyState when filtered results are empty
+ * - Shows ErrorState with retry on fetch failure
+ * - Navigates to /candidate/assessments/{id} on challenge select
+ *
+ * Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 10.3, 11.1, 11.2
+ */
 export default function ChallengeLibraryPage() {
-  const [filters, setFilters] = useState<FilterState>({});
+  const router = useRouter();
+
+  // --- Data Fetching ---
+  const { data, error, isValidating, mutate } = useDataFetcher<ChallengesApiResponse>(
+    "/api/challenges",
+    () =>
+      fetch("/api/challenges").then((res) => {
+        if (!res.ok) throw new Error(`Failed to fetch challenges: ${res.status}`);
+        return res.json();
+      })
+  );
+
+  // --- Filter State ---
+  const [filters, setFilters] = useState<ChallengeFilter>({});
   const [searchQuery, setSearchQuery] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setSearchQuery(value);
-
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current);
-    }
-
-    debounceRef.current = setTimeout(() => {
-      setDebouncedSearch(value);
-    }, 300);
-  }, []);
+  // --- Filtered Challenges (instant via useMemo) ---
+  const challenges = data?.challenges ?? [];
 
   const filteredChallenges = useMemo(() => {
-    return PREVIEW_CHALLENGES.filter((challenge) => {
-      // Search filter
-      if (debouncedSearch) {
-        const query = debouncedSearch.toLowerCase();
-        if (!challenge.title.toLowerCase().includes(query)) {
-          return false;
-        }
-      }
+    let result = filterChallenges(challenges, filters);
 
-      // Difficulty filter
-      const difficulties = (filters.difficulty as string[]) || [];
-      if (difficulties.length > 0 && !difficulties.includes(challenge.difficulty)) {
-        return false;
-      }
+    // Apply search query filter on top
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter(
+        (c) =>
+          c.title.toLowerCase().includes(query) ||
+          c.topics.some((t) => t.toLowerCase().includes(query)) ||
+          c.languages.some((l) => l.toLowerCase().includes(query))
+      );
+    }
 
-      // Language filter
-      const languages = (filters.language as string[]) || [];
-      if (languages.length > 0 && !challenge.languages.some((lang) => languages.includes(lang))) {
-        return false;
-      }
+    return result;
+  }, [challenges, filters, searchQuery]);
 
-      // Topic filter
-      const topics = (filters.topic as string[]) || [];
-      if (topics.length > 0 && !challenge.topics.some((topic) => topics.includes(topic))) {
-        return false;
-      }
+  // --- Handlers ---
+  const handleFilterChange = useCallback((newFilters: ChallengeFilter) => {
+    setFilters(newFilters);
+  }, []);
 
-      return true;
-    });
-  }, [debouncedSearch, filters]);
+  const handleSearchChange = useCallback((value: string) => {
+    setSearchQuery(value);
+  }, []);
 
-  return (
-    <div className="challenge-library">
-      <div className="challenge-library__sidebar">
-        <FilterSidebar
-          filters={FILTER_CONFIG}
-          value={filters}
-          onChange={setFilters}
+  const handleSelectChallenge = useCallback(
+    (id: string) => {
+      router.push(`/candidate/assessments/${id}`);
+    },
+    [router]
+  );
+
+  const handleRetry = useCallback(() => {
+    mutate();
+  }, [mutate]);
+
+  // --- Error State ---
+  if (error && !data) {
+    return (
+      <div className="dh-challenges dh-challenges--centered">
+        <ErrorState
+          variant="network"
+          onRetry={handleRetry}
+          data-testid="challenges-error"
         />
       </div>
+    );
+  }
 
-      <div className="challenge-library__content">
-        <div className="challenge-library__header">
-          <div className="challenge-library__search">
-            <input
-              type="text"
-              placeholder="Tìm kiếm challenge..."
-              value={searchQuery}
-              onChange={handleSearchChange}
-              aria-label="Tìm kiếm challenge"
-            />
-          </div>
-          <span className="challenge-library__count">
+  // --- Loading State ---
+  if (!data && isValidating) {
+    return <ChallengePageSkeleton />;
+  }
+
+  // --- Available filter options from API ---
+  const availableLanguages = data?.availableLanguages ?? [];
+  const availableTopics = data?.availableTopics ?? [];
+
+  // --- Render ---
+  return (
+    <div className="dh-challenges">
+      {/* Sidebar: Filters + Progress */}
+      <aside className="dh-challenges__sidebar">
+        <FilterSidebar
+          filters={filters}
+          onFilterChange={handleFilterChange}
+          availableLanguages={availableLanguages}
+          availableTopics={availableTopics}
+        />
+        <ProgressSummaryPanel
+          className="dh-challenges__progress"
+          data-testid="challenges-progress"
+        />
+      </aside>
+
+      {/* Main Content: Search + Grid */}
+      <main className="dh-challenges__main">
+        <div className="dh-challenges__toolbar">
+          <SearchInput
+            value={searchQuery}
+            onChange={handleSearchChange}
+            placeholder="Search challenges..."
+          />
+          <span className="dh-challenges__count" aria-live="polite">
             {filteredChallenges.length} challenge{filteredChallenges.length !== 1 ? "s" : ""}
           </span>
         </div>
 
         {filteredChallenges.length > 0 ? (
-          <div className="challenge-library__grid">
-            {filteredChallenges.map((challenge) => (
-              <ChallengeCard key={challenge.id} challenge={challenge} />
-            ))}
-          </div>
+          <ChallengeGrid
+            challenges={filteredChallenges}
+            onSelectChallenge={handleSelectChallenge}
+          />
         ) : (
-          <div className="challenge-library__empty">
-            Không tìm thấy challenge phù hợp
-          </div>
+          <EmptyState
+            illustration="no-results"
+            title="No challenges found"
+            description="Try adjusting your filters or search query."
+            data-testid="challenges-empty"
+          />
         )}
-      </div>
+      </main>
     </div>
   );
 }

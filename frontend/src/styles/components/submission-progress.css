@@ -1,0 +1,110 @@
+/* Submission Progress Modal
+ * Styles for the 3-step submission progress indicator.
+ * Uses --dh-* design tokens.
+ */
+
+.dh-submission-progress {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dh-space-4, 16px);
+  padding: var(--dh-space-2, 8px) 0;
+}
+
+/* Step list */
+.dh-submission-progress__steps {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  gap: var(--dh-space-2, 8px);
+}
+
+.dh-submission-progress__step {
+  display: flex;
+  align-items: center;
+  gap: var(--dh-space-1, 4px);
+  font-size: var(--dh-font-size-sm, 0.875rem);
+  color: var(--dh-color-fg-muted, #6b7280);
+  transition: color var(--dh-duration-fast, 150ms) var(--dh-easing-standard, ease);
+}
+
+.dh-submission-progress__step--active {
+  color: var(--dh-color-fg-accent, #3b82f6);
+  font-weight: 600;
+}
+
+.dh-submission-progress__step--done {
+  color: var(--dh-color-fg-success, #10b981);
+}
+
+.dh-submission-progress__step--failed {
+  color: var(--dh-color-fg-danger, #ef4444);
+}
+
+/* Step indicator icon */
+.dh-submission-progress__step-indicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: var(--dh-radius-full, 9999px);
+  font-size: var(--dh-font-size-xs, 0.75rem);
+  flex-shrink: 0;
+}
+
+.dh-submission-progress__step--active .dh-submission-progress__step-indicator {
+  animation: dh-pulse 1.5s ease-in-out infinite;
+}
+
+/* Progress bar spacing */
+.dh-submission-progress__bar {
+  margin-top: var(--dh-space-1, 4px);
+}
+
+/* Status text */
+.dh-submission-progress__status {
+  margin: 0;
+  font-size: var(--dh-font-size-sm, 0.875rem);
+  color: var(--dh-color-fg-default, #374151);
+  text-align: center;
+}
+
+.dh-submission-progress__status--error {
+  color: var(--dh-color-fg-danger, #ef4444);
+  font-weight: 500;
+}
+
+/* Close/Dismiss button */
+.dh-submission-progress__close-btn {
+  align-self: center;
+  padding: var(--dh-space-2, 8px) var(--dh-space-4, 16px);
+  border: 1px solid var(--dh-color-border-default, #d1d5db);
+  border-radius: var(--dh-radius-md, 6px);
+  background: var(--dh-color-bg-surface, #ffffff);
+  color: var(--dh-color-fg-default, #374151);
+  font-size: var(--dh-font-size-sm, 0.875rem);
+  cursor: pointer;
+  transition: background var(--dh-duration-fast, 150ms) var(--dh-easing-standard, ease);
+}
+
+.dh-submission-progress__close-btn:hover {
+  background: var(--dh-color-bg-hover, #f3f4f6);
+}
+
+.dh-submission-progress__close-btn:focus-visible {
+  outline: 2px solid var(--dh-color-focus-ring, #3b82f6);
+  outline-offset: 2px;
+}
+
+/* Pulse animation for active step */
+@keyframes dh-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
