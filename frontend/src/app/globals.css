@@ -1,3 +1,66 @@
+/* Design Tokens — imported first, before any selectors */
+@import '../styles/tokens/colors.css';
+@import '../styles/tokens/typography.css';
+@import '../styles/tokens/spacing.css';
+@import '../styles/tokens/radii.css';
+@import '../styles/tokens/shadows.css';
+@import '../styles/tokens/motion.css';
+@import '../styles/tokens/breakpoints.css';
+@import '../styles/tokens/z-index.css';
+
+/* Design System v2 — Primitive component styles */
+@import '../styles/components/button.css';
+@import '../styles/components/icon-button.css';
+@import '../styles/components/input.css';
+@import '../styles/components/textarea.css';
+@import '../styles/components/select.css';
+@import '../styles/components/checkbox.css';
+@import '../styles/components/radio.css';
+@import '../styles/components/switch.css';
+@import '../styles/components/avatar.css';
+@import '../styles/components/badge.css';
+@import '../styles/components/tag.css';
+@import '../styles/components/tooltip.css';
+@import '../styles/components/skeleton-loader.css';
+@import '../styles/components/progress-bar.css';
+@import '../styles/components/spinner.css';
+
+/* Design System v2 — Layout component styles */
+@import '../styles/components/card.css';
+@import '../styles/components/page-container.css';
+@import '../styles/components/grid.css';
+@import '../styles/components/stack.css';
+@import '../styles/components/divider.css';
+
+/* Design System v2 — Navigation component styles */
+@import '../styles/components/tabs.css';
+@import '../styles/components/breadcrumb.css';
+@import '../styles/components/pagination.css';
+
+/* Design System v2 — Data display component styles */
+@import '../styles/components/data-table.css';
+@import '../styles/components/sparkline.css';
+@import '../styles/components/status-dot.css';
+@import '../styles/components/key-value-list.css';
+
+/* Design System v2 — IDE component styles */
+@import '../styles/components/split-pane.css';
+
+/* Design System v2 — Feedback component styles */
+@import '../styles/components/toast.css';
+@import '../styles/components/empty-state.css';
+@import '../styles/components/error-state.css';
+@import '../styles/components/inline-alert.css';
+
+/* Existing stylesheets */
+@import '../styles/design-system.css';
+@import '../styles/layout.css';
+@import '../styles/components.css';
+@import '../styles/pages/homepage.css';
+@import '../styles/pages/job-listing.css';
+@import '../styles/pages/challenge-library.css';
+@import '../styles/pages/job-detail.css';
+
 :root {
   color-scheme: light;
   --bg: #f4f7fb;

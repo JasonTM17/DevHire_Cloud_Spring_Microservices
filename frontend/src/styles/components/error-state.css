@@ -1,0 +1,94 @@
+/* ==========================================================================
+   ErrorState Component Styles
+   Uses --dh-* design tokens
+   ========================================================================== */
+
+.dh-error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--dh-space-4);
+  text-align: center;
+}
+
+/* Variant: inline — compact, embedded within a section */
+.dh-error-state--inline {
+  padding: var(--dh-space-6) var(--dh-space-4);
+}
+
+/* Variant: route — full-page centered error */
+.dh-error-state--route {
+  justify-content: center;
+  min-height: 60vh;
+  padding: var(--dh-space-12) var(--dh-space-6);
+}
+
+/* Variant: network — similar to route but with network-specific styling */
+.dh-error-state--network {
+  justify-content: center;
+  min-height: 40vh;
+  padding: var(--dh-space-10) var(--dh-space-6);
+}
+
+/* Illustration */
+.dh-error-state__illustration {
+  width: 80px;
+  height: 80px;
+  margin-bottom: var(--dh-space-2);
+}
+
+/* Title */
+.dh-error-state__title {
+  margin: 0;
+  font-size: var(--dh-font-size-lg);
+  font-weight: var(--dh-font-weight-semibold);
+  color: var(--dh-color-fg-primary);
+  line-height: var(--dh-line-height-tight);
+}
+
+/* Message */
+.dh-error-state__message {
+  margin: 0;
+  max-width: 420px;
+  font-size: var(--dh-font-size-sm);
+  color: var(--dh-color-fg-muted);
+  line-height: var(--dh-line-height-normal);
+}
+
+/* Action slot */
+.dh-error-state__action {
+  margin-top: var(--dh-space-2);
+}
+
+/* Retry/Reset button */
+.dh-error-state__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--dh-space-2);
+  min-height: 40px;
+  padding: 0 var(--dh-space-5);
+  border: none;
+  border-radius: var(--dh-radius-md);
+  background: var(--dh-color-brand);
+  color: #ffffff;
+  font-size: var(--dh-font-size-sm);
+  font-weight: var(--dh-font-weight-semibold);
+  cursor: pointer;
+  transition: background-color var(--dh-motion-duration-fast) var(--dh-motion-easing-standard),
+    transform var(--dh-motion-duration-fast) var(--dh-motion-easing-standard);
+}
+
+.dh-error-state__button:hover {
+  background: var(--dh-color-brand-hover);
+  transform: translateY(-1px);
+}
+
+.dh-error-state__button:focus-visible {
+  outline: 2px solid var(--dh-color-focus-ring);
+  outline-offset: 2px;
+}
+
+.dh-error-state__button:active {
+  transform: translateY(0);
+}

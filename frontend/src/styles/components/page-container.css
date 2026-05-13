@@ -1,0 +1,51 @@
+/* ==========================================================================
+   PageContainer — Layout Primitive
+   Max-width container with responsive padding.
+   Sizes: sm, md, lg, xl, full
+   Uses --dh-* design tokens exclusively.
+   ========================================================================== */
+
+.dh-page-container {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--dh-space-4);
+  padding-right: var(--dh-space-4);
+}
+
+/* Responsive padding increase at larger viewports */
+@media (min-width: 768px) { /* --bp-md */
+  .dh-page-container {
+    padding-left: var(--dh-space-6);
+    padding-right: var(--dh-space-6);
+  }
+}
+
+@media (min-width: 1024px) { /* --bp-lg */
+  .dh-page-container {
+    padding-left: var(--dh-space-8);
+    padding-right: var(--dh-space-8);
+  }
+}
+
+/* --- Max-width variants --- */
+
+.dh-page-container--sm {
+  max-width: 640px;
+}
+
+.dh-page-container--md {
+  max-width: 768px;
+}
+
+.dh-page-container--lg {
+  max-width: 1024px;
+}
+
+.dh-page-container--xl {
+  max-width: 1280px;
+}
+
+.dh-page-container--full {
+  max-width: 100%;
+}

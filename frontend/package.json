@@ -2,11 +2,14 @@
   "name": "devhire-cloud-frontend",
   "version": "0.6.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev --hostname 0.0.0.0 --port 3000",
     "build": "next build",
     "start": "next start --hostname 0.0.0.0 --port 3000",
     "typecheck": "tsc --noEmit",
+    "test": "node --test --experimental-test-module-mocks src/__tests__/**/*.test.ts src/__tests__/**/*.test.tsx",
+    "test:properties": "FAST_CHECK_NUM_RUNS=500 node --test src/__tests__/properties/**/*.property.test.ts",
     "e2e": "playwright test e2e/devhire-smoke.spec.ts e2e/code-assessment-flow.spec.ts e2e/assistant-smoke.spec.ts --project=chromium",
     "e2e:mobile": "playwright test e2e/mobile-smoke.spec.ts --project=mobile-chrome",
     "e2e:preview": "node scripts/e2e-preview.mjs desktop",
@@ -17,7 +20,8 @@
     "screenshots:stitch": "node scripts/e2e-preview.mjs stitch",
     "screenshots:promote": "powershell -NoProfile -ExecutionPolicy Bypass -File ../scripts/screenshot-promote.ps1 -Set All",
     "screenshots:ops": "playwright test e2e/ops-screenshots.spec.ts e2e/ops-evidence-render.spec.ts --project=chromium",
-    "screenshots:ops-evidence": "playwright test e2e/ops-evidence-render.spec.ts --project=chromium"
+    "screenshots:ops-evidence": "playwright test e2e/ops-evidence-render.spec.ts --project=chromium",
+    "check:contrast": "node scripts/check-contrast.mjs"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
@@ -28,9 +32,14 @@
   },
   "devDependencies": {
     "@playwright/test": "1.57.0",
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/react": "^16.3.0",
+    "@types/jsdom": "^28.0.3",
     "@types/node": "24.10.2",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
+    "fast-check": "^3.23.0",
+    "jsdom": "^25.0.1",
     "typescript": "6.0.3"
   },
   "overrides": {

@@ -1,0 +1,41 @@
+/* ==========================================================================
+   KeyValueList — Data Display Component Styles
+   Uses design tokens: --dh-*
+   ========================================================================== */
+
+.dh-kv-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dh-space-2);
+  margin: 0;
+  font-family: var(--dh-font-sans);
+  font-size: var(--dh-font-size-base);
+  line-height: var(--dh-line-height-normal);
+}
+
+.dh-kv-list__item {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--dh-space-4);
+  padding: var(--dh-space-2) 0;
+  border-bottom: 1px solid var(--dh-color-border-default);
+}
+
+.dh-kv-list__item:last-child {
+  border-bottom: none;
+}
+
+.dh-kv-list__key {
+  color: var(--dh-color-fg-muted);
+  font-size: var(--dh-font-size-sm);
+  font-weight: var(--dh-font-weight-medium);
+  flex-shrink: 0;
+}
+
+.dh-kv-list__value {
+  color: var(--dh-color-fg-primary);
+  font-weight: var(--dh-font-weight-medium);
+  text-align: right;
+  margin: 0;
+}

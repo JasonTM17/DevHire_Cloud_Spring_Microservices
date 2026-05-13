@@ -1,0 +1,58 @@
+/* ==========================================================================
+   Checkbox — Primitive Component Styles
+   Uses design tokens: --dh-*
+   ========================================================================== */
+
+.dh-checkbox-wrapper {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: var(--dh-space-2);
+  cursor: pointer;
+}
+
+.dh-checkbox-wrapper--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.dh-checkbox {
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+  accent-color: var(--dh-color-brand);
+  cursor: pointer;
+  border-radius: var(--dh-radius-sm);
+}
+
+.dh-checkbox:focus-visible {
+  outline: 2px solid var(--dh-color-focus-ring);
+  outline-offset: 2px;
+}
+
+.dh-checkbox:disabled {
+  cursor: not-allowed;
+}
+
+.dh-checkbox-label {
+  font-family: var(--dh-font-sans);
+  font-size: var(--dh-font-size-base);
+  color: var(--dh-color-fg-primary);
+  line-height: var(--dh-line-height-normal);
+  user-select: none;
+}
+
+.dh-checkbox-description {
+  font-size: var(--dh-font-size-sm);
+  color: var(--dh-color-fg-muted);
+  line-height: var(--dh-line-height-normal);
+  margin-top: var(--dh-space-1);
+}
+
+.dh-checkbox-error {
+  font-size: var(--dh-font-size-xs);
+  color: var(--dh-color-danger);
+  line-height: var(--dh-line-height-normal);
+  margin-top: var(--dh-space-1);
+}

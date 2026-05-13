@@ -1,0 +1,81 @@
+/* ==========================================================================
+   Component: Dropdown
+   Click-triggered menu with aria-expanded, aria-controls, role="menu".
+   Uses --dh-z-dropdown for z-index layering.
+   ========================================================================== */
+
+.dh-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dh-dropdown__trigger {
+  cursor: pointer;
+}
+
+.dh-dropdown__menu {
+  position: absolute;
+  top: calc(100% + var(--dh-space-1));
+  z-index: var(--dh-z-dropdown);
+  min-width: 180px;
+  padding: var(--dh-space-1) 0;
+  background: var(--dh-color-bg-elevated);
+  border: 1px solid var(--dh-color-border-default);
+  border-radius: var(--dh-radius-md);
+  box-shadow: var(--dh-shadow-md);
+  animation: dh-dropdown-in var(--dh-motion-duration-fast) var(--dh-motion-easing-standard);
+}
+
+.dh-dropdown__menu--left {
+  left: 0;
+}
+
+.dh-dropdown__menu--right {
+  right: 0;
+}
+
+.dh-dropdown__item {
+  display: flex;
+  align-items: center;
+  gap: var(--dh-space-2);
+  width: 100%;
+  padding: var(--dh-space-2) var(--dh-space-3);
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  color: var(--dh-color-fg-primary);
+  font-size: var(--dh-font-size-sm);
+  font-family: var(--dh-font-sans);
+  line-height: var(--dh-line-height-normal);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--dh-motion-duration-fast) var(--dh-motion-easing-standard);
+}
+
+.dh-dropdown__item:hover,
+.dh-dropdown__item:focus-visible {
+  background: var(--dh-color-bg-muted);
+}
+
+.dh-dropdown__item:focus-visible {
+  outline: 2px solid var(--dh-color-focus-ring);
+  outline-offset: -2px;
+}
+
+.dh-dropdown__item-icon {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  color: var(--dh-color-fg-muted);
+}
+
+@keyframes dh-dropdown-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

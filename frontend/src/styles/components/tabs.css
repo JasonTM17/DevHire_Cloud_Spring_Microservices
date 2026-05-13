@@ -1,0 +1,62 @@
+/* ==========================================================================
+   Tabs — Navigation Component Styles
+   Uses design tokens: --dh-*
+   ========================================================================== */
+
+.dh-tabs {
+  display: flex;
+  flex-direction: column;
+}
+
+.dh-tabs__list {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--dh-color-border-default);
+  overflow-x: auto;
+}
+
+.dh-tabs__tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--dh-space-3) var(--dh-space-4);
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--dh-color-fg-muted);
+  font-family: var(--dh-font-sans);
+  font-size: var(--dh-font-size-base);
+  font-weight: var(--dh-font-weight-medium);
+  line-height: var(--dh-line-height-normal);
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    color var(--dh-motion-duration-fast) var(--dh-motion-easing-standard),
+    border-color var(--dh-motion-duration-fast) var(--dh-motion-easing-standard);
+}
+
+.dh-tabs__tab:hover {
+  color: var(--dh-color-fg-primary);
+}
+
+.dh-tabs__tab--active {
+  color: var(--dh-color-brand);
+  border-bottom-color: var(--dh-color-brand);
+  font-weight: var(--dh-font-weight-semibold);
+}
+
+.dh-tabs__tab:focus-visible {
+  outline: 2px solid var(--dh-color-focus-ring);
+  outline-offset: -2px;
+  border-radius: var(--dh-radius-sm);
+}
+
+.dh-tabs__panel {
+  padding: var(--dh-space-4) 0;
+}
+
+.dh-tabs__panel:focus-visible {
+  outline: 2px solid var(--dh-color-focus-ring);
+  outline-offset: 2px;
+  border-radius: var(--dh-radius-sm);
+}

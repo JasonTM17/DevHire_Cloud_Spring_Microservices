@@ -1,0 +1,61 @@
+/* ==========================================================================
+   Component: Popover
+   Positioned content popup with focus trap and Escape-to-close.
+   Uses --dh-z-dropdown for z-index layering.
+   ========================================================================== */
+
+.dh-popover {
+  position: relative;
+  display: inline-block;
+}
+
+.dh-popover__trigger {
+  cursor: pointer;
+}
+
+.dh-popover__content {
+  position: absolute;
+  z-index: var(--dh-z-dropdown);
+  min-width: 200px;
+  padding: var(--dh-space-3);
+  background: var(--dh-color-bg-elevated);
+  border: 1px solid var(--dh-color-border-default);
+  border-radius: var(--dh-radius-md);
+  box-shadow: var(--dh-shadow-md);
+  animation: dh-popover-in var(--dh-motion-duration-fast) var(--dh-motion-easing-standard);
+}
+
+.dh-popover__content--top {
+  bottom: calc(100% + var(--dh-space-2));
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.dh-popover__content--bottom {
+  top: calc(100% + var(--dh-space-2));
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.dh-popover__content--left {
+  right: calc(100% + var(--dh-space-2));
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.dh-popover__content--right {
+  left: calc(100% + var(--dh-space-2));
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+@keyframes dh-popover-in {
+  from {
+    opacity: 0;
+    scale: 0.96;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}

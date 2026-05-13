@@ -1,0 +1,80 @@
+/* ==========================================================================
+   Tooltip — Primitive Component Styles
+   Uses design tokens: --dh-*
+   ========================================================================== */
+
+.dh-tooltip-trigger {
+  display: inline-flex;
+  position: relative;
+}
+
+.dh-tooltip {
+  position: absolute;
+  z-index: var(--dh-z-dropdown);
+  padding: var(--dh-space-2) var(--dh-space-3);
+  border-radius: var(--dh-radius-md);
+  background-color: var(--dh-color-fg-primary);
+  color: var(--dh-color-fg-inverse);
+  font-family: var(--dh-font-sans);
+  font-size: var(--dh-font-size-xs);
+  font-weight: var(--dh-font-weight-regular);
+  line-height: var(--dh-line-height-normal);
+  white-space: nowrap;
+  max-width: 16rem;
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(0.95);
+  transition:
+    opacity var(--dh-motion-duration-fast) var(--dh-motion-easing-standard),
+    transform var(--dh-motion-duration-fast) var(--dh-motion-easing-standard);
+}
+
+.dh-tooltip--visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.dh-tooltip--multiline {
+  white-space: normal;
+}
+
+/* Positions */
+.dh-tooltip--top {
+  bottom: calc(100% + var(--dh-space-2));
+  left: 50%;
+  transform: translateX(-50%) scale(0.95);
+}
+
+.dh-tooltip--top.dh-tooltip--visible {
+  transform: translateX(-50%) scale(1);
+}
+
+.dh-tooltip--bottom {
+  top: calc(100% + var(--dh-space-2));
+  left: 50%;
+  transform: translateX(-50%) scale(0.95);
+}
+
+.dh-tooltip--bottom.dh-tooltip--visible {
+  transform: translateX(-50%) scale(1);
+}
+
+.dh-tooltip--left {
+  right: calc(100% + var(--dh-space-2));
+  top: 50%;
+  transform: translateY(-50%) scale(0.95);
+}
+
+.dh-tooltip--left.dh-tooltip--visible {
+  transform: translateY(-50%) scale(1);
+}
+
+.dh-tooltip--right {
+  left: calc(100% + var(--dh-space-2));
+  top: 50%;
+  transform: translateY(-50%) scale(0.95);
+}
+
+.dh-tooltip--right.dh-tooltip--visible {
+  transform: translateY(-50%) scale(1);
+}

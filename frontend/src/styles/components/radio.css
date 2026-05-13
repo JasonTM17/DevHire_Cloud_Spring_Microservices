@@ -1,0 +1,78 @@
+/* ==========================================================================
+   Radio — Primitive Component Styles
+   Uses design tokens: --dh-*
+   ========================================================================== */
+
+.dh-radio-wrapper {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: var(--dh-space-2);
+  cursor: pointer;
+}
+
+.dh-radio-wrapper--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.dh-radio {
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+  accent-color: var(--dh-color-brand);
+  cursor: pointer;
+}
+
+.dh-radio:focus-visible {
+  outline: 2px solid var(--dh-color-focus-ring);
+  outline-offset: 2px;
+}
+
+.dh-radio:disabled {
+  cursor: not-allowed;
+}
+
+.dh-radio-label {
+  font-family: var(--dh-font-sans);
+  font-size: var(--dh-font-size-base);
+  color: var(--dh-color-fg-primary);
+  line-height: var(--dh-line-height-normal);
+  user-select: none;
+}
+
+.dh-radio-description {
+  font-size: var(--dh-font-size-sm);
+  color: var(--dh-color-fg-muted);
+  line-height: var(--dh-line-height-normal);
+  margin-top: var(--dh-space-1);
+}
+
+.dh-radio-error {
+  font-size: var(--dh-font-size-xs);
+  color: var(--dh-color-danger);
+  line-height: var(--dh-line-height-normal);
+  margin-top: var(--dh-space-1);
+}
+
+/* Radio Group */
+.dh-radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dh-space-2);
+}
+
+.dh-radio-group--horizontal {
+  flex-direction: row;
+  gap: var(--dh-space-4);
+}
+
+.dh-radio-group-label {
+  font-family: var(--dh-font-sans);
+  font-size: var(--dh-font-size-sm);
+  font-weight: var(--dh-font-weight-medium);
+  color: var(--dh-color-fg-primary);
+  line-height: var(--dh-line-height-normal);
+  margin-bottom: var(--dh-space-1);
+}

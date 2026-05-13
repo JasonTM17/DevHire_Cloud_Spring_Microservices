@@ -1,0 +1,12 @@
+/* ==========================================================================
+   Design Tokens — Border Radii
+   Prefix: --dh-radius-*
+   ========================================================================== */
+
+:root {
+  --dh-radius-sm: 4px;
+  --dh-radius-md: 8px;
+  --dh-radius-lg: 12px;
+  --dh-radius-xl: 16px;
+  --dh-radius-full: 9999px;
+}

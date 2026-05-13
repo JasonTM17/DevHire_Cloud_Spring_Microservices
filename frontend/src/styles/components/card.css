@@ -1,0 +1,51 @@
+/* ==========================================================================
+   Card — Layout Primitive
+   Surface wrapper with background, border, radius, shadow.
+   Variants: default, elevated, outlined
+   Padding: none, sm, md, lg
+   Uses --dh-* design tokens exclusively.
+   ========================================================================== */
+
+.dh-card {
+  background: var(--dh-color-bg-surface);
+  border: 1px solid var(--dh-color-border-default);
+  border-radius: var(--dh-radius-md);
+  box-shadow: var(--dh-shadow-sm);
+  transition:
+    box-shadow var(--dh-motion-duration-normal) var(--dh-motion-easing-standard),
+    transform var(--dh-motion-duration-normal) var(--dh-motion-easing-standard);
+}
+
+/* --- Variants --- */
+
+.dh-card--elevated {
+  box-shadow: var(--dh-shadow-md);
+}
+
+.dh-card--elevated:hover {
+  box-shadow: var(--dh-shadow-lg);
+  transform: translateY(-2px);
+}
+
+.dh-card--outlined {
+  box-shadow: none;
+  border-color: var(--dh-color-border-strong);
+}
+
+/* --- Padding --- */
+
+.dh-card--padding-none {
+  padding: 0;
+}
+
+.dh-card--padding-sm {
+  padding: var(--dh-space-3);
+}
+
+.dh-card--padding-md {
+  padding: var(--dh-space-5);
+}
+
+.dh-card--padding-lg {
+  padding: var(--dh-space-8);
+}

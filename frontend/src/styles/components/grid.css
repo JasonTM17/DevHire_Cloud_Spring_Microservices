@@ -1,0 +1,19 @@
+/* ==========================================================================
+   Grid — Layout Primitive
+   CSS Grid wrapper with configurable columns, gap, and minChildWidth.
+   Uses --dh-* design tokens exclusively.
+   ========================================================================== */
+
+.dh-grid {
+  display: grid;
+  gap: var(--dh-grid-gap, var(--dh-space-4));
+  grid-template-columns: var(--dh-grid-columns, 1fr);
+}
+
+/* When minChildWidth is set, use auto-fit responsive columns */
+.dh-grid--auto-fit {
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(var(--dh-grid-min-child-width, 200px), 1fr)
+  );
+}

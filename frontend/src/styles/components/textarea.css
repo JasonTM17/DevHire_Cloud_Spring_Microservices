@@ -1,0 +1,71 @@
+/* ==========================================================================
+   Textarea — Primitive Component Styles
+   Uses design tokens: --dh-*
+   ========================================================================== */
+
+.dh-textarea-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dh-space-1);
+}
+
+.dh-textarea-label {
+  font-family: var(--dh-font-sans);
+  font-size: var(--dh-font-size-sm);
+  font-weight: var(--dh-font-weight-medium);
+  color: var(--dh-color-fg-primary);
+  line-height: var(--dh-line-height-normal);
+}
+
+.dh-textarea {
+  width: 100%;
+  min-height: 5rem;
+  padding: var(--dh-space-2) var(--dh-space-3);
+  border: 1px solid var(--dh-color-border-default);
+  border-radius: var(--dh-radius-md);
+  background-color: var(--dh-color-bg-surface);
+  color: var(--dh-color-fg-primary);
+  font-family: var(--dh-font-sans);
+  font-size: var(--dh-font-size-base);
+  line-height: var(--dh-line-height-normal);
+  resize: vertical;
+  transition:
+    border-color var(--dh-motion-duration-fast) var(--dh-motion-easing-standard),
+    box-shadow var(--dh-motion-duration-fast) var(--dh-motion-easing-standard);
+}
+
+.dh-textarea::placeholder {
+  color: var(--dh-color-fg-muted);
+}
+
+.dh-textarea:hover:not(:disabled):not(:focus) {
+  border-color: var(--dh-color-border-strong);
+}
+
+.dh-textarea:focus {
+  outline: none;
+  border-color: var(--dh-color-focus-ring);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.dh-textarea:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: var(--dh-color-bg-muted);
+  resize: none;
+}
+
+.dh-textarea--error {
+  border-color: var(--dh-color-danger);
+}
+
+.dh-textarea--error:focus {
+  border-color: var(--dh-color-danger);
+  box-shadow: 0 0 0 3px rgba(180, 35, 24, 0.12);
+}
+
+.dh-textarea-error {
+  font-size: var(--dh-font-size-xs);
+  color: var(--dh-color-danger);
+  line-height: var(--dh-line-height-normal);
+}

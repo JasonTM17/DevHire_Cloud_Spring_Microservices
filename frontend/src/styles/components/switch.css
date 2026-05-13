@@ -1,0 +1,78 @@
+/* ==========================================================================
+   Switch — Primitive Component Styles
+   Uses design tokens: --dh-*
+   ========================================================================== */
+
+.dh-switch-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--dh-space-2);
+  cursor: pointer;
+}
+
+.dh-switch-wrapper--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.dh-switch {
+  position: relative;
+  width: 2.5rem;
+  height: 1.375rem;
+  flex-shrink: 0;
+}
+
+.dh-switch-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.dh-switch-track {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--dh-radius-full);
+  background-color: var(--dh-color-border-strong);
+  transition: background-color var(--dh-motion-duration-fast) var(--dh-motion-easing-standard);
+}
+
+.dh-switch-input:checked + .dh-switch-track {
+  background-color: var(--dh-color-brand);
+}
+
+.dh-switch-input:focus-visible + .dh-switch-track {
+  outline: 2px solid var(--dh-color-focus-ring);
+  outline-offset: 2px;
+}
+
+.dh-switch-thumb {
+  position: absolute;
+  top: 0.1875rem;
+  left: 0.1875rem;
+  width: 1rem;
+  height: 1rem;
+  border-radius: var(--dh-radius-full);
+  background-color: var(--dh-color-bg-surface);
+  box-shadow: var(--dh-shadow-sm);
+  transition: transform var(--dh-motion-duration-fast) var(--dh-motion-easing-emphasized);
+  pointer-events: none;
+}
+
+.dh-switch-input:checked ~ .dh-switch-thumb {
+  transform: translateX(1.125rem);
+}
+
+.dh-switch-label {
+  font-family: var(--dh-font-sans);
+  font-size: var(--dh-font-size-base);
+  color: var(--dh-color-fg-primary);
+  line-height: var(--dh-line-height-normal);
+  user-select: none;
+}

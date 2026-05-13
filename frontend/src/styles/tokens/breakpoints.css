@@ -1,0 +1,24 @@
+/* ==========================================================================
+   Design Tokens — Breakpoints (Reference Only)
+   
+   CSS custom properties cannot be used inside media query conditions.
+   This file serves as the single source of truth for breakpoint values.
+   Use the corresponding min-width value directly in component CSS files
+   with a comment referencing the token name for grep-ability.
+   
+   Token        Value         Purpose
+   --bp-sm      640px         Small tablet
+   --bp-md      768px         Tablet, condensed nav boundary
+   --bp-lg      1024px        Desktop, full nav boundary
+   --bp-xl      1280px        Wide desktop
+   --bp-2xl     1536px        Ultrawide, OPS grid expansion
+   ========================================================================== */
+
+:root {
+  /* Breakpoint reference values (not usable in media queries, for JS access) */
+  --dh-bp-sm: 640;
+  --dh-bp-md: 768;
+  --dh-bp-lg: 1024;
+  --dh-bp-xl: 1280;
+  --dh-bp-2xl: 1536;
+}

@@ -1,0 +1,30 @@
+/* ==========================================================================
+   Divider — Layout Primitive
+   Horizontal or vertical divider line.
+   Uses --dh-* design tokens exclusively.
+   ========================================================================== */
+
+.dh-divider {
+  border: none;
+  margin: 0;
+  flex-shrink: 0;
+}
+
+/* Horizontal (default) */
+.dh-divider--horizontal {
+  width: 100%;
+  height: 1px;
+  background-color: var(--dh-color-border-default);
+  margin-top: var(--dh-divider-spacing, var(--dh-space-4));
+  margin-bottom: var(--dh-divider-spacing, var(--dh-space-4));
+}
+
+/* Vertical */
+.dh-divider--vertical {
+  width: 1px;
+  height: auto;
+  align-self: stretch;
+  background-color: var(--dh-color-border-default);
+  margin-left: var(--dh-divider-spacing, var(--dh-space-4));
+  margin-right: var(--dh-divider-spacing, var(--dh-space-4));
+}

@@ -1,0 +1,44 @@
+/* ==========================================================================
+   EmptyState Component Styles
+   Uses --dh-* design tokens
+   ========================================================================== */
+
+.dh-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--dh-space-4);
+  padding: var(--dh-space-12) var(--dh-space-6);
+  text-align: center;
+}
+
+/* Illustration */
+.dh-empty-state__illustration {
+  width: 120px;
+  height: 120px;
+  margin-bottom: var(--dh-space-2);
+}
+
+/* Title */
+.dh-empty-state__title {
+  margin: 0;
+  font-size: var(--dh-font-size-lg);
+  font-weight: var(--dh-font-weight-semibold);
+  color: var(--dh-color-fg-primary);
+  line-height: var(--dh-line-height-tight);
+}
+
+/* Description */
+.dh-empty-state__description {
+  margin: 0;
+  max-width: 360px;
+  font-size: var(--dh-font-size-sm);
+  color: var(--dh-color-fg-muted);
+  line-height: var(--dh-line-height-normal);
+}
+
+/* Action slot */
+.dh-empty-state__action {
+  margin-top: var(--dh-space-2);
+}

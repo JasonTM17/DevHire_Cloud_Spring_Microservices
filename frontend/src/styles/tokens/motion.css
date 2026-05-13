@@ -1,0 +1,18 @@
+/* ==========================================================================
+   Design Tokens — Motion (Transitions & Animations)
+   Prefix: --dh-motion-*
+   
+   Duration scale: fast (120ms), normal (200ms), slow (350ms)
+   Easing: standard (ease-out), emphasized (cubic-bezier for spring-like)
+   ========================================================================== */
+
+:root {
+  /* Durations */
+  --dh-motion-duration-fast: 120ms;
+  --dh-motion-duration-normal: 200ms;
+  --dh-motion-duration-slow: 350ms;
+
+  /* Easing curves */
+  --dh-motion-easing-standard: cubic-bezier(0.2, 0, 0, 1);
+  --dh-motion-easing-emphasized: cubic-bezier(0.4, 0, 0.2, 1);
+}

@@ -1,0 +1,102 @@
+/* ==========================================================================
+   SplitPane — IDE Component Styles
+   Uses design tokens: --dh-*
+   ========================================================================== */
+
+.dh-split-pane {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.dh-split-pane--horizontal {
+  flex-direction: row;
+}
+
+.dh-split-pane--vertical {
+  flex-direction: column;
+}
+
+/* Panels */
+.dh-split-pane__panel {
+  overflow: auto;
+  min-width: 0;
+  min-height: 0;
+}
+
+/* Handle — shared */
+.dh-split-pane__handle {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--dh-color-border-default);
+  transition:
+    background-color var(--dh-motion-duration-fast) var(--dh-motion-easing-standard);
+  z-index: var(--dh-z-base);
+  position: relative;
+}
+
+.dh-split-pane__handle:hover,
+.dh-split-pane__handle:focus-visible {
+  background-color: var(--dh-color-brand);
+}
+
+.dh-split-pane__handle:focus-visible {
+  outline: 2px solid var(--dh-color-focus-ring);
+  outline-offset: -2px;
+}
+
+/* Handle — horizontal orientation (vertical divider line) */
+.dh-split-pane--horizontal > .dh-split-pane__handle {
+  width: 6px;
+  cursor: col-resize;
+}
+
+/* Handle — vertical orientation (horizontal divider line) */
+.dh-split-pane--vertical > .dh-split-pane__handle {
+  height: 6px;
+  cursor: row-resize;
+}
+
+/* Handle indicator (grip dots) */
+.dh-split-pane__handle-indicator {
+  border-radius: var(--dh-radius-full);
+  background-color: var(--dh-color-fg-muted);
+  opacity: 0.6;
+  transition:
+    opacity var(--dh-motion-duration-fast) var(--dh-motion-easing-standard);
+}
+
+.dh-split-pane__handle:hover .dh-split-pane__handle-indicator,
+.dh-split-pane__handle:focus-visible .dh-split-pane__handle-indicator {
+  opacity: 1;
+  background-color: var(--dh-color-fg-inverse);
+}
+
+/* Indicator sizing per orientation */
+.dh-split-pane--horizontal > .dh-split-pane__handle .dh-split-pane__handle-indicator {
+  width: 2px;
+  height: 24px;
+}
+
+.dh-split-pane--vertical > .dh-split-pane__handle .dh-split-pane__handle-indicator {
+  width: 24px;
+  height: 2px;
+}
+
+/* Active drag state — applied via JS body cursor, but also style handle */
+.dh-split-pane__handle:active {
+  background-color: var(--dh-color-brand-hover);
+}
+
+/* OPS dark scope overrides */
+[data-theme-scope="ops-dark"] .dh-split-pane__handle {
+  background-color: var(--dh-color-ops-grid-line, var(--dh-color-border-default));
+}
+
+[data-theme-scope="ops-dark"] .dh-split-pane__handle:hover,
+[data-theme-scope="ops-dark"] .dh-split-pane__handle:focus-visible {
+  background-color: var(--dh-color-brand);
+}

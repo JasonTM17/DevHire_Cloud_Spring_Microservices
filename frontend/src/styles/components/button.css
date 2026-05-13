@@ -1,0 +1,127 @@
+/* ==========================================================================
+   Button — Primitive Component Styles
+   Uses design tokens: --dh-*
+   ========================================================================== */
+
+.dh-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--dh-space-2);
+  padding: var(--dh-space-2) var(--dh-space-4);
+  border: 1px solid transparent;
+  border-radius: var(--dh-radius-md);
+  font-family: var(--dh-font-sans);
+  font-size: var(--dh-font-size-base);
+  font-weight: var(--dh-font-weight-semibold);
+  line-height: var(--dh-line-height-normal);
+  cursor: pointer;
+  transition:
+    background-color var(--dh-motion-duration-fast) var(--dh-motion-easing-standard),
+    border-color var(--dh-motion-duration-fast) var(--dh-motion-easing-standard),
+    box-shadow var(--dh-motion-duration-fast) var(--dh-motion-easing-standard),
+    transform var(--dh-motion-duration-fast) var(--dh-motion-easing-standard);
+  text-decoration: none;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.dh-btn:focus-visible {
+  outline: 2px solid var(--dh-color-focus-ring);
+  outline-offset: 2px;
+}
+
+.dh-btn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.dh-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Variants */
+.dh-btn--primary {
+  background-color: var(--dh-color-brand);
+  color: var(--dh-color-fg-inverse);
+  border-color: var(--dh-color-brand);
+}
+
+.dh-btn--primary:hover:not(:disabled) {
+  background-color: var(--dh-color-brand-hover);
+  border-color: var(--dh-color-brand-hover);
+}
+
+.dh-btn--secondary {
+  background-color: var(--dh-color-bg-surface);
+  color: var(--dh-color-fg-primary);
+  border-color: var(--dh-color-border-default);
+}
+
+.dh-btn--secondary:hover:not(:disabled) {
+  background-color: var(--dh-color-bg-muted);
+  border-color: var(--dh-color-border-strong);
+}
+
+.dh-btn--ghost {
+  background-color: transparent;
+  color: var(--dh-color-fg-secondary);
+  border-color: transparent;
+}
+
+.dh-btn--ghost:hover:not(:disabled) {
+  background-color: var(--dh-color-bg-muted);
+  color: var(--dh-color-fg-primary);
+}
+
+.dh-btn--danger {
+  background-color: var(--dh-color-danger);
+  color: var(--dh-color-fg-inverse);
+  border-color: var(--dh-color-danger);
+}
+
+.dh-btn--danger:hover:not(:disabled) {
+  background-color: #991b1b;
+  border-color: #991b1b;
+}
+
+/* Sizes */
+.dh-btn--sm {
+  padding: var(--dh-space-1) var(--dh-space-3);
+  font-size: var(--dh-font-size-sm);
+}
+
+.dh-btn--md {
+  padding: var(--dh-space-2) var(--dh-space-4);
+  font-size: var(--dh-font-size-base);
+}
+
+.dh-btn--lg {
+  padding: var(--dh-space-3) var(--dh-space-6);
+  font-size: var(--dh-font-size-md);
+}
+
+/* Full width */
+.dh-btn--full {
+  width: 100%;
+}
+
+/* Loading state */
+.dh-btn--loading {
+  position: relative;
+  color: transparent;
+  pointer-events: none;
+}
+
+.dh-btn--loading::after {
+  content: "";
+  position: absolute;
+  width: 1em;
+  height: 1em;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: var(--dh-radius-full);
+  animation: dh-spin 0.6s linear infinite;
+  color: var(--dh-color-fg-inverse);
+}

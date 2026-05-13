@@ -1,0 +1,15 @@
+/* ==========================================================================
+   Design Tokens — Z-Index Scale
+   Prefix: --dh-z-*
+   
+   Layered scale to prevent z-index wars.
+   Each level is spaced by 100 to allow intermediate values if needed.
+   ========================================================================== */
+
+:root {
+  --dh-z-base: 1;
+  --dh-z-dropdown: 100;
+  --dh-z-overlay: 200;
+  --dh-z-modal: 300;
+  --dh-z-toast: 400;
+}
