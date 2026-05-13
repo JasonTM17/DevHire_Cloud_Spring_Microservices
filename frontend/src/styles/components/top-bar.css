@@ -199,6 +199,8 @@
   align-items: center;
   gap: var(--dh-space-2);
   padding: var(--dh-space-1) var(--dh-space-2);
+  border: none;
+  background: transparent;
   border-radius: var(--dh-radius-md);
   cursor: pointer;
   transition: background-color var(--dh-motion-duration-fast) var(--dh-motion-easing-standard);
@@ -206,6 +208,11 @@
 
 .dh-topbar__user-trigger:hover {
   background: var(--dh-color-bg-muted);
+}
+
+.dh-topbar__user-trigger:focus-visible {
+  outline: 2px solid var(--dh-color-focus-ring);
+  outline-offset: -2px;
 }
 
 .dh-topbar__user-name {
@@ -392,6 +399,13 @@ form.dh-topbar__search-slot:focus-within {
   color: var(--dh-color-fg-primary);
 }
 
+.dh-topbar__dropdown-item:focus {
+  background: var(--dh-color-bg-muted);
+  color: var(--dh-color-fg-primary);
+  outline: 2px solid var(--dh-color-focus-ring);
+  outline-offset: -2px;
+}
+
 .dh-topbar__dropdown-item--danger {
   color: var(--dh-color-danger);
 }
@@ -399,6 +413,13 @@ form.dh-topbar__search-slot:focus-within {
 .dh-topbar__dropdown-item--danger:hover {
   background: var(--dh-color-danger-soft);
   color: var(--dh-color-danger);
+}
+
+.dh-topbar__dropdown-item--danger:focus {
+  background: var(--dh-color-danger-soft);
+  color: var(--dh-color-danger);
+  outline: 2px solid var(--dh-color-focus-ring);
+  outline-offset: -2px;
 }
 
 /* --------------------------------------------------------------------------

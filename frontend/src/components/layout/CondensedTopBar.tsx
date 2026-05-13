@@ -3,6 +3,7 @@
 import {
   Activity,
   BarChart,
+  Bell,
   Brain,
   Briefcase,
   Circle,
@@ -28,9 +29,7 @@ import { useMemo } from "react";
 import { Avatar } from "@/components/ui/primitives/Avatar";
 import { Tooltip } from "@/components/ui/primitives/Tooltip";
 import { Dropdown, type DropdownItem } from "@/components/ui/overlays/Dropdown";
-import { filterNavByRole, navLinks } from "@/lib/navLinks";
-import type { NavLink, NavUserRole } from "@/lib/navLinks";
-import type { Session } from "@/lib/session";
+import type { NavLink } from "@/lib/navLinks";
 
 import "@/styles/components/condensed-top-bar.css";
 
@@ -75,49 +74,38 @@ function NavIcon({ name, size = 20 }: { name?: string; size?: number }) {
 const MAX_VISIBLE_ICONS = 5;
 
 export interface CondensedTopBarProps {
-  /** Navigation links to display (derived from session if not provided) */
-  links?: NavLink[];
-  /** Current user info (derived from session if not provided) */
+  /** Navigation links to display (role-filtered by AppShell) */
+  links: NavLink[];
+  /** Current user info (optional — shows avatar when provided) */
   user?: { name: string; avatarUrl?: string };
-  /** Session object — used to derive links and user when explicit props are omitted */
-  session?: Session | null;
+  /** Unread notification count (0 hides the badge) */
+  notificationCount?: number;
 }
 
 /**
- * Tablet navigation bar (768–1023px viewport).
+ * CondensedTopBar — Tablet navigation bar (768–1023px viewport).
  *
- * - Logo on the left
- * - First N links rendered as icon-only buttons with tooltips
+ * Renders a compact top bar with:
+ * - Logo (icon only)
+ * - First N links as icon-only buttons with tooltips
  * - Remaining links collapsed into a "More" dropdown
- * - User avatar button on the right
+ * - Notification bell with badge count
+ * - User avatar button
  *
- * Accepts either explicit `links`/`user` props or a `session` prop from which
- * links and user info are derived. Styled with `--dh-*` design tokens.
+ * Uses `--dh-*` design tokens. Proper ARIA roles and keyboard navigation
+ * are provided via the Dropdown and Tooltip primitives.
  *
- * Uses `Dropdown` from `@/components/ui/overlays` and `Tooltip` from
- * `@/components/ui/primitives`.
+ * Requirements: 2.3
  */
-export function CondensedTopBar({ links, user, session }: CondensedTopBarProps) {
+export function CondensedTopBar({
+  links,
+  user,
+  notificationCount = 0,
+}: CondensedTopBarProps) {
   const pathname = usePathname();
 
-  // Derive links from session if not explicitly provided
-  const resolvedLinks: NavLink[] = useMemo(() => {
-    if (links) return links;
-    const role: NavUserRole = session?.user.role ?? "PUBLIC";
-    return filterNavByRole(navLinks, role);
-  }, [links, session]);
-
-  // Derive user from session if not explicitly provided
-  const resolvedUser = useMemo(() => {
-    if (user) return user;
-    if (session?.user) {
-      return { name: session.user.email, avatarUrl: undefined };
-    }
-    return undefined;
-  }, [user, session]);
-
-  const visibleLinks = resolvedLinks.slice(0, MAX_VISIBLE_ICONS);
-  const overflowLinks = resolvedLinks.slice(MAX_VISIBLE_ICONS);
+  const visibleLinks = links.slice(0, MAX_VISIBLE_ICONS);
+  const overflowLinks = links.slice(MAX_VISIBLE_ICONS);
 
   const overflowItems: DropdownItem[] = useMemo(
     () =>
@@ -137,11 +125,25 @@ export function CondensedTopBar({ links, user, session }: CondensedTopBarProps) 
     return pathname === href || pathname.startsWith(href + "/");
   }
 
+  const displayCount =
+    notificationCount > 99 ? "99+" : String(notificationCount);
+
   return (
-    <header className="dh-condensed-top-bar" data-testid="condensed-top-bar">
+    <header
+      className="dh-condensed-top-bar"
+      data-testid="condensed-top-bar"
+    >
       {/* Logo */}
-      <Link href="/" className="dh-condensed-top-bar__logo" aria-label="DevHire Cloud home">
-        <Code2 size={24} className="dh-condensed-top-bar__logo-icon" aria-hidden="true" />
+      <Link
+        href="/"
+        className="dh-condensed-top-bar__logo"
+        aria-label="DevHire Cloud home"
+      >
+        <Code2
+          size={24}
+          className="dh-condensed-top-bar__logo-icon"
+          aria-hidden="true"
+        />
       </Link>
 
       {/* Icon-only nav links */}
@@ -173,7 +175,10 @@ export function CondensedTopBar({ links, user, session }: CondensedTopBarProps) 
         {overflowLinks.length > 0 && (
           <Dropdown
             trigger={
-              <span className="dh-condensed-top-bar__more-btn" aria-label="More navigation links">
+              <span
+                className="dh-condensed-top-bar__more-btn"
+                aria-label="More navigation links"
+              >
                 <MoreHorizontal size={20} aria-hidden="true" />
               </span>
             }
@@ -187,20 +192,44 @@ export function CondensedTopBar({ links, user, session }: CondensedTopBarProps) 
       {/* Spacer */}
       <div className="dh-condensed-top-bar__spacer" />
 
-      {/* User avatar */}
-      {resolvedUser && (
-        <button
-          type="button"
-          className="dh-condensed-top-bar__user-btn"
-          aria-label={`User menu for ${resolvedUser.name}`}
+      {/* Actions: notification bell + user avatar */}
+      <div className="dh-condensed-top-bar__actions">
+        {/* Notification bell */}
+        <Link
+          href="/candidate/notifications"
+          className="dh-condensed-top-bar__bell"
+          aria-label={
+            notificationCount > 0
+              ? `Notifications, ${notificationCount} unread`
+              : "Notifications"
+          }
         >
-          <Avatar
-            src={resolvedUser.avatarUrl}
-            alt={resolvedUser.name}
-            size="sm"
-          />
-        </button>
-      )}
+          <Bell size={20} aria-hidden="true" />
+          {notificationCount > 0 && (
+            <span
+              className="dh-condensed-top-bar__bell-badge"
+              aria-hidden="true"
+            >
+              {displayCount}
+            </span>
+          )}
+        </Link>
+
+        {/* User avatar */}
+        {user && (
+          <button
+            type="button"
+            className="dh-condensed-top-bar__user-btn"
+            aria-label={`User menu for ${user.name}`}
+          >
+            <Avatar
+              src={user.avatarUrl}
+              alt={user.name}
+              size="sm"
+            />
+          </button>
+        )}
+      </div>
     </header>
   );
 }

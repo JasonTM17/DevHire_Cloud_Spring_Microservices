@@ -1,0 +1,17 @@
+/**
+ * AppShell — Footer and layout landmark styles.
+ * Uses design tokens for consistent theming.
+ */
+
+.dh-app-footer {
+  padding: var(--dh-space-4, 16px) var(--dh-space-6, 24px);
+  border-top: 1px solid var(--dh-color-border-default, #e2e8f0);
+  background: var(--dh-color-bg-primary, #ffffff);
+  color: var(--dh-color-fg-muted, #667085);
+  font-size: var(--dh-font-size-sm, 14px);
+  text-align: center;
+}
+
+.dh-app-footer p {
+  margin: 0;
+}
