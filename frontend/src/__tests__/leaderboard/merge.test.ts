@@ -1,5 +1,5 @@
 ﻿/**
- * Unit tests for lib/leaderboard/merge.ts â€” mergeLeaderboard
+ * Unit tests for lib/leaderboard/merge.ts - mergeLeaderboard
  * Requirements: 5.3
  */
 

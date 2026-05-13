@@ -73,8 +73,16 @@ describe('computeOverallHealth', () => {
     assert.equal(computeOverallHealth(services), 'healthy');
   });
 
-  it('returns healthy for empty service list', () => {
-    assert.equal(computeOverallHealth([]), 'healthy');
+  it('returns unknown for empty service list', () => {
+    assert.equal(computeOverallHealth([]), 'unknown');
+  });
+
+  it('returns unknown when at least one service has no live signal and none are degraded or critical', () => {
+    const services = [
+      makeService('auth', 'healthy'),
+      makeService('api-gateway', 'unknown'),
+    ];
+    assert.equal(computeOverallHealth(services), 'unknown');
   });
 
   it('returns degraded when any service is degraded and none critical', () => {

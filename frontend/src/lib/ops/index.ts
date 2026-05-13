@@ -12,6 +12,14 @@ export {
   isStale,
 } from './classifiers.ts';
 
+export {
+  buildOpsHealthSummary,
+  unknownOpsHealthSummary,
+  runnerToServiceStatus,
+} from './healthSignals';
+
+export type { OpsHealthSummary } from './healthSignals';
+
 export type {
   ServiceHealth,
   ServiceStatus,

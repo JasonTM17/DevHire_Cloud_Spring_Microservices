@@ -49,3 +49,4 @@ tmp/
 surefire-reports/
 failsafe-reports/
 reports/
+.jqwik-database

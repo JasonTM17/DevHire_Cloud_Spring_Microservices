@@ -47,6 +47,11 @@
   box-shadow: 0 0 0 1px var(--dh-color-danger-soft);
 }
 
+.dh-service-card--unknown {
+  border-style: dashed;
+  border-color: var(--dh-color-border-strong);
+}
+
 .dh-service-card__indicator {
   position: absolute;
   inset: 0;
@@ -107,6 +112,14 @@
   font-size: var(--dh-font-size-sm);
   font-weight: var(--dh-font-weight-medium);
   color: var(--dh-color-fg-primary);
+  overflow-wrap: anywhere;
+}
+
+.dh-service-card__detail {
+  margin: 0;
+  font-size: var(--dh-font-size-xs);
+  line-height: 1.5;
+  color: var(--dh-color-fg-muted);
 }
 
 /* --------------------------------------------------------------------------
@@ -163,6 +176,10 @@
 
 .dh-transition-timeline__status--critical {
   color: var(--dh-color-danger);
+}
+
+.dh-transition-timeline__status--unknown {
+  color: var(--dh-color-fg-muted);
 }
 
 .dh-transition-timeline__timestamp {

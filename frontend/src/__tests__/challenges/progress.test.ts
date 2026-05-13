@@ -1,5 +1,5 @@
 ﻿/**
- * Unit tests for lib/challenges/progress.ts â€” computeProgress
+ * Unit tests for lib/challenges/progress.ts - computeProgress
  * Requirements: 3.3
  */
 

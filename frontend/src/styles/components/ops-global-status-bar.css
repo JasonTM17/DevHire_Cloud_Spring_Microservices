@@ -67,6 +67,16 @@
   animation: ops-pulse 1s ease-in-out infinite;
 }
 
+.ops-status-pill--unknown {
+  background: var(--dh-color-bg-muted);
+  color: var(--dh-color-fg-muted);
+  border-color: var(--dh-color-border-default);
+}
+
+.ops-status-pill--unknown .ops-status-pill__dot {
+  background: var(--dh-color-fg-muted);
+}
+
 @keyframes ops-pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.4; }

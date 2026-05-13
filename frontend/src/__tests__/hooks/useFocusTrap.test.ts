@@ -64,7 +64,7 @@ describe('useFocusTrap - DOM behavior', () => {
     last.focus();
     assert.equal(document.activeElement, last);
 
-    // Simulate the trap logic: Tab on last â†’ focus first
+    // Simulate the trap logic: Tab on last -> focus first
     const focusable = Array.from(container.querySelectorAll('button:not([disabled])'));
     const firstEl = focusable[0] as HTMLElement;
     const lastEl = focusable[focusable.length - 1] as HTMLElement;
@@ -90,7 +90,7 @@ describe('useFocusTrap - DOM behavior', () => {
     first.focus();
     assert.equal(document.activeElement, first);
 
-    // Simulate the trap logic: Shift+Tab on first â†’ focus last
+    // Simulate the trap logic: Shift+Tab on first -> focus last
     const focusable = Array.from(container.querySelectorAll('button:not([disabled])'));
     const firstEl = focusable[0] as HTMLElement;
     const lastEl = focusable[focusable.length - 1] as HTMLElement;

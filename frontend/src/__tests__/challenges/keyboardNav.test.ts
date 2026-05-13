@@ -1,5 +1,5 @@
 ﻿/**
- * Unit tests for lib/keyboardNav.ts â€” nextIndex
+ * Unit tests for lib/keyboardNav.ts - nextIndex
  * Requirements: 3.5
  */
 

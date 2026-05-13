@@ -1,68 +1,43 @@
 "use client";
 
 import { Drawer } from "@/components/ui/overlays/Drawer";
-import { VirtualList } from "@/components/ui/data-display";
-import { StatusDot } from "@/components/ui/data-display";
+import { StatusDot, VirtualList } from "@/components/ui/data-display";
 import type { ServiceHealth } from "@/lib/ops/types";
 import "@/styles/components/service-detail-drawer.css";
 
-/** Detailed metrics for a service shown in the drawer */
 export interface ServiceDetailMetrics {
-  /** JVM heap usage in MB */
   jvmHeapUsedMb: number;
-  /** JVM heap max in MB */
   jvmHeapMaxMb: number;
-  /** Active thread count */
   threadCount: number;
-  /** GC collections per minute */
   gcFrequencyPerMin: number;
-  /** Recent error log entries */
   recentErrors: ErrorLogEntry[];
 }
 
 export interface ErrorLogEntry {
-  /** ISO timestamp */
   timestamp: string;
-  /** Log level */
   level: "ERROR" | "WARN";
-  /** Error message */
   message: string;
-  /** Optional stack trace (first line) */
   stackTrace?: string;
 }
 
 export interface ServiceDetailDrawerProps {
-  /** The service to show details for (null = closed) */
   service: ServiceHealth | null;
-  /** Detailed metrics for the selected service */
   details?: ServiceDetailMetrics | null;
-  /** Whether detail metrics are loading */
   isLoading?: boolean;
-  /** Callback to close the drawer */
   onClose: () => void;
 }
 
 const ERROR_LOG_ITEM_HEIGHT = 64;
 
-/**
- * ServiceDetailDrawer — Slide-in panel showing detailed metrics for a service.
- *
- * Displays JVM heap usage, thread count, GC frequency, and recent error logs.
- * Error logs are virtualized when > 50 entries for performance.
- *
- * Requirements: 7.5, 10.6
- */
 export function ServiceDetailDrawer({
   service,
   details,
   isLoading = false,
   onClose,
 }: ServiceDetailDrawerProps) {
-  const isOpen = service !== null;
-
   return (
     <Drawer
-      isOpen={isOpen}
+      isOpen={service !== null}
       onClose={onClose}
       title={service ? `${service.name} Details` : "Service Details"}
       position="right"
@@ -71,7 +46,6 @@ export function ServiceDetailDrawer({
     >
       {service && (
         <div className="dh-service-detail">
-          {/* Service status summary */}
           <div className="dh-service-detail__status">
             <StatusDot status={service.status} size="lg" />
             <div className="dh-service-detail__status-info">
@@ -82,17 +56,19 @@ export function ServiceDetailDrawer({
             </div>
           </div>
 
-          {/* Basic metrics from health snapshot */}
           <div className="dh-service-detail__section">
-            <h4 className="dh-service-detail__section-title">Health Metrics</h4>
+            <h4 className="dh-service-detail__section-title">Health Signal</h4>
             <div className="dh-service-detail__metrics-grid">
-              <MetricItem label="Response Time" value={`${service.responseTimeMs}ms`} />
-              <MetricItem label="Uptime" value={`${service.uptimePercent.toFixed(2)}%`} />
+              <MetricItem label="Response Time" value={formatOptionalMilliseconds(service.responseTimeMs)} />
+              <MetricItem label="Uptime" value={formatOptionalPercent(service.uptimePercent)} />
               <MetricItem label="Last Check" value={formatTime(service.lastCheck)} />
+              {service.source && <MetricItem label="Source" value={service.source} />}
             </div>
+            {service.detail && (
+              <p className="dh-service-detail__empty">{service.detail}</p>
+            )}
           </div>
 
-          {/* Detailed JVM metrics */}
           {isLoading ? (
             <div className="dh-service-detail__loading" aria-label="Loading details">
               <div className="dh-service-detail__skeleton" />
@@ -122,7 +98,6 @@ export function ServiceDetailDrawer({
                 </div>
               </div>
 
-              {/* Error logs */}
               <div className="dh-service-detail__section">
                 <h4 className="dh-service-detail__section-title">
                   Recent Errors
@@ -144,8 +119,8 @@ export function ServiceDetailDrawer({
                   />
                 ) : (
                   <div className="dh-service-detail__error-list--static">
-                    {details.recentErrors.map((entry, idx) => (
-                      <ErrorLogRow key={`${entry.timestamp}-${idx}`} entry={entry} />
+                    {details.recentErrors.map((entry, index) => (
+                      <ErrorLogRow key={`${entry.timestamp}-${index}`} entry={entry} />
                     ))}
                   </div>
                 )}
@@ -157,8 +132,6 @@ export function ServiceDetailDrawer({
     </Drawer>
   );
 }
-
-// ─── Sub-components ──────────────────────────────────────────────────────────
 
 function MetricItem({
   label,
@@ -190,6 +163,14 @@ function ErrorLogRow({ entry }: { entry: ErrorLogEntry }) {
       )}
     </div>
   );
+}
+
+function formatOptionalMilliseconds(value?: number): string {
+  return typeof value === "number" ? `${Math.round(value)}ms` : "n/a";
+}
+
+function formatOptionalPercent(value?: number): string {
+  return typeof value === "number" ? `${value.toFixed(2)}%` : "n/a";
 }
 
 function formatTime(isoString: string): string {

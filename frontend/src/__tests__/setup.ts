@@ -30,7 +30,7 @@ Object.defineProperty(globalThis, 'MouseEvent', { value: window.MouseEvent, writ
 Object.defineProperty(globalThis, 'MutationObserver', { value: window.MutationObserver, writable: true });
 Object.defineProperty(globalThis, 'getComputedStyle', { value: window.getComputedStyle, writable: true });
 
-// Mock window.matchMedia â€” returns a minimal MediaQueryList stub
+// Mock window.matchMedia - returns a minimal MediaQueryList stub
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
   value: (query: string) => ({
