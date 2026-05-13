@@ -1,54 +1,91 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 
-const LOCKED_STATUSES = new Set([
-  "SUBMITTED",
-  "AUTO_REVIEWED",
-  "REVIEWED",
-  "EMPLOYER_REVIEWED",
-  "PASSED",
-  "FAILED",
-]);
+// --- Pure types ---
 
-export type UseAssessmentTimerOptions = {
-  dueAt: string | null | undefined;
-  status: string;
-  onAutoSubmit: () => Promise<void>;
-};
+export type TimerSeverity = 'normal' | 'warning' | 'critical' | 'expired' | 'locked';
 
-export type TimerState = {
-  display: string;
-  isWarning: boolean;
-  isCritical: boolean;
-  isExpired: boolean;
-  isLocked: boolean;
-};
+export interface TimerState {
+  remainingSeconds: number;
+  severity: TimerSeverity;
+  ariaLive: 'off' | 'polite' | 'assertive';
+  formatted: string;
+}
 
-function formatTime(totalSeconds: number): string {
-  if (totalSeconds <= 0) return "00:00";
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
+// --- Pure classifier (exported for property testing) ---
 
-  const mm = String(minutes).padStart(2, "0");
-  const ss = String(seconds).padStart(2, "0");
+/**
+ * Classifies timer severity based on remaining time relative to total duration.
+ *
+ * - If status === 'LOCKED' → 'locked'
+ * - If remaining <= 0 → 'expired'
+ * - If remaining/total <= 0.10 → 'critical'
+ * - If remaining/total <= 0.25 → 'warning'
+ * - Otherwise → 'normal'
+ */
+export function classifyTimer(remaining: number, total: number, status?: string): TimerSeverity {
+  if (status === 'LOCKED') return 'locked';
+  if (remaining <= 0) return 'expired';
+  if (total <= 0) return 'normal'; // guard against division by zero
+  const ratio = remaining / total;
+  if (ratio <= 0.10) return 'critical';
+  if (ratio <= 0.25) return 'warning';
+  return 'normal';
+}
 
-  if (hours > 0) {
-    const hh = String(hours).padStart(2, "0");
-    return `${hh}:${mm}:${ss}`;
+// --- Pure ariaLive mapper (exported) ---
+
+/**
+ * Maps timer severity to the appropriate aria-live politeness level.
+ *
+ * - normal → 'off'
+ * - warning → 'polite'
+ * - critical → 'assertive'
+ * - locked → 'polite'
+ * - expired → 'polite'
+ */
+export function timerAriaLive(severity: TimerSeverity): 'off' | 'polite' | 'assertive' {
+  switch (severity) {
+    case 'normal': return 'off';
+    case 'warning': return 'polite';
+    case 'critical': return 'assertive';
+    case 'locked': return 'polite';
+    case 'expired': return 'polite';
   }
+}
+
+// --- Pure formatter (exported) ---
+
+/**
+ * Formats seconds into mm:ss format.
+ * Negative or zero values return "00:00".
+ */
+export function formatTimer(seconds: number): string {
+  if (seconds <= 0) return '00:00';
+  const totalSec = Math.floor(seconds);
+  const mm = String(Math.floor(totalSec / 60)).padStart(2, '0');
+  const ss = String(totalSec % 60).padStart(2, '0');
   return `${mm}:${ss}`;
 }
 
-function getRemainingSeconds(dueAt: string): number {
-  const dueTime = new Date(dueAt).getTime();
-  const now = Date.now();
-  return Math.floor((dueTime - now) / 1000);
+// --- Hook ---
+
+export interface UseAssessmentTimerOptions {
+  assignedAt: number;
+  dueAt: number;
+  status: string;
+  onAutoSubmit?: () => void;
 }
 
-export function useAssessmentTimer(options: UseAssessmentTimerOptions): TimerState {
-  const { dueAt, status, onAutoSubmit } = options;
+/**
+ * React hook for assessment countdown timer with relative severity thresholds.
+ *
+ * Computes remaining = dueAt - now (seconds), updates every 1s via setInterval.
+ * Calls onAutoSubmit exactly once when transitioning to 'expired'.
+ */
+export function useAssessmentTimer(opts: UseAssessmentTimerOptions): TimerState {
+  const { assignedAt, dueAt, status, onAutoSubmit } = opts;
 
   const onAutoSubmitRef = useRef(onAutoSubmit);
   useEffect(() => {
@@ -56,78 +93,74 @@ export function useAssessmentTimer(options: UseAssessmentTimerOptions): TimerSta
   }, [onAutoSubmit]);
 
   const hasAutoSubmittedRef = useRef(false);
+  const totalSeconds = Math.max(0, Math.floor((dueAt - assignedAt) / 1000));
 
-  const isLocked = LOCKED_STATUSES.has(status);
-
-  const [timerState, setTimerState] = useState<TimerState>(() => {
-    if (isLocked) {
-      return { display: "Submitted", isWarning: false, isCritical: false, isExpired: false, isLocked: true };
-    }
-    if (!dueAt) {
-      return { display: "No deadline", isWarning: false, isCritical: false, isExpired: false, isLocked: false };
-    }
-    const remaining = getRemainingSeconds(dueAt);
-    if (remaining <= 0) {
-      return { display: "Time expired", isWarning: false, isCritical: true, isExpired: true, isLocked: false };
-    }
+  const computeState = useCallback((): TimerState => {
+    const nowMs = Date.now();
+    const remaining = Math.floor((dueAt - nowMs) / 1000);
+    const severity = classifyTimer(remaining, totalSeconds, status === 'LOCKED' ? 'LOCKED' : undefined);
     return {
-      display: formatTime(remaining),
-      isWarning: remaining < 300,
-      isCritical: remaining < 60,
-      isExpired: false,
-      isLocked: false,
+      remainingSeconds: Math.max(0, remaining),
+      severity,
+      ariaLive: timerAriaLive(severity),
+      formatted: formatTimer(remaining),
     };
-  });
+  }, [dueAt, totalSeconds, status]);
+
+  const [timerState, setTimerState] = useState<TimerState>(computeState);
 
   useEffect(() => {
-    // Handle locked status
-    if (isLocked) {
-      setTimerState({ display: "Submitted", isWarning: false, isCritical: false, isExpired: false, isLocked: true });
+    // If locked, set state once and don't start interval
+    if (status === 'LOCKED') {
+      setTimerState({
+        remainingSeconds: 0,
+        severity: 'locked',
+        ariaLive: 'polite',
+        formatted: '00:00',
+      });
       return;
     }
 
-    // Handle null/undefined dueAt
-    if (!dueAt) {
-      setTimerState({ display: "No deadline", isWarning: false, isCritical: false, isExpired: false, isLocked: false });
-      return;
+    // Compute initial state
+    const initial = computeState();
+    setTimerState(initial);
+
+    // If already expired at mount, fire auto-submit once
+    if (initial.severity === 'expired' && !hasAutoSubmittedRef.current) {
+      hasAutoSubmittedRef.current = true;
+      onAutoSubmitRef.current?.();
     }
 
-    // Handle dueAt in the past at load
-    const initialRemaining = getRemainingSeconds(dueAt);
-    if (initialRemaining <= 0) {
-      setTimerState({ display: "Time expired", isWarning: false, isCritical: true, isExpired: true, isLocked: false });
-      return;
-    }
+    // Don't start interval if already expired
+    if (initial.severity === 'expired') return;
 
-    // Active countdown
     const intervalId = setInterval(() => {
-      const remaining = getRemainingSeconds(dueAt);
+      const nowMs = Date.now();
+      const remaining = Math.floor((dueAt - nowMs) / 1000);
+      const severity = classifyTimer(remaining, totalSeconds, undefined);
+      const newState: TimerState = {
+        remainingSeconds: Math.max(0, remaining),
+        severity,
+        ariaLive: timerAriaLive(severity),
+        formatted: formatTimer(remaining),
+      };
 
-      if (remaining <= 0) {
-        setTimerState({ display: "Time expired", isWarning: false, isCritical: true, isExpired: true, isLocked: false });
+      setTimerState(newState);
+
+      // Trigger auto-submit exactly once on expiration
+      if (severity === 'expired') {
         clearInterval(intervalId);
-
-        // Call onAutoSubmit once
         if (!hasAutoSubmittedRef.current) {
           hasAutoSubmittedRef.current = true;
-          onAutoSubmitRef.current();
+          onAutoSubmitRef.current?.();
         }
-        return;
       }
-
-      setTimerState({
-        display: formatTime(remaining),
-        isWarning: remaining < 300,
-        isCritical: remaining < 60,
-        isExpired: false,
-        isLocked: false,
-      });
     }, 1000);
 
     return () => {
       clearInterval(intervalId);
     };
-  }, [dueAt, isLocked]);
+  }, [dueAt, totalSeconds, status, computeState]);
 
   return timerState;
 }
