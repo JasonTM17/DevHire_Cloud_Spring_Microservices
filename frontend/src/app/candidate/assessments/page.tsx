@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { CandidateCodeEditor } from "@/components/CandidateCodeEditor";
 import { statusLabel } from "@/components/StatusPill";
+import { useAssessmentTimer } from "@/hooks/useAssessmentTimer";
 import { api } from "@/lib/api";
 import { formatShortDate } from "@/lib/dateFormat";
 import { previewCodeAssessments } from "@/lib/previewData";
@@ -25,11 +26,13 @@ import type { CodeAssessment, CodeIntegrityEvent, CodeRun, CodeRunCaseResult, Co
 
 const FINAL_STATUSES = new Set(["PASSED", "FAILED"]);
 const LOCKED_STATUSES = new Set(["SUBMITTED", "AUTO_REVIEWED", "REVIEWED", "EMPLOYER_REVIEWED", "PASSED", "FAILED"]);
-const DEFAULT_CODE = `class CandidateSolution {
-  String solve(String input) {
-    return "";
-  }
-}`;
+const DEFAULT_CODE = 'class CandidateSolution {\n  String solve(String input) {\n    return "";\n  }\n}';
+
+const LANGUAGE_PLACEHOLDERS: Record<string, string> = {
+  Java: 'class CandidateSolution {\n  String solve(String input) {\n    return "";\n  }\n}',
+  TypeScript: 'async function solve(input: string): Promise<string> {\n  \n}',
+  SQL: 'SELECT ... FROM ...'
+};
 
 type EvidenceCase = {
   label: string;
@@ -80,6 +83,8 @@ export default function CandidateAssessmentsPage() {
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [running, setRunning] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [autoSubmitFailed, setAutoSubmitFailed] = useState(false);
+  const [activeEditorTab, setActiveEditorTab] = useState<"code" | "cases" | "notes">("code");
   const sessionStartedAt = useRef(Date.now());
   const lastPasteAt = useRef(0);
 
@@ -162,6 +167,67 @@ export default function CandidateAssessmentsPage() {
   const isFinalDecision = selected ? FINAL_STATUSES.has(selected.status) : false;
   const isSubmissionLocked = selected ? LOCKED_STATUSES.has(selected.status) : false;
 
+  const autoSubmitWithRetry = async () => {
+    const MAX_RETRIES = 3;
+    const RETRY_INTERVAL_MS = 5000;
+
+    const attemptSubmit = async (): Promise<boolean> => {
+      if (!selected) return false;
+      // For non-UUID (preview) assessments, use the regular submitCode path
+      if (!isUuid(selected.id)) {
+        await submitCode();
+        return true;
+      }
+      // For real assessments, attempt the API call directly
+      try {
+        setSubmitting(true);
+        const updated = await api.submitCodeAssessment(
+          selected.id,
+          language,
+          code,
+          notes,
+          integrityEvents(integrityCounters),
+          await clientFingerprintHash(),
+          elapsedSeconds(sessionStartedAt.current)
+        );
+        setAssessments((current) => current.map((item) => (item.id === updated.id ? updated : item)));
+        setLatestRun(updated.latestRun);
+        if (isUuid(updated.id)) {
+          api.candidateCodeAssessmentSubmissions(updated.id)
+            .then(setSubmissionAttempts)
+            .catch(() => setSubmissionAttempts([]));
+        }
+        setMessage(`Server-side grading complete: rubric score ${updated.latestScore ?? 0}/${updated.maxScore}; hidden tests were scored server-side by the runtime judge.`);
+        setSubmitting(false);
+        return true;
+      } catch {
+        setSubmitting(false);
+        return false;
+      }
+    };
+
+    setAutoSubmitFailed(false);
+
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+      const success = await attemptSubmit();
+      if (success) return;
+      // If not the last attempt, wait before retrying
+      if (attempt < MAX_RETRIES) {
+        await new Promise((resolve) => setTimeout(resolve, RETRY_INTERVAL_MS));
+      }
+    }
+    // All retries failed — show error and re-enable Submit button
+    setAutoSubmitFailed(true);
+    setMessage("Auto-submit failed — please submit manually");
+    setSubmitting(false);
+  };
+
+  const timer = useAssessmentTimer({
+    dueAt: selected?.dueAt,
+    status: selected?.status ?? "",
+    onAutoSubmit: autoSubmitWithRetry,
+  });
+
   useEffect(() => {
     if (!selected) {
       return;
@@ -174,6 +240,7 @@ export default function CandidateAssessmentsPage() {
     setSubmissionAttempts([]);
     setCustomInput("");
     setIntegrityCounters({ focusLoss: 0, pasteBurst: 0, tabHidden: 0 });
+    setAutoSubmitFailed(false);
     sessionStartedAt.current = Date.now();
 
     if (!isUuid(selected.id) || selected.submittedCode) {
@@ -389,12 +456,29 @@ export default function CandidateAssessmentsPage() {
           <span className="assessment-brand">DevHire Cloud</span>
           <span className="assessment-divider" aria-hidden="true" />
           <h1>{selected.challengeTitle}</h1>
-          <span className="assessment-language">{language}</span>
+          <select
+            className="assessment-language-select"
+            value={language}
+            onChange={(e) => {
+              const newLang = e.target.value;
+              const oldPlaceholder = LANGUAGE_PLACEHOLDERS[language];
+              setLanguage(newLang);
+              if (!code.trim() || code === oldPlaceholder || code === DEFAULT_CODE) {
+                setCode(LANGUAGE_PLACEHOLDERS[newLang] || DEFAULT_CODE);
+              }
+            }}
+            aria-label="Assessment language"
+            disabled={isSubmissionLocked}
+          >
+            <option value="Java">Java</option>
+            <option value="TypeScript">TypeScript</option>
+            <option value="SQL">SQL</option>
+          </select>
         </div>
         <div className="assessment-top-actions">
-          <div className="assessment-timer" aria-label="Assessment time remaining">
+          <div className={`assessment-timer${timer.isWarning ? " timer-warning" : ""}${timer.isCritical ? " timer-critical" : ""}`} aria-label="Assessment time remaining">
             <Clock3 size={20} />
-            <span>45:00</span>
+            <span>{timer.display}</span>
           </div>
           <div className="assessment-progress" aria-label={`${progressCompleted} of ${progressTotal} tasks complete`}>
             <div>
@@ -410,7 +494,7 @@ export default function CandidateAssessmentsPage() {
             type="button"
             aria-label="Submit for rubric score"
             onClick={submitCode}
-            disabled={submitting || isSubmissionLocked}
+            disabled={submitting || isSubmissionLocked || (timer.isExpired && !autoSubmitFailed)}
           >
             <Upload size={20} />
             {submitting ? "Scoring" : "Submit Code"}
@@ -421,30 +505,79 @@ export default function CandidateAssessmentsPage() {
       <div className="assessment-main">
         <section className="assessment-editor-pane" aria-label="Coding workspace">
           <div className="assessment-file-tabs" role="tablist" aria-label="Assessment files">
-            <button className="assessment-file-tab active" type="button" role="tab" aria-selected="true">
+            <button
+              className={`assessment-file-tab${activeEditorTab === "code" ? " active" : ""}`}
+              type="button"
+              role="tab"
+              aria-selected={activeEditorTab === "code"}
+              onClick={() => setActiveEditorTab("code")}
+            >
               <Code2 size={18} />
               {solutionFileName(selected)}
               <X size={15} />
             </button>
-            <button className="assessment-file-tab" type="button" role="tab" aria-selected="false">
+            <button
+              className={`assessment-file-tab${activeEditorTab === "cases" ? " active" : ""}`}
+              type="button"
+              role="tab"
+              aria-selected={activeEditorTab === "cases"}
+              onClick={() => setActiveEditorTab("cases")}
+            >
               <ListChecks size={18} />
               VisibleCases.json
             </button>
-            <button className="assessment-file-tab" type="button" role="tab" aria-selected="false">
+            <button
+              className={`assessment-file-tab${activeEditorTab === "notes" ? " active" : ""}`}
+              type="button"
+              role="tab"
+              aria-selected={activeEditorTab === "notes"}
+              onClick={() => setActiveEditorTab("notes")}
+            >
               <FileText size={18} />
               Notes.md
             </button>
           </div>
 
           <div className="assessment-editor-body">
-            <CandidateCodeEditor
-              value={code}
-              language={language}
-              disabled={isSubmissionLocked}
-              placeholder="Implement class CandidateSolution with String solve(String input)."
-              lineNumbers={lineNumbers}
-              onChange={setCode}
-            />
+            {activeEditorTab === "code" && (
+              <CandidateCodeEditor
+                value={code}
+                language={language}
+                disabled={isSubmissionLocked}
+                placeholder={LANGUAGE_PLACEHOLDERS[language] || "Implement your solution here."}
+                lineNumbers={lineNumbers}
+                onChange={setCode}
+              />
+            )}
+            {activeEditorTab === "cases" && (
+              <div className="assessment-cases-view" aria-label="Visible test cases">
+                {visibleCases.length === 0 ? (
+                  <p className="assessment-empty-cases">No visible test cases available for this challenge.</p>
+                ) : (
+                  <pre className="assessment-json-view" aria-readonly="true">
+                    {JSON.stringify(
+                      (selected.visibleTestCases ?? []).map((tc) => ({
+                        name: tc.name,
+                        stdin: tc.input,
+                        expectedOutput: tc.expectedOutput
+                      })),
+                      null,
+                      2
+                    )}
+                  </pre>
+                )}
+              </div>
+            )}
+            {activeEditorTab === "notes" && (
+              <textarea
+                className="assessment-notes-editor"
+                aria-label="Candidate notes"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                readOnly={isSubmissionLocked}
+                placeholder="Write your notes here. Explain tradeoffs, tests, and operational assumptions."
+              />
+            )}
           </div>
 
           <div className="assessment-terminal">
@@ -459,6 +592,7 @@ export default function CandidateAssessmentsPage() {
               <p>[INFO] Running stdout comparison with normalized line endings</p>
               {analysisMessage ? <p className="terminal-success">{analysisMessage}</p> : null}
               {message ? <p className="terminal-success">{message}</p> : null}
+              {timer.isExpired && !autoSubmitFailed ? <p className="terminal-success">Time expired — submission locked for server-side grading.</p> : null}
               {loadingDetail ? <p>[INFO] Syncing owner-only assessment detail...</p> : null}
             </div>
           </div>
@@ -525,7 +659,7 @@ export default function CandidateAssessmentsPage() {
             <section className="assessment-test-panel">
               <div className="assessment-panel-heading">
                 <h2>Test Results</h2>
-                <button className="assessment-link-button" type="button" onClick={runStaticAnalysis} disabled={running || isSubmissionLocked}>
+                <button className="assessment-link-button" type="button" onClick={runStaticAnalysis} disabled={running || isSubmissionLocked || timer.isExpired}>
                   <PlayCircle size={16} />
                   {isSubmissionLocked ? "Decision Locked" : running ? "Running Tests" : customInput.trim() ? "Run Custom Input" : "Run Tests"}
                 </button>
@@ -619,7 +753,7 @@ export default function CandidateAssessmentsPage() {
                 className="assessment-secondary-submit"
                 type="button"
                 onClick={submitCode}
-                disabled={submitting || isSubmissionLocked}
+                disabled={submitting || isSubmissionLocked || (timer.isExpired && !autoSubmitFailed)}
               >
                 {isFinalDecision
                   ? "Employer decision locked"

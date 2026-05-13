@@ -8,11 +8,37 @@ import { api } from "@/lib/api";
 import { previewOperationsSummary } from "@/lib/previewData";
 import type { OperationsSummary } from "@/types/domain";
 
+const RUNBOOKS = [
+  "Gateway 5xx spike",
+  "Outbox backlog",
+  "Kafka consumer lag",
+  "AI provider backup spike",
+];
+
 export default function PlatformObservabilityPage() {
   const [summary, setSummary] = useState<OperationsSummary>(previewOperationsSummary);
+  const [source, setSource] = useState<"live" | "preview">("preview");
 
   useEffect(() => {
-    api.operationsSummary().then(setSummary).catch(() => setSummary(previewOperationsSummary));
+    let cancelled = false;
+
+    api.operationsSummary()
+      .then((data) => {
+        if (!cancelled) {
+          setSummary(data);
+          setSource("live");
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setSummary(previewOperationsSummary);
+          setSource("preview");
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   return (
@@ -21,19 +47,41 @@ export default function PlatformObservabilityPage() {
         <div>
           <p className="eyebrow">Observability & event streaming</p>
           <h1>Runtime operations cockpit</h1>
-          <p>Domain KPIs, audit events, outbox posture, SLO targets, and runbook ownership in one operations view.</p>
+          <p>Domain KPIs, audit events, SLO targets, and runbook ownership in one operations view.</p>
         </div>
         <div className="hero-actions">
-          <span className="badge live">Prometheus</span>
+          <span className="badge live">{source === "live" ? "Live API" : "Preview data"}</span>
           <span className="badge">Grafana SLO</span>
         </div>
       </div>
+
       <div className="metrics-row">
-        <MetricCard icon={ScrollText} label="Audit events" value={summary.auditEvents} helper="Event-driven evidence" />
-        <MetricCard icon={Activity} label="Actors" value={summary.distinctActors} helper="Distinct platform users" />
-        <MetricCard icon={RadioTower} label="Outbox" value="Healthy" helper="Backlog alerting" />
-        <MetricCard icon={Gauge} label="Gateway p95" value="SLO" helper="Latency monitored" />
+        <MetricCard
+          icon={ScrollText}
+          label="Audit events"
+          value={summary.auditEvents}
+          helper="Event-driven evidence"
+        />
+        <MetricCard
+          icon={Activity}
+          label="Actors"
+          value={summary.distinctActors}
+          helper="Distinct platform users"
+        />
+        <MetricCard
+          icon={RadioTower}
+          label="Outbox"
+          value="Scripted"
+          helper="Backlog checks run in release smoke"
+        />
+        <MetricCard
+          icon={Gauge}
+          label="Gateway p95"
+          value="SLO"
+          helper="Tracked by Prometheus and Grafana"
+        />
       </div>
+
       <div className="split-grid">
         <div className="panel">
           <h2>Top audit actions</h2>
@@ -49,7 +97,7 @@ export default function PlatformObservabilityPage() {
         <div className="panel">
           <h2>Runbook map</h2>
           <div className="table-list">
-            {["Gateway 5xx spike", "Outbox backlog", "Kafka consumer lag", "AI provider backup spike"].map((item) => (
+            {RUNBOOKS.map((item) => (
               <div className="table-row" key={item}>
                 <strong>{item}</strong>
                 <span className="badge">Runbook linked</span>
@@ -58,6 +106,7 @@ export default function PlatformObservabilityPage() {
           </div>
         </div>
       </div>
+
       <OperationsEvidencePanel
         title="Runtime observability evidence"
         items={[
