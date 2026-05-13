@@ -1,0 +1,85 @@
+/* ==========================================================================
+   ChallengeCard — Challenge Library Card Component
+   Uses --dh-* design tokens for consistent theming.
+   ========================================================================== */
+
+.dh-challenge-card__wrapper {
+  outline: none;
+  border-radius: var(--dh-radius-md);
+  cursor: pointer;
+}
+
+.dh-challenge-card__wrapper:focus-visible {
+  outline: 2px solid var(--dh-color-focus-ring);
+  outline-offset: 2px;
+  border-radius: var(--dh-radius-md);
+}
+
+.dh-challenge-card {
+  display: grid;
+  gap: var(--dh-space-3);
+  transition:
+    border-color var(--dh-motion-duration-fast) var(--dh-motion-easing-standard),
+    box-shadow var(--dh-motion-duration-fast) var(--dh-motion-easing-standard),
+    transform var(--dh-motion-duration-fast) var(--dh-motion-easing-standard);
+}
+
+.dh-challenge-card:hover {
+  border-color: var(--dh-color-border-strong);
+  box-shadow: var(--dh-shadow-md);
+  transform: translateY(-1px);
+}
+
+.dh-challenge-card--focused {
+  border-color: var(--dh-color-border-focus);
+  box-shadow: 0 0 0 2px var(--dh-color-accent-soft);
+}
+
+/* Header: title + solved icon */
+.dh-challenge-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--dh-space-2);
+}
+
+.dh-challenge-card__title {
+  margin: 0;
+  font-family: var(--dh-font-sans);
+  font-size: var(--dh-font-size-sm);
+  font-weight: var(--dh-font-weight-semibold);
+  line-height: var(--dh-line-height-tight);
+  color: var(--dh-color-fg-primary);
+}
+
+/* Solved status icon */
+.dh-challenge-card__solved {
+  flex-shrink: 0;
+  font-size: var(--dh-font-size-base);
+  color: var(--dh-color-fg-muted);
+}
+
+.dh-challenge-card__solved--yes {
+  color: var(--dh-color-difficulty-easy);
+}
+
+/* Meta row: difficulty badge + acceptance rate */
+.dh-challenge-card__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--dh-space-3);
+}
+
+.dh-challenge-card__acceptance {
+  font-family: var(--dh-font-sans);
+  font-size: var(--dh-font-size-xs);
+  font-weight: var(--dh-font-weight-medium);
+  color: var(--dh-color-fg-muted);
+}
+
+/* Tag rows: languages and topics */
+.dh-challenge-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--dh-space-1);
+}

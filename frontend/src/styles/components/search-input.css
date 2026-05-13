@@ -1,0 +1,67 @@
+/* ==========================================================================
+   SearchInput — Challenge Library Search Component
+   Uses design tokens: --dh-*
+   ========================================================================== */
+
+.dh-search-input {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.dh-search-input__icon {
+  position: absolute;
+  left: var(--dh-space-3);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--dh-color-fg-muted);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  z-index: 1;
+}
+
+.dh-search-input__field {
+  padding-left: var(--dh-space-8) !important;
+  padding-right: var(--dh-space-8) !important;
+}
+
+.dh-search-input__field::-webkit-search-cancel-button {
+  display: none;
+}
+
+.dh-search-input__clear {
+  position: absolute;
+  right: var(--dh-space-2);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  border: none;
+  border-radius: var(--dh-radius-full);
+  background-color: transparent;
+  color: var(--dh-color-fg-muted);
+  cursor: pointer;
+  transition: background-color var(--dh-motion-duration-fast) var(--dh-motion-easing-standard),
+    color var(--dh-motion-duration-fast) var(--dh-motion-easing-standard);
+}
+
+.dh-search-input__clear:hover {
+  background-color: var(--dh-color-bg-muted);
+  color: var(--dh-color-fg-primary);
+}
+
+.dh-search-input__clear:focus-visible {
+  outline: 2px solid var(--dh-color-focus-ring);
+  outline-offset: 2px;
+}
+
+/* Hide the label from Input primitive since we use aria-label */
+.dh-search-input .dh-input-wrapper .dh-input-label {
+  display: none;
+}
