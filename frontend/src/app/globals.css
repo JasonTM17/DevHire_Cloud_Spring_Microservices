@@ -42,9 +42,23 @@
 @import '../styles/components/sparkline.css';
 @import '../styles/components/status-dot.css';
 @import '../styles/components/key-value-list.css';
+@import '../styles/components/virtual-list.css';
+
+/* Design System v2 — Overlay component styles */
+@import '../styles/components/modal.css';
+@import '../styles/components/drawer.css';
+@import '../styles/components/dropdown.css';
+@import '../styles/components/popover.css';
 
 /* Design System v2 — IDE component styles */
 @import '../styles/components/split-pane.css';
+
+/* Design System v2 — AppShell component styles */
+@import '../styles/components/skip-link.css';
+@import '../styles/components/top-bar.css';
+@import '../styles/components/condensed-top-bar.css';
+@import '../styles/components/mobile-top-bar.css';
+@import '../styles/components/mobile-drawer.css';
 
 /* Design System v2 — Feedback component styles */
 @import '../styles/components/toast.css';
