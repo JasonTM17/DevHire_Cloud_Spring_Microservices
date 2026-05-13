@@ -1,5 +1,5 @@
 ﻿/**
- * Unit tests for lib/backoff.ts â€” runWithRetry
+ * Unit tests for lib/backoff.ts - runWithRetry
  * Requirements: 11.3
  */
 

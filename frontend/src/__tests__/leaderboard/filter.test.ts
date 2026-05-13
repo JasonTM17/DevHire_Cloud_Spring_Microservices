@@ -1,5 +1,5 @@
 ﻿/**
- * Unit tests for lib/leaderboard/filter.ts â€” filterLeaderboard
+ * Unit tests for lib/leaderboard/filter.ts - filterLeaderboard
  * Requirements: 5.4
  */
 
@@ -85,7 +85,7 @@ describe("filterLeaderboard", () => {
   it("topic matching is case-sensitive", () => {
     const filter: LeaderboardFilter = { period: "weekly", topic: "Arrays" };
     const result = filterLeaderboard(entries, filter);
-    // "arrays" !== "Arrays" â€” case-sensitive
+    // "arrays" !== "Arrays" - case-sensitive
     assert.deepEqual(result, []);
   });
 

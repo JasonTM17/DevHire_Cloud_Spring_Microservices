@@ -59,6 +59,10 @@
   color: var(--dh-color-danger);
 }
 
+.dh-service-detail__status-label--unknown {
+  color: var(--dh-color-fg-muted);
+}
+
 /* Sections */
 .dh-service-detail__section {
   display: flex;

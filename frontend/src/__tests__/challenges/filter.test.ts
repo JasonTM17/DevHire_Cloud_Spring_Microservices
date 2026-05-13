@@ -1,5 +1,5 @@
 ﻿/**
- * Unit tests for lib/challenges/filter.ts â€” filterChallenges
+ * Unit tests for lib/challenges/filter.ts - filterChallenges
  * Requirements: 3.2
  */
 

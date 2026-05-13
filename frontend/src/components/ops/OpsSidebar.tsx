@@ -4,8 +4,6 @@ import { usePathname } from "next/navigation";
 import { useCallback, useRef, type KeyboardEvent } from "react";
 import "@/styles/components/ops-sidebar.css";
 
-// ─── Types ───────────────────────────────────────────────────────────────────
-
 export interface OpsNavItem {
   label: string;
   href: string;
@@ -13,22 +11,17 @@ export interface OpsNavItem {
 }
 
 export interface OpsSidebarProps {
-  /** Override default nav items (useful for testing) */
   items?: OpsNavItem[];
 }
 
-// ─── Default nav items ───────────────────────────────────────────────────────
-
 const DEFAULT_NAV_ITEMS: OpsNavItem[] = [
-  { label: "Overview", href: "/admin", icon: "⊞" },
-  { label: "Service Health", href: "/admin/monitoring", icon: "♥" },
-  { label: "AI Ops", href: "/admin/ai", icon: "⚡" },
-  { label: "Observability", href: "/platform/observability", icon: "◎" },
-  { label: "Audit Logs", href: "/admin/audit", icon: "📋" },
-  { label: "Alerts", href: "/admin/alerts", icon: "🔔" },
+  { label: "Overview", href: "/admin", icon: "OV" },
+  { label: "Service Health", href: "/admin/monitoring", icon: "HL" },
+  { label: "AI Ops", href: "/admin/ai", icon: "AI" },
+  { label: "Observability", href: "/platform/observability", icon: "OB" },
+  { label: "Audit Logs", href: "/admin/audit", icon: "AU" },
+  { label: "Alerts", href: "/admin/alerts", icon: "AL" },
 ];
-
-// ─── OpsNavLink ──────────────────────────────────────────────────────────────
 
 interface OpsNavLinkProps {
   item: OpsNavItem;
@@ -51,17 +44,6 @@ function OpsNavLink({ item, isActive }: OpsNavLinkProps) {
   );
 }
 
-// ─── OpsSidebar ──────────────────────────────────────────────────────────────
-
-/**
- * OpsSidebar — Navigation sidebar for OPS Dashboard.
- *
- * Links: Overview, Service Health, AI Ops, Observability, Audit Logs, Alerts.
- * Active state highlight based on current pathname.
- * Keyboard navigation: ArrowDown/ArrowUp to move between links.
- *
- * Requirements: 6.5
- */
 export function OpsSidebar({ items = DEFAULT_NAV_ITEMS }: OpsSidebarProps) {
   const pathname = usePathname();
   const navRef = useRef<HTMLElement>(null);
@@ -71,49 +53,37 @@ export function OpsSidebar({ items = DEFAULT_NAV_ITEMS }: OpsSidebarProps) {
     return pathname.startsWith(href);
   };
 
-  const handleKeyDown = useCallback(
-    (e: KeyboardEvent<HTMLElement>) => {
-      const nav = navRef.current;
-      if (!nav) return;
+  const handleKeyDown = useCallback((event: KeyboardEvent<HTMLElement>) => {
+    const nav = navRef.current;
+    if (!nav) return;
 
-      const links = Array.from(
-        nav.querySelectorAll<HTMLAnchorElement>(".ops-nav-link")
-      );
-      const currentIndex = links.findIndex(
-        (link) => link === document.activeElement
-      );
+    const links = Array.from(nav.querySelectorAll<HTMLAnchorElement>(".ops-nav-link"));
+    const currentIndex = links.findIndex((link) => link === document.activeElement);
+    let nextIndex = -1;
 
-      let nextIndex = -1;
+    switch (event.key) {
+      case "ArrowDown":
+        event.preventDefault();
+        nextIndex = currentIndex < links.length - 1 ? currentIndex + 1 : 0;
+        break;
+      case "ArrowUp":
+        event.preventDefault();
+        nextIndex = currentIndex > 0 ? currentIndex - 1 : links.length - 1;
+        break;
+      case "Home":
+        event.preventDefault();
+        nextIndex = 0;
+        break;
+      case "End":
+        event.preventDefault();
+        nextIndex = links.length - 1;
+        break;
+      default:
+        return;
+    }
 
-      switch (e.key) {
-        case "ArrowDown":
-          e.preventDefault();
-          nextIndex =
-            currentIndex < links.length - 1 ? currentIndex + 1 : 0;
-          break;
-        case "ArrowUp":
-          e.preventDefault();
-          nextIndex =
-            currentIndex > 0 ? currentIndex - 1 : links.length - 1;
-          break;
-        case "Home":
-          e.preventDefault();
-          nextIndex = 0;
-          break;
-        case "End":
-          e.preventDefault();
-          nextIndex = links.length - 1;
-          break;
-        default:
-          return;
-      }
-
-      if (nextIndex >= 0 && links[nextIndex]) {
-        links[nextIndex].focus();
-      }
-    },
-    []
-  );
+    links[nextIndex]?.focus();
+  }, []);
 
   return (
     <nav
@@ -124,7 +94,7 @@ export function OpsSidebar({ items = DEFAULT_NAV_ITEMS }: OpsSidebarProps) {
       data-testid="ops-sidebar"
     >
       <div className="ops-sidebar__brand">
-        <span className="ops-sidebar__logo" aria-hidden="true">◈</span>
+        <span className="ops-sidebar__logo" aria-hidden="true">DH</span>
         <span className="ops-sidebar__title">DevHire OPS</span>
       </div>
       <ul className="ops-sidebar__nav-list" role="list">

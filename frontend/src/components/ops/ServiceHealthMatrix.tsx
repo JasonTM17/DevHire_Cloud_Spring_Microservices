@@ -5,24 +5,11 @@ import type { ServiceHealth, ServiceTransition } from "@/lib/ops/types";
 import "@/styles/components/service-health.css";
 
 export interface ServiceHealthMatrixProps {
-  /** Array of service health snapshots */
   services: ServiceHealth[];
-  /** Optional transition timeline entries */
   transitions?: ServiceTransition[];
-  /** Callback when a service card is clicked (opens detail drawer) */
   onServiceClick?: (service: ServiceHealth) => void;
 }
 
-/**
- * ServiceHealthMatrix — Grid of service health cards for OPS Dashboard.
- *
- * Displays a card per service showing status dot, name, response time,
- * uptime percentage, and last health check timestamp.
- * Unhealthy services get a red border + pulsing indicator.
- * Clicking a card triggers onServiceClick for opening the detail drawer.
- *
- * Requirements: 7.1, 7.2
- */
 export function ServiceHealthMatrix({
   services,
   transitions = [],
@@ -32,9 +19,11 @@ export function ServiceHealthMatrix({
     <div className="dh-service-health-matrix" data-testid="service-health-matrix">
       {services.map((service) => {
         const isUnhealthy = service.status === "critical" || service.status === "degraded";
+        const isUnknown = service.status === "unknown";
         const cardClasses = [
           "dh-service-card",
           isUnhealthy && "dh-service-card--unhealthy",
+          isUnknown && "dh-service-card--unknown",
           onServiceClick && "dh-service-card--clickable",
         ]
           .filter(Boolean)
@@ -47,9 +36,9 @@ export function ServiceHealthMatrix({
             aria-label={`${service.name} service health`}
             data-testid={`service-card-${service.name}`}
             onClick={() => onServiceClick?.(service)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
+            onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
                 onServiceClick?.(service);
               }
             }}
@@ -58,33 +47,20 @@ export function ServiceHealthMatrix({
           >
             {isUnhealthy && <div className="dh-service-card__indicator" />}
             <div className="dh-service-card__header">
-              <StatusDot
-                status={service.status === "critical" ? "critical" : service.status === "degraded" ? "degraded" : "healthy"}
-                size="md"
-              />
+              <StatusDot status={service.status} size="md" />
               <h3 className="dh-service-card__name">{service.name}</h3>
             </div>
 
             <div className="dh-service-card__metrics">
-              <div className="dh-service-card__metric">
-                <span className="dh-service-card__metric-label">Response</span>
-                <span className="dh-service-card__metric-value">
-                  {service.responseTimeMs}ms
-                </span>
-              </div>
-              <div className="dh-service-card__metric">
-                <span className="dh-service-card__metric-label">Uptime</span>
-                <span className="dh-service-card__metric-value">
-                  {service.uptimePercent.toFixed(2)}%
-                </span>
-              </div>
-              <div className="dh-service-card__metric">
-                <span className="dh-service-card__metric-label">Last Check</span>
-                <span className="dh-service-card__metric-value">
-                  {formatLastCheck(service.lastCheck)}
-                </span>
-              </div>
+              <Metric label="Response" value={formatMilliseconds(service.responseTimeMs)} />
+              <Metric label="Uptime" value={formatPercent(service.uptimePercent)} />
+              <Metric label="Last Check" value={formatLastCheck(service.lastCheck)} />
+              <Metric label="Source" value={service.source ?? "Admin health synthesis"} />
             </div>
+
+            {service.detail && (
+              <p className="dh-service-card__detail">{service.detail}</p>
+            )}
           </article>
         );
       })}
@@ -92,23 +68,23 @@ export function ServiceHealthMatrix({
       {transitions.length > 0 && (
         <div className="dh-transition-timeline" data-testid="transition-timeline">
           <h4 className="dh-transition-timeline__title">Recent Transitions</h4>
-          {transitions.map((t, idx) => (
+          {transitions.map((transition, index) => (
             <div
-              key={`${t.serviceName}-${t.timestamp}-${idx}`}
+              key={`${transition.serviceName}-${transition.timestamp}-${index}`}
               className="dh-transition-timeline__item"
             >
               <span className="dh-transition-timeline__service-name">
-                {t.serviceName}
+                {transition.serviceName}
               </span>
-              <span className={`dh-transition-timeline__status--${t.from}`}>
-                {t.from}
+              <span className={`dh-transition-timeline__status--${transition.from}`}>
+                {transition.from}
               </span>
-              <span className="dh-transition-timeline__arrow">→</span>
-              <span className={`dh-transition-timeline__status--${t.to}`}>
-                {t.to}
+              <span className="dh-transition-timeline__arrow">-&gt;</span>
+              <span className={`dh-transition-timeline__status--${transition.to}`}>
+                {transition.to}
               </span>
               <span className="dh-transition-timeline__timestamp">
-                {formatTimestamp(t.timestamp)}
+                {formatTimestamp(transition.timestamp)}
               </span>
             </div>
           ))}
@@ -118,23 +94,37 @@ export function ServiceHealthMatrix({
   );
 }
 
-/** Format ISO timestamp to a short relative/time display */
+function Metric({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="dh-service-card__metric">
+      <span className="dh-service-card__metric-label">{label}</span>
+      <span className="dh-service-card__metric-value">{value}</span>
+    </div>
+  );
+}
+
+function formatMilliseconds(value?: number): string {
+  return typeof value === "number" ? `${Math.round(value)}ms` : "n/a";
+}
+
+function formatPercent(value?: number): string {
+  return typeof value === "number" ? `${value.toFixed(2)}%` : "n/a";
+}
+
 function formatLastCheck(isoString: string): string {
   try {
     const date = new Date(isoString);
-    const now = Date.now();
-    const diffMs = now - date.getTime();
-    const diffSec = Math.floor(diffMs / 1000);
+    const diffSeconds = Math.floor((Date.now() - date.getTime()) / 1000);
 
-    if (diffSec < 60) return `${diffSec}s ago`;
-    if (diffSec < 3600) return `${Math.floor(diffSec / 60)}m ago`;
+    if (Number.isNaN(diffSeconds)) return isoString;
+    if (diffSeconds < 60) return `${Math.max(diffSeconds, 0)}s ago`;
+    if (diffSeconds < 3600) return `${Math.floor(diffSeconds / 60)}m ago`;
     return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   } catch {
     return isoString;
   }
 }
 
-/** Format transition timestamp */
 function formatTimestamp(isoString: string): string {
   try {
     const date = new Date(isoString);

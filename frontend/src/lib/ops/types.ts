@@ -5,15 +5,17 @@
  */
 
 /** Possible health statuses for a service */
-export type ServiceStatus = 'healthy' | 'degraded' | 'critical';
+export type ServiceStatus = 'healthy' | 'degraded' | 'critical' | 'unknown';
 
 /** Health snapshot for a single service */
 export type ServiceHealth = {
   name: string;
   status: ServiceStatus;
-  responseTimeMs: number;
-  uptimePercent: number;
+  responseTimeMs?: number;
+  uptimePercent?: number;
   lastCheck: string;
+  source?: string;
+  detail?: string;
 };
 
 /** Represents a status change for a service between two snapshots */

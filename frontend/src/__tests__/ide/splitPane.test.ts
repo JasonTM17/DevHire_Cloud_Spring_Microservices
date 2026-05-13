@@ -2,7 +2,7 @@
  * Unit tests for SplitPane utility logic
  *
  * Tests cover: clamp function, readStoredRatio, keyboard delta computation,
- * and aria value computation â€” the pure logic extracted from SplitPane.tsx.
+ * and aria value computation - the pure logic extracted from SplitPane.tsx.
  *
  * Note: The SplitPane component itself is a .tsx file which requires a JSX
  * transform. These tests validate the core logic that drives the component.
@@ -64,7 +64,7 @@ function computeAriaValues(ratio: number, effectiveMin: number, effectiveMax: nu
 
 // --- Tests ---
 
-describe('SplitPane â€” clamp', () => {
+describe('SplitPane - clamp', () => {
   it('returns value unchanged when within bounds', () => {
     assert.equal(clamp(0.5, 0.1, 0.9), 0.5);
     assert.equal(clamp(0.1, 0.1, 0.9), 0.1);
@@ -84,7 +84,7 @@ describe('SplitPane â€” clamp', () => {
   });
 });
 
-describe('SplitPane â€” readStoredRatio', () => {
+describe('SplitPane - readStoredRatio', () => {
   beforeEach(() => {
     window.localStorage.clear();
   });
@@ -119,7 +119,7 @@ describe('SplitPane â€” readStoredRatio', () => {
 
   it('respects custom min/max when clamping', () => {
     localStorage.setItem('test-key', '0.15');
-    // min=0.2 â†’ effective min = max(0.2, 0.1) = 0.2
+    // min=0.2 -> effective min = max(0.2, 0.1) = 0.2
     assert.equal(readStoredRatio('test-key', 0.2, 0.8, 0.5), 0.2);
   });
 
@@ -134,7 +134,7 @@ describe('SplitPane â€” readStoredRatio', () => {
   });
 });
 
-describe('SplitPane â€” computeKeyboardDelta', () => {
+describe('SplitPane - computeKeyboardDelta', () => {
   it('ArrowRight returns +0.05 for horizontal', () => {
     assert.equal(computeKeyboardDelta('horizontal', 'ArrowRight'), KEYBOARD_STEP);
   });
@@ -168,7 +168,7 @@ describe('SplitPane â€” computeKeyboardDelta', () => {
   });
 });
 
-describe('SplitPane â€” computeAriaValues', () => {
+describe('SplitPane - computeAriaValues', () => {
   it('converts ratio to 0-100 scale', () => {
     const result = computeAriaValues(0.5, 0.1, 0.9);
     assert.equal(result.ariaValueNow, 50);
@@ -189,7 +189,7 @@ describe('SplitPane â€” computeAriaValues', () => {
   });
 });
 
-describe('SplitPane â€” keyboard + clamp integration', () => {
+describe('SplitPane - keyboard + clamp integration', () => {
   it('ratio stays within bounds after multiple ArrowRight presses', () => {
     let ratio = 0.85;
     const effectiveMin = 0.1;
@@ -233,7 +233,7 @@ describe('SplitPane â€” keyboard + clamp integration', () => {
   });
 });
 
-describe('SplitPane â€” localStorage debounce behavior', () => {
+describe('SplitPane - localStorage debounce behavior', () => {
   beforeEach(() => {
     window.localStorage.clear();
   });

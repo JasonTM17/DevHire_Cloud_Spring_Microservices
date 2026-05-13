@@ -1,5 +1,5 @@
 ﻿/**
- * Unit tests for lib/navLinks.ts â€” filterNavByRole and selectNavMode
+ * Unit tests for lib/navLinks.ts - filterNavByRole and selectNavMode
  * Requirements: 2.1, 2.2, 2.3, 2.4
  */
 
@@ -163,7 +163,7 @@ describe('selectNavMode', () => {
     assert.equal(selectNavMode(767), 'mobile');
   });
 
-  it('returns condensed for viewport 768â€“1023', () => {
+  it('returns condensed for viewport 768-1023', () => {
     assert.equal(selectNavMode(768), 'condensed');
     assert.equal(selectNavMode(900), 'condensed');
     assert.equal(selectNavMode(1023), 'condensed');
