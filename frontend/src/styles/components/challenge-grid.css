@@ -1,0 +1,32 @@
+/* ==========================================================================
+   ChallengeGrid — Responsive Grid Layout for Challenge Cards
+   Uses --dh-* design tokens. CSS Grid with responsive columns.
+   Mobile: 1 col, Tablet (≥768px): 2 cols, Desktop (≥1024px): 3 cols
+   ========================================================================== */
+
+.dh-challenge-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--dh-space-4);
+  outline: none;
+}
+
+.dh-challenge-grid:focus-visible {
+  outline: 2px solid var(--dh-color-focus-ring);
+  outline-offset: 2px;
+  border-radius: var(--dh-radius-sm);
+}
+
+/* Tablet: 2 columns */
+@media (min-width: 768px) {
+  .dh-challenge-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Desktop: 3 columns */
+@media (min-width: 1024px) {
+  .dh-challenge-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

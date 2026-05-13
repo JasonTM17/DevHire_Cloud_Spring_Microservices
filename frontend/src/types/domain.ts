@@ -8,6 +8,8 @@ export type PublicChallenge = {
   acceptanceRate: number;
   totalSubmissions: number;
   solved: boolean;
+  /** Problem statement text (used for tooltip preview) */
+  statement?: string;
 };
 
 export type UserRole = "ADMIN" | "EMPLOYER" | "CANDIDATE";

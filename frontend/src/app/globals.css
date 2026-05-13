@@ -50,8 +50,17 @@
 @import '../styles/components/dropdown.css';
 @import '../styles/components/popover.css';
 
+/* Design System v2 — Challenge component styles */
+@import '../styles/components/challenge-card.css';
+@import '../styles/components/challenge-grid.css';
+
+/* Design System v2 — Challenge Library component styles */
+@import '../styles/components/filter-sidebar.css';
+@import '../styles/components/search-input.css';
+
 /* Design System v2 — IDE component styles */
 @import '../styles/components/split-pane.css';
+@import '../styles/components/terminal.css';
 
 /* Design System v2 — AppShell component styles */
 @import '../styles/components/skip-link.css';

@@ -1,0 +1,131 @@
+/* ==========================================================================
+   ProgressSummaryPanel — Challenge Progress Summary
+   Displays total solved, difficulty breakdown, streak, and rank.
+   Uses --dh-* design tokens exclusively.
+   ========================================================================== */
+
+.dh-progress-summary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dh-space-5);
+}
+
+/* --- Header with total solved --- */
+
+.dh-progress-summary__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--dh-space-3);
+}
+
+.dh-progress-summary__total {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dh-space-1);
+}
+
+.dh-progress-summary__total-count {
+  font-family: var(--dh-font-sans);
+  font-size: var(--dh-font-size-3xl);
+  font-weight: var(--dh-font-weight-bold);
+  color: var(--dh-color-fg-primary);
+  line-height: 1;
+}
+
+.dh-progress-summary__total-label {
+  font-family: var(--dh-font-sans);
+  font-size: var(--dh-font-size-sm);
+  color: var(--dh-color-fg-secondary);
+  line-height: var(--dh-line-height-normal);
+}
+
+/* --- Stats row (streak + rank) --- */
+
+.dh-progress-summary__stats {
+  display: flex;
+  align-items: center;
+  gap: var(--dh-space-4);
+  flex-wrap: wrap;
+}
+
+.dh-progress-summary__stat {
+  display: flex;
+  align-items: center;
+  gap: var(--dh-space-2);
+  font-family: var(--dh-font-sans);
+  font-size: var(--dh-font-size-sm);
+  color: var(--dh-color-fg-secondary);
+  line-height: var(--dh-line-height-normal);
+}
+
+.dh-progress-summary__stat-value {
+  font-weight: var(--dh-font-weight-semibold);
+  color: var(--dh-color-fg-primary);
+}
+
+.dh-progress-summary__stat-emoji {
+  font-size: var(--dh-font-size-base);
+}
+
+/* --- Difficulty breakdown --- */
+
+.dh-progress-summary__breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dh-space-3);
+}
+
+.dh-progress-summary__breakdown-title {
+  font-family: var(--dh-font-sans);
+  font-size: var(--dh-font-size-sm);
+  font-weight: var(--dh-font-weight-medium);
+  color: var(--dh-color-fg-secondary);
+  margin: 0;
+}
+
+.dh-progress-summary__difficulty {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dh-space-2);
+}
+
+.dh-progress-summary__difficulty-row {
+  display: flex;
+  align-items: center;
+  gap: var(--dh-space-3);
+}
+
+.dh-progress-summary__difficulty-label {
+  min-width: 4rem;
+  font-family: var(--dh-font-sans);
+  font-size: var(--dh-font-size-sm);
+  font-weight: var(--dh-font-weight-medium);
+  color: var(--dh-color-fg-primary);
+}
+
+.dh-progress-summary__difficulty-bar {
+  flex: 1;
+}
+
+.dh-progress-summary__difficulty-count {
+  min-width: 3rem;
+  text-align: right;
+  font-family: var(--dh-font-mono);
+  font-size: var(--dh-font-size-xs);
+  color: var(--dh-color-fg-secondary);
+}
+
+/* --- Loading skeleton --- */
+
+.dh-progress-summary__skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dh-space-4);
+}
+
+.dh-progress-summary__skeleton-row {
+  display: flex;
+  align-items: center;
+  gap: var(--dh-space-3);
+}
