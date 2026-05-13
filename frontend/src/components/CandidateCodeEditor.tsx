@@ -16,6 +16,9 @@ type MonacoType = typeof import("monaco-editor");
 export interface CandidateCodeEditorProps {
   value: string;
   language: string;
+  /** Whether the editor is read-only. Alias for `disabled`. */
+  readOnly?: boolean;
+  /** @deprecated Use `readOnly` instead. */
   disabled?: boolean;
   placeholder?: string;
   /** @deprecated Line numbers are now auto-generated from value. Kept for backward compatibility. */
@@ -108,12 +111,14 @@ function normalizeLanguage(language: string): string {
 function TextareaFallback({
   value,
   language,
+  readOnly,
   disabled,
   placeholder,
   onChange,
 }: CandidateCodeEditorProps) {
   const lines = value.split("\n");
   const lineCount = Math.max(lines.length, 1);
+  const isReadOnly = readOnly ?? disabled ?? false;
 
   return (
     <div className="dh-code-editor__fallback">
@@ -132,7 +137,8 @@ function TextareaFallback({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         spellCheck={false}
-        disabled={disabled}
+        disabled={isReadOnly}
+        readOnly={isReadOnly}
         data-language={normalizeLanguage(language)}
       />
     </div>
@@ -146,11 +152,13 @@ function TextareaFallback({
 export function CandidateCodeEditor({
   value,
   language,
+  readOnly,
   disabled = false,
   placeholder = "",
   lineNumbers: _lineNumbers,
   onChange,
 }: CandidateCodeEditorProps) {
+  const isReadOnly = readOnly ?? disabled;
   const [MonacoEditor, setMonacoEditor] = useState<MonacoEditorComponent | null>(null);
   const [loadFailed, setLoadFailed] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -244,7 +252,8 @@ export function CandidateCodeEditor({
         <TextareaFallback
           value={value}
           language={language}
-          disabled={disabled}
+          readOnly={isReadOnly}
+          disabled={isReadOnly}
           placeholder={placeholder}
           onChange={onChange}
         />
@@ -276,7 +285,7 @@ export function CandidateCodeEditor({
           />
         }
         options={{
-          readOnly: disabled,
+          readOnly: isReadOnly,
           fontSize,
           fontFamily: "var(--dh-font-mono, 'Fira Code', 'SFMono-Regular', Consolas, monospace)",
           lineNumbers: "on",

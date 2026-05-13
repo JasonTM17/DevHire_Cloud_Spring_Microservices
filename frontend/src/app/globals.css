@@ -62,8 +62,10 @@
 /* Design System v2 — IDE component styles */
 @import '../styles/components/split-pane.css';
 @import '../styles/components/terminal.css';
+@import '../styles/components/file-tab.css';
 @import '../styles/components/submission-progress.css';
 @import '../styles/components/assessment-timer.css';
+@import '../styles/components/problem-panel.css';
 
 /* Design System v2 — AppShell component styles */
 @import '../styles/components/app-shell.css';
