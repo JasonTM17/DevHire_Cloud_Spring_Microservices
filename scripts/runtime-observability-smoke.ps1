@@ -1,17 +1,65 @@
 [CmdletBinding()]
 param(
-    [string]$GatewayUrl = "http://localhost:8080",
+    [string]$GatewayUrl,
     [switch]$SkipTraffic,
-    [string]$ApplicationUrl = "http://localhost:$($(if ($env:APPLICATION_HOST_PORT) { $env:APPLICATION_HOST_PORT } else { '8085' }))",
-    [string]$NotificationUrl = "http://localhost:$($(if ($env:NOTIFICATION_HOST_PORT) { $env:NOTIFICATION_HOST_PORT } else { '8086' }))",
-    [string]$AuditUrl = "http://localhost:$($(if ($env:AUDIT_HOST_PORT) { $env:AUDIT_HOST_PORT } else { '8087' }))",
-    [string]$JobUrl = "http://localhost:$($(if ($env:JOB_HOST_PORT) { $env:JOB_HOST_PORT } else { '8084' }))",
-    [string]$AiUrl = "http://localhost:$($(if ($env:AI_HOST_PORT) { $env:AI_HOST_PORT } else { '8088' }))",
-    [string]$AssessmentRunnerUrl = "http://localhost:$($(if ($env:ASSESSMENT_RUNNER_HOST_PORT) { $env:ASSESSMENT_RUNNER_HOST_PORT } else { '8089' }))"
+    [string]$ApplicationUrl,
+    [string]$NotificationUrl,
+    [string]$AuditUrl,
+    [string]$JobUrl,
+    [string]$AiUrl,
+    [string]$AssessmentRunnerUrl
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
+
+function Import-LocalEnvFile {
+    param([string]$Path)
+
+    if (-not (Test-Path -LiteralPath $Path)) {
+        return
+    }
+
+    Get-Content -LiteralPath $Path | ForEach-Object {
+        $line = $_.Trim()
+        if ([string]::IsNullOrWhiteSpace($line) -or $line.StartsWith("#") -or $line -notmatch "^[A-Za-z_][A-Za-z0-9_]*=") {
+            return
+        }
+
+        $name, $value = $line -split "=", 2
+        if ([string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable($name, "Process"))) {
+            [Environment]::SetEnvironmentVariable($name, $value.Trim('"').Trim("'"), "Process")
+        }
+    }
+}
+
+function Resolve-LocalServiceUrl {
+    param(
+        [string]$ProvidedUrl,
+        [string]$PortEnvName,
+        [string]$DefaultPort
+    )
+
+    if (-not [string]::IsNullOrWhiteSpace($ProvidedUrl)) {
+        return $ProvidedUrl
+    }
+
+    $port = [Environment]::GetEnvironmentVariable($PortEnvName, "Process")
+    if ([string]::IsNullOrWhiteSpace($port)) {
+        $port = $DefaultPort
+    }
+    return "http://localhost:$port"
+}
+
+Import-LocalEnvFile -Path (Join-Path $PSScriptRoot "..\.env")
+
+$GatewayUrl = Resolve-LocalServiceUrl -ProvidedUrl $GatewayUrl -PortEnvName "GATEWAY_HOST_PORT" -DefaultPort "8080"
+$ApplicationUrl = Resolve-LocalServiceUrl -ProvidedUrl $ApplicationUrl -PortEnvName "APPLICATION_HOST_PORT" -DefaultPort "8085"
+$NotificationUrl = Resolve-LocalServiceUrl -ProvidedUrl $NotificationUrl -PortEnvName "NOTIFICATION_HOST_PORT" -DefaultPort "8086"
+$AuditUrl = Resolve-LocalServiceUrl -ProvidedUrl $AuditUrl -PortEnvName "AUDIT_HOST_PORT" -DefaultPort "8087"
+$JobUrl = Resolve-LocalServiceUrl -ProvidedUrl $JobUrl -PortEnvName "JOB_HOST_PORT" -DefaultPort "8084"
+$AiUrl = Resolve-LocalServiceUrl -ProvidedUrl $AiUrl -PortEnvName "AI_HOST_PORT" -DefaultPort "8088"
+$AssessmentRunnerUrl = Resolve-LocalServiceUrl -ProvidedUrl $AssessmentRunnerUrl -PortEnvName "ASSESSMENT_RUNNER_HOST_PORT" -DefaultPort "8089"
 
 function Invoke-Step {
     param(
