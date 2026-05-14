@@ -2,6 +2,7 @@ package com.devhire.notification.ratelimit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Component;
@@ -32,6 +33,7 @@ public class SlidingWindowRateLimiter {
     private final StringRedisTemplate redisTemplate;
     private final Clock clock;
 
+    @Autowired
     public SlidingWindowRateLimiter(StringRedisTemplate redisTemplate) {
         this(redisTemplate, Clock.systemUTC());
     }
