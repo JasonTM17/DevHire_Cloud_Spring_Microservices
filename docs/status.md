@@ -33,8 +33,8 @@ This page is the single source of truth for the current public state of DevHire 
 
 | Signal | Evidence |
 |---|---|
-| Close-out PRs | [#78](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/pull/78) and [#80](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/pull/80) merged into `master` on 2026-05-14 |
-| Current master head before final branch-cleanup patch | `f0114284` (`chore: finalize release closeout`) |
+| Close-out PRs | v0.6 close-out, final branch cleanup, and documentation polish merged into `master` on 2026-05-14 |
+| Current master head | Verify with `git log -1 --oneline` and `gh run list --branch master`; current-state docs avoid hardcoding a moving head SHA |
 | Branch protection | Restored after merge; required reviews and required status checks remain enabled |
 | Final docs gates | `docs-quality.ps1`, `evidence-audit.ps1`, and `git diff --check` passed after `master` sync |
 | Dependency posture | Dependabot queue is zero-noise clean: no open PRs, no remote branches pending merge, and risky updates deferred to a future maintenance window |
