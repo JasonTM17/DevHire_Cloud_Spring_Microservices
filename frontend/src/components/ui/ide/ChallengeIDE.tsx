@@ -9,6 +9,7 @@ import { AssessmentTimer } from "./AssessmentTimer";
 import { SubmissionProgressModal } from "./SubmissionProgressModal";
 import { CandidateCodeEditor } from "@/components/CandidateCodeEditor";
 import type { SubmissionStep } from "@/lib/ide/submissionReducer";
+import { assessmentTimerStatus, isLockedCodeAssessmentStatus } from "@/lib/statusLabels";
 import type { CodeAssessment, CodeRun, CodeSubmissionSummary } from "@/types/domain";
 
 import "@/styles/components/challenge-ide.css";
@@ -126,15 +127,6 @@ function IDETopBar({
    Helpers
    -------------------------------------------------------------------------- */
 
-const LOCKED_STATUSES = new Set([
-  "SUBMITTED",
-  "AUTO_REVIEWED",
-  "REVIEWED",
-  "EMPLOYER_REVIEWED",
-  "PASSED",
-  "FAILED",
-]);
-
 const DEFAULT_JAVA_PLACEHOLDER = [
   "class CandidateSolution {",
   "  String solve(String input) {",
@@ -214,10 +206,10 @@ export function ChallengeIDE({
   const [submissionStep, setSubmissionStep] = useState<SubmissionStep>("idle");
   const [showSubmissionModal, setShowSubmissionModal] = useState(false);
 
-  const isLocked = LOCKED_STATUSES.has(assessment.status);
+  const isLocked = isLockedCodeAssessmentStatus(assessment.status);
   const assignedAt = new Date(assessment.assignedAt).getTime();
   const dueAt = new Date(assessment.dueAt).getTime();
-  const timerStatus = isLocked ? "LOCKED" : assessment.status;
+  const timerStatus = assessmentTimerStatus(assessment.status);
 
   const terminalRows = buildTerminalRows(latestRun);
   const visibleRunResults = latestRun?.results?.filter((result) => result.visibility !== "HIDDEN") ?? [];

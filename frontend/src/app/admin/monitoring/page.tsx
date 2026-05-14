@@ -52,7 +52,7 @@ export default function AdminMonitoringPage() {
     }
   }, []);
 
-  const { data: healthSummary, error: healthError, isValidating: healthLoading } = useDataFetcher<OpsHealthSummary>(
+  const { data: healthSummary, error: healthError, isValidating: healthPending } = useDataFetcher<OpsHealthSummary>(
     "ops:monitoring-health",
     fetchHealthSummary,
     { refreshInterval: HEALTH_POLL_INTERVAL, pauseWhenHidden: true }
@@ -62,7 +62,7 @@ export default function AdminMonitoringPage() {
     return [];
   }, []);
 
-  const { data: kafkaGroups, error: kafkaError, isValidating: kafkaLoading } = useDataFetcher<KafkaConsumerGroup[]>(
+  const { data: kafkaGroups, error: kafkaError, isValidating: kafkaPending } = useDataFetcher<KafkaConsumerGroup[]>(
     "ops:kafka-lag",
     fetchKafkaLag,
     { refreshInterval: HEALTH_POLL_INTERVAL, pauseWhenHidden: true }
@@ -72,7 +72,7 @@ export default function AdminMonitoringPage() {
     return [];
   }, []);
 
-  const { data: pools, error: poolError, isValidating: poolLoading } = useDataFetcher<HikariPool[]>(
+  const { data: pools, error: poolError, isValidating: poolPending } = useDataFetcher<HikariPool[]>(
     "ops:hikari-pools",
     fetchPools,
     { refreshInterval: HEALTH_POLL_INTERVAL, pauseWhenHidden: true }
@@ -104,7 +104,7 @@ export default function AdminMonitoringPage() {
       <OpsWidget
         title="Service Health Matrix"
         span={2}
-        isLoading={!healthSummary && healthLoading}
+        isLoading={!healthSummary && healthPending}
         error={healthError}
         data-testid="ops-widget-health-matrix"
       >
@@ -118,7 +118,7 @@ export default function AdminMonitoringPage() {
       <div className="ops-monitoring-page__infra-panels">
         <OpsWidget
           title="Kafka Consumer Lag"
-          isLoading={!kafkaGroups && kafkaLoading}
+          isLoading={!kafkaGroups && kafkaPending}
           error={kafkaError}
           empty={(kafkaGroups ?? []).length === 0}
           emptyMessage="Kafka lag metrics are not exposed through the admin API yet."
@@ -129,7 +129,7 @@ export default function AdminMonitoringPage() {
 
         <OpsWidget
           title="HikariCP Pool Utilization"
-          isLoading={!pools && poolLoading}
+          isLoading={!pools && poolPending}
           error={poolError}
           empty={(pools ?? []).length === 0}
           emptyMessage="Connection-pool metrics are not exposed through the admin API yet."
