@@ -13,6 +13,26 @@ $ErrorActionPreference = "Stop"
 
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 
+function Resolve-OpenSearchCleanupUrl {
+    if ($env:OPENSEARCH_URL -or $env:OPENSEARCH_HOST_PORT -or $OpenSearchUrl -ne "http://localhost:9200") {
+        return $OpenSearchUrl
+    }
+
+    try {
+        $published = docker compose port opensearch 9200 2>$null | Select-Object -First 1
+        if ($LASTEXITCODE -eq 0 -and -not [string]::IsNullOrWhiteSpace($published)) {
+            $port = ($published.Trim() -split ":")[-1]
+            if (-not [string]::IsNullOrWhiteSpace($port)) {
+                return "http://localhost:$port"
+            }
+        }
+    } catch {
+        Write-Verbose "Unable to detect published OpenSearch port: $($_.Exception.Message)"
+    }
+
+    return $OpenSearchUrl
+}
+
 function Invoke-PostgresSql {
     param(
         [Parameter(Mandatory = $true)][string]$Database,
@@ -57,14 +77,15 @@ function Invoke-OpenSearchCleanup {
         }
     } | ConvertTo-Json -Depth 10
 
-    Write-Host "Resetting OpenSearch smoke documents at $OpenSearchUrl..."
+    $cleanupUrl = Resolve-OpenSearchCleanupUrl
+    Write-Host "Resetting OpenSearch smoke documents at $cleanupUrl..."
     if ($DryRun) {
         Write-Host $body
         return
     }
 
     try {
-        Invoke-RestMethod -Method Post -Uri "$OpenSearchUrl/devhire_jobs/_delete_by_query?conflicts=proceed&refresh=true" `
+        Invoke-RestMethod -Method Post -Uri "$cleanupUrl/devhire_jobs/_delete_by_query?conflicts=proceed&refresh=true" `
             -ContentType "application/json" -Body $body -TimeoutSec 20 | Out-Null
     } catch {
         Write-Warning "OpenSearch cleanup skipped or unavailable: $($_.Exception.Message)"

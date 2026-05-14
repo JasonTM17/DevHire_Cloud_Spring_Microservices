@@ -82,6 +82,7 @@ $requiredPaths = @(
     "scripts/clean-local-artifacts.ps1",
     "scripts/domain-placeholder-audit.ps1",
     "scripts/professionalism-audit.ps1",
+    "scripts/secret-config-audit.ps1",
     "scripts/visual-evidence-audit.ps1",
     "scripts/evidence-manifest-verify.ps1",
     "scripts/screenshot-promote.ps1",

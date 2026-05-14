@@ -44,6 +44,23 @@ function Wait-HttpOk {
     throw "Timed out waiting for $Url"
 }
 
+function Write-ComposeFailureDiagnostics {
+    Write-Warning "docker compose up failed; collecting container state and recent bootstrap logs."
+    try {
+        docker compose ps
+    } catch {
+        Write-Warning "Unable to collect docker compose ps: $($_.Exception.Message)"
+    }
+    foreach ($service in @("postgres-init", "postgres", "api-gateway", "application-service", "job-service")) {
+        try {
+            Write-Warning "Recent logs for ${service}:"
+            docker compose logs --no-color --tail=160 $service
+        } catch {
+            Write-Warning "Unable to collect logs for ${service}: $($_.Exception.Message)"
+        }
+    }
+}
+
 function Invoke-Api {
     param(
         [Parameter(Mandatory = $true)][ValidateSet("GET", "POST", "PUT", "PATCH", "DELETE")][string]$Method,
@@ -166,6 +183,7 @@ try {
         }
         docker @composeArgs
         if ($LASTEXITCODE -ne 0) {
+            Write-ComposeFailureDiagnostics
             throw "docker compose up failed"
         }
     }

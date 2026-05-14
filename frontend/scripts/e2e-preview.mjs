@@ -107,6 +107,25 @@ function run(command, args, options = {}) {
   });
 }
 
+function waitForChildExit(child, timeoutMs = 5000) {
+  if (!child.pid || child.exitCode !== null || child.signalCode !== null) {
+    return Promise.resolve();
+  }
+
+  return new Promise((resolve) => {
+    const timeout = setTimeout(() => cleanup(), timeoutMs);
+    const cleanup = () => {
+      clearTimeout(timeout);
+      child.off("exit", cleanup);
+      child.off("close", cleanup);
+      resolve();
+    };
+
+    child.once("exit", cleanup);
+    child.once("close", cleanup);
+  });
+}
+
 async function waitForPreview(server) {
   let serverExited = false;
   server.once("exit", () => {
@@ -139,21 +158,44 @@ async function stopServer(server) {
   }
 
   if (isWindows) {
+    server.stdout?.removeAllListeners();
+    server.stderr?.removeAllListeners();
+    server.stdout?.destroy();
+    server.stderr?.destroy();
     await new Promise((resolve) => {
       const killer = spawn("taskkill", ["/pid", String(server.pid), "/T", "/F"], {
         stdio: "ignore"
       });
-      killer.on("exit", resolve);
-      killer.on("error", resolve);
+      let settled = false;
+      const finish = () => {
+        if (settled) {
+          return;
+        }
+        settled = true;
+        clearTimeout(timeout);
+        killer.removeAllListeners();
+        resolve();
+      };
+      const timeout = setTimeout(finish, 5000);
+      killer.once("exit", finish);
+      killer.once("error", finish);
+      killer.once("close", finish);
     });
+    if (server.exitCode === null && !server.killed) {
+      server.kill();
+    }
+    await waitForChildExit(server);
+    server.removeAllListeners();
     return;
   }
 
   server.kill("SIGTERM");
-  await delay(1000);
+  await waitForChildExit(server, 1000);
   if (server.exitCode === null) {
     server.kill("SIGKILL");
+    await waitForChildExit(server);
   }
+  server.removeAllListeners();
 }
 
 if (!["desktop", "mobile", "all", "stitch", "code-assessment"].includes(mode)) {
@@ -223,3 +265,5 @@ try {
   console.log("[e2e-preview] Stopping preview server");
   await stopServer(server);
 }
+
+process.exit(0);
