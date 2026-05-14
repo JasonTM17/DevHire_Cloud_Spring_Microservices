@@ -29,7 +29,7 @@
     "@monaco-editor/react": "^4.7.0",
     "@stomp/stompjs": "^7.3.0",
     "lucide-react": "1.14.0",
-    "next": "16.2.4",
+    "next": "16.2.6",
     "react": "19.2.5",
     "react-dom": "19.2.5",
     "sockjs-client": "^1.6.1"
