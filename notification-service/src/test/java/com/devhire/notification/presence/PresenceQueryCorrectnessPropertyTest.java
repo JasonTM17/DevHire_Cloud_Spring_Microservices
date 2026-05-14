@@ -70,9 +70,9 @@ class PresenceQueryCorrectnessPropertyTest {
         Set<String> result = presenceTracker.getOnlineUsers(scenario.queryContext());
 
         // Assert: result contains exactly the users whose context matches the query
-        Set<String> expected = scenario.activeUsers().stream()
-                .filter(u -> scenario.queryContext().equals(u.context()))
-                .map(UserPresence::userId)
+        Set<String> expected = activeContextByUser(scenario.activeUsers()).entrySet().stream()
+                .filter(entry -> scenario.queryContext().equals(entry.getValue()))
+                .map(Map.Entry::getKey)
                 .collect(Collectors.toSet());
 
         assertThat(result).isEqualTo(expected);
@@ -111,9 +111,9 @@ class PresenceQueryCorrectnessPropertyTest {
         Set<String> result = presenceTracker.getOnlineUsers(scenario.queryContext());
 
         // Assert: no user with a different context is in the result
-        Set<String> usersWithDifferentContext = scenario.activeUsers().stream()
-                .filter(u -> !scenario.queryContext().equals(u.context()))
-                .map(UserPresence::userId)
+        Set<String> usersWithDifferentContext = activeContextByUser(scenario.activeUsers()).entrySet().stream()
+                .filter(entry -> !scenario.queryContext().equals(entry.getValue()))
+                .map(Map.Entry::getKey)
                 .collect(Collectors.toSet());
 
         for (String userId : usersWithDifferentContext) {
@@ -192,6 +192,14 @@ class PresenceQueryCorrectnessPropertyTest {
 
         return Combinators.combine(activeUsers, expiredUsers, contexts)
                 .as(PresenceScenarioWithExpired::new);
+    }
+
+    private Map<String, String> activeContextByUser(List<UserPresence> activeUsers) {
+        Map<String, String> contextByUser = new LinkedHashMap<>();
+        for (UserPresence user : activeUsers) {
+            contextByUser.put(user.userId(), user.context());
+        }
+        return contextByUser;
     }
 
     record UserPresence(String userId, String context) {}

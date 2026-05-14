@@ -32,7 +32,7 @@ import java.util.concurrent.TimeUnit;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Integration tests for the Kafka → notification persistence → WebSocket delivery pipeline.
+ * Integration tests for the Kafka -> notification persistence -> WebSocket delivery pipeline.
  * Verifies end-to-end flow using Testcontainers with Kafka, Redis, and PostgreSQL.
  *
  * <p>Validates: Requirements 4.2, 13.3</p>
@@ -260,9 +260,11 @@ class KafkaNotificationPipelineIntegrationTest {
         assertThat(latch.await(5, TimeUnit.SECONDS)).isTrue();
         assertThat(deliveredMessages).hasSize(notificationCount);
 
-        // Verify sequence numbers are in order
+        // Verify sequence numbers are in order after the WebSocket wrapper JSON is decoded.
         for (int i = 0; i < notificationCount; i++) {
-            assertThat(deliveredMessages.get(i)).contains("\"sequenceNumber\":" + (i + 1));
+            WebSocketMessage delivered = objectMapper.readValue(deliveredMessages.get(i), WebSocketMessage.class);
+            Map<?, ?> payload = objectMapper.readValue(delivered.payload(), Map.class);
+            assertThat(payload.get("sequenceNumber")).isEqualTo(i + 1);
         }
 
         listenerContainer.stop();
