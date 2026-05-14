@@ -9,6 +9,14 @@ It validates:
 - visible untracked sensitive artifacts are not waiting to be accidentally added,
 - `.gitattributes` keeps text normalization enabled.
 
+For token-shaped committed content, run the focused secret/config audit:
+
+```powershell
+.\scripts\secret-config-audit.ps1
+```
+
+It scans tracked text files for high-risk API keys, GitHub tokens, cloud access keys, Slack tokens, and private-key blocks while avoiding broad password heuristics that would make local placeholder configs noisy.
+
 Run:
 
 ```powershell

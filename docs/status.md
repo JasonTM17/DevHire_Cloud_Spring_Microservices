@@ -8,13 +8,14 @@ This page is the single source of truth for the current public state of DevHire 
 | GitHub release | https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.5.1 |
 | Default branch | `master` |
 | Branch protection | Enabled |
-| Open pull requests | 20 open PRs at the 2026-05-13 live GitHub scan, all authored by Dependabot |
-| Dependabot queue | Zero-noise dry-run classifies all 20 as blocked, manual-review, or close/defer candidates; owner-token cleanup remains pending |
+| Open pull requests | 20 open PRs at the 2026-05-14 live GitHub scan, all authored by Dependabot |
+| Dependabot queue | Curation dry-run classifies 11 safe-batch, 3 manual-review, and 6 defer-major PRs; zero-noise reports 0 clean merge candidates until CI/runtime smoke are green |
 | Maven development version | `0.6.0-SNAPSHOT` |
 | Frontend development version | `0.6.0` |
 | Helm chart version | `0.6.0` |
 | Cloud posture | AWS blueprint apply-ready; no `terraform apply` has been run |
 | Runtime posture | Local Docker Compose runtime with smoke, observability, E2E, and data evidence |
+| CI parity posture | Local parity for the previously red `AI Assistant Evaluation` and `Performance Smoke` workflows passed on 2026-05-14; GitHub status refreshes after the release branch is pushed |
 | v1 posture | Roadmap and acceptance checklist only; no `v1.0.0` tag exists or should be claimed |
 
 ## Current Development Highlights

@@ -2,7 +2,7 @@
 
 This audit records the professional UI contract for the current DevHire Cloud frontend. It is intentionally executable: reviewers should be able to compare the browser routes, screenshots, and smoke scripts against the claims below without trusting marketing copy.
 
-Latest local review: 2026-05-14 against the Docker high-port stack (`frontend` on `13001`, Gateway on `18080`) plus isolated Next.js preview E2E.
+Latest local review: 2026-05-14 against the Docker high-port stack (`frontend` on `13001`, Gateway on `18080`) plus isolated Next.js preview E2E. Final polish also covers the Code Assessment E2E wrapper exit path, ops-provider mojibake guard, and source guard coverage for the primary ops widgets.
 
 ## Design Direction
 
@@ -57,11 +57,14 @@ npm --prefix frontend run e2e:preview:mobile
 npm --prefix frontend run e2e:code-assessment
 .\scripts\code-assessment-smoke.ps1 -GatewayUrl http://localhost:18080
 .\scripts\runtime-observability-smoke.ps1 -GatewayUrl http://localhost:18080
-.\scripts\reset-demo-data.ps1 -SkipOpenSearch
+.\scripts\reset-demo-data.ps1
 .\scripts\docs-quality.ps1
 .\scripts\evidence-audit.ps1
+.\scripts\visual-evidence-audit.ps1
 ```
 
 Preview E2E is deliberately isolated from the live Gateway unless `NEXT_PUBLIC_API_BASE_URL` is supplied. Live API behavior is verified by the Gateway smoke scripts above.
+
+The source guard intentionally scans the client marketplace, candidate studio, employer shell, admin routes, and core ops components (`AiProviderPanel`, global status bar, health matrix, widget grid). It fails on stale LeetCode copy, hidden fixture leaks, raw user-facing statuses, debug/offline copy, and common mojibake markers before screenshots can be accepted.
 
 Use Browser visual inspection after significant frontend changes. Capture screenshots only after the route has settled and the page contains real data or a deliberate empty/auth state.
