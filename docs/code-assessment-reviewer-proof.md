@@ -113,6 +113,17 @@ Runtime after Docker is up:
 .\scripts\runtime-observability-smoke.ps1 -GatewayUrl http://localhost:8080
 ```
 
+If Docker Desktop or another local stack already owns common ports, use the high-port parity path:
+
+```powershell
+$env:GATEWAY_HOST_PORT="18080"
+$env:FRONTEND_HOST_PORT="13001"
+docker compose up -d --build
+.\scripts\code-assessment-smoke.ps1 -GatewayUrl http://localhost:18080
+.\scripts\runtime-observability-smoke.ps1 -GatewayUrl http://localhost:18080
+.\scripts\reset-demo-data.ps1
+```
+
 Live Judge0, when a runner is configured:
 
 ```powershell

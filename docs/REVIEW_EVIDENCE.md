@@ -10,10 +10,11 @@ This is the curated proof pack for recruiters and senior engineering reviewers. 
 | Current development cycle | `0.6.0-SNAPSHOT` after the `v0.5.1` release |
 | GitHub About/Homepage/Topics | Applied through owner-authenticated GitHub API |
 | Branch protection | `master` is protected and release changes go through PR review |
-| Dependabot posture | 20 open Dependabot PRs at the 2026-05-13 live scan; zero-noise dry-run classifies all as blocked/manual/defer and owner-token cleanup is pending |
+| Dependabot posture | 20 open Dependabot PRs at the 2026-05-14 live scan; curation dry-run classifies 11 safe-batch, 3 manual-review, and 6 defer-major PRs; zero-noise reports 0 clean merge candidates until CI/runtime smoke are green |
 | Release notes | `docs/release-notes/v0.5.1.md` is the canonical release body |
 | v1 posture | Roadmap and acceptance checklist only; no `v1.0.0` release is claimed |
 | v0.6 Stitch/code-assessment stack | Merged into `master`; [pr-stack-v0.6.md](pr-stack-v0.6.md) is now the historical merge record |
+| Release CI parity | Local parity for `AI Assistant Evaluation` and `Performance Smoke` passed on 2026-05-14 with Docker high-port Gateway `18080`; GitHub Actions status updates after push |
 
 See [status.md](status.md) for the single source of truth.
 
@@ -62,6 +63,8 @@ Primary screenshots must not contain raw IDs, `UNKNOWN`, loading-only panels, of
 .\scripts\repository-health.ps1
 .\scripts\github-workflow-status.ps1 -Branch master -RequireGreen
 .\scripts\portfolio-verify.ps1 -Docs -Docker -Cloud
+.\scripts\ai-eval.ps1 -StartStack -Build -KeepRunning -GatewayUrl http://localhost:18080
+.\scripts\perf-suite.ps1 -GatewayUrl http://localhost:18080 -Scenario all -Vus 5 -Duration 30s -UseDocker
 ```
 
 Runtime proof when Docker is available:

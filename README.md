@@ -26,7 +26,7 @@ DevHire Cloud is a production-engineering portfolio for a recruitment platform: 
 | Current development cycle | `0.6.0-SNAPSHOT` |
 | v0.6 Stitch app | Merged into `master`; Code Assessment Studio is the flagship candidate grading, employer review, and admin health workflow |
 | Default branch | `master`, protected and PR-governed |
-| Dependabot queue | 20 open Dependabot PRs at the 2026-05-13 live scan; zero-noise dry-run classifies all as blocked/manual/defer until owner-token cleanup |
+| Dependabot queue | 20 open Dependabot PRs at the 2026-05-14 live scan; curation dry-run: 11 safe-batch, 3 manual-review, 6 defer-major; zero-noise reports 0 clean merge candidates until CI/runtime smoke are green |
 | v1 status | Roadmap and acceptance checklist only, not a released tag |
 
 ## Reviewer Quick Links
@@ -101,10 +101,30 @@ Production code grading requires `DEVHIRE_RUNNER_MODE=judge0` and `JUDGE0_BASE_U
 
 ## Run and Verify Locally
 
+Port convention:
+
+| Mode | Gateway | Frontend | When to use |
+|---|---:|---:|---|
+| Compose default | `8080` | `3001` | Fresh local stack with no port conflicts |
+| Docker Desktop high-port smoke | `18080` | `13001` | CI parity, existing local services, or reviewer machines with common ports occupied |
+
 ```powershell
 docker compose up -d --build
 .\scripts\api-smoke.ps1 -GatewayUrl http://localhost:8080
 .\scripts\code-assessment-smoke.ps1 -GatewayUrl http://localhost:8080
+```
+
+High-port smoke path:
+
+```powershell
+$env:GATEWAY_HOST_PORT="18080"
+$env:FRONTEND_HOST_PORT="13001"
+docker compose up -d --build
+.\scripts\api-smoke.ps1 -GatewayUrl http://localhost:18080
+.\scripts\code-assessment-smoke.ps1 -GatewayUrl http://localhost:18080
+.\scripts\runtime-observability-smoke.ps1 -GatewayUrl http://localhost:18080
+.\scripts\reset-demo-data.ps1
+.\scripts\secret-config-audit.ps1
 ```
 
 Frontend preview without Docker:

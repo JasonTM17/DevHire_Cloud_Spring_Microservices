@@ -44,6 +44,8 @@ Gateway workflow smoke:
 .\scripts\code-assessment-smoke.ps1 -GatewayUrl http://localhost:8080
 ```
 
+Use `http://localhost:18080` instead when running the CI/high-port Docker Desktop profile (`GATEWAY_HOST_PORT=18080`).
+
 This covers employer assignment, candidate visible run, candidate final submit, hidden redaction, employer attempt history, employer review, and admin summary.
 
 Live runner smoke:
