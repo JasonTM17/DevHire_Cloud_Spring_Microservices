@@ -64,7 +64,7 @@ DevHire Cloud is a production-engineering portfolio for a recruitment platform: 
 | Admin/Ops | `/admin`, `/admin/ai`, code-assessment health, AI operations, platform signals |
 | Platform | `/assistant`, `/platform/observability`, `/platform/cloud`, `/platform/releases` |
 
-The v0.6 UI follows Stitch project `projects/5421325194779586117` and the "DevHire Cloud Operations" design system: dark navigation rail, light operational workspace, compact panels, 8px radius, Inter typography, dense tables, and restrained emerald/cobalt status language. Route-matrix screenshots are checked for broken assets, overflow, raw UUIDs, `UNKNOWN`, loading-only states, fallback banners, and smoke labels.
+The v0.6 UI follows Stitch project `projects/5421325194779586117` with a hybrid design system. Public candidate and job-discovery pages use an ITViec-inspired marketplace pattern: search-first red/white surfaces, salary/location/company prominence, compact filters, and mobile-safe job cards without copying ITViec brand assets. Employer, admin, and platform pages keep the "DevHire Cloud Operations" control-plane style: dark navigation, light operational workspace, dense panels, 8px radius, Inter typography, and evidence-heavy status language. Route-matrix screenshots are checked for broken assets, overflow, raw UUIDs, `UNKNOWN`, loading-only states, fallback banners, smoke labels, mojibake, and hidden assessment payloads.
 
 ## Cloud State Matrix
 

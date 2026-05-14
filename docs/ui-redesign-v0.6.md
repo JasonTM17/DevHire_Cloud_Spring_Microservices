@@ -7,7 +7,14 @@ This document is the implementation bridge from the Stitch project to the produc
 - Stitch project: `projects/5421325194779586117`
 - Product split: Admin/Ops, Employer/Company, Client/Candidate
 - Merge state: merged into `master` through the v0.6 consolidation path; temporary `v0.6*` branches have been deleted after verification.
-- Goal: make the product feel like a recruitment operations platform instead of a static portfolio demo.
+- Goal: make the product feel like a real recruitment platform instead of a static portfolio demo: public candidate/job pages use a polished ITViec-inspired marketplace pattern, while employer/admin/platform pages stay in the Stitch control-plane style.
+
+## Hybrid UI Direction
+
+DevHire now uses two coordinated visual modes:
+
+- Client marketplace: red/white search-first pages for `/`, `/jobs`, `/jobs/[id]`, and candidate-facing job workflows. These pages emphasize keyword search, filters, salary, location, company credibility, and mobile readability. They are inspired by Vietnamese IT job-marketplace conventions without copying ITViec branding, logos, or layouts.
+- Operations workspace: dark-rail, light-workspace, dense panels for employer, admin, platform, and reviewer evidence routes. These pages keep the original Stitch "DevHire Cloud Operations" design language and make health, queues, risk, and audit state easy to scan.
 
 ## Route Mapping
 
@@ -89,8 +96,10 @@ v0.6.7 keeps code grading reviewer-safe and v0.7 introduces the internal runner 
 ## UX Acceptance Rules
 
 - Candidate pages are mobile-friendly and guided.
+- Public job pages use marketplace conventions: keyword search must affect the `/jobs` query, city filters must survive navigation from the homepage, salary must render as USD/month, and company names/logos should be shown when public company data is available.
 - Admin/platform pages are compact and operational.
 - Primary screenshots avoid raw IDs, `UNKNOWN`, loading-only states, fallback/offline warnings, and smoke/test labels.
+- Primary screenshots avoid mojibake and internal machine tokens in visible copy.
 - Controls that look interactive either call a read model or present a clear preview state.
 - The role-aware navigation groups Candidate, Employer, Admin/Ops, and Platform workspaces.
 - Company profile pages use the actual route slug and scope jobs to the resolved company.

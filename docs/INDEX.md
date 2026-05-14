@@ -14,6 +14,7 @@ This is the reviewer-facing map for DevHire Cloud. It separates current claims, 
 | Runtime proof | [runtime acceptance matrix](runtime-acceptance-matrix.md) | Black-box commands mapped to platform claims |
 | Security posture | [security evidence](security-evidence.md) | Secret handling, scans, auth, supply chain, and safe defaults |
 | Code grading proof | [code assessment reviewer proof](code-assessment-reviewer-proof.md) | Candidate runner, hidden redaction, scoring, review, and admin health |
+| UI/UX audit | [UI/UX audit](ui-ux-audit.md) | ITViec-inspired client marketplace, Code Studio redaction, admin/ops visual contract |
 | Runner operations | [code assessment runner runbook](runbooks/code-assessment-runner.md) | Triage path for Judge0, fail-closed mode, metrics, and smoke tests |
 
 ## Current Release Narrative
