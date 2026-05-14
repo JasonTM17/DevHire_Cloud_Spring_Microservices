@@ -7,8 +7,12 @@ import { ProblemPanel, type TestCase, type SubmissionEntry } from "./ProblemPane
 import { FileTab } from "./FileTab";
 import { AssessmentTimer } from "./AssessmentTimer";
 import { SubmissionProgressModal } from "./SubmissionProgressModal";
+import { CandidateCodeEditor } from "@/components/CandidateCodeEditor";
 import type { SubmissionStep } from "@/lib/ide/submissionReducer";
 import type { CodeAssessment, CodeRun, CodeSubmissionSummary } from "@/types/domain";
+
+import "@/styles/components/challenge-ide.css";
+import "@/styles/components/ide-top-bar.css";
 
 /* --------------------------------------------------------------------------
    Types
@@ -34,6 +38,7 @@ export interface ChallengeIDEProps {
 interface IDETopBarProps {
   title: string;
   language: string;
+  availableLanguages: string[];
   onLanguageChange: (lang: string) => void;
   assignedAt: number;
   dueAt: number;
@@ -48,6 +53,7 @@ interface IDETopBarProps {
 function IDETopBar({
   title,
   language,
+  availableLanguages,
   onLanguageChange,
   assignedAt,
   dueAt,
@@ -73,17 +79,23 @@ function IDETopBar({
       </div>
 
       <div className="dh-ide-topbar__center">
-        <select
-          className="dh-ide-topbar__language-select"
-          value={language}
-          onChange={(e) => onLanguageChange(e.target.value)}
-          aria-label="Programming language"
-          disabled={isLocked}
-        >
-          <option value="Java">Java</option>
-          <option value="TypeScript">TypeScript</option>
-          <option value="SQL">SQL</option>
-        </select>
+        {availableLanguages.length > 1 ? (
+          <select
+            className="dh-ide-topbar__language-select"
+            value={language}
+            onChange={(e) => onLanguageChange(e.target.value)}
+            aria-label="Programming language"
+            disabled={isLocked}
+          >
+            {availableLanguages.map((item) => (
+              <option key={item} value={item}>{item}</option>
+            ))}
+          </select>
+        ) : (
+          <span className="dh-ide-topbar__language-pill" aria-label={`Programming language: ${language}`}>
+            {language}
+          </span>
+        )}
       </div>
 
       <div className="dh-ide-topbar__right">
@@ -123,6 +135,14 @@ const LOCKED_STATUSES = new Set([
   "FAILED",
 ]);
 
+const DEFAULT_JAVA_PLACEHOLDER = [
+  "class CandidateSolution {",
+  "  String solve(String input) {",
+  "    return \"\";",
+  "  }",
+  "}",
+].join("\n");
+
 function mapSubmissionsToEntries(submissions: CodeSubmissionSummary[]): SubmissionEntry[] {
   return submissions.map((sub) => ({
     id: sub.id,
@@ -156,7 +176,7 @@ function mapVerdict(
 
 function buildTerminalRows(run?: CodeRun): TerminalRow[] {
   if (!run?.results) return [];
-  return run.results.map((result, idx) => ({
+  return run.results.filter((result) => result.visibility !== "HIDDEN").map((result, idx) => ({
     testIndex: idx + 1,
     passed: result.passed,
     timeMs: result.executionTimeMs ?? 0,
@@ -189,6 +209,7 @@ export function ChallengeIDE({
   className = "",
 }: ChallengeIDEProps) {
   const [language, setLanguage] = useState(assessment.language || "Java");
+  const [code, setCode] = useState(assessment.submittedCode || assessment.starterCode || "");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionStep, setSubmissionStep] = useState<SubmissionStep>("idle");
   const [showSubmissionModal, setShowSubmissionModal] = useState(false);
@@ -199,14 +220,18 @@ export function ChallengeIDE({
   const timerStatus = isLocked ? "LOCKED" : assessment.status;
 
   const terminalRows = buildTerminalRows(latestRun);
+  const visibleRunResults = latestRun?.results?.filter((result) => result.visibility !== "HIDDEN") ?? [];
   const terminalStatus: TerminalStatus = latestRun
-    ? latestRun.results?.length
+    ? visibleRunResults.length
       ? "done"
       : "idle"
     : "idle";
 
   const submissionEntries = mapSubmissionsToEntries(submissions);
-  const progressText = `${submissions.filter((s) => s.verdict === "ACCEPTED").length}/${visibleTests.length} passed`;
+  const progressPassed = latestRun?.visiblePassed ?? 0;
+  const progressTotal = Math.max(latestRun?.visibleTotal ?? 0, visibleTests.length, 1);
+  const progressText = `${progressPassed}/${progressTotal} visible passed`;
+  const availableLanguages = [assessment.language || "Java"];
 
   const handleAutoSubmit = useCallback(() => {
     // Auto-submit on timer expiry — placeholder for full implementation
@@ -235,6 +260,7 @@ export function ChallengeIDE({
       <IDETopBar
         title={assessment.challengeTitle}
         language={language}
+        availableLanguages={availableLanguages}
         onLanguageChange={setLanguage}
         assignedAt={assignedAt}
         dueAt={dueAt}
@@ -279,13 +305,12 @@ export function ChallengeIDE({
                 className="dh-challenge-ide__editor-content"
                 aria-label="Code editor"
               >
-                {/* Monaco editor or textarea fallback will be mounted here */}
-                <textarea
-                  className="dh-challenge-ide__code-textarea"
-                  defaultValue={assessment.submittedCode || assessment.starterCode || ""}
-                  aria-label="Code editor"
-                  readOnly={isLocked}
-                  data-editor-mode="textarea-fallback"
+                <CandidateCodeEditor
+                  value={code}
+                  language={language}
+                  disabled={isLocked}
+                  placeholder={DEFAULT_JAVA_PLACEHOLDER}
+                  onChange={setCode}
                 />
               </div>
             </div>

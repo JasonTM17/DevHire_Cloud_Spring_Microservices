@@ -56,6 +56,21 @@
   min-width: 120px;
 }
 
+.dh-ide-top-bar__language-pill,
+.dh-ide-topbar__language-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 var(--dh-space-3, 12px);
+  border: 1px solid var(--dh-color-border-default, #2d3d52);
+  border-radius: var(--dh-radius-sm, 6px);
+  background: var(--dh-color-bg-elevated, #243044);
+  color: var(--dh-color-fg-primary, #f0f4f8);
+  font-size: var(--dh-font-size-sm, 0.875rem);
+  font-weight: var(--dh-font-weight-medium, 500);
+  white-space: nowrap;
+}
+
 .dh-ide-top-bar__timer {
   flex-shrink: 0;
 }

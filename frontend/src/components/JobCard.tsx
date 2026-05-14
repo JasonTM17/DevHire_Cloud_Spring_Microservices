@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { MapPin, Clock } from "lucide-react";
 import { SkillTag } from "./ui/SkillTag";
+import { formatSalaryRange } from "@/lib/salaryFormat";
 import type { Job } from "@/types/domain";
 
 type JobCardProps = {
@@ -11,13 +12,6 @@ type JobCardProps = {
   companyName?: string;
   companyLogoUrl?: string;
 };
-
-function formatSalary(min?: number, max?: number): string {
-  if (!min && !max) return "Thương lượng";
-  if (min && max) return `${min} - ${max} triệu`;
-  if (min) return `Từ ${min} triệu`;
-  return `Đến ${max} triệu`;
-}
 
 function formatRelativeDate(dateStr: string): string {
   const date = new Date(dateStr);
@@ -77,7 +71,7 @@ export function JobCard({ job, companyName, companyLogoUrl }: JobCardProps) {
       </div>
 
       <div className="job-card__salary">
-        {formatSalary(job.salaryMin, job.salaryMax)}
+        {formatSalaryRange(job.salaryMin, job.salaryMax)}
       </div>
     </div>
   );

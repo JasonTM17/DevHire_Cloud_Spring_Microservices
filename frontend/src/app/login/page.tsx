@@ -26,12 +26,12 @@ export default function LoginPage() {
     try {
       const auth = await api.login({ email, password });
       saveSession(auth);
-      router.push(auth.role === "ADMIN" ? "/admin" : auth.role === "EMPLOYER" ? "/employer" : "/candidate");
+      router.push(postLoginPath(auth.role));
     } catch (ex) {
       const fallback = demoFallbackLogin(email, password);
       if (fallback) {
         saveSession(fallback);
-        router.push(fallback.role === "ADMIN" ? "/admin" : fallback.role === "EMPLOYER" ? "/employer" : "/candidate");
+        router.push(postLoginPath(fallback.role));
       } else {
         setError(ex instanceof Error ? ex.message : "Login failed");
       }
@@ -118,6 +118,16 @@ export default function LoginPage() {
       </div>
     </section>
   );
+}
+
+function postLoginPath(role: "ADMIN" | "EMPLOYER" | "CANDIDATE") {
+  const defaultPath = role === "ADMIN" ? "/admin" : role === "EMPLOYER" ? "/employer" : "/candidate";
+  if (typeof window === "undefined") return defaultPath;
+  const returnUrl = new URLSearchParams(window.location.search).get("returnUrl");
+  if (!returnUrl || !returnUrl.startsWith("/") || returnUrl.startsWith("//")) {
+    return defaultPath;
+  }
+  return returnUrl;
 }
 
 function demoFallbackLogin(email: string, password: string) {

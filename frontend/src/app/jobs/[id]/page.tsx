@@ -9,14 +9,8 @@ import { SkillTag } from "@/components/ui/SkillTag";
 import { JobCard } from "@/components/JobCard";
 import { api } from "@/lib/api";
 import { getSession } from "@/lib/session";
+import { formatSalaryRange } from "@/lib/salaryFormat";
 import type { Job, Company } from "@/types/domain";
-
-function formatSalary(min?: number, max?: number): string {
-  if (!min && !max) return "Thương lượng";
-  if (min && max) return `${min} - ${max} triệu`;
-  if (min) return `Từ ${min} triệu`;
-  return `Đến ${max} triệu`;
-}
 
 function formatDate(dateStr: string): string {
   const date = new Date(dateStr);
@@ -92,7 +86,7 @@ export default function JobDetailPage() {
   function handleApplyClick() {
     const session = getSession();
     if (!session?.accessToken) {
-      router.push(`/auth/login?returnUrl=/jobs/${params.id}`);
+      router.push(`/login?returnUrl=${encodeURIComponent(`/jobs/${params.id}`)}`);
       return;
     }
     setShowModal(true);
@@ -163,7 +157,7 @@ export default function JobDetailPage() {
         <div className="job-detail-page__header">
           <h1 className="job-detail-page__title">{job.title}</h1>
           <div className="job-detail-page__salary">
-            {formatSalary(job.salaryMin, job.salaryMax)}
+            {formatSalaryRange(job.salaryMin, job.salaryMax)}
           </div>
           <div className="job-detail-page__meta">
             {job.location && (

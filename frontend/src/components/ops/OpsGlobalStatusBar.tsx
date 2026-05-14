@@ -11,12 +11,14 @@ export interface OpsGlobalStatusBarProps {
   data?: OpsHealthSummary;
 }
 
+const PENDING_REFRESH_AT = "1970-01-01T00:00:00.000Z";
+
 function HealthPill({ status }: { status: ServiceStatus }) {
   const labels: Record<ServiceStatus, string> = {
     healthy: "Healthy",
     degraded: "Degraded",
     critical: "Critical",
-    unknown: "Unknown",
+    unknown: "Awaiting signal",
   };
 
   return (
@@ -49,7 +51,9 @@ export function OpsGlobalStatusBar({ data: overrideData }: OpsGlobalStatusBarPro
     { refreshInterval: 30_000, pauseWhenHidden: true }
   );
 
-  const summary = overrideData ?? fetchedData ?? unknownOpsHealthSummary("Waiting for the first admin health poll.");
+  const summary = overrideData
+    ?? fetchedData
+    ?? unknownOpsHealthSummary("Waiting for the first admin health poll.", PENDING_REFRESH_AT);
   const overallHealth = computeOverallHealth(summary.services);
 
   return (
@@ -87,6 +91,9 @@ export function OpsGlobalStatusBar({ data: overrideData }: OpsGlobalStatusBarPro
 }
 
 function formatRefreshTime(isoString: string): string {
+  if (isoString === PENDING_REFRESH_AT) {
+    return "pending";
+  }
   try {
     const date = new Date(isoString);
     return date.toLocaleTimeString([], {
