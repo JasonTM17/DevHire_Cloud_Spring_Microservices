@@ -301,6 +301,7 @@ class RedisPubSubFanOutIntegrationTest {
     private RedisMessageListenerContainer createListenerContainer() {
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(connectionFactory);
+        container.setTaskExecutor(Runnable::run);
         container.afterPropertiesSet();
         container.start();
         return container;

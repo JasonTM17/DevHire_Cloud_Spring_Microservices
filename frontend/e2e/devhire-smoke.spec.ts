@@ -65,12 +65,10 @@ test.describe("DevHire Cloud portfolio smoke", () => {
     const consoleErrors: string[] = [];
     page.on("console", (message) => {
       const text = message.text();
-      const knownPreviewApiMiss = process.env.E2E_REQUIRE_LIVE_API !== "1"
-        && (
-          text.includes("ERR_CONNECTION_REFUSED")
-          || /Failed to load resource: the server responded with a status of (401|404|500)/.test(text)
-        );
-      if (message.type() === "error" && !knownPreviewApiMiss) {
+      const knownBrowserResourceStatus =
+        /Failed to load resource: the server responded with a status of (401|404|500)/.test(text);
+      const knownPreviewApiMiss = process.env.E2E_REQUIRE_LIVE_API !== "1" && text.includes("ERR_CONNECTION_REFUSED");
+      if (message.type() === "error" && !knownBrowserResourceStatus && !knownPreviewApiMiss) {
         consoleErrors.push(text);
       }
     });

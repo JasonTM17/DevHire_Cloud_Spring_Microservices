@@ -38,7 +38,9 @@ test.describe("operations portfolio screenshots", () => {
     await page.setViewportSize({ width: 1440, height: 1100 });
 
     await loginFrontendAsAdmin(page);
-    await expect(page.getByText("AI provider operations")).toBeVisible();
+    await page.goto(`${urls.frontend}/admin/ai`);
+    await expect(page.getByTestId("admin-ai-ops-page")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "AI Operations" })).toBeVisible();
     await capture(page, "ops-ai-provider");
 
     await page.goto(urls.mailpit);

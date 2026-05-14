@@ -16,7 +16,7 @@ DevHire Cloud keeps Dependabot enabled because dependency hygiene is part of the
 
 ## Current v0.6 Release-Readiness State
 
-The 2026-05-14 live GitHub scan reports 20 open Dependabot pull requests: 9 Docker, 1 GitHub Actions, 2 Maven, 4 npm/frontend, 3 Terraform, and 1 other. `scripts/dependabot-curate.ps1` dry-run classifies the queue as 11 safe-batch, 3 manual-review, and 6 defer-major. `scripts/dependabot-zero-noise.ps1` dry-run reports 0 clean merge candidates until CI and runtime smoke are green.
+The 2026-05-14 live GitHub scan reports 20 open Dependabot pull requests: 9 Docker, 1 GitHub Actions, 2 Maven, 4 npm/frontend, 3 Terraform, and 1 other. `scripts/dependabot-curate.ps1` dry-run classifies the queue as 11 safe-batch, 3 manual-review, and 6 defer-major. `scripts/dependabot-zero-noise.ps1` dry-run reports 0 merge candidates and 20 close/defer candidates, so no dependency PR was auto-merged during release close-out.
 
 Do not claim a zero Dependabot queue until the owner-token apply path has been run and verified. The intended cleanup command is:
 
@@ -26,7 +26,7 @@ $env:GITHUB_TOKEN = "<short-lived-owner-token>"
 Remove-Item Env:\GITHUB_TOKEN
 ```
 
-Run this only after the release branch has green CI and runtime smoke evidence. The local 2026-05-14 parity pass covered `ai-eval.ps1 -StartStack -Build -KeepRunning` and `perf-suite.ps1 -Vus 5 -Duration 30s -UseDocker`; public GitHub status still needs to refresh after push.
+Run this only during an explicit dependency maintenance window. The local 2026-05-14 parity pass covered `ai-eval.ps1 -StartStack -Build -KeepRunning` and `perf-suite.ps1 -Vus 5 -Duration 30s -UseDocker`; PR #78 GitHub checks were green before merge to `master`.
 
 ## v0.4 Strategy Background
 
