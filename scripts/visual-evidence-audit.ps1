@@ -114,6 +114,7 @@ if (-not $SkipSourceGuard) {
     $primarySourceFiles = @(
         "frontend/src/app/admin/page.tsx",
         "frontend/src/app/admin/ai/page.tsx",
+        "frontend/src/app/admin/monitoring/page.tsx",
         "frontend/src/app/employer/page.tsx",
         "frontend/src/app/candidate/page.tsx",
         "frontend/src/app/candidate/applications/page.tsx",
@@ -132,7 +133,13 @@ if (-not $SkipSourceGuard) {
         "frontend/src/app/assistant/page.tsx",
         "frontend/src/app/platform/cloud/page.tsx",
         "frontend/src/app/platform/observability/page.tsx",
-        "frontend/src/app/platform/releases/page.tsx"
+        "frontend/src/app/platform/releases/page.tsx",
+        "frontend/src/components/ops/AiProviderPanel.tsx",
+        "frontend/src/components/ops/AiRequestMetricsPanel.tsx",
+        "frontend/src/components/ops/OpsDashboardShell.tsx",
+        "frontend/src/components/ops/OpsGlobalStatusBar.tsx",
+        "frontend/src/components/ops/ServiceHealthMatrix.tsx",
+        "frontend/src/components/ops/WidgetGrid.tsx"
     )
     $forbiddenText = @(
         "UNKNOWN",
@@ -142,10 +149,19 @@ if (-not $SkipSourceGuard) {
         "Live API Gateway is offline",
         "offline",
         "Fallback disabled",
+        "Fallback Active",
         "local-deterministic-fallback",
         "local_preview_fallback",
+        "CloudServiceApplication",
+        "Java production validation challenge",
+        "expected_output",
+        "preview-case-hidden",
+        "resource=res-hidden",
+        "@Test",
         "Smoke",
         "â",
+        "Ã",
+        "Â",
         "�",
         "Job `$`{jobId.slice",
         "Candidate `$`{item.candidateId.slice",
@@ -166,7 +182,7 @@ if (-not $SkipSourceGuard) {
     }
 
     $guardSpec = Get-Content -Raw -Encoding UTF8 (Join-Path $repoRoot "frontend/e2e/evidence-guards.ts")
-    foreach ($requiredAssertion in @("assertPrimaryEvidenceReady", "Reviewer demo mode", "local-deterministic-fallback", "Pending job ID", "Job ID")) {
+    foreach ($requiredAssertion in @("assertPrimaryEvidenceReady", "Reviewer demo mode", "local-deterministic-fallback", "Pending job ID", "Job ID", "CloudServiceApplication", "@Test")) {
         if (-not $guardSpec.Contains($requiredAssertion)) {
             throw "Visual evidence guard is missing required readiness assertion: $requiredAssertion"
         }
