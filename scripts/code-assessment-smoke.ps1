@@ -108,24 +108,24 @@ $candidateToken = Login -Email "candidate@devhire.local" -Password "Candidate@12
 $stamp = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
 
 $company = Invoke-Api -Method POST -Path "/api/companies" -Token $employerToken -Body @{
-    name = "DevHire Code Assessment Smoke $stamp"
-    logoUrl = "https://cdn.devhire.local/logos/code-smoke.png"
+    name = "DevHire Code Assessment Verification $stamp"
+    logoUrl = "https://cdn.devhire.local/logos/code-verification.png"
     website = "https://devhire.local"
     size = "51-200"
     industry = "Software"
-    description = "Company created by automated code assessment smoke verification."
+    description = "Company created by automated code assessment release verification."
 }
 $approvedCompany = Invoke-Api -Method PATCH -Path "/api/admin/companies/$($company.id)/approve" -Token $adminToken -Body @{
-    reason = "Automated code assessment smoke verification"
+    reason = "Automated code assessment release verification"
 }
 Assert-Equals -Actual $approvedCompany.status -Expected "APPROVED" -Message "Company approval failed"
 
 $job = Invoke-Api -Method POST -Path "/api/jobs" -Token $employerToken -Body @{
     companyId = $company.id
-    title = "Senior Java Assessment Smoke $stamp"
+    title = "Senior Java Assessment Verification $stamp"
     description = "Verify Java CandidateSolution solve contract through the DevHire assessment runtime."
     requirements = "Java 21, Spring Boot, PostgreSQL, Docker"
-    benefits = "Automated smoke verification"
+    benefits = "Automated release verification"
     salaryMin = 3500
     salaryMax = 6500
     location = "Ho Chi Minh City"
@@ -139,12 +139,12 @@ $approvedJob = Invoke-Api -Method PATCH -Path "/api/admin/jobs/$($job.id)/approv
 Assert-Equals -Actual $approvedJob.status -Expected "PUBLISHED" -Message "Job approval failed"
 
 $application = Invoke-Api -Method POST -Path "/api/jobs/$($job.id)/applications" -Token $candidateToken -Body @{
-    cvUrl = "https://cdn.devhire.local/cv/code-assessment-smoke.pdf"
-    coverLetter = "Automated code assessment verification application."
+    cvUrl = "https://cdn.devhire.local/cv/code-assessment-verification.pdf"
+    coverLetter = "Automated code assessment release verification application."
 }
 $interviewApplication = Invoke-Api -Method PATCH -Path "/api/applications/$($application.id)/status" -Token $employerToken -Body @{
     status = "INTERVIEW"
-    note = "Ready for code assessment smoke."
+    note = "Ready for code assessment verification."
 }
 Assert-Equals -Actual $interviewApplication.status -Expected "INTERVIEW" -Message "Application status update failed"
 
@@ -170,9 +170,9 @@ $run = Invoke-Api -Method POST -Path "/api/candidate/code-assessments/$($assignm
     language = "Java"
     code = $code
     integrityEvents = @()
-    clientFingerprintHash = "code-assessment-smoke"
+    clientFingerprintHash = "code-assessment-verification"
     elapsedSeconds = 60
-    customInput = "resource=res-smoke;policy=STRICT;tag=production"
+    customInput = "resource=res-verification;policy=STRICT;tag=production"
 }
 if ($run.visibleTotal -lt 1) {
     throw "Visible run did not execute any cases"
@@ -181,22 +181,22 @@ if ($run.visibleTotal -lt 1) {
 $submission = Invoke-Api -Method POST -Path "/api/candidate/code-assessments/$($assignment.id)/submit" -Token $candidateToken -Body @{
     language = "Java"
     code = $code
-    notes = "Smoke verification for server-side hidden grading."
+    notes = "Release verification for server-side hidden grading."
     integrityEvents = @()
-    clientFingerprintHash = "code-assessment-smoke"
+    clientFingerprintHash = "code-assessment-verification"
     elapsedSeconds = 90
 }
 if ($null -eq $submission.latestScore) {
     throw "Submission did not return a final score"
 }
 $candidateJson = $submission | ConvertTo-Json -Depth 20
-if ($candidateJson -match "res-hidden|Hidden malformed|expectedOutput") {
+if ($candidateJson -match "res-hidden|Hidden malformed|Private validation|expectedOutput") {
     throw "Candidate submission response leaked hidden payload or expected output"
 }
 
 $candidateHistory = Invoke-Api -Method GET -Path "/api/candidate/code-assessments/$($assignment.id)/submissions" -Token $candidateToken
 $candidateHistoryJson = $candidateHistory | ConvertTo-Json -Depth 20
-if ($candidateHistoryJson -match "res-hidden|Hidden malformed|expectedOutput") {
+if ($candidateHistoryJson -match "res-hidden|Hidden malformed|Private validation|expectedOutput") {
     throw "Candidate submission history leaked hidden payload or expected output"
 }
 
@@ -208,7 +208,7 @@ if ($employerHistoryJson -notmatch "hiddenTotal") {
 
 $reviewed = Invoke-Api -Method PATCH -Path "/api/employer/code-assessments/$($assignment.id)/review" -Token $employerToken -Body @{
     decision = "PASS"
-    note = "Automated code assessment smoke passed."
+    note = "Automated code assessment release verification passed."
 }
 Assert-Equals -Actual $reviewed.latestDecision -Expected "PASS" -Message "Employer review decision failed"
 

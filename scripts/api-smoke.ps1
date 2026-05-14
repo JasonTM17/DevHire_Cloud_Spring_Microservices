@@ -178,25 +178,25 @@ try {
 
     $stamp = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
     $company = Invoke-Api -Method POST -Path "/api/companies" -Token $employerToken -Body @{
-        name        = "DevHire API Smoke $stamp"
-        logoUrl     = "https://cdn.devhire.local/logos/api-smoke.png"
+        name        = "DevHire API Verification $stamp"
+        logoUrl     = "https://cdn.devhire.local/logos/api-verification.png"
         website     = "https://devhire.local"
         size        = "51-200"
         industry    = "Software"
-        description = "Company created by automated Gateway smoke verification."
+        description = "Company created by automated Gateway release verification."
     }
     if ([string]::IsNullOrWhiteSpace($company.id)) {
         throw "Company creation did not return an id"
     }
 
     $approvedCompany = Invoke-Api -Method PATCH -Path "/api/admin/companies/$($company.id)/approve" -Token $adminToken -Body @{
-        reason = "Automated Gateway smoke verification"
+        reason = "Automated Gateway release verification"
     }
     Assert-Equals -Actual $approvedCompany.status -Expected "APPROVED" -Message "Company approval failed"
 
     $job = Invoke-Api -Method POST -Path "/api/jobs" -Token $employerToken -Body @{
         companyId    = $company.id
-        title        = "Senior Java Backend Engineer Smoke $stamp"
+        title        = "Senior Java Backend Engineer Verification $stamp"
         description  = "Build production Spring Boot services for a recruitment platform."
         requirements = "Java 21, Spring Boot, PostgreSQL, Kafka, Docker"
         benefits     = "Hybrid work, learning budget, engineering culture"
@@ -217,10 +217,10 @@ try {
     $approvedJob = Invoke-Api -Method PATCH -Path "/api/admin/jobs/$($job.id)/approve" -Token $adminToken
     Assert-Equals -Actual $approvedJob.status -Expected "PUBLISHED" -Message "Job approval failed"
 
-    Wait-SearchContainsJob -Token $candidateToken -JobId $job.id -Keyword "Smoke $stamp"
+    Wait-SearchContainsJob -Token $candidateToken -JobId $job.id -Keyword "Verification $stamp"
 
     $application = Invoke-Api -Method POST -Path "/api/jobs/$($job.id)/applications" -Token $candidateToken -Body @{
-        cvUrl       = "https://cdn.devhire.local/cv/final-smoke.pdf"
+        cvUrl       = "https://cdn.devhire.local/cv/final-verification.pdf"
         coverLetter = "Automated final verification application for DevHire Cloud."
     }
     if ([string]::IsNullOrWhiteSpace($application.id)) {
@@ -229,7 +229,7 @@ try {
 
     $updatedApplication = Invoke-Api -Method PATCH -Path "/api/applications/$($application.id)/status" -Token $employerToken -Body @{
         status = "INTERVIEW"
-        note   = "Automated Gateway smoke verification status update"
+        note   = "Automated Gateway release verification status update"
     }
     Assert-Equals -Actual $updatedApplication.status -Expected "INTERVIEW" -Message "Application status update failed"
 
