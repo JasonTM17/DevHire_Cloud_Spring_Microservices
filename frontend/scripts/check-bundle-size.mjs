@@ -12,10 +12,15 @@
  */
 
 import { readFileSync, existsSync, readdirSync, statSync } from "node:fs";
-import { join, resolve } from "node:path";
+import { dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const BUDGET_BYTES = 200 * 1024; // 200KB gzipped budget
-const NEXT_DIR = resolve(process.cwd(), ".next");
+const scriptDir = dirname(fileURLToPath(import.meta.url));
+const frontendDir = resolve(scriptDir, "..");
+const NEXT_DIR = existsSync(resolve(process.cwd(), ".next"))
+  ? resolve(process.cwd(), ".next")
+  : resolve(frontendDir, ".next");
 
 /**
  * Attempt to read route sizes from the build-manifest or app-build-manifest.
@@ -83,7 +88,7 @@ function formatBytes(bytes) {
 
 function main() {
   if (!existsSync(NEXT_DIR)) {
-    console.error("❌ .next directory not found. Run `next build` first.");
+    console.error(`[fail] .next directory not found at ${NEXT_DIR}. Run \`next build\` first.`);
     process.exit(1);
   }
 
@@ -142,39 +147,37 @@ function main() {
   }
 
   if (routeSizes.size === 0) {
-    console.warn("⚠️  No route data found in build output. Skipping bundle size check.");
+    console.warn("[warn] No route data found in build output. Skipping bundle size check.");
     process.exit(0);
   }
 
   // Print table
-  console.log("\n📦 Bundle Size Report\n");
-  console.log("┌─────────────────────────────────────────┬──────────┬──────────────┬────────┐");
-  console.log("│ Route                                   │ Chunks   │ Gzip (est.)  │ Status │");
-  console.log("├─────────────────────────────────────────┼──────────┼──────────────┼────────┤");
+  console.log("\nBundle Size Report\n");
+  console.log("Route                                   Chunks   Gzip (est.)   Status");
+  console.log("-----                                   ------   -----------   ------");
 
   let hasFailure = false;
   const sortedRoutes = [...routeSizes.entries()].sort((a, b) => b[1].gzip - a[1].gzip);
 
   for (const [route, info] of sortedRoutes) {
-    const status = info.gzip > BUDGET_BYTES ? "❌ OVER" : "✅ OK";
+    const status = info.gzip > BUDGET_BYTES ? "OVER" : "OK";
     if (info.gzip > BUDGET_BYTES) hasFailure = true;
 
     const routeCol = route.padEnd(39).slice(0, 39);
     const chunksCol = String(info.chunks).padStart(6);
     const sizeCol = formatBytes(info.gzip).padStart(10);
 
-    console.log(`│ ${routeCol} │ ${chunksCol}   │ ${sizeCol}   │ ${status} │`);
+    console.log(`${routeCol}   ${chunksCol}   ${sizeCol}   ${status}`);
   }
 
-  console.log("└─────────────────────────────────────────┴──────────┴──────────────┴────────┘");
   console.log(`\n  Budget: ${formatBytes(BUDGET_BYTES)} (gzipped) per route`);
   console.log(`  Routes checked: ${routeSizes.size}\n`);
 
   if (hasFailure) {
-    console.error("❌ Bundle size budget exceeded! One or more routes are over the 200KB limit.");
+    console.error("[fail] Bundle size budget exceeded. One or more routes are over the 200KB limit.");
     process.exit(1);
   } else {
-    console.log("✅ All routes are within the bundle size budget.");
+    console.log("[pass] All routes are within the bundle size budget.");
     process.exit(0);
   }
 }
