@@ -40,8 +40,19 @@ function Invoke-OpenSearchCleanup {
 
     $body = @{
         query = @{
-            match_phrase_prefix = @{
-                title = "Senior Java Backend Engineer Smoke"
+            bool = @{
+                should = @(
+                    @{ match_phrase_prefix = @{ title = "Senior Java Backend Engineer Smoke" } },
+                    @{ match_phrase_prefix = @{ title = "Senior Java Assessment Smoke" } },
+                    @{ match_phrase_prefix = @{ title = "Senior Java Assessment Debug" } },
+                    @{ match_phrase_prefix = @{ title = "Senior Java Assessment Verification" } },
+                    @{ match_phrase_prefix = @{ title = "Senior Java Backend Engineer k6" } },
+                    @{ match_phrase_prefix = @{ title = "Senior Java Backend Engineer Verification" } },
+                    @{ match_phrase_prefix = @{ title = "Senior Java Mailpit Verification" } },
+                    @{ match_phrase_prefix = @{ title = "Senior Java Resilience Mail" } },
+                    @{ match_phrase_prefix = @{ title = "Senior Java Chaos Mail" } }
+                )
+                minimum_should_match = 1
             }
         }
     } | ConvertTo-Json -Depth 10
@@ -62,36 +73,120 @@ function Invoke-OpenSearchCleanup {
 
 $applicationSql = @'
 DELETE FROM job_applications
-WHERE job_title LIKE 'Senior Java Backend Engineer Smoke %';
+WHERE job_title LIKE 'Senior Java Backend Engineer Smoke %'
+   OR job_title LIKE 'Senior Java Assessment Smoke %'
+   OR job_title LIKE 'Senior Java Assessment Debug %'
+   OR job_title LIKE 'Senior Java Assessment Verification %'
+   OR job_title LIKE 'Senior Java Backend Engineer k6 %'
+   OR job_title LIKE 'Senior Java Backend Engineer Verification %'
+   OR job_title LIKE 'Senior Java Mailpit Smoke %'
+   OR job_title LIKE 'Senior Java Mailpit Verification %'
+   OR job_title LIKE 'Senior Java Chaos Mail %'
+   OR job_title LIKE 'Senior Java Resilience Mail %';
 '@
 
 $jobSql = @'
 DELETE FROM outbox_events
-WHERE payload::text ILIKE '%Senior Java Backend Engineer Smoke%';
+WHERE payload::text ILIKE '%Senior Java Backend Engineer Smoke%'
+   OR payload::text ILIKE '%Senior Java Assessment Smoke%'
+   OR payload::text ILIKE '%Senior Java Assessment Debug%'
+   OR payload::text ILIKE '%Senior Java Assessment Verification%'
+   OR payload::text ILIKE '%Senior Java Backend Engineer k6%'
+   OR payload::text ILIKE '%Senior Java Backend Engineer Verification%'
+   OR payload::text ILIKE '%Senior Java Mailpit Smoke%'
+   OR payload::text ILIKE '%Senior Java Mailpit Verification%'
+   OR payload::text ILIKE '%Senior Java Chaos Mail%'
+   OR payload::text ILIKE '%Senior Java Resilience Mail%';
 
 DELETE FROM jobs
-WHERE title LIKE 'Senior Java Backend Engineer Smoke %';
+WHERE title LIKE 'Senior Java Backend Engineer Smoke %'
+   OR title LIKE 'Senior Java Assessment Smoke %'
+   OR title LIKE 'Senior Java Assessment Debug %'
+   OR title LIKE 'Senior Java Assessment Verification %'
+   OR title LIKE 'Senior Java Backend Engineer k6 %'
+   OR title LIKE 'Senior Java Backend Engineer Verification %'
+   OR title LIKE 'Senior Java Mailpit Smoke %'
+   OR title LIKE 'Senior Java Mailpit Verification %'
+   OR title LIKE 'Senior Java Chaos Mail %'
+   OR title LIKE 'Senior Java Resilience Mail %';
 '@
 
 $companySql = @'
 DELETE FROM outbox_events
-WHERE payload::text ILIKE '%DevHire API Smoke%';
+WHERE payload::text ILIKE '%DevHire API Smoke%'
+   OR payload::text ILIKE '%DevHire API Verification%'
+   OR payload::text ILIKE '%DevHire Code Assessment Smoke%'
+   OR payload::text ILIKE '%DevHire Code Assessment Debug%'
+   OR payload::text ILIKE '%DevHire Code Assessment Verification%'
+   OR payload::text ILIKE '%DevHire k6 Review%'
+   OR payload::text ILIKE '%DevHire Performance Review%'
+   OR payload::text ILIKE '%DevHire Email Smoke%'
+   OR payload::text ILIKE '%DevHire Email Verification%'
+   OR payload::text ILIKE '%DevHire Chaos Company%'
+   OR payload::text ILIKE '%DevHire Chaos Mail%'
+   OR payload::text ILIKE '%DevHire Resilience Company%'
+   OR payload::text ILIKE '%DevHire Resilience Mail%';
 
 DELETE FROM companies
-WHERE name LIKE 'DevHire API Smoke %';
+WHERE name LIKE 'DevHire API Smoke %'
+   OR name LIKE 'DevHire API Verification %'
+   OR name LIKE 'DevHire Code Assessment Smoke %'
+   OR name LIKE 'DevHire Code Assessment Debug %'
+   OR name LIKE 'DevHire Code Assessment Verification %'
+   OR name LIKE 'DevHire k6 Review %'
+   OR name LIKE 'DevHire Performance Review %'
+   OR name LIKE 'DevHire Email Smoke %'
+   OR name LIKE 'DevHire Email Verification %'
+   OR name LIKE 'DevHire Chaos Company %'
+   OR name LIKE 'DevHire Chaos Mail %'
+   OR name LIKE 'DevHire Resilience Company %'
+   OR name LIKE 'DevHire Resilience Mail %';
 '@
 
 $notificationSql = @'
 DELETE FROM notifications
 WHERE title ILIKE '%Smoke%'
    OR message ILIKE '%Senior Java Backend Engineer Smoke%'
-   OR message ILIKE '%Automated final verification%';
+   OR message ILIKE '%Senior Java Assessment Smoke%'
+   OR message ILIKE '%Senior Java Assessment Debug%'
+   OR message ILIKE '%Senior Java Assessment Verification%'
+   OR message ILIKE '%Ready for code assessment smoke%'
+   OR message ILIKE '%Ready for code assessment verification%'
+   OR message ILIKE '%Senior Java Backend Engineer k6%'
+   OR message ILIKE '%Senior Java Backend Engineer Verification%'
+   OR message ILIKE '%Senior Java Mailpit Smoke%'
+   OR message ILIKE '%Senior Java Mailpit Verification%'
+   OR message ILIKE '%Senior Java Chaos Mail%'
+   OR message ILIKE '%Senior Java Resilience Mail%'
+   OR message ILIKE '%Role-based k6 employer review smoke%'
+   OR message ILIKE '%Role-based k6 candidate application verification%'
+   OR message ILIKE '%Role-based performance verification%'
+   OR message ILIKE '%Automated Gateway release verification%'
+   OR message ILIKE '%Automated final verification%'
+   OR message ILIKE '%Mailpit email verification%'
+   OR message ILIKE '%mail resilience verification%';
 '@
 
 $auditSql = @'
 DELETE FROM audit_logs
 WHERE metadata::text ILIKE '%Smoke%'
-   OR metadata::text ILIKE '%Automated Gateway smoke verification%';
+   OR metadata::text ILIKE '%Automated Gateway smoke verification%'
+   OR metadata::text ILIKE '%Automated Gateway release verification%'
+   OR metadata::text ILIKE '%Automated code assessment smoke verification%'
+   OR metadata::text ILIKE '%Automated code assessment release verification%'
+   OR metadata::text ILIKE '%Senior Java Assessment Debug%'
+   OR metadata::text ILIKE '%Senior Java Assessment Verification%'
+   OR metadata::text ILIKE '%Role-based k6 employer review smoke%'
+   OR metadata::text ILIKE '%Role-based k6 candidate application verification%'
+   OR metadata::text ILIKE '%Role-based performance verification%'
+   OR metadata::text ILIKE '%Senior Java Backend Engineer k6%'
+   OR metadata::text ILIKE '%Senior Java Backend Engineer Verification%'
+   OR metadata::text ILIKE '%Senior Java Mailpit Smoke%'
+   OR metadata::text ILIKE '%Senior Java Mailpit Verification%'
+   OR metadata::text ILIKE '%Senior Java Chaos Mail%'
+   OR metadata::text ILIKE '%Senior Java Resilience Mail%'
+   OR metadata::text ILIKE '%Mailpit email verification%'
+   OR metadata::text ILIKE '%mail resilience verification%';
 '@
 
 $aiSql = @'
