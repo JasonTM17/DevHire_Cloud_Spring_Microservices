@@ -504,7 +504,7 @@ class CodeAssessmentServiceTest {
                 return List.of(
                         testCase(rowMapper, "Runtime solve contract", "VISIBLE",
                                 "resource=res-9982;policy=STRICT;tag=production", "PASSED", 15),
-                        testCase(rowMapper, "Hidden malformed resource rejection", "HIDDEN",
+                        testCase(rowMapper, "Private validation case B", "HIDDEN",
                                 "resource=res-hidden-2;policy=STRICT", "REJECTED", 20));
             }
             if (sql.contains("FROM code_assessment_run_results")) {
