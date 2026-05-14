@@ -27,7 +27,7 @@ jobs:
 
       - name: Upload AI eval report
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: ai-eval-summary
           path: reports/ai/eval-summary.json
@@ -39,7 +39,7 @@ jobs:
 
       - name: Store compose logs
         if: failure()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: compose-ai-eval-log
           path: compose-ai-eval.log
