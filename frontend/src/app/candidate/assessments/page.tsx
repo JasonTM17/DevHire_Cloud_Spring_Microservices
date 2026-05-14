@@ -22,10 +22,9 @@ import { useAssessmentTimer } from "@/hooks/useAssessmentTimer";
 import { api } from "@/lib/api";
 import { formatShortDate } from "@/lib/dateFormat";
 import { previewCodeAssessments } from "@/lib/previewData";
+import { assessmentTimerStatus, isFinalCodeAssessmentStatus, isLockedCodeAssessmentStatus, STATUS_TOKENS } from "@/lib/statusLabels";
 import type { CodeAssessment, CodeIntegrityEvent, CodeRun, CodeRunCaseResult, CodeSubmissionSummary } from "@/types/domain";
 
-const FINAL_STATUSES = new Set(["PASSED", "FAILED"]);
-const LOCKED_STATUSES = new Set(["SUBMITTED", "AUTO_REVIEWED", "REVIEWED", "EMPLOYER_REVIEWED", "PASSED", "FAILED"]);
 const DEFAULT_CODE = 'class CandidateSolution {\n  String solve(String input) {\n    return "";\n  }\n}';
 
 const LANGUAGE_PLACEHOLDERS: Record<string, string> = {
@@ -162,8 +161,8 @@ export default function CandidateAssessmentsPage() {
         matched: index === 0
       }));
   const availableLanguages = selected ? selectableLanguages(selected) : ["Java"];
-  const isFinalDecision = selected ? FINAL_STATUSES.has(selected.status) : false;
-  const isSubmissionLocked = selected ? LOCKED_STATUSES.has(selected.status) : false;
+  const isFinalDecision = selected ? isFinalCodeAssessmentStatus(selected.status) : false;
+  const isSubmissionLocked = selected ? isLockedCodeAssessmentStatus(selected.status) : false;
   const progressTotal = Math.max(visibleCases.length, selectedRun?.visibleTotal ?? 0, 1);
   const progressCompleted = Math.min(progressTotal, selectedRun?.visiblePassed ?? 0);
   const progressPercent = Math.round((progressCompleted / progressTotal) * 100);
@@ -226,7 +225,7 @@ export default function CandidateAssessmentsPage() {
   const timer = useAssessmentTimer({
     assignedAt: selected?.assignedAt ? new Date(selected.assignedAt).getTime() : Date.now(),
     dueAt: selected?.dueAt ? new Date(selected.dueAt).getTime() : Date.now(),
-    status: selected?.status === 'SUBMITTED' || selected?.status === 'AUTO_REVIEWED' || selected?.status === 'REVIEWED' || selected?.status === 'EMPLOYER_REVIEWED' || selected?.status === 'PASSED' || selected?.status === 'FAILED' ? 'LOCKED' : (selected?.status ?? ''),
+    status: assessmentTimerStatus(selected?.status),
     onAutoSubmit: autoSubmitWithRetry,
   });
 
@@ -852,8 +851,8 @@ function selectableLanguages(item: CodeAssessment) {
 
 function preferredCodeAssessment(items: CodeAssessment[]) {
   const flagship = items.find((item) => item.challengeTitle.toLowerCase().includes("cloud architecture"));
-  const runnableJava = items.find((item) => item.language.toLowerCase() === "java" && !LOCKED_STATUSES.has(item.status));
-  const runnableAny = items.find((item) => !LOCKED_STATUSES.has(item.status));
+  const runnableJava = items.find((item) => item.language.toLowerCase() === "java" && !isLockedCodeAssessmentStatus(item.status));
+  const runnableAny = items.find((item) => !isLockedCodeAssessmentStatus(item.status));
   return flagship ?? runnableJava ?? runnableAny ?? items[0];
 }
 
@@ -952,7 +951,7 @@ function formatVerdict(value?: string) {
     return "Pending";
   }
   const normalized = value.trim().toUpperCase();
-  if (!normalized || normalized === "UNKNOWN") {
+  if (!normalized || normalized === STATUS_TOKENS.unknown) {
     return "Needs Review";
   }
   return normalized.replaceAll("_", " ").toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
@@ -1137,12 +1136,12 @@ function isUuid(value: string) {
 
 function submissionHistory(item: CodeAssessment) {
   const submitted = Boolean(item.submittedAt);
-  const finalized = FINAL_STATUSES.has(item.status);
+  const finalized = isFinalCodeAssessmentStatus(item.status);
   return [
     {
       title: "Challenge assigned",
       description: `${item.challengeTitle} assigned for ${item.jobTitle}.`,
-      status: "ASSIGNED",
+      status: STATUS_TOKENS.assigned,
       completed: true
     },
     {
@@ -1150,7 +1149,7 @@ function submissionHistory(item: CodeAssessment) {
       description: submitted
         ? `Submitted ${formatDate(item.submittedAt ?? item.assignedAt)} with ${item.language} evidence.`
         : `Due ${formatDate(item.dueAt)} with code, notes, and visible-case evidence.`,
-      status: submitted ? "SUBMITTED" : "SCHEDULED",
+      status: submitted ? STATUS_TOKENS.submitted : STATUS_TOKENS.scheduled,
       completed: submitted
     },
     {

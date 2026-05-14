@@ -55,9 +55,9 @@ function formatCooldownRemaining(cooldownEndsAt: string): string {
 }
 
 /**
- * AiProviderPanel — Displays AI provider status including circuit breaker state.
+ * AiProviderPanel - Displays AI provider status including circuit breaker state.
  * When circuit is OPEN, shows a prominent error alert with cooldown timer
- * and fallback mode indicator.
+ * and reviewer-safe provider backup indicator.
  *
  * Wrapped in OpsWidget for consistent dark theme styling and error isolation.
  *
@@ -111,8 +111,8 @@ export function AiProviderPanel({
           >
             <div className="dh-ai-provider-panel__alert-content">
               <p>
-                Provider is unavailable. Requests are being routed to fallback
-                mode.
+                Provider is unavailable. Requests are using reviewer-safe
+                provider backup mode.
               </p>
               {cooldownDisplay && (
                 <span
@@ -120,11 +120,11 @@ export function AiProviderPanel({
                   aria-live="polite"
                   aria-atomic="true"
                 >
-                  ⏱ {cooldownDisplay}
+                  Timer: {cooldownDisplay}
                 </span>
               )}
               <Badge variant="warning" size="sm">
-                Fallback Active
+                Provider Backup Active
               </Badge>
             </div>
           </InlineAlert>

@@ -8,6 +8,7 @@ import { StatusPill, statusLabel } from "@/components/StatusPill";
 import { api } from "@/lib/api";
 import { brandForCompany } from "@/lib/demoCompanies";
 import { previewApplications, previewCodeAssessments, previewCompanies, previewEmployerPipelineSummary, previewJobs } from "@/lib/previewData";
+import { CODE_REVIEW_STATUS_OPTIONS, isFinalCodeAssessmentStatus, STATUS_TOKENS } from "@/lib/statusLabels";
 import type { Application, CodeAssessment, CodeSubmissionSummary, Company, EmployerPipelineSummary, Job, PageResponse } from "@/types/domain";
 
 export default function EmployerPage() {
@@ -22,7 +23,7 @@ export default function EmployerPage() {
   const [selectedReviewDetail, setSelectedReviewDetail] = useState<CodeAssessment | null>(previewCodeAssessments[0] ?? null);
   const [selectedReviewAttempts, setSelectedReviewAttempts] = useState<CodeSubmissionSummary[]>([]);
   const [reviewNote, setReviewNote] = useState("Record pass, hold, or reject with the reviewer rationale.");
-  const [codeStatusFilter, setCodeStatusFilter] = useState("SUBMITTED");
+  const [codeStatusFilter, setCodeStatusFilter] = useState<string>(STATUS_TOKENS.submitted);
   const [codeJobFilter, setCodeJobFilter] = useState("ALL");
   const [pipelineSummary, setPipelineSummary] = useState<EmployerPipelineSummary>(previewEmployerPipelineSummary);
   const [message, setMessage] = useState("");
@@ -334,7 +335,7 @@ export default function EmployerPage() {
             </button>
           </div>
           <div className="insight-list compact">
-            {["SUBMITTED", "REVIEWING", "INTERVIEW", "OFFER"].map((status) => (
+            {[STATUS_TOKENS.submitted, STATUS_TOKENS.reviewing, STATUS_TOKENS.interview, STATUS_TOKENS.offer].map((status) => (
               <div className="insight-line" key={status}>
                 <span>{status.toLowerCase().replace("_", " ")}</span>
                 <strong>{pipelineCounts[status] ?? 0}</strong>
@@ -375,13 +376,9 @@ export default function EmployerPage() {
             value={codeStatusFilter}
             onChange={(event) => setCodeStatusFilter(event.target.value)}
           >
-            <option value="SUBMITTED">Ready for review</option>
-            <option value="AUTO_REVIEWED">Rubric reviewed</option>
-            <option value="REVIEWED">Reviewed</option>
-            <option value="EMPLOYER_REVIEWED">Decision recorded</option>
-            <option value="PASSED">Passed</option>
-            <option value="FAILED">Failed</option>
-            <option value="ALL">All statuses</option>
+            {CODE_REVIEW_STATUS_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
           </select>
           <select
             aria-label="Code review job scope"
@@ -509,7 +506,7 @@ export default function EmployerPage() {
                 {selectedReviewAttempts.map((attempt) => (
                   <div key={attempt.id}>
                     <span className="done" />
-                    <strong>Attempt {attempt.attemptNumber ?? "?"} - {statusLabel(attempt.verdict ?? "UNKNOWN")}</strong>
+                    <strong>Attempt {attempt.attemptNumber ?? "?"} - {statusLabel(attempt.verdict)}</strong>
                     <small>
                       Score {attempt.finalScore ?? 0}/{selectedReview.maxScore}; visible {attempt.visiblePassed}/{attempt.visibleTotal}; hidden {attempt.hiddenPassed}/{attempt.hiddenTotal}; runtime {attempt.executionTimeMs} ms
                     </small>
@@ -579,7 +576,7 @@ function isPositiveMessage(message: string) {
 }
 
 function isReviewableCodeAssessment(item: CodeAssessment) {
-  return Boolean(item.submittedAt) && !["PASSED", "FAILED"].includes(item.status);
+  return Boolean(item.submittedAt) && !isFinalCodeAssessmentStatus(item.status);
 }
 
 function riskFlagLabel(flag: string) {
@@ -602,12 +599,12 @@ function riskFlagLabel(flag: string) {
 
 function statusForReviewDecision(decision: string) {
   if (decision === "PASS" || decision === "ADVANCE") {
-    return "PASSED";
+    return STATUS_TOKENS.passed;
   }
   if (decision === "REJECT") {
-    return "FAILED";
+    return STATUS_TOKENS.failed;
   }
-  return "REVIEWED";
+  return STATUS_TOKENS.reviewed;
 }
 
 function isUuid(value: string) {
