@@ -12,7 +12,7 @@ DevHire Cloud treats GitHub repository presentation as part of the production po
 | Latest release | `v0.5.1` public |
 | Default branch | `master` |
 | Branch protection | Enabled |
-| Dependabot queue | 20 open Dependabot PRs at the 2026-05-14 live scan; curation dry-run: 11 safe-batch, 3 manual-review, 6 defer-major; zero-noise: 0 merge candidates and 20 close/defer candidates |
+| Dependabot queue | 0 open Dependabot PRs after the 2026-05-14 zero-noise apply; stale/behind/risky branches were commented, closed, and pruned |
 | Wiki | Disabled target; the repository should not expose an empty Wiki tab |
 | Merge policy | Squash or rebase only; merge commits disabled in settings-as-code |
 | Branch cleanup | Delete merged branches enabled in settings-as-code |

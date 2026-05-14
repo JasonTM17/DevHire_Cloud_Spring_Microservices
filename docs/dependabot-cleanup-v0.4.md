@@ -4,7 +4,7 @@ DevHire Cloud keeps Dependabot PRs visible, triaged, and intentionally batched. 
 
 ## Current Issue
 
-The public GitHub repo previously had 20 open Dependabot PRs across Docker, GitHub Actions, Maven, npm/frontend, and Terraform. v0.4.6 curation closed the deferred-major PRs with comments, leaving the safe maintenance batch visible.
+The public GitHub repo previously had 20 open Dependabot PRs across Docker, GitHub Actions, Maven, npm/frontend, and Terraform. The 2026-05-14 zero-noise apply found no clean merge candidates, commented on all PRs, closed/deferred the stale or risky queue, and pruned the remote Dependabot branches. The public queue is now intentionally empty until the next scheduled dependency maintenance window.
 
 ## Automation
 
@@ -46,7 +46,7 @@ $env:GITHUB_TOKEN = "<short-lived-owner-token>"
 Remove-Item Env:\GITHUB_TOKEN
 ```
 
-The script never merges pull requests automatically.
+The curation script never merges pull requests automatically. The stricter zero-noise script can merge only when GitHub reports `mergeable_state=clean` and readable checks are green; otherwise it closes/defer-comments the PR.
 
 ## GitHub Actions Route
 
@@ -112,7 +112,7 @@ Initial v0.4.6 dry-run evidence categorized the public Dependabot queue as:
 | Deferred major | 8 | Close with comment explaining dedicated migration/runtime-smoke requirement |
 | Manual review | 1 | Keep open until scoped review |
 
-After `Dependabot Curation -> close-deferred`, the visible PR count dropped to 12: 11 safe-batch PRs and 1 manual-review PR.
+Historical v0.4.6 curation reduced the queue once; the final 2026-05-14 zero-noise apply reduced the visible PR count to 0 because every remaining PR was behind, failing, unreadable, or a runtime/platform update that needed a future maintenance pass.
 
 ## v0.4.7 Zero-Noise Policy
 

@@ -16,17 +16,15 @@ DevHire Cloud keeps Dependabot enabled because dependency hygiene is part of the
 
 ## Current v0.6 Release-Readiness State
 
-The 2026-05-14 live GitHub scan reports 20 open Dependabot pull requests: 9 Docker, 1 GitHub Actions, 2 Maven, 4 npm/frontend, 3 Terraform, and 1 other. `scripts/dependabot-curate.ps1` dry-run classifies the queue as 11 safe-batch, 3 manual-review, and 6 defer-major. `scripts/dependabot-zero-noise.ps1` dry-run reports 0 merge candidates and 20 close/defer candidates, so no dependency PR was auto-merged during release close-out.
+The 2026-05-14 live GitHub scan originally found 20 Dependabot pull requests: 9 Docker, 1 GitHub Actions, 2 Maven, 4 npm/frontend, 3 Terraform, and 1 other. `scripts/dependabot-zero-noise.ps1 -Apply` was then run from an owner-authenticated shell. It found 0 clean merge candidates, commented on each PR, closed/deferred all 20 stale/behind/risky updates, and the remote Dependabot branches were pruned. No dependency PR was force-merged into the release.
 
-Do not claim a zero Dependabot queue until the owner-token apply path has been run and verified. The intended cleanup command is:
+Future dependency cleanup should start with a dry run:
 
 ```powershell
-$env:GITHUB_TOKEN = "<short-lived-owner-token>"
-.\scripts\dependabot-zero-noise.ps1 -Apply
-Remove-Item Env:\GITHUB_TOKEN
+.\scripts\dependabot-zero-noise.ps1 -DryRun
 ```
 
-Run this only during an explicit dependency maintenance window. The local 2026-05-14 parity pass covered `ai-eval.ps1 -StartStack -Build -KeepRunning` and `perf-suite.ps1 -Vus 5 -Duration 30s -UseDocker`; PR #78 GitHub checks were green before merge to `master`.
+Apply mode should run only during an explicit dependency maintenance window, after green CI/runtime smoke. The 2026-05-14 close-out covered local `ai-eval.ps1`, `api-smoke.ps1`, `runtime-observability-smoke.ps1`, `code-assessment-smoke.ps1`, and `perf-suite.ps1 -Vus 2 -Duration 10s -UseDocker` against Docker Gateway `18080`, then re-dispatched `AI Assistant Evaluation` and `Performance Smoke` on `master` until both were green.
 
 ## v0.4 Strategy Background
 

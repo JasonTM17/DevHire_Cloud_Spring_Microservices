@@ -74,10 +74,10 @@ These items require repository owner credentials and should not be hidden behind
 
 | Item | Current state as of 2026-05-14 | Action |
 |---|---|---|
-| Dependabot PR queue | 20 open Dependabot PRs. Curation dry-run classifies 11 safe-batch, 3 manual-review, and 6 defer-major; zero-noise reports 0 merge candidates and 20 close/defer candidates. | Use a short-lived owner token with `.\scripts\dependabot-zero-noise.ps1 -Apply` only for an intentional dependency maintenance window. |
+| Dependabot PR queue | 0 open Dependabot PRs after the 2026-05-14 zero-noise apply; 20 stale/behind/risky PRs were commented, closed, and pruned. | Keep Dependabot enabled, but use `.\scripts\dependabot-zero-noise.ps1 -DryRun` before any future dependency maintenance window. |
 | Branch and public facade governance | `master` is protected and public metadata is applied, but detailed protection reads may require owner scope. | Run `.\scripts\github-governance.ps1 -DryRun` and owner-token apply only when settings drift. |
-| Docker Hub release promotion | Preview tags are verifiable; publishing a new release tag should use the merged `master` head `72be9df8`. | Run `.\scripts\dockerhub-image-verify.ps1` and release workflow from `master`. |
-| GitHub Actions release blockers | Local parity for `AI Assistant Evaluation` and `Performance Smoke` passed on 2026-05-14; PR #78 checks were green before merge. | Watch the next scheduled or manually-dispatched workflow runs before Docker Hub promotion. |
+| Docker Hub release promotion | Preview tags are verifiable; publishing a new release tag should use the latest green `master` head. | Run `.\scripts\dockerhub-image-verify.ps1` and release workflow from `master`. |
+| GitHub Actions release blockers | `AI Assistant Evaluation`, `Performance Smoke`, CI, E2E Smoke, Docker Images, CodeQL, Security, and Documentation are green on `master` after the 2026-05-14 close-out. | Watch the next scheduled workflow runs before Docker Hub promotion. |
 
 ## Documentation Standards
 
