@@ -23,8 +23,8 @@ This page summarizes the public GitHub presentation state for DevHire Cloud.
 
 | Signal | Value |
 |---|---|
-| Close-out PRs | [#78](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/pull/78), [#80](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/pull/80) |
-| Merged master head before final branch-cleanup patch | `f0114284` |
+| Close-out PRs | v0.6 close-out, final branch cleanup, and documentation polish merged into `master` on 2026-05-14 |
+| Current master head | Verify with `git log -1 --oneline` and `gh run list --branch master`; current-state docs avoid hardcoding a moving head SHA |
 | Branch protection after merge | Required reviews and required status checks enabled |
 | Final local docs gates | `docs-quality.ps1`, `evidence-audit.ps1`, and `git diff --check` passed |
 
