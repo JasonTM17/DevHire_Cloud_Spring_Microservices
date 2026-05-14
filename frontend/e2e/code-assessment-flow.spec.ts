@@ -44,6 +44,20 @@ async function login(page: Page, role: Role) {
   await expect(page.getByTestId(user.testId)).toBeVisible();
 }
 
+async function setCandidateCode(page: Page, code: string) {
+  const fallback = page.locator('textarea[aria-label="Candidate code submission"]');
+  if (await fallback.isVisible().catch(() => false)) {
+    await fallback.fill(code);
+    return;
+  }
+
+  const monacoEditor = page.locator('.dh-code-editor[data-editor-mode="monaco"] .monaco-editor');
+  await expect(monacoEditor).toBeVisible();
+  await monacoEditor.click();
+  await page.keyboard.press(process.platform === "darwin" ? "Meta+A" : "Control+A");
+  await page.keyboard.insertText(code);
+}
+
 function envelope(data: unknown) {
   return {
     timestamp: NOW,
@@ -351,7 +365,7 @@ function codeChallenge(overrides: Record<string, unknown> = {}) {
       },
       {
         id: "hidden-1",
-        name: "Hidden staging strict case",
+        name: "Private validation case A",
         visibility: "HIDDEN",
         stdin: "resource=res-1111;policy=STRICT;tag=staging",
         expectedOutput: "REJECTED",
@@ -655,10 +669,10 @@ test.describe("LeetCode-style code assessment E2E", () => {
     await expect(page.getByRole("tab", { name: /CandidateSolution\.java/ })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Cloud Architecture Challenge", exact: true })).toBeVisible();
     await expect(page.getByText("Visible production strict case").first()).toBeVisible();
-    await expect(page.locator("body")).not.toContainText("Hidden staging strict case");
+    await expect(page.locator("body")).not.toContainText("Private validation case A");
     await expect(page.locator("body")).not.toContainText("resource=res-1111");
 
-    await page.getByLabel("Candidate code submission").fill(javaAcceptedCode());
+    await setCandidateCode(page, javaAcceptedCode());
     await page.getByLabel("Custom stdin").fill("resource=res-9982;policy=STRICT;tag=production");
     await page.getByRole("button", { name: "Run Custom Input" }).click();
 
@@ -673,7 +687,7 @@ test.describe("LeetCode-style code assessment E2E", () => {
     await expect(page.getByRole("heading", { name: "Submission history" })).toBeVisible();
     await expect(page.getByText(/hidden results redacted for candidate view/i)).toBeVisible();
     await expect(page.getByRole("button", { name: "Submit for rubric score" })).toBeDisabled();
-    await expect(page.locator("body")).not.toContainText("Hidden staging strict case");
+    await expect(page.locator("body")).not.toContainText("Private validation case A");
     await expect(page.locator("body")).not.toContainText("resource=res-1111");
     await expect(page.locator("body")).not.toContainText("expected_output");
   });
@@ -754,7 +768,7 @@ test.describe("LeetCode-style code assessment E2E", () => {
     await login(page, "candidate");
     await page.goto("/candidate/assessments");
 
-    await page.getByLabel("Candidate code submission").fill(javaAcceptedCode());
+    await setCandidateCode(page, javaAcceptedCode());
     await page.getByLabel("Custom stdin").fill("resource=res-9982;policy=STRICT;tag=production");
 
     await page.getByRole("button", { name: "Run Custom Input" }).click();

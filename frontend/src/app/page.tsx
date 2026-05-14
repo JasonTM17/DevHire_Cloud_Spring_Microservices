@@ -1,14 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { Building2, MapPin, ShieldCheck } from "lucide-react";
 import { api } from "@/lib/api";
 import { SearchBar } from "@/components/ui/SearchBar";
 import { SkillTag } from "@/components/ui/SkillTag";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { JobCard } from "@/components/JobCard";
-import type { Job, Company, PageResponse } from "@/types/domain";
+import type { Company, Job } from "@/types/domain";
 
 const TRENDING_SKILLS = ["Java", "ReactJS", ".NET", "NodeJS", "Python", "TypeScript", "PHP", "Tester"];
 
@@ -35,28 +36,33 @@ export default function HomePage() {
         setFeaturedJobs(jobsResponse.content);
         setTotalJobs(jobsResponse.totalElements);
       } catch {
-        // Silently handle — homepage still renders
+        setFeaturedJobs([]);
       }
 
       try {
         const companiesResponse = await api.companies();
         const approved = companiesResponse.content
-          .filter((c) => c.status === "APPROVED")
+          .filter((company) => company.status === "APPROVED")
           .slice(0, 6);
         setCompanies(approved);
       } catch {
-        // Silently handle
+        setCompanies([]);
       }
     }
 
     fetchData();
   }, []);
 
+  const companyById = useMemo(() => {
+    return new Map(companies.map((company) => [company.id, company]));
+  }, [companies]);
+
   function handleSearch() {
     const params = new URLSearchParams();
     if (searchQuery.trim()) params.set("search", searchQuery.trim());
     if (city) params.set("city", city);
-    router.push(`/jobs?${params.toString()}`);
+    const query = params.toString();
+    router.push(query ? `/jobs?${query}` : "/jobs");
   }
 
   function handleSkillClick(skill: string) {
@@ -64,46 +70,54 @@ export default function HomePage() {
   }
 
   return (
-    <div>
-      {/* Hero Section */}
+    <div className="client-home">
       <section className="hero-section">
-        <h1 className="hero-section__heading">
-          <span>{totalJobs}</span> IT Jobs For <span>Chất</span> Developers
-        </h1>
-        <div className="hero-section__search">
-          <SearchBar
-            placeholder="Tìm kiếm việc làm IT theo skill, vị trí..."
-            value={searchQuery}
-            onChange={setSearchQuery}
-            onSearch={handleSearch}
-          />
-          <select
-            className="hero-section__city-select"
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
-            aria-label="Chọn thành phố"
-          >
-            {CITIES.map((c) => (
-              <option key={c.value} value={c.value}>
-                {c.label}
-              </option>
-            ))}
-          </select>
+        <div className="hero-section__content">
+          <p className="hero-section__eyebrow">DevHire IT Jobs</p>
+          <h1 className="hero-section__heading">
+            Tìm việc IT chất lượng cho developer nghiêm túc
+          </h1>
+          <p className="hero-section__subtitle">
+            Khám phá cơ hội backend, cloud, data và frontend từ các công ty công nghệ đang tuyển thật.
+          </p>
+          <div className="hero-section__search">
+            <SearchBar
+              placeholder="Nhập kỹ năng, vị trí hoặc tên công ty"
+              value={searchQuery}
+              onChange={setSearchQuery}
+              onSearch={handleSearch}
+            />
+            <select
+              className="hero-section__city-select"
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              aria-label="Chọn thành phố"
+            >
+              {CITIES.map((item) => (
+                <option key={item.value} value={item.value}>
+                  {item.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="hero-section__trust-row" aria-label="Nền tảng tuyển dụng IT">
+            <span><ShieldCheck size={16} /> Code assessment server-side</span>
+            <span><Building2 size={16} /> {companies.length || 6}+ công ty nổi bật</span>
+            <span><MapPin size={16} /> Remote, Hà Nội, Hồ Chí Minh</span>
+          </div>
         </div>
       </section>
 
-      {/* Trending Skills */}
       <section className="trending-section">
-        <span className="trending-section__label">Trending:</span>
+        <span className="trending-section__label">Kỹ năng nổi bật:</span>
         {TRENDING_SKILLS.map((skill) => (
           <SkillTag key={skill} skill={skill} onClick={handleSkillClick} />
         ))}
       </section>
 
-      {/* Top Employers */}
       {companies.length > 0 && (
         <section className="top-employers">
-          <SectionHeader title="Nhà tuyển dụng hàng đầu" linkText="Xem tất cả" linkHref="/companies" />
+          <SectionHeader title="Nhà tuyển dụng nổi bật" linkText="Xem tất cả" linkHref="/companies" />
           <div className="top-employers__grid">
             {companies.map((company) => (
               <div
@@ -134,14 +148,21 @@ export default function HomePage() {
         </section>
       )}
 
-      {/* Featured Jobs */}
       {featuredJobs.length > 0 && (
         <section className="featured-jobs">
           <SectionHeader title="Việc làm nổi bật" linkText="Xem tất cả" linkHref="/jobs" />
           <div className="featured-jobs__grid">
-            {featuredJobs.map((job) => (
-              <JobCard key={job.id} job={job} />
-            ))}
+            {featuredJobs.map((job) => {
+              const company = companyById.get(job.companyId);
+              return (
+                <JobCard
+                  key={job.id}
+                  job={job}
+                  companyName={company?.name}
+                  companyLogoUrl={company?.logoUrl}
+                />
+              );
+            })}
           </div>
         </section>
       )}

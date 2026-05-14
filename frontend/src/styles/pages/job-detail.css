@@ -1,5 +1,5 @@
 /* ============================================
-   Job Detail Page — DevHire Cloud
+   Job Detail Page - DevHire Cloud
    ============================================ */
 
 .job-detail-page {
@@ -15,6 +15,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-6);
+  min-width: 0;
 }
 
 .job-detail-page__sidebar {
@@ -27,8 +28,18 @@
 .job-detail-page__header {
   background: var(--color-white);
   border: 1px solid var(--color-border);
+  border-top: 4px solid var(--color-primary);
   border-radius: var(--radius-md);
   padding: var(--space-6);
+}
+
+.job-detail-page__eyebrow {
+  margin: 0 0 var(--space-3);
+  color: var(--color-primary);
+  font-size: var(--font-size-xs);
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
 }
 
 .job-detail-page__title {
@@ -37,6 +48,7 @@
   color: var(--color-text-primary);
   margin-bottom: var(--space-4);
   line-height: var(--line-height-tight);
+  overflow-wrap: anywhere;
 }
 
 .job-detail-page__meta {
@@ -55,7 +67,7 @@
 
 .job-detail-page__salary {
   font-size: var(--font-size-lg);
-  font-weight: 600;
+  font-weight: 800;
   color: var(--color-primary);
   margin-top: var(--space-3);
 }
@@ -66,6 +78,7 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   padding: var(--space-6);
+  min-width: 0;
 }
 
 .job-detail-page__section h2 {
@@ -130,6 +143,10 @@
   cursor: not-allowed;
 }
 
+.job-detail-page__apply-btn--mobile {
+  display: none;
+}
+
 /* Company Sidebar Card */
 .job-detail-page__company-card {
   background: var(--color-white);
@@ -176,6 +193,13 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
+}
+
+.job-detail-page__company-info span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
 }
 
 .job-detail-page__company-link {
@@ -323,6 +347,7 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   padding: var(--space-6);
+  min-width: 0;
 }
 
 .job-detail-page__similar h2 {
@@ -362,11 +387,21 @@
   .job-detail-page__similar-grid {
     grid-template-columns: 1fr;
   }
+
+  .job-detail-page__sidebar > .job-detail-page__apply-btn {
+    display: none;
+  }
+
+  .job-detail-page__apply-btn--mobile {
+    display: block;
+  }
 }
 
 @media (max-width: 767px) {
   .job-detail-page {
     padding: var(--space-4) var(--space-3);
+    max-width: 100%;
+    overflow-x: clip;
   }
 
   .job-detail-page__title {
@@ -380,5 +415,9 @@
 
   .job-detail-page__modal {
     padding: var(--space-6);
+  }
+
+  .job-detail-page__apply-btn--mobile {
+    max-width: 100%;
   }
 }

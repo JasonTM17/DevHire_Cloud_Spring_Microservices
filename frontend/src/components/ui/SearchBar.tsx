@@ -17,15 +17,16 @@ export function SearchBar({
 }: SearchBarProps) {
   return (
     <div className="search-bar">
-      <Search size={18} className="search-bar__icon" />
+      <Search size={18} className="search-bar__icon" aria-hidden="true" />
       <input
         type="text"
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={(e) => e.key === "Enter" && onSearch?.()}
+        aria-label={placeholder}
       />
-      <button className="btn btn-primary search-bar__btn" onClick={onSearch}>
+      <button className="btn btn-primary search-bar__btn" onClick={onSearch} type="button">
         Tìm kiếm
       </button>
     </div>

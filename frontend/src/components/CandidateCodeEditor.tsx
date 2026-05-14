@@ -132,7 +132,7 @@ function TextareaFallback({
       <textarea
         data-editor-mode="textarea-fallback"
         className="dh-code-editor__textarea"
-        aria-label="Code editor"
+        aria-label="Candidate code submission"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
@@ -234,7 +234,7 @@ export function CandidateCodeEditor({
   // Loading state — show skeleton
   if (isLoading && !loadFailed) {
     return (
-      <div className="dh-code-editor" aria-label="Code editor" role="region">
+      <div className="dh-code-editor" aria-label="Code editor region" role="region">
         <SkeletonLoader
           shape="rect"
           width="100%"
@@ -248,7 +248,7 @@ export function CandidateCodeEditor({
   // Fallback state — Monaco failed or timed out
   if (loadFailed || !MonacoEditor) {
     return (
-      <div className="dh-code-editor" aria-label="Code editor" role="region">
+      <div className="dh-code-editor" aria-label="Code editor region" role="region">
         <TextareaFallback
           value={value}
           language={language}
@@ -265,7 +265,7 @@ export function CandidateCodeEditor({
   return (
     <div
       className="dh-code-editor"
-      aria-label="Code editor"
+      aria-label="Code editor region"
       role="region"
       data-editor-mode="monaco"
     >
@@ -285,6 +285,7 @@ export function CandidateCodeEditor({
           />
         }
         options={{
+          ariaLabel: "Candidate code submission",
           readOnly: isReadOnly,
           fontSize,
           fontFamily: "var(--dh-font-mono, 'Fira Code', 'SFMono-Regular', Consolas, monospace)",

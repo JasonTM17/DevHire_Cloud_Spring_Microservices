@@ -1,8 +1,10 @@
 import { expect, test, type Page } from "@playwright/test";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { assertPrimaryEvidenceReady } from "./evidence-guards";
 
-const screenshotsDir = path.resolve(__dirname, "..", "..", "docs", "screenshots");
+const currentDir = path.dirname(fileURLToPath(import.meta.url));
+const screenshotsDir = path.resolve(currentDir, "..", "..", "docs", "screenshots");
 
 const urls = {
   frontend: process.env.E2E_FRONTEND_URL ?? "http://localhost:3001",

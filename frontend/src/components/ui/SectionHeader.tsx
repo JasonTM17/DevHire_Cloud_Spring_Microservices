@@ -12,7 +12,7 @@ export function SectionHeader({ title, linkText, linkHref }: SectionHeaderProps)
       <h2>{title}</h2>
       {linkText && linkHref && (
         <Link href={linkHref} className="section-header__link">
-          {linkText} →
+          {linkText} <span aria-hidden="true">-&gt;</span>
         </Link>
       )}
     </div>

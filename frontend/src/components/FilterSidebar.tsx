@@ -86,6 +86,7 @@ export function FilterSidebar({ filters, value, onChange }: FilterSidebarProps) 
               className="filter-sidebar__group-header"
               onClick={() => toggleSection(group.id)}
               type="button"
+              aria-expanded={!isCollapsed}
             >
               <span>{group.title}</span>
               {isCollapsed ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
@@ -147,8 +148,9 @@ export function FilterSidebar({ filters, value, onChange }: FilterSidebarProps) 
                           handleRangeChange(group.id, 0, Number(e.target.value))
                         }
                         placeholder="Min"
+                        aria-label={`${group.title} tối thiểu`}
                       />
-                      <span className="filter-sidebar__range-separator">—</span>
+                      <span className="filter-sidebar__range-separator">-</span>
                       <input
                         type="number"
                         min={group.min ?? 0}
@@ -164,6 +166,7 @@ export function FilterSidebar({ filters, value, onChange }: FilterSidebarProps) 
                           handleRangeChange(group.id, 1, Number(e.target.value))
                         }
                         placeholder="Max"
+                        aria-label={`${group.title} tối đa`}
                       />
                     </div>
                   </div>

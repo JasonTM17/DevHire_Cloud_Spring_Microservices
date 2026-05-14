@@ -1,8 +1,10 @@
 import { expect, test, type Page } from "@playwright/test";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { assertPrimaryEvidenceReady } from "./evidence-guards";
 
-const screenshotsDir = path.resolve(__dirname, "..", "test-results", "portfolio-screenshots");
+const currentDir = path.dirname(fileURLToPath(import.meta.url));
+const screenshotsDir = path.resolve(currentDir, "..", "test-results", "portfolio-screenshots");
 
 const accounts = {
   admin: {
@@ -56,7 +58,7 @@ test.describe("portfolio screenshots", () => {
     await expect(page.getByText("Syncing published jobs")).toHaveCount(0);
     await capture(page, "jobs-page");
 
-    await page.getByTestId("job-card").first().click();
+    await page.locator("a.job-card__title").first().click();
     await expect(page.getByTestId("job-detail-page")).toBeVisible();
     await capture(page, "job-detail");
 
@@ -80,9 +82,8 @@ test.describe("portfolio screenshots", () => {
     await capture(page, "employer-dashboard");
 
     await login(page, "admin");
-    await expect(page.getByText("Review console")).toBeVisible();
-    await expect(page.getByText("AI provider operations")).toBeVisible();
-    await expect(page.getByText("Syncing admin review queue...")).toHaveCount(0);
+    await expect(page.getByText("Operations Overview")).toBeVisible();
+    await expect(page.getByText(/Assessment Runner|Runner Risk Rate/i).first()).toBeVisible();
     await capture(page, "admin-dashboard");
   });
 });

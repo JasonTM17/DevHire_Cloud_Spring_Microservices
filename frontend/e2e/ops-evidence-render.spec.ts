@@ -1,8 +1,10 @@
 import { expect, test } from "@playwright/test";
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
-const repoRoot = path.resolve(__dirname, "..", "..");
+const currentDir = path.dirname(fileURLToPath(import.meta.url));
+const repoRoot = path.resolve(currentDir, "..", "..");
 const screenshotsDir = path.join(repoRoot, "docs", "screenshots");
 const prometheusRulesPath = path.join(repoRoot, "infra", "prometheus", "rules", "devhire-slo.yml");
 const grafanaDashboardPath = path.join(repoRoot, "infra", "grafana", "dashboards", "devhire-slo-overview.json");
