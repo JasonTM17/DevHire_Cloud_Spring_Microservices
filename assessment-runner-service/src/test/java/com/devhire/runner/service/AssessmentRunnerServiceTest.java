@@ -63,7 +63,7 @@ class AssessmentRunnerServiceTest {
                     }
                 }
                 """, List.of(new RunnerTestCaseRequest(UUID.randomUUID(), "Custom input", "VISIBLE",
-                "resource=res-smoke;policy=STRICT;tag=production", "", 0))));
+                "resource=res-verification;policy=STRICT;tag=production", "", 0))));
 
         assertThat(response.status()).isEqualTo("COMPLETED");
         assertThat(response.passed()).isEqualTo(1);
