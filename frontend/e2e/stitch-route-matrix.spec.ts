@@ -1,8 +1,10 @@
 import { expect, test, type Page } from "@playwright/test";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { assertPrimaryEvidenceReady, expectNoHorizontalOverflow } from "./evidence-guards";
 
-const screenshotsDir = path.resolve(__dirname, "..", "test-results", "stitch-route-matrix");
+const currentDir = path.dirname(fileURLToPath(import.meta.url));
+const screenshotsDir = path.resolve(currentDir, "..", "test-results", "stitch-route-matrix");
 
 const accounts = {
   admin: {

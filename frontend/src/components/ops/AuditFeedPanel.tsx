@@ -41,6 +41,12 @@ function getActionBadgeVariant(
   return "default";
 }
 
+function formatResource(log: AuditLog): string {
+  const targetType = log.targetType || "resource";
+  const targetId = log.targetId ? log.targetId.slice(0, 8) : "pending";
+  return `${targetType}/${targetId}`;
+}
+
 // ─── AuditRow ────────────────────────────────────────────────────────────────
 
 function AuditRow({ log }: { log: AuditLog }) {
@@ -56,7 +62,7 @@ function AuditRow({ log }: { log: AuditLog }) {
         {log.action.replaceAll("_", " ").toLowerCase()}
       </span>
       <span className="dh-audit-feed__resource">
-        {log.targetType}/{log.targetId.slice(0, 8)}
+        {formatResource(log)}
       </span>
       <Badge
         variant={getActionBadgeVariant(log.action)}

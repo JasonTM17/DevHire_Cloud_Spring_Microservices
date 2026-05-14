@@ -45,6 +45,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   // Derive role and filtered nav links
   const role: NavUserRole = session?.user.role ?? "PUBLIC";
   const links = useMemo(() => filterNavByRole(navLinks, role), [role]);
+  const requiredRole = requiredRoleForPath(pathname);
+  const isAccessDenied = Boolean(session && requiredRole && role !== requiredRole);
 
   const user = session
     ? { name: session.user.email, avatarUrl: undefined }
@@ -58,6 +60,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   if (isAssessmentIDE && role === "CANDIDATE") {
     return <>{children}</>;
   }
+
+  const mainContent = isAccessDenied ? (
+    <AccessDenied currentRole={role} requiredRole={requiredRole!} />
+  ) : children;
 
   return (
     <>
@@ -81,11 +87,37 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         {navMode === "mobile" && <MobileTopBar links={links} user={user} session={session} />}
       </header>
       <main id="main-content" role="main">
-        {children}
+        {mainContent}
       </main>
       <footer role="contentinfo" className="dh-app-footer">
         <p>&copy; {new Date().getFullYear()} DevHire Cloud. All rights reserved.</p>
       </footer>
     </>
+  );
+}
+
+function requiredRoleForPath(pathname: string): NavUserRole | null {
+  if (pathname.startsWith("/admin") || pathname.startsWith("/platform")) return "ADMIN";
+  if (pathname.startsWith("/employer")) return "EMPLOYER";
+  if (pathname.startsWith("/candidate")) return "CANDIDATE";
+  return null;
+}
+
+function AccessDenied({
+  currentRole,
+  requiredRole,
+}: {
+  currentRole: NavUserRole;
+  requiredRole: NavUserRole;
+}) {
+  return (
+    <section className="access-denied panel" data-testid="access-denied">
+      <p className="eyebrow">Access control</p>
+      <h2>Workspace unavailable for this role</h2>
+      <p>
+        Required role <strong>{requiredRole}</strong>. Current session <strong>{currentRole}</strong>.
+        Switch accounts from the sign-in page to inspect this workspace.
+      </p>
+    </section>
   );
 }

@@ -1,8 +1,10 @@
 import { expect, test, type Page } from "@playwright/test";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { assertPrimaryEvidenceReady, expectNoHorizontalOverflow } from "./evidence-guards";
 
-const mobileScreenshotsDir = path.resolve(__dirname, "..", "test-results", "mobile-screenshots");
+const currentDir = path.dirname(fileURLToPath(import.meta.url));
+const mobileScreenshotsDir = path.resolve(currentDir, "..", "test-results", "mobile-screenshots");
 const accounts = {
   admin: {
     email: "admin@devhire.local",
@@ -57,16 +59,24 @@ async function login(page: Page, role: Role) {
   await expect(page.getByTestId(user.testId)).toBeVisible();
 }
 
+async function expectRouteMainVisible(page: Page) {
+  const appMain = page.locator("#main-content");
+  if (await appMain.count()) {
+    await expect(appMain).toBeVisible();
+    return;
+  }
+  await expect(page.locator("main")).toBeVisible();
+}
+
 test.describe("Mobile recruiter demo smoke", () => {
   test("jobs workspace remains usable on a phone viewport", async ({ page }) => {
     await page.goto("/jobs");
 
     await expect(page.getByTestId("jobs-page")).toBeVisible();
-    await expect(page.getByRole("navigation", { name: "Primary" })).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Jobs" })).toBeVisible();
-    await expect(page.getByPlaceholder("Keyword")).toBeVisible();
+    await expect(page.getByTestId("mobile-top-bar")).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Tìm việc IT phù hợp/i })).toBeVisible();
+    await expect(page.getByPlaceholder("Tìm Java, ReactJS, Cloud, Backend...")).toBeVisible();
     await expect(page.getByTestId("job-grid")).toBeVisible();
-    await expect(page.getByLabel("Global job search")).toBeVisible();
     await assertPrimaryEvidenceReady(page);
     await expectNoHorizontalOverflow(page);
     await page.screenshot({ path: path.join(mobileScreenshotsDir, "jobs-mobile.png"), fullPage: true });
@@ -91,7 +101,7 @@ test.describe("Mobile recruiter demo smoke", () => {
 
     await expect(page.getByTestId("candidate-assessments-page")).toBeVisible();
     await expect(page.getByRole("tab", { name: /CandidateSolution\.java|solution\.sql|solution\.ts/ }).first()).toBeVisible();
-    await expect(page.getByLabel("Candidate code submission")).toBeVisible();
+    await expect(page.locator(".dh-code-editor")).toBeVisible();
     await expect(page.getByLabel("Custom stdin")).toBeVisible();
     await expect(page.getByRole("heading", { name: "Submission history" })).toBeVisible();
     await expect(page.getByText(/hidden results redacted|Hidden tests server-side/i).first()).toBeVisible();
@@ -106,7 +116,7 @@ test.describe("Mobile recruiter demo smoke", () => {
         await login(page, role);
       }
       await page.goto(route);
-      await expect(page.locator("main")).toBeVisible();
+      await expectRouteMainVisible(page);
       await expect(page.getByText(/Syncing|Loading/i)).toHaveCount(0, { timeout: 10_000 });
       await assertPrimaryEvidenceReady(page);
       await expectNoHorizontalOverflow(page);
@@ -116,7 +126,7 @@ test.describe("Mobile recruiter demo smoke", () => {
   test("job detail route has no mobile overflow after opening a published role", async ({ page }) => {
     await page.goto("/jobs");
     await expect(page.getByTestId("job-card").first()).toBeVisible();
-    await page.getByTestId("job-card").first().click();
+    await page.locator("a.job-card__title").first().click();
     await expect(page.getByTestId("job-detail-page")).toBeVisible();
     await expect(page.getByText(/Syncing|Loading/i)).toHaveCount(0, { timeout: 10_000 });
     await assertPrimaryEvidenceReady(page);

@@ -1,12 +1,13 @@
 "use client";
 
-import { Suspense, useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { JobCard } from "@/components/JobCard";
 import { FilterSidebar, type FilterGroup, type FilterState } from "@/components/FilterSidebar";
+import { SearchBar } from "@/components/ui/SearchBar";
 import { api } from "@/lib/api";
-import type { Job } from "@/types/domain";
+import type { Company, Job } from "@/types/domain";
 
 const PAGE_SIZE = 20;
 
@@ -71,11 +72,14 @@ const FILTER_GROUPS: FilterGroup[] = [
   },
 ];
 
-function buildSearchParams(filters: FilterState, page: number): URLSearchParams {
+function buildSearchParams(filters: FilterState, page: number, keyword: string): URLSearchParams {
   const params = new URLSearchParams();
   params.set("page", String(page));
   params.set("size", String(PAGE_SIZE));
   params.set("sort", "publishedAt,desc");
+
+  const trimmedKeyword = keyword.trim();
+  if (trimmedKeyword) params.set("search", trimmedKeyword);
 
   const skills = filters.skills as string[] | undefined;
   if (skills && skills.length > 0) {
@@ -100,7 +104,7 @@ function buildSearchParams(filters: FilterState, page: number): URLSearchParams 
   return params;
 }
 
-function getInitialFilters(searchParams: URLSearchParams): FilterState {
+function getInitialFilters(searchParams: { get(name: string): string | null }): FilterState {
   const state: FilterState = {};
 
   const skill = searchParams.get("skill");
@@ -114,7 +118,7 @@ function getInitialFilters(searchParams: URLSearchParams): FilterState {
   const type = searchParams.get("type");
   if (type) state.type = type;
 
-  const location = searchParams.get("location");
+  const location = searchParams.get("location") || searchParams.get("city");
   if (location) state.location = location;
 
   const salaryMin = searchParams.get("salaryMin");
@@ -127,6 +131,15 @@ function getInitialFilters(searchParams: URLSearchParams): FilterState {
   }
 
   return state;
+}
+
+function getActiveFilterCount(filters: FilterState): number {
+  return Object.values(filters).reduce((count, value) => {
+    if (Array.isArray(value)) {
+      return count + (value.length > 0 ? 1 : 0);
+    }
+    return count + (value ? 1 : 0);
+  }, 0);
 }
 
 export default function JobsPage() {
@@ -147,12 +160,34 @@ export default function JobsPage() {
 function JobListingContent() {
   const searchParams = useSearchParams();
   const [filters, setFilters] = useState<FilterState>(() => getInitialFilters(searchParams));
+  const [keyword, setKeyword] = useState(() => searchParams.get("search") ?? "");
   const [jobs, setJobs] = useState<Job[]>([]);
+  const [companies, setCompanies] = useState<Company[]>([]);
   const [totalElements, setTotalElements] = useState(0);
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(false);
+  const [error, setError] = useState("");
+
+  const companyById = useMemo(() => {
+    return new Map(companies.map((company) => [company.id, company]));
+  }, [companies]);
+
+  const activeFilterCount = getActiveFilterCount(filters);
+
+  useEffect(() => {
+    async function fetchCompanies() {
+      try {
+        const response = await api.companies();
+        setCompanies(response.content.filter((company) => company.status === "APPROVED"));
+      } catch {
+        setCompanies([]);
+      }
+    }
+
+    fetchCompanies();
+  }, []);
 
   const fetchJobs = useCallback(
     async (currentPage: number, append: boolean) => {
@@ -162,9 +197,10 @@ function JobListingContent() {
       } else {
         setLoading(true);
       }
+      setError("");
 
       try {
-        const params = buildSearchParams(filters, currentPage);
+        const params = buildSearchParams(filters, currentPage, keyword);
         const response = await api.jobs(params);
         const newJobs = response.content ?? [];
 
@@ -181,13 +217,14 @@ function JobListingContent() {
           setJobs([]);
           setTotalElements(0);
           setHasMore(false);
+          setError("Không thể tải danh sách việc làm. Vui lòng thử lại sau.");
         }
       } finally {
         setLoading(false);
         setLoadingMore(false);
       }
     },
-    [filters]
+    [filters, keyword]
   );
 
   useEffect(() => {
@@ -220,11 +257,32 @@ function JobListingContent() {
       </div>
 
       <div className="job-listing__results">
+        <section className="job-listing__hero" aria-label="Tìm kiếm việc làm IT">
+          <p className="job-listing__eyebrow">IT jobs marketplace</p>
+          <h1>Tìm việc IT phù hợp với kỹ năng của bạn</h1>
+          <p>
+            Lọc nhanh theo stack, mức lương, cấp bậc và địa điểm. Kết quả ưu tiên tin tuyển dụng đã xuất bản.
+          </p>
+          <SearchBar
+            placeholder="Tìm Java, ReactJS, Cloud, Backend..."
+            value={keyword}
+            onChange={setKeyword}
+            onSearch={() => fetchJobs(0, false)}
+          />
+        </section>
+
         <div className="job-listing__header">
           <span className="job-listing__count">
             Tìm thấy {totalElements} việc làm
           </span>
+          {activeFilterCount > 0 && (
+            <button className="job-listing__clear-inline" type="button" onClick={handleClearFilters}>
+              Xóa {activeFilterCount} bộ lọc
+            </button>
+          )}
         </div>
+
+        {error && <div className="job-listing__error">{error}</div>}
 
         {loading && (
           <div className="job-listing__loading">
@@ -235,7 +293,7 @@ function JobListingContent() {
 
         {!loading && jobs.length === 0 && (
           <div className="job-listing__empty">
-            <div className="job-listing__empty-icon">🔍</div>
+            <div className="job-listing__empty-icon" aria-hidden="true">⌕</div>
             <p className="job-listing__empty-text">
               Không tìm thấy việc làm phù hợp
             </p>
@@ -249,10 +307,21 @@ function JobListingContent() {
           </div>
         )}
 
-        {!loading &&
-          jobs.map((job) => (
-            <JobCard key={job.id} job={job} />
-          ))}
+        {!loading && jobs.length > 0 && (
+          <div className="job-listing__grid" data-testid="job-grid">
+            {jobs.map((job) => {
+              const company = companyById.get(job.companyId);
+              return (
+                <JobCard
+                  key={job.id}
+                  job={job}
+                  companyName={company?.name}
+                  companyLogoUrl={company?.logoUrl}
+                />
+              );
+            })}
+          </div>
+        )}
 
         {!loading && hasMore && (
           <div className="job-listing__load-more">
