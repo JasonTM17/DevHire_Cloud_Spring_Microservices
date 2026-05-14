@@ -14,7 +14,7 @@ export interface OpsDashboardShellProps {
  * Forces dark theme via `data-theme-scope="ops-dark"` which activates
  * the ops-dark CSS custom property overrides defined in colors.css.
  *
- * Layout: OpsSidebar (left) + OpsGlobalStatusBar (top) + OpsPageContent (main).
+ * Layout: OpsSidebar (left) + OpsGlobalStatusBar (top) + OpsPageContent.
  *
  * Requirements: 6.1, 6.5
  */
@@ -28,9 +28,9 @@ export function OpsDashboardShell({ children }: OpsDashboardShellProps) {
         <header className="ops-shell__status-bar" aria-label="Global status">
           <OpsGlobalStatusBar />
         </header>
-        <main className="ops-shell__content" id="ops-main-content">
+        <section className="ops-shell__content" id="ops-main-content" aria-label="Operations content">
           {children}
-        </main>
+        </section>
       </div>
     </div>
   );

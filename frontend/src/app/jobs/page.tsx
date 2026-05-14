@@ -7,6 +7,7 @@ import { JobCard } from "@/components/JobCard";
 import { FilterSidebar, type FilterGroup, type FilterState } from "@/components/FilterSidebar";
 import { SearchBar } from "@/components/ui/SearchBar";
 import { api } from "@/lib/api";
+import { previewCompanies, previewJobs } from "@/lib/previewData";
 import type { Company, Job } from "@/types/domain";
 
 const PAGE_SIZE = 20;
@@ -142,6 +143,58 @@ function getActiveFilterCount(filters: FilterState): number {
   }, 0);
 }
 
+function approvedPreviewCompanies() {
+  return previewCompanies.content.filter((company) => company.status === "APPROVED");
+}
+
+function filterPreviewJobs(filters: FilterState, keyword: string) {
+  const normalizedKeyword = keyword.trim().toLowerCase();
+  const skills = filters.skills as string[] | undefined;
+  const salary = filters.salary as [number, number] | undefined;
+  const level = filters.level as string | undefined;
+  const type = filters.type as string | undefined;
+  const location = filters.location as string | undefined;
+
+  return previewJobs.content.filter((job) => {
+    const searchable = [
+      job.title,
+      job.description,
+      job.requirements,
+      job.benefits,
+      job.location,
+      job.level,
+      job.type,
+      ...job.skills,
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+
+    if (normalizedKeyword && !searchable.includes(normalizedKeyword)) {
+      return false;
+    }
+    if (skills?.length && !skills.every((skill) => job.skills.includes(skill))) {
+      return false;
+    }
+    if (salary) {
+      const [min, max] = salary;
+      if ((job.salaryMax ?? 0) < min || (job.salaryMin ?? 0) > max) {
+        return false;
+      }
+    }
+    if (level && job.level !== level) {
+      return false;
+    }
+    if (type && job.type !== type) {
+      return false;
+    }
+    if (location && !job.location?.toLowerCase().includes(location.toLowerCase())) {
+      return false;
+    }
+    return true;
+  });
+}
+
 export default function JobsPage() {
   return (
     <Suspense
@@ -161,9 +214,9 @@ function JobListingContent() {
   const searchParams = useSearchParams();
   const [filters, setFilters] = useState<FilterState>(() => getInitialFilters(searchParams));
   const [keyword, setKeyword] = useState(() => searchParams.get("search") ?? "");
-  const [jobs, setJobs] = useState<Job[]>([]);
-  const [companies, setCompanies] = useState<Company[]>([]);
-  const [totalElements, setTotalElements] = useState(0);
+  const [jobs, setJobs] = useState<Job[]>(() => filterPreviewJobs(getInitialFilters(searchParams), searchParams.get("search") ?? ""));
+  const [companies, setCompanies] = useState<Company[]>(approvedPreviewCompanies);
+  const [totalElements, setTotalElements] = useState(() => filterPreviewJobs(getInitialFilters(searchParams), searchParams.get("search") ?? "").length);
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -182,7 +235,7 @@ function JobListingContent() {
         const response = await api.companies();
         setCompanies(response.content.filter((company) => company.status === "APPROVED"));
       } catch {
-        setCompanies([]);
+        setCompanies(approvedPreviewCompanies());
       }
     }
 
@@ -214,11 +267,12 @@ function JobListingContent() {
         setHasMore(currentPage < (response.totalPages ?? 1) - 1);
       } catch {
         if (!append) {
-          setJobs([]);
-          setTotalElements(0);
-          setHasMore(false);
-          setError("Không thể tải danh sách việc làm. Vui lòng thử lại sau.");
+          const previewMatches = filterPreviewJobs(filters, keyword);
+          setJobs(previewMatches.slice(0, PAGE_SIZE));
+          setTotalElements(previewMatches.length);
+          setError("");
         }
+        setHasMore(false);
       } finally {
         setLoading(false);
         setLoadingMore(false);
@@ -282,7 +336,7 @@ function JobListingContent() {
           )}
         </div>
 
-        {error && <div className="job-listing__error">{error}</div>}
+        {error && jobs.length === 0 && <div className="job-listing__error">{error}</div>}
 
         {loading && (
           <div className="job-listing__loading">

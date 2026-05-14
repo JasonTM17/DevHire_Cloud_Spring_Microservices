@@ -101,6 +101,7 @@ Frontend:
 ```powershell
 cd frontend
 npm run typecheck
+npm run e2e:code-assessment
 npm run e2e:preview
 npm run e2e:preview:mobile
 ```
