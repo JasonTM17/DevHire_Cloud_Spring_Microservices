@@ -10,12 +10,12 @@ This is the curated proof pack for recruiters and senior engineering reviewers. 
 | Current development cycle | `0.6.0-SNAPSHOT` after the `v0.5.1` release |
 | GitHub About/Homepage/Topics | Applied through owner-authenticated GitHub API |
 | Branch protection | `master` is protected and release changes go through PR review |
-| Dependabot posture | 20 open Dependabot PRs at the 2026-05-14 live scan; curation dry-run classifies 11 safe-batch, 3 manual-review, and 6 defer-major PRs; zero-noise reports 0 merge candidates and 20 close/defer candidates; no dependency PR was auto-merged during release close-out |
+| Dependabot posture | 0 open Dependabot PRs after the 2026-05-14 zero-noise apply; 20 stale/behind/risky PRs were commented, closed, and pruned; no dependency PR was force-merged into the release |
 | Release notes | `docs/release-notes/v0.5.1.md` is the canonical release body |
 | v1 posture | Roadmap and acceptance checklist only; no `v1.0.0` release is claimed |
 | v0.6 Stitch/code-assessment stack | Merged into `master`; [pr-stack-v0.6.md](pr-stack-v0.6.md) is now the historical merge record |
-| Release CI parity | Local parity for `AI Assistant Evaluation` and `Performance Smoke` passed on 2026-05-14 with Docker high-port Gateway `18080`; PR #78 GitHub checks were green before merge |
-| Release close-out | PR [#78](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/pull/78) merged to `master` at `72be9df8`; branch protection was restored after merge |
+| Release CI parity | `AI Assistant Evaluation`, `Performance Smoke`, CI, E2E Smoke, Docker Images, CodeQL, Security, and Documentation are green on `master` after the 2026-05-14 close-out |
+| Release close-out | PR [#78](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/pull/78) and PR [#80](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/pull/80) merged to `master`; branch protection was restored after merge |
 
 See [status.md](status.md) for the single source of truth.
 

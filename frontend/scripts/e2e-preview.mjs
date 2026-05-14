@@ -29,7 +29,9 @@ function canListen(portToCheck) {
     server.once("listening", () => {
       server.close(() => resolve(true));
     });
-    server.listen(Number(portToCheck), host);
+    // Probe the wildcard listener, not only 127.0.0.1. On Windows a process
+    // bound to :: can still make a localhost port unusable for Next's server.
+    server.listen(Number(portToCheck));
   });
 }
 
@@ -207,7 +209,7 @@ await run(npm, ["run", "build"]);
 await prepareStandalonePreview();
 
 console.log("[e2e-preview] Starting Next.js standalone preview server");
-const server = spawnCommand("node", ["server.js"], {
+const server = spawn(process.execPath, ["server.js"], {
   cwd: standaloneDir,
   env: {
     ...previewEnv,

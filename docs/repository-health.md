@@ -13,8 +13,8 @@ This page summarizes the public GitHub presentation state for DevHire Cloud.
 | Topics | 20 production-engineering topics |
 | Default branch | `master` |
 | Branch protection | Enabled; public branch API reports `protected=true` |
-| Dependabot PRs | 20 open Dependabot PRs at the 2026-05-14 live scan; curation dry-run: 11 safe-batch, 3 manual-review, 6 defer-major; zero-noise: 0 merge candidates and 20 close/defer candidates |
-| CI parity | Local parity for the previously red AI eval and performance smoke workflows passed on 2026-05-14; PR #78 GitHub checks were green before merge |
+| Dependabot PRs | 0 open Dependabot PRs after the 2026-05-14 zero-noise apply; stale/behind/risky Dependabot branches were pruned |
+| CI parity | `AI Assistant Evaluation`, `Performance Smoke`, CI, E2E Smoke, Docker Images, CodeQL, Security, and Documentation are green on `master` after the 2026-05-14 close-out |
 | Runtime evidence | Domain metrics, runtime smoke, and portfolio runtime report scripts |
 | Cloud posture | AWS blueprint apply-ready as code; no AWS apply claimed |
 | Tracked source hygiene | Clean; reports, targets, `.next`, Playwright output, and local `.env` remain ignored |
@@ -23,8 +23,8 @@ This page summarizes the public GitHub presentation state for DevHire Cloud.
 
 | Signal | Value |
 |---|---|
-| Close-out PR | [#78](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/pull/78) |
-| Merged master head | `72be9df8` |
+| Close-out PRs | [#78](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/pull/78), [#80](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/pull/80) |
+| Merged master head before final branch-cleanup patch | `f0114284` |
 | Branch protection after merge | Required reviews and required status checks enabled |
 | Final local docs gates | `docs-quality.ps1`, `evidence-audit.ps1`, and `git diff --check` passed |
 
