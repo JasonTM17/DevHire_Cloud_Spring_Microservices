@@ -70,3 +70,10 @@ Candidate screens should feel guided and focused. Job discovery uses marketplace
 ## Repository Facade Decision
 
 This document used to live under `.stitch/DESIGN.md`. It is now a normal portfolio document under `docs/` so the GitHub root presents as an engineering repository rather than a tool workspace export.
+
+## Stitch Usage Policy
+
+- Treat Stitch project `projects/5421325194779586117` as visual reference, not as generated source committed into the repo.
+- Do not reintroduce `.stitch/` baton, exported HTML, or generated workspace files unless a reviewer explicitly asks for design iteration artifacts.
+- When implementing UI, translate Stitch direction into production React components, route-matrix screenshots, and browser/E2E evidence.
+- Keep client marketplace work ITViec-inspired only: red/white job-search patterns, salary clarity, compact cards, and mobile usability without copying ITViec assets, logos, or layouts.

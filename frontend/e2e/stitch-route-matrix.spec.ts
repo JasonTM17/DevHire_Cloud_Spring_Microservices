@@ -88,7 +88,7 @@ test.describe("v0.6 Stitch route matrix", () => {
     await page.goto("/jobs");
     await expect(page.getByTestId("jobs-page")).toBeVisible();
     await expect(page.getByTestId("job-card").first()).toBeVisible();
-    await page.getByTestId("job-card").first().click();
+    await page.locator("a.job-card__title").first().click();
     await expect(page.getByTestId("job-detail-page")).toBeVisible();
     await expect(page.getByText(/Syncing|Loading/i)).toHaveCount(0, { timeout: 10_000 });
     await assertPrimaryEvidenceReady(page);

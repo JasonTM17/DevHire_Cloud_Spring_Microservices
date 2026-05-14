@@ -1,6 +1,8 @@
 # UI/UX Audit - Client Marketplace And Code Assessment
 
-This audit records the professional UI contract for the current DevHire Cloud frontend. It is intentionally short and executable: reviewers should be able to compare the screenshots, browser routes, and smoke scripts against the claims below.
+This audit records the professional UI contract for the current DevHire Cloud frontend. It is intentionally executable: reviewers should be able to compare the browser routes, screenshots, and smoke scripts against the claims below without trusting marketing copy.
+
+Latest local review: 2026-05-14 against the Docker high-port stack (`frontend` on `13001`, Gateway on `18080`) plus isolated Next.js preview E2E.
 
 ## Design Direction
 
@@ -12,6 +14,8 @@ DevHire uses a hybrid design system:
 | Candidate LeetCode Studio | Focused coding workspace | `Cloud Architecture Challenge`, `CandidateSolution.java`, visible/custom runs, stdout/stderr/compile output, attempt history, submitted/locked states |
 | Employer review | Evidence dossier | Submitted code, score, verdict, runtime/static score, risk flags, visible aggregate, hidden aggregate, sanitized output, immutable raw score |
 | Admin/Ops | Stitch control plane | Runner health, fail-closed reason, queue depth, verdict rates, risky backlog, operational empty/auth states |
+
+The Stitch visual reference is project `projects/5421325194779586117`. The repository intentionally does not keep a `.stitch/` baton/export workspace; `docs/design-system.md` is the source-of-truth design contract for implementers.
 
 ## Browser Routes
 
@@ -29,10 +33,10 @@ Primary routes:
 |---|---|
 | `/` | Search-first IT jobs hero, no mojibake, visible skills, top employers, featured jobs |
 | `/jobs` | Keyword from `?search=` is honored, filters are readable, empty/error states are friendly |
-| `/jobs/[id]` | Salary, skills, company card, login-safe apply modal, no broken Vietnamese copy |
+| `/jobs/[id]` | Salary, skills, company card, login-safe apply modal, preview detail works when the API is offline |
 | `/candidate/assessments` | Java-only production challenge, visible cases, no hidden payload leakage |
-| `/employer/applications` | Employer workspace renders, assessment dossier is available after assignment |
-| `/admin` and `/admin/monitoring` | Unauthenticated state is polished; authenticated state shows runner/admin metrics |
+| `/employer/applications` | Employer workspace renders at the deep link without redirecting away |
+| `/admin` and `/admin/monitoring` | Authenticated state shows runner/admin metrics with one primary page landmark |
 
 Forbidden visible copy in primary screenshots:
 
@@ -50,10 +54,14 @@ Forbidden visible copy in primary screenshots:
 npm --prefix frontend run typecheck
 npm --prefix frontend run e2e:preview
 npm --prefix frontend run e2e:preview:mobile
+npm --prefix frontend run e2e:code-assessment
 .\scripts\code-assessment-smoke.ps1 -GatewayUrl http://localhost:18080
 .\scripts\runtime-observability-smoke.ps1 -GatewayUrl http://localhost:18080
+.\scripts\reset-demo-data.ps1 -SkipOpenSearch
 .\scripts\docs-quality.ps1
 .\scripts\evidence-audit.ps1
 ```
+
+Preview E2E is deliberately isolated from the live Gateway unless `NEXT_PUBLIC_API_BASE_URL` is supplied. Live API behavior is verified by the Gateway smoke scripts above.
 
 Use Browser visual inspection after significant frontend changes. Capture screenshots only after the route has settled and the page contains real data or a deliberate empty/auth state.

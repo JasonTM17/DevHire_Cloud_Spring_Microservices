@@ -8,6 +8,7 @@ import { Briefcase, Building2, Calendar, Clock, ExternalLink, MapPin, Users } fr
 import { SkillTag } from "@/components/ui/SkillTag";
 import { JobCard } from "@/components/JobCard";
 import { api } from "@/lib/api";
+import { previewCompanies, previewJobs } from "@/lib/previewData";
 import { getSession } from "@/lib/session";
 import { formatSalaryRange } from "@/lib/salaryFormat";
 import type { Company, Job } from "@/types/domain";
@@ -33,6 +34,21 @@ function isRenderableLogo(url?: string): boolean {
   } catch {
     return false;
   }
+}
+
+function previewJobFor(id: string) {
+  return previewJobs.content.find((item) => item.id === id) ?? previewJobs.content[0] ?? null;
+}
+
+function previewCompanyFor(job: Job | null) {
+  return job ? previewCompanies.content.find((item) => item.id === job.companyId) ?? null : null;
+}
+
+function previewSimilarJobs(job: Job | null) {
+  if (!job) return [];
+  return previewJobs.content
+    .filter((item) => item.id !== job.id && item.skills.some((skill) => job.skills.includes(skill)))
+    .slice(0, 4);
 }
 
 export default function JobDetailPage() {
@@ -85,7 +101,11 @@ export default function JobDetailPage() {
           setSimilarJobs([]);
         }
       } catch {
-        setJob(null);
+        const previewJob = previewJobFor(params.id);
+        setJob(previewJob);
+        setCompany(previewCompanyFor(previewJob));
+        setSimilarJobs(previewSimilarJobs(previewJob));
+        setCompanyLogoFailed(false);
       } finally {
         setLoading(false);
       }

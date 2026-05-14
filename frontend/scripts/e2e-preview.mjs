@@ -18,7 +18,7 @@ const standaloneServer = path.join(standaloneDir, "server.js");
 
 const previewEnv = {
   ...process.env,
-  NEXT_PUBLIC_API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:18080",
+  NEXT_PUBLIC_API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:65534",
   E2E_FRONTEND_URL: process.env.E2E_FRONTEND_URL ?? baseUrl
 };
 
@@ -156,8 +156,8 @@ async function stopServer(server) {
   }
 }
 
-if (!["desktop", "mobile", "all", "stitch"].includes(mode)) {
-  throw new Error(`Unsupported E2E preview mode '${mode}'. Use desktop, mobile, stitch, or all.`);
+if (!["desktop", "mobile", "all", "stitch", "code-assessment"].includes(mode)) {
+  throw new Error(`Unsupported E2E preview mode '${mode}'. Use desktop, mobile, stitch, code-assessment, or all.`);
 }
 
 console.log(`[e2e-preview] Building frontend for ${baseUrl}`);
@@ -198,6 +198,15 @@ try {
       "playwright",
       "test",
       "e2e/stitch-route-matrix.spec.ts",
+      "--project=chromium"
+    ]);
+  }
+
+  if (mode === "code-assessment") {
+    await run(npx, [
+      "playwright",
+      "test",
+      "e2e/code-assessment-flow.spec.ts",
       "--project=chromium"
     ]);
   }
