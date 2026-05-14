@@ -66,13 +66,14 @@ export function unknownOpsHealthSummary(
   reason: string,
   checkedAt: string = new Date().toISOString()
 ): OpsHealthSummary {
+  const detail = normalizeUnavailableReason(reason);
   return {
     services: OPS_SIGNAL_SERVICES.map((name) => ({
       name,
       status: "unknown",
       lastCheck: checkedAt,
-      source: "Admin health synthesis",
-      detail: reason,
+      source: detail.requiresAdmin ? "Admin sign-in required" : "Admin health synthesis",
+      detail: detail.message,
     })),
     activeIncidents: 0,
     lastRefresh: checkedAt,
@@ -104,4 +105,23 @@ function runnerDetail(runner: CodeAssessmentRunnerHealth): string {
   }
 
   return parts.join("; ");
+}
+
+function normalizeUnavailableReason(reason: string): { message: string; requiresAdmin: boolean } {
+  if (/bearer|unauthori[sz]ed|forbidden|401|403/i.test(reason)) {
+    return {
+      requiresAdmin: true,
+      message: "Sign in as an admin to view live service health.",
+    };
+  }
+  if (/failed to fetch|network/i.test(reason)) {
+    return {
+      requiresAdmin: false,
+      message: "Admin health APIs are unreachable from this browser session.",
+    };
+  }
+  return {
+    requiresAdmin: false,
+    message: reason || "Waiting for the first admin health poll.",
+  };
 }

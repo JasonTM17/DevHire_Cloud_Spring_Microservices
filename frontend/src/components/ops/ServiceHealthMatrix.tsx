@@ -112,6 +112,9 @@ function formatPercent(value?: number): string {
 }
 
 function formatLastCheck(isoString: string): string {
+  if (isoString === "1970-01-01T00:00:00.000Z") {
+    return "pending";
+  }
   try {
     const date = new Date(isoString);
     const diffSeconds = Math.floor((Date.now() - date.getTime()) / 1000);

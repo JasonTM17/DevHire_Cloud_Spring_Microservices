@@ -30,11 +30,11 @@ const FILTER_GROUPS: FilterGroup[] = [
   },
   {
     id: "salary",
-    title: "Mức lương (triệu)",
+    title: "Salary (USD/month)",
     type: "range",
     min: 0,
-    max: 100,
-    step: 5,
+    max: 12000,
+    step: 500,
   },
   {
     id: "level",
@@ -85,7 +85,7 @@ function buildSearchParams(filters: FilterState, page: number): URLSearchParams 
   const salary = filters.salary as [number, number] | undefined;
   if (salary) {
     if (salary[0] > 0) params.set("salaryMin", String(salary[0]));
-    if (salary[1] > 0 && salary[1] < 100) params.set("salaryMax", String(salary[1]));
+    if (salary[1] > 0 && salary[1] < 12000) params.set("salaryMax", String(salary[1]));
   }
 
   const level = filters.level as string | undefined;
@@ -122,7 +122,7 @@ function getInitialFilters(searchParams: URLSearchParams): FilterState {
   if (salaryMin || salaryMax) {
     state.salary = [
       salaryMin ? Number(salaryMin) : 0,
-      salaryMax ? Number(salaryMax) : 100,
+      salaryMax ? Number(salaryMax) : 12000,
     ];
   }
 

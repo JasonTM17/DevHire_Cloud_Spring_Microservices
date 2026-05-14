@@ -420,7 +420,7 @@ export default function EmployerPage() {
                 <pre className="code-preview">{(item.submittedCodePreview ?? item.submittedCode ?? item.starterCode).slice(0, 360)}</pre>
                 <div className="tag-list">
                   {item.riskFlags.length ? item.riskFlags.map((flag) => (
-                    <span className="badge warn" key={flag}>{flag.replaceAll("-", " ")}</span>
+                    <span className="badge warn" key={flag}>{riskFlagLabel(flag)}</span>
                   )) : <span className="badge live">No high-risk flags</span>}
                   <span className={reviewable ? "badge live" : "badge"}>
                     {reviewable ? "Ready for employer decision" : item.submittedAt ? "Decision recorded" : "Waiting for candidate submission"}
@@ -580,6 +580,24 @@ function isPositiveMessage(message: string) {
 
 function isReviewableCodeAssessment(item: CodeAssessment) {
   return Boolean(item.submittedAt) && !["PASSED", "FAILED"].includes(item.status);
+}
+
+function riskFlagLabel(flag: string) {
+  const labels: Record<string, string> = {
+    POLICY_SUSPICIOUS_API: "Suspicious API usage",
+    HARDCODED_SAMPLE_OUTPUT: "Possible sample hardcoding",
+    LOW_SIGNAL_CODE: "Low-signal solution",
+    HIGH_SIMILARITY: "High similarity",
+    RUNNER_UNTRUSTED: "Untrusted runner evidence",
+    MULTIPLE_FAILED_ATTEMPTS: "Multiple failed attempts",
+    "policy-suspicious-api": "Suspicious API usage",
+    "hardcoded-sample-output": "Possible sample hardcoding",
+    "low-signal-code": "Low-signal solution",
+    "high-similarity": "High similarity",
+    "runner-untrusted": "Untrusted runner evidence",
+    "multiple-failed-attempts": "Multiple failed attempts",
+  };
+  return labels[flag] ?? flag.replaceAll("_", " ").replaceAll("-", " ").toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
 function statusForReviewDecision(decision: string) {

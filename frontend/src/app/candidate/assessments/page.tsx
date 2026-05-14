@@ -130,21 +130,18 @@ export default function CandidateAssessmentsPage() {
     () => assessments.find((item) => item.id === selectedId) ?? assessments[0],
     [assessments, selectedId]
   );
-  const completed = assessments.filter((item) => item.submittedAt).length;
-  const progressCompleted = Math.min(5, Math.max(2, completed));
-  const progressTotal = 5;
-  const progressPercent = Math.round((progressCompleted / progressTotal) * 100);
   const lineNumbers = useMemo(
     () => Array.from({ length: Math.max(28, code.split("\n").length + 8) }, (_, index) => index + 1),
     [code]
   );
   const selectedRun = latestRun ?? selected?.latestRun;
   const visibleCases = selected ? visibleJudgeCases(selected) : [];
+  const visibleRunResults = visibleResults(selectedRun);
   const examples = selected ? challengeExamples(selected) : [];
   const rubricItems = selected ? (selected.rubric.length ? selected.rubric : emptyRubric()) : emptyRubric();
   const displayedResults = analysisResults.length
     ? analysisResults
-    : (selectedRun?.results ?? []).map((result) => ({
+    : visibleRunResults.map((result) => ({
         label: result.name,
         detail: runtimeResultDetail(result),
         matched: result.passed,
@@ -164,8 +161,12 @@ export default function CandidateAssessmentsPage() {
         detail: testCase.detail,
         matched: index === 0
       }));
+  const availableLanguages = selected ? selectableLanguages(selected) : ["Java"];
   const isFinalDecision = selected ? FINAL_STATUSES.has(selected.status) : false;
   const isSubmissionLocked = selected ? LOCKED_STATUSES.has(selected.status) : false;
+  const progressTotal = Math.max(visibleCases.length, selectedRun?.visibleTotal ?? 0, 1);
+  const progressCompleted = Math.min(progressTotal, selectedRun?.visiblePassed ?? 0);
+  const progressPercent = Math.round((progressCompleted / progressTotal) * 100);
 
   const autoSubmitWithRetry = async () => {
     const MAX_RETRIES = 3;
@@ -299,7 +300,7 @@ export default function CandidateAssessmentsPage() {
               sandboxStatus: run.sandboxStatus
             }
           : item)));
-        setAnalysisResults(run.results.map((result) => ({
+        setAnalysisResults(visibleResults(run).map((result) => ({
           label: result.name,
           detail: runtimeResultDetail(result),
           matched: result.passed,
@@ -370,7 +371,7 @@ export default function CandidateAssessmentsPage() {
       };
       setAssessments((current) => current.map((item) => (item.id === selected.id ? updated : item)));
       setLatestRun(previewRun);
-      setAnalysisResults(previewRun.results.map((result) => ({
+      setAnalysisResults(visibleResults(previewRun).map((result) => ({
         label: result.name,
         detail: runtimeResultDetail(result),
         matched: result.passed,
@@ -457,34 +458,40 @@ export default function CandidateAssessmentsPage() {
           <span className="assessment-brand">DevHire Cloud</span>
           <span className="assessment-divider" aria-hidden="true" />
           <h1>{selected.challengeTitle}</h1>
-          <select
-            className="assessment-language-select"
-            value={language}
-            onChange={(e) => {
-              const newLang = e.target.value;
-              const oldPlaceholder = LANGUAGE_PLACEHOLDERS[language];
-              setLanguage(newLang);
-              if (!code.trim() || code === oldPlaceholder || code === DEFAULT_CODE) {
-                setCode(LANGUAGE_PLACEHOLDERS[newLang] || DEFAULT_CODE);
-              }
-            }}
-            aria-label="Assessment language"
-            disabled={isSubmissionLocked}
-          >
-            <option value="Java">Java</option>
-            <option value="TypeScript">TypeScript</option>
-            <option value="SQL">SQL</option>
-          </select>
+          {availableLanguages.length > 1 ? (
+            <select
+              className="assessment-language-select"
+              value={language}
+              onChange={(e) => {
+                const newLang = e.target.value;
+                const oldPlaceholder = LANGUAGE_PLACEHOLDERS[language];
+                setLanguage(newLang);
+                if (!code.trim() || code === oldPlaceholder || code === DEFAULT_CODE) {
+                  setCode(LANGUAGE_PLACEHOLDERS[newLang] || DEFAULT_CODE);
+                }
+              }}
+              aria-label="Assessment language"
+              disabled={isSubmissionLocked}
+            >
+              {availableLanguages.map((item) => (
+                <option key={item} value={item}>{item}</option>
+              ))}
+            </select>
+          ) : (
+            <span className="assessment-language" aria-label={`Assessment language: ${language}`}>
+              {language}
+            </span>
+          )}
         </div>
         <div className="assessment-top-actions">
           <div className={`assessment-timer${timer.severity === 'warning' ? " timer-warning" : ""}${timer.severity === 'critical' ? " timer-critical" : ""}`} aria-label="Assessment time remaining" aria-live={timer.ariaLive} aria-atomic="true">
             <Clock3 size={20} />
-            <span>{timer.formatted}</span>
+            <span>{isSubmissionLocked ? "Locked" : timer.formatted}</span>
           </div>
-          <div className="assessment-progress" aria-label={`${progressCompleted} of ${progressTotal} tasks complete`}>
+          <div className="assessment-progress" aria-label={`${progressCompleted} of ${progressTotal} visible cases accepted`}>
             <div>
-              <span>Progress</span>
-              <strong>{progressCompleted}/{progressTotal} Tasks</strong>
+              <span>Visible cases</span>
+              <strong>{progressCompleted}/{progressTotal} passed</strong>
             </div>
             <span className="assessment-progress-track">
               <span style={{ width: `${progressPercent}%` }} />
@@ -498,7 +505,7 @@ export default function CandidateAssessmentsPage() {
             disabled={submitting || isSubmissionLocked || (timer.severity === 'expired' && !autoSubmitFailed)}
           >
             <Upload size={20} />
-            {submitting ? "Scoring" : "Submit Code"}
+            {isSubmissionLocked ? "Submitted" : submitting ? "Scoring" : "Submit Code"}
           </button>
         </div>
       </header>
@@ -832,6 +839,15 @@ function visibleJudgeCases(item: CodeAssessment) {
     }));
   }
   return assessmentEvidenceCases(item);
+}
+
+function visibleResults(run?: CodeRun) {
+  return (run?.results ?? []).filter((result) => result.visibility !== "HIDDEN");
+}
+
+function selectableLanguages(item: CodeAssessment) {
+  const normalized = item.language?.trim() || "Java";
+  return [normalized];
 }
 
 function preferredCodeAssessment(items: CodeAssessment[]) {

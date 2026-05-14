@@ -111,15 +111,21 @@ export function IDETopBar({
 
       {/* Center section: Language selector + Timer + Progress */}
       <div className="dh-ide-top-bar__center">
-        <Select
-          id="ide-language-selector"
-          selectSize="sm"
-          options={buildLanguageOptions(availableLanguages)}
-          value={language}
-          onChange={handleLanguageChange}
-          aria-label="Select programming language"
-          className="dh-ide-top-bar__language-select"
-        />
+        {availableLanguages.length > 1 ? (
+          <Select
+            id="ide-language-selector"
+            selectSize="sm"
+            options={buildLanguageOptions(availableLanguages)}
+            value={language}
+            onChange={handleLanguageChange}
+            aria-label="Select programming language"
+            className="dh-ide-top-bar__language-select"
+          />
+        ) : (
+          <span className="dh-ide-top-bar__language-pill" aria-label={`Programming language: ${language}`}>
+            {language}
+          </span>
+        )}
 
         <AssessmentTimer
           assignedAt={assignedAt}

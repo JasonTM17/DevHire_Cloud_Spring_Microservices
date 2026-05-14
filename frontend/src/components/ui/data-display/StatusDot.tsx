@@ -9,7 +9,7 @@ const statusLabels: Record<StatusDotProps["status"], string> = {
   healthy: "Healthy",
   degraded: "Degraded",
   critical: "Critical",
-  unknown: "Unknown",
+  unknown: "Awaiting signal",
 };
 
 export function StatusDot({

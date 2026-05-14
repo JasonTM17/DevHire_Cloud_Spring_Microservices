@@ -19,7 +19,7 @@ import type {
   SkillAnalytics
 } from "@/types/domain";
 
-const PREVIEW_NOW = new Date("2026-05-08T02:00:00.000Z");
+const PREVIEW_NOW = new Date();
 
 export const previewJobs: PageResponse<Job> = {
   content: [
