@@ -9,13 +9,13 @@ This page is the single source of truth for the current public state of DevHire 
 | Default branch | `master` |
 | Branch protection | Enabled |
 | Open pull requests | 20 open PRs at the 2026-05-14 live GitHub scan, all authored by Dependabot |
-| Dependabot queue | Curation dry-run classifies 11 safe-batch, 3 manual-review, and 6 defer-major PRs; zero-noise reports 0 clean merge candidates until CI/runtime smoke are green |
+| Dependabot queue | Curation dry-run classifies 11 safe-batch, 3 manual-review, and 6 defer-major PRs; zero-noise reports 0 merge candidates and 20 close/defer candidates; no dependency PR was auto-merged during release close-out |
 | Maven development version | `0.6.0-SNAPSHOT` |
 | Frontend development version | `0.6.0` |
 | Helm chart version | `0.6.0` |
 | Cloud posture | AWS blueprint apply-ready; no `terraform apply` has been run |
 | Runtime posture | Local Docker Compose runtime with smoke, observability, E2E, and data evidence |
-| CI parity posture | Local parity for the previously red `AI Assistant Evaluation` and `Performance Smoke` workflows passed on 2026-05-14; GitHub status refreshes after the release branch is pushed |
+| CI parity posture | Local parity for the previously red `AI Assistant Evaluation` and `Performance Smoke` workflows passed on 2026-05-14; PR #78 checks were green before merge to `master` |
 | v1 posture | Roadmap and acceptance checklist only; no `v1.0.0` tag exists or should be claimed |
 
 ## Current Development Highlights
@@ -28,6 +28,16 @@ This page is the single source of truth for the current public state of DevHire 
 | Frontend deploy | Optional Vercel preview path exists for `frontend/` only; Java backend deployment remains Docker/AWS blueprint. |
 | Gateway operations | Gateway emits route request, latency, and rate-limit metrics with Prometheus alert coverage. |
 | Runtime proof | Runtime observability smoke checks Gateway metrics plus domain KPI metrics when Docker is running; code-assessment smoke covers assign, visible/custom run, hidden submit redaction, employer review, and admin summary. |
+
+## Release Close-Out
+
+| Signal | Evidence |
+|---|---|
+| Close-out PR | [#78](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/pull/78) merged into `master` on 2026-05-14 |
+| Current master head | `72be9df8` (`ci: make bundle size check cwd-independent`) |
+| Branch protection | Restored after merge; required reviews and required status checks remain enabled |
+| Final docs gates | `docs-quality.ps1`, `evidence-audit.ps1`, and `git diff --check` passed after `master` sync |
+| Dependency posture | Dependabot queue remains intentionally unmerged for owner-governed follow-up |
 
 ## Reviewer Path
 
