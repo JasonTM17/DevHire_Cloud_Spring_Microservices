@@ -2,6 +2,7 @@ package com.devhire.notification.ratelimit;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
 
@@ -190,5 +191,17 @@ class SlidingWindowRateLimiterTest {
         RateLimitResult result = rateLimiter.checkLimit(USER_ID, RateLimitType.REST);
 
         assertThat(result.allowed()).isTrue();
+    }
+
+    @Test
+    void canBeCreatedBySpringWithRedisTemplateDependency() {
+        try (AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext()) {
+            context.registerBean(StringRedisTemplate.class, () -> mock(StringRedisTemplate.class));
+            context.register(SlidingWindowRateLimiter.class);
+
+            context.refresh();
+
+            assertThat(context.getBean(SlidingWindowRateLimiter.class)).isNotNull();
+        }
     }
 }
