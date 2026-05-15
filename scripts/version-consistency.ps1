@@ -3,7 +3,7 @@ param(
     [string]$Root = ".",
     [string]$ExpectedMavenVersion = "0.6.0-SNAPSHOT",
     [string]$ExpectedFrontendVersion = "0.6.0",
-    [string]$LatestRelease = "v0.5.1"
+    [string]$LatestRelease = "v0.6.0"
 )
 
 Set-StrictMode -Version Latest
@@ -60,8 +60,8 @@ if (Test-Path $packageLockPath) {
 }
 
 $changelog = Get-Content -Raw -Encoding UTF8 (Join-Path $rootPath "CHANGELOG.md")
-if ($changelog -notmatch "## 0\.6\.0 - Unreleased") {
-    throw "CHANGELOG.md does not record the active 0.6.0 development section."
+if ($changelog -notmatch "## 0\.6\.0 - 2026-05-15") {
+    throw "CHANGELOG.md does not record the released 0.6.0 date."
 }
 if ($changelog -notmatch "## 0\.5\.1 - 2026-05-06") {
     throw "CHANGELOG.md does not record the released 0.5.1 date."

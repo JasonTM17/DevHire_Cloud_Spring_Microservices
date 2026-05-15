@@ -10,7 +10,7 @@ This scorecard gives reviewers a fast, evidence-backed view of DevHire Cloud as 
 | Security and identity | 8/10 | JWT access tokens, refresh rotation, logout blacklist, BCrypt, role checks, security headers, Gitleaks, blocking Trivy image scans with throttled/cache-backed image builds, CodeQL |
 | Reliability and event delivery | 8/10 | Kafka, transactional outbox, retry/dead-letter states, idempotent notification/audit consumers, chaos smoke scripts |
 | Observability and SLOs | 9/10 | Actuator, Prometheus rules, Grafana SLO/domain dashboards, Loki, Tempo, OpenTelemetry, runtime metrics smoke, seeded funnel metrics |
-| CI/CD and release governance | 8/10 | Maven verify, frontend build, ratcheted coverage gate, Docker matrix, docs/security/terraform workflows, release notes, release evidence, `v0.5.1` public release |
+| CI/CD and release governance | 8/10 | Maven verify, frontend build, ratcheted coverage gate, Docker matrix, docs/security/terraform workflows, release notes, release evidence, `v0.6.0` public release |
 | Cloud readiness | 9/10 | Docker Compose, Kubernetes manifests without `latest`, `ai-service` raw K8s coverage, Helm chart with immutable defaults, Argo CD samples, AWS Terraform blueprint, External Secrets wiring, race-safe Terraform validation, cloud policy audit |
 | Runtime reviewer proof | 9/10 | Self-starting frontend E2E smoke, portfolio verification scripts, curated demo evidence pack, API smoke, AI eval, Mailpit smoke, OpenAPI verify, performance and chaos smoke wrappers |
 | AI portfolio layer | 8/10 | Claude Haiku assistant, RAG citations, fallback mode, tool traces, AI safety docs, eval dataset |
@@ -18,7 +18,7 @@ This scorecard gives reviewers a fast, evidence-backed view of DevHire Cloud as 
 
 Overall portfolio posture: **9.2/10 production engineering evidence**, with the main remaining gap being future real-cloud deployment evidence in an AWS account.
 
-Current public release: `v0.5.1`. Current development cycle: `0.6.0-SNAPSHOT`. The `v1.0.0` files are roadmap and acceptance evidence only.
+Current public release: `v0.6.0`. Current development cycle: `0.6.0-SNAPSHOT` release cut. The `v1.0.0` files are roadmap and acceptance evidence only.
 
 ## Architecture
 
@@ -79,7 +79,7 @@ Evidence:
 - `.github/workflows/docker.yml`
 - `.github/workflows/release.yml`
 - [Versioning](versioning.md)
-- [v0.5.1 production runtime depth evidence](release-evidence/v0.5.1.md)
+- [v0.6.0 product and code assessment evidence](release-evidence/v0.6.0.md)
 
 ## Cloud Readiness
 
@@ -133,7 +133,7 @@ Evidence:
 - [GitHub governance](github-governance.md)
 - [Branch protection](branch-protection.md)
 - [Repository health](repository-health.md)
-- [v0.5.1 production runtime depth evidence](release-evidence/v0.5.1.md)
+- [v0.6.0 product and code assessment evidence](release-evidence/v0.6.0.md)
 - `scripts/github-governance.ps1 -DryRun`
 - `scripts/github-facade-assert.ps1 -AllowOwnerActions`
 - `scripts/professionalism-audit.ps1`

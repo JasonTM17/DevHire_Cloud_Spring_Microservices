@@ -6,12 +6,12 @@ This is the curated proof pack for recruiters and senior engineering reviewers. 
 
 | Evidence | Status |
 |---|---|
-| Latest public release | `v0.5.1` is visible on GitHub |
-| Current development cycle | `0.6.0-SNAPSHOT` after the `v0.5.1` release |
+| Latest public release | `v0.6.0` is visible on GitHub |
+| Current development cycle | `0.6.0-SNAPSHOT` release cut; next snapshot bump is a post-release maintenance step |
 | GitHub About/Homepage/Topics | Applied through owner-authenticated GitHub API |
 | Branch protection | `master` is protected and release changes go through PR review |
 | Dependabot posture | 0 open Dependabot PRs after the 2026-05-14 zero-noise apply; 20 stale/behind/risky PRs were commented, closed, and pruned; no dependency PR was force-merged into the release |
-| Release notes | `docs/release-notes/v0.5.1.md` is the canonical release body |
+| Release notes | `docs/release-notes/v0.6.0.md` is the canonical release body |
 | v1 posture | Roadmap and acceptance checklist only; no `v1.0.0` release is claimed |
 | v0.6 Stitch/code-assessment stack | Merged into `master`; [pr-stack-v0.6.md](pr-stack-v0.6.md) is now the historical merge record |
 | Release CI parity | `AI Assistant Evaluation`, `Performance Smoke`, CI, E2E Smoke, Docker Images, CodeQL, Security, and Documentation are green on `master` after the 2026-05-14 close-out |
@@ -94,4 +94,4 @@ docker compose up -d --build
 
 ## Historical Evidence
 
-Older release evidence remains in `docs/release-evidence/` for auditability. Reviewer-facing docs should start from `v0.5.1` and only open older evidence when checking project history.
+Older release evidence remains in `docs/release-evidence/` for auditability. Reviewer-facing docs should start from `v0.6.0` and only open older evidence when checking project history.

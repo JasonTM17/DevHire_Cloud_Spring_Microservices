@@ -6,7 +6,7 @@ DevHire Cloud is a production engineering portfolio, not a live SaaS system runn
 
 | Area | Current state | Remaining gap | Next action |
 |---|---|---|---|
-| Public GitHub facade | About, topics, releases, branch protection, and Dependabot cleanup are applied | Keep docs aligned with `v0.5.1` and future tags | Run release hygiene checks before every tag |
+| Public GitHub facade | About, topics, releases, branch protection, and Dependabot cleanup are applied | Keep docs aligned with `v0.6.0` and future tags | Run release hygiene checks before every tag |
 | Cloud | AWS Terraform, Helm, raw Kubernetes, External Secrets, and Argo CD are blueprint-ready and validated | No real AWS account has been applied | Run the cloud apply runbook in a budget-controlled staging account |
 | Runtime | Docker Compose, API smoke, E2E, Mailpit, OpenAPI, metrics, chaos, and migration scripts exist | Full runtime evidence is local and generated on demand | Publish sanitized runtime evidence per release |
 | Monitoring | Prometheus rules, Grafana dashboards, domain metrics, SLO docs, and runtime observability smoke exist | No long-running production traffic history | Run a scheduled demo environment and archive SLO snapshots |
@@ -21,7 +21,7 @@ DevHire Cloud is a production engineering portfolio, not a live SaaS system runn
 
 The v1 roadmap is a future acceptance path, not a published release claim:
 
-1. `v0.6.0`: product UX and frontend screenshot polish.
+1. `v0.6.0`: shipped product UX, code-assessment, admin/ops, screenshot, and Docker Hub release polish.
 2. `v0.7.0`: backend integration maturity and coverage ratchets.
 3. `v0.7.5`: API and event compatibility baselines.
 4. `v0.8.0`: observability and SLO maturity.

@@ -6,12 +6,12 @@ DevHire Cloud separates public portfolio releases from active development snapsh
 
 | Signal | Value |
 |---|---|
-| Latest public release | `v0.5.1` |
+| Latest public release | `v0.6.0` |
 | Active Maven development version | `0.6.0-SNAPSHOT` |
 | Active frontend development version | `0.6.0` |
 | Helm chart version | `0.6.0` |
-| Helm application version | `0.5.1` |
-| Next milestone | `v0.6.0` product and reviewer facade cleanup |
+| Helm application version | `0.6.0` |
+| Next milestone | `v0.7.0` post-release maintenance and optional live Judge0 validation |
 
 ## Rules
 

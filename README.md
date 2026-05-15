@@ -22,8 +22,8 @@ DevHire Cloud is a production-engineering portfolio for a recruitment platform: 
 
 | Signal | Current |
 |---|---|
-| Latest public release | [v0.5.1](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.5.1) |
-| Current development cycle | `0.6.0-SNAPSHOT` |
+| Latest public release | [v0.6.0](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.6.0) |
+| Current development cycle | `0.6.0-SNAPSHOT` release cut; next snapshot bump is a post-release maintenance step |
 | v0.6 Stitch app | Merged into `master`; Code Assessment Studio is the flagship candidate grading, employer review, and admin health workflow |
 | Default branch | `master`, protected and PR-governed |
 | Dependabot queue | 0 open Dependabot PRs after the 2026-05-14 zero-noise apply; 20 stale/behind/risky PRs were commented, closed, and their remote branches pruned; no dependency PR was force-merged into the release |

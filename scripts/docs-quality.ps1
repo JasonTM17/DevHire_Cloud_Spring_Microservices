@@ -110,6 +110,8 @@ $requiredPaths = @(
     "docs/release-evidence/v0.5.0.md",
     "docs/release-evidence/v0.5.1.md",
     "docs/release-notes/v0.5.1.md",
+    "docs/release-evidence/v0.6.0.md",
+    "docs/release-notes/v0.6.0.md",
     "docs/release-notes/v1.0.0.md",
     "docs/release-evidence/v1.0.0.md",
     "docs/v1-reviewer-guide.md",

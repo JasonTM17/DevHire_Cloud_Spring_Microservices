@@ -7,9 +7,9 @@ DevHire Cloud treats GitHub repository presentation as part of the production po
 | Signal | Status |
 |---|---|
 | About description | Applied |
-| Homepage | Points to `v0.5.1` |
+| Homepage | Points to `v0.6.0` |
 | Topics | 20 topics applied |
-| Latest release | `v0.5.1` public |
+| Latest release | `v0.6.0` public |
 | Default branch | `master` |
 | Branch protection | Enabled |
 | Dependabot queue | 0 open Dependabot PRs after the 2026-05-14 zero-noise apply; stale/behind/risky branches were commented, closed, and pruned |
@@ -49,5 +49,5 @@ GitHub Actions path:
 ## Target Homepage
 
 ```text
-https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.5.1
+https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.6.0
 ```
