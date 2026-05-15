@@ -3,7 +3,7 @@ name: devhire-cloud
 description: Production-style Helm chart for DevHire Cloud microservices recruitment platform.
 type: application
 version: 0.6.0
-appVersion: "0.5.1"
+appVersion: "0.6.0"
 keywords:
   - java
   - spring-boot

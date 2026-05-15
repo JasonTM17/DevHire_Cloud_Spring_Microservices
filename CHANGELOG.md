@@ -2,14 +2,14 @@
 
 All notable changes to DevHire Cloud are documented here. The project follows Conventional Commits and keeps tag-specific release notes under `docs/release-notes/`.
 
-## 0.6.0 - Unreleased
+## 0.6.0 - 2026-05-15
 
-### Planned
+### Added
 
 - Canonical reviewer facade cleanup after `v0.5.1`.
 - Stitch full-app product polish with candidate, employer, admin, platform, and code assessment evidence.
-- Code assessment grading, candidate submission history, employer review filters, admin health summary, and due-date enforcement.
-- Product screenshot and visual-evidence audit hardening.
+- Java LeetCode-style Code Assessment Studio with visible/custom runs, hidden server-side scoring, candidate redaction, employer review dossier, admin runner health, due-date enforcement, and static risk flags.
+- Product screenshot, visual-evidence audit, mobile E2E, runtime smoke, observability smoke, and Docker Hub verification hardening.
 - v1 roadmap documentation without claiming a final `v1.0.0` release.
 
 ## 0.5.1 - 2026-05-06

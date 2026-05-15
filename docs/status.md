@@ -4,13 +4,13 @@ This page is the single source of truth for the current public state of DevHire 
 
 | Signal | Current value |
 |---|---|
-| Latest public release | `v0.5.1` |
-| GitHub release | https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.5.1 |
+| Latest public release | `v0.6.0` |
+| GitHub release | https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.6.0 |
 | Default branch | `master` |
 | Branch protection | Enabled |
 | Open pull requests | 0 open PRs after the 2026-05-14 Dependabot zero-noise apply |
 | Dependabot queue | 20 stale/behind/risky Dependabot PRs were commented, closed, and pruned because zero-noise found 0 clean merge candidates; no dependency PR was force-merged into the release |
-| Maven development version | `0.6.0-SNAPSHOT` |
+| Maven development version | `0.6.0-SNAPSHOT` release cut; next snapshot bump is post-release maintenance |
 | Frontend development version | `0.6.0` |
 | Helm chart version | `0.6.0` |
 | Cloud posture | AWS blueprint apply-ready; no `terraform apply` has been run |
@@ -44,7 +44,7 @@ This page is the single source of truth for the current public state of DevHire 
 1. Start with [README](../README.md), [English README](README_EN.md), or [Japanese README](README_JA.md).
 2. Use [documentation index](INDEX.md) to choose the right review path.
 3. Review [REVIEW_EVIDENCE](REVIEW_EVIDENCE.md) for the curated proof pack.
-4. Review [v0.5.1 release evidence](release-evidence/v0.5.1.md) and [v0.5.1 release notes](release-notes/v0.5.1.md).
+4. Review [v0.6.0 release evidence](release-evidence/v0.6.0.md) and [v0.6.0 release notes](release-notes/v0.6.0.md).
 5. Review the [v0.6 merge record](pr-stack-v0.6.md) to understand how the Stitch/code-assessment stack was consolidated.
 6. Review [production engineering scorecard](production-engineering-scorecard.md).
 7. Use [v1 reviewer guide](v1-reviewer-guide.md) only as the future roadmap toward `v1.0.0`.

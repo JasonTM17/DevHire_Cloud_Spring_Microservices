@@ -6,8 +6,8 @@ These actions require repository owner permissions and are intentionally not for
 
 | Field | Value |
 |---|---|
-| Latest public release | `v0.5.1` |
-| Homepage | `https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.5.1` |
+| Latest public release | `v0.6.0` |
+| Homepage | `https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/releases/tag/v0.6.0` |
 | Default branch | `master` |
 | Branch protection | Required |
 | Wiki | Target disabled; run owner-authenticated governance apply if public dry-run still reports enabled |
@@ -57,6 +57,6 @@ java, spring-boot, microservices, spring-cloud, postgresql, kafka, opensearch, r
 
 ## Release And Package Notes
 
-- Keep `v0.5.1` visible as the current production portfolio release.
+- Keep `v0.6.0` visible as the current production portfolio release.
 - Future release tags must have `docs/release-notes/<tag>.md`.
 - GHCR package visibility may still require owner/account settings.

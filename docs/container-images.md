@@ -58,12 +58,11 @@ gh variable set DOCKERHUB_NAMESPACE --body nguyenson1710 --repo JasonTM17/DevHir
 
 If `DOCKERHUB_NAMESPACE` is omitted, the workflow uses `DOCKERHUB_USERNAME` as the namespace.
 
-## Current Preview Mirror
+## Current Release Mirror
 
-The current preview images were mirrored through Docker Desktop under the `nguyenson1710` Docker Hub account. The latest local mirror was refreshed on 2026-05-11 after the Java code-assessment grading completion. Each service has these tags:
+The current release images are mirrored through Docker Desktop and/or the release workflow under the `nguyenson1710` Docker Hub account. Each service has the release tag:
 
-- `container-preview-20260511-code-assessment`
-- `v0.6.0-preview`
+- `v0.6.0`
 
 ## Pull Examples
 
@@ -75,20 +74,20 @@ docker pull ghcr.io/jasontm17/devhire/frontend:v0.6.0
 Docker Hub mirror examples:
 
 ```powershell
-docker pull docker.io/nguyenson1710/devhire-cloud-api-gateway:v0.6.0-preview
-docker pull docker.io/nguyenson1710/devhire-cloud-frontend:v0.6.0-preview
+docker pull docker.io/nguyenson1710/devhire-cloud-api-gateway:v0.6.0
+docker pull docker.io/nguyenson1710/devhire-cloud-frontend:v0.6.0
 ```
 
 Verify the complete Docker Hub mirror set:
 
 ```powershell
-.\scripts\dockerhub-image-verify.ps1 -Tags v0.6.0-preview,container-preview-20260511-code-assessment
+.\scripts\dockerhub-image-verify.ps1 -Tags v0.6.0
 ```
 
 Use the production compose sample with Docker Hub mirror names:
 
 ```powershell
-$env:IMAGE_TAG = "container-preview-20260511-code-assessment"
+$env:IMAGE_TAG = "v0.6.0"
 $env:DEVHIRE_RUNNER_MODE = "judge0"
 $env:JUDGE0_BASE_URL = "https://judge0.example.internal"
 docker compose -f deploy/docker-compose.prod.yml -f deploy/docker-compose.dockerhub.yml config --quiet

@@ -23,7 +23,7 @@ Run the audit:
 
 The script validates required files, checks that forbidden runtime/secret artifacts are not tracked by Git, and writes ignored reports under `reports/evidence-audit/`.
 
-v0.6.x adds Stitch route-matrix evidence for candidate, employer, admin, AI, and platform surfaces while keeping dependency backlog and hosted workflow state auditable through `scripts/dependabot-zero-noise.ps1` and `scripts/github-workflow-status.ps1`.
+v0.6.0 adds Stitch route-matrix evidence for candidate, employer, admin, AI, and platform surfaces while keeping dependency backlog and hosted workflow state auditable through `scripts/dependabot-zero-noise.ps1` and `scripts/github-workflow-status.ps1`.
 
 v0.6.7 and the v0.7 runner boundary turn Code Assessment Studio into the flagship grading workflow: Java `CandidateSolution.solve(String input)`, visible/custom runs, hidden server-side scoring, secret-safe code previews, submission history, employer review filters, admin assessment health, runner fail-closed posture, and static risk flags are visible in the primary Stitch screenshots.
 

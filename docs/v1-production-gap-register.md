@@ -17,7 +17,7 @@ This register separates production-grade portfolio evidence from work required f
 
 ## Priority Order To Close Gaps
 
-1. Merge current protected PR and tag v0.5.1.
+1. Keep the current protected `master` release line green after `v0.6.0`.
 2. Publish v1 release verification scripts and evidence docs.
 3. Run a full Docker runtime proof and promote sanitized screenshots.
 4. Execute an AWS staging apply only after budget, DNS, remote state, and secret ownership are ready.

@@ -22,7 +22,7 @@ $documents = @(
 
 $requiredSignals = @(
     @{ Label = "DevHire Cloud"; Pattern = "DevHire Cloud" },
-    @{ Label = "v0.5.1"; Pattern = "v0\.5\.1" },
+    @{ Label = "v0.6.0"; Pattern = "v0\.6\.0" },
     @{ Label = "v1 roadmap"; Pattern = "v1" },
     @{ Label = "Reviewer Quick Links"; Pattern = "Reviewer Quick Links" },
     @{ Label = "Public repository status"; Pattern = "Public (GitHub|Repository) Status" },

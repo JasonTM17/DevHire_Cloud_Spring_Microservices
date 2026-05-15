@@ -21,8 +21,8 @@ This is the reviewer-facing map for DevHire Cloud. It separates current claims, 
 
 | Topic | Document |
 |---|---|
-| Public release body | [release notes v0.5.1](release-notes/v0.5.1.md) |
-| Public release evidence | [release evidence v0.5.1](release-evidence/v0.5.1.md) |
+| Public release body | [release notes v0.6.0](release-notes/v0.6.0.md) |
+| Public release evidence | [release evidence v0.6.0](release-evidence/v0.6.0.md) |
 | Current development status | [status](status.md) |
 | v0.6 Stitch and code-assessment consolidation | [pr stack v0.6](pr-stack-v0.6.md) |
 | v1 roadmap, not released | [v1 reviewer guide](v1-reviewer-guide.md), [v1 production gap register](v1-production-gap-register.md) |

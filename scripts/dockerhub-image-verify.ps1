@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [string]$Namespace = $(if ($env:DOCKERHUB_NAMESPACE) { $env:DOCKERHUB_NAMESPACE } else { "nguyenson1710" }),
-    [string[]]$Tags = @("v0.6.0-preview"),
+    [string[]]$Tags = @("v0.6.0"),
     [string[]]$Services = @(
         "api-gateway",
         "auth-service",

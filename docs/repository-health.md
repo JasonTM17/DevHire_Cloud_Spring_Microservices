@@ -7,9 +7,9 @@ This page summarizes the public GitHub presentation state for DevHire Cloud.
 | Area | Status |
 |---|---|
 | Repository visibility | Public |
-| Latest release | `v0.5.1` is visible |
+| Latest release | `v0.6.0` is visible |
 | About description | Applied |
-| Homepage | Points to the `v0.5.1` release |
+| Homepage | Points to the `v0.6.0` release |
 | Topics | 20 production-engineering topics |
 | Default branch | `master` |
 | Branch protection | Enabled; public branch API reports `protected=true` |
