@@ -31,8 +31,8 @@
     "@stomp/stompjs": "^7.3.0",
     "lucide-react": "1.14.0",
     "next": "16.2.6",
-    "react": "19.2.5",
-    "react-dom": "19.2.5",
+    "react": "19.2.6",
+    "react-dom": "19.2.6",
     "sockjs-client": "^1.6.1"
   },
   "devDependencies": {
