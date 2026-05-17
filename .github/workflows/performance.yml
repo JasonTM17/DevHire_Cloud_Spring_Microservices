@@ -45,7 +45,7 @@ jobs:
 
       - name: Upload k6 summary
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: k6-role-based-suite-summary
           path: reports/k6/role-based-suite-summary.json
@@ -57,7 +57,7 @@ jobs:
 
       - name: Store compose logs
         if: failure()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: compose-performance-smoke-log
           path: compose-performance-smoke.log
