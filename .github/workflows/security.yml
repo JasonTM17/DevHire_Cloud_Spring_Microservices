@@ -27,7 +27,7 @@ jobs:
           fetch-depth: 0
 
       - name: Scan repository for secrets
-        uses: gitleaks/gitleaks-action@v2
+        uses: gitleaks/gitleaks-action@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITLEAKS_CONFIG: .gitleaks.toml
@@ -56,7 +56,7 @@ jobs:
 
       - name: Upload Trivy filesystem report
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: trivy-filesystem-report
           path: security-reports/trivy-fs.txt
@@ -83,7 +83,7 @@ jobs:
           output-file: security-reports/devhire-cloud-sbom.cdx.json
 
       - name: Upload SBOM
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: devhire-cloud-sbom
           path: security-reports/devhire-cloud-sbom.cdx.json
@@ -206,7 +206,7 @@ jobs:
 
       - name: Upload image scan report
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: trivy-image-${{ matrix.service }}
           path: security-reports/trivy-image-${{ matrix.service }}.txt
