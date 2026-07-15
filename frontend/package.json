@@ -48,10 +48,11 @@
     "@types/sockjs-client": "^1.5.4",
     "fast-check": "^4.8.0",
     "jsdom": "^29.1.1",
-    "typescript": "7.0.2"
+    "playwright-core": "1.60.0",
+    "typescript": "6.0.3"
   },
   "overrides": {
-    "dompurify": "3.4.2",
+    "dompurify": "3.4.12",
     "postcss": "8.5.10"
   }
 }

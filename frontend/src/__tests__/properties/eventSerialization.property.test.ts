@@ -28,7 +28,11 @@ const arbNotificationEvent = fc.record({
   type: arbNotificationType,
   title: fc.string({ minLength: 1, maxLength: 100 }),
   body: fc.string({ minLength: 1, maxLength: 500 }),
-  createdAt: fc.date({ min: new Date("2020-01-01"), max: new Date("2030-01-01") })
+  createdAt: fc.date({
+    min: new Date("2020-01-01"),
+    max: new Date("2030-01-01"),
+    noInvalidDate: true,
+  })
     .map((d) => d.toISOString()),
   read: fc.boolean(),
   sequenceNumber: fc.nat(),

@@ -1,6 +1,6 @@
 # DevHire Cloud - Microservices Recruitment Platform
 
-DevHire Cloud is a production-engineering portfolio for a recruitment platform: Java 21, Spring Boot 3.5, Next.js, Kafka, OpenSearch, PostgreSQL, Redis, Docker, Kubernetes, Terraform, and a controlled Claude Haiku AI assistant. The repository is written for senior review: it emphasizes service boundaries, owned data, event reliability, observability, security, CI/CD, cloud readiness, and evidence that can be checked without trusting the README.
+DevHire Cloud is a production-engineering portfolio for a recruitment platform: Java 21, Spring Boot 4.0, Next.js, Kafka, OpenSearch, PostgreSQL, Redis, Docker, Kubernetes, Terraform, and a controlled Claude Haiku AI assistant. The repository is written for senior review: it emphasizes service boundaries, owned data, event reliability, observability, security, CI/CD, cloud readiness, and evidence that can be checked without trusting the README.
 
 ## 30-Second Reviewer Brief
 

@@ -1,6 +1,6 @@
 # DevHire Cloud - Microservices Recruitment Platform
 
-DevHire Cloud は、Java 21 / Spring Boot 3.5 で構築した採用プラットフォームの production engineering portfolio です。小規模な ITviec / LinkedIn Jobs のようなドメインを使い、明確な service boundary、service-owned database、Kafka/outbox、OpenSearch、observability、Docker/Kubernetes/Terraform、CI/CD、security evidence、Claude Haiku AI assistant を示します。
+DevHire Cloud は、Java 21 / Spring Boot 4.0 で構築した採用プラットフォームの production engineering portfolio です。小規模な ITviec / LinkedIn Jobs のようなドメインを使い、明確な service boundary、service-owned database、Kafka/outbox、OpenSearch、observability、Docker/Kubernetes/Terraform、CI/CD、security evidence、Claude Haiku AI assistant を示します。
 
 ## Public Repository Status
 

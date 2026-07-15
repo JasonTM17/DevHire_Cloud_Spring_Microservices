@@ -10,11 +10,18 @@ DevHire Cloud keeps Dependabot enabled because dependency hygiene is part of the
 | Docker base images patch/minor | Batch by runtime family | Keeps image drift small without forcing many tiny releases. |
 | Maven patch/minor | Accept when tests and smoke gates pass | Backend dependency changes can affect contracts and runtime behavior. |
 | npm patch/minor | Accept with typecheck, build, and Playwright smoke | Frontend runtime changes are visible and should be screenshot-checked. |
+| TypeScript major | Defer until the Next.js production build and compiler API are compatible | A standalone `tsc` pass is insufficient when the framework also loads the TypeScript compiler API. |
 | Terraform provider major | Defer until migration review | AWS provider major upgrades can change resources and state behavior. |
 | Node major | Defer until Docker/frontend compatibility review | Runtime major upgrades can affect Next.js build and image behavior. |
 | Spring platform major | Defer until compatibility matrix review | Spring Boot/Spring Cloud compatibility is a hard production constraint. |
 
-## Current v0.6 Release-Readiness State
+## 2026-07-15 Coordinated Integration Batch
+
+This maintenance window consolidates 23 remote branches into one reviewable change: 1 README correction and 22 Dependabot updates spanning GitHub Actions, Docker images, Maven, npm, and Terraform. Major platform changes were reviewed together because Spring Boot 4, Testcontainers 2, Node 26, and the AWS provider 6 line require compatibility fixes beyond a mechanical version bump.
+
+Local validation covered the full 12-module Maven reactor, 417 frontend tests, 22 property tests at 500 runs each, 52 Playwright scenarios across desktop and Pixel 7 projects, all three Terraform environments, documentation and repository audits, and an npm audit with zero known vulnerabilities. TypeScript remains on 6.0.3 because the current Next.js production build does not yet load the TypeScript 7 compiler API correctly; Dependabot ignores that major line until the framework boundary is compatible. Pull-request CI remains the final gate for the complete Docker matrix, CodeQL, secret scanning, SBOM generation, and filesystem scanning.
+
+## 2026-05 Release-Readiness Baseline
 
 The 2026-05-14 live GitHub scan originally found 20 Dependabot pull requests: 9 Docker, 1 GitHub Actions, 2 Maven, 4 npm/frontend, 3 Terraform, and 1 other. `scripts/dependabot-zero-noise.ps1 -Apply` was then run from an owner-authenticated shell. It found 0 clean merge candidates, commented on each PR, closed/deferred all 20 stale/behind/risky updates, and the remote Dependabot branches were pruned. No dependency PR was force-merged into the release.
 

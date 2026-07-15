@@ -660,6 +660,10 @@ async function routeAdminApi(page: Page) {
 }
 
 test.describe("LeetCode-style code assessment E2E", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.clock.setFixedTime(new Date(NOW));
+  });
+
   test("candidate runs custom visible input, submits Java, and never sees hidden payloads", async ({ page }) => {
     await routeCandidateCodeAssessmentApi(page);
     await login(page, "candidate");

@@ -7,7 +7,7 @@
 [![Terraform](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/terraform.yml/badge.svg)](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/terraform.yml)
 [![Docs](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/docs.yml/badge.svg)](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/docs.yml)
 
-DevHire Cloud is a Java, systems, and DevOps learning project for a recruitment platform: Java 21, Spring Boot 3.5, Next.js, Kafka, OpenSearch, PostgreSQL, Redis, Docker, Kubernetes, Terraform, and a controlled Claude Haiku AI assistant. The repository documents service boundaries, owned data, event reliability, observability, security, CI/CD, and cloud-readiness evidence so reviewers can verify each claim against the code and supporting records.
+DevHire Cloud is a Java, systems, and DevOps learning project for a recruitment platform: Java 21, Spring Boot 4.0, Next.js, Kafka, OpenSearch, PostgreSQL, Redis, Docker, Kubernetes, Terraform, and a controlled Claude Haiku AI assistant. The repository documents service boundaries, owned data, event reliability, observability, security, CI/CD, and cloud-readiness evidence so reviewers can verify each claim against the code and supporting records.
 
 ## 30-Second Reviewer Brief
 
