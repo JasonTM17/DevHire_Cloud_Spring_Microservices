@@ -7,7 +7,7 @@
 [![Terraform](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/terraform.yml/badge.svg)](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/terraform.yml)
 [![Docs](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/docs.yml/badge.svg)](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/actions/workflows/docs.yml)
 
-DevHire Cloud is a production-engineering portfolio for a recruitment platform: Java 21, Spring Boot 3.5, Next.js, Kafka, OpenSearch, PostgreSQL, Redis, Docker, Kubernetes, Terraform, and a controlled Claude Haiku AI assistant. The repository is written for senior review: it emphasizes service boundaries, owned data, event reliability, observability, security, CI/CD, cloud readiness, and evidence that can be checked without trusting the README.
+DevHire Cloud is a Java, systems, and DevOps learning project for a recruitment platform: Java 21, Spring Boot 4.0, Next.js, Kafka, OpenSearch, PostgreSQL, Redis, Docker, Kubernetes, Terraform, and a controlled Claude Haiku AI assistant. The repository documents service boundaries, owned data, event reliability, observability, security, CI/CD, and cloud-readiness evidence so reviewers can verify each claim against the code and supporting records.
 
 ## 30-Second Reviewer Brief
 
@@ -26,7 +26,7 @@ DevHire Cloud is a production-engineering portfolio for a recruitment platform: 
 | Current development cycle | `0.6.0-SNAPSHOT` release cut; next snapshot bump is a post-release maintenance step |
 | v0.6 Stitch app | Merged into `master`; Code Assessment Studio is the flagship candidate grading, employer review, and admin health workflow |
 | Default branch | `master`, protected and PR-governed |
-| Dependabot queue | 0 open Dependabot PRs after the 2026-05-14 zero-noise apply; 20 stale/behind/risky PRs were commented, closed, and their remote branches pruned; no dependency PR was force-merged into the release |
+| Dependency updates | [View the current Dependabot queue](https://github.com/JasonTM17/DevHire_Cloud_Spring_Microservices/pulls?q=is%3Apr+is%3Aopen+author%3Aapp%2Fdependabot); maintenance policy is documented in [docs/dependency-maintenance.md](docs/dependency-maintenance.md). |
 | v1 status | Roadmap and acceptance checklist only, not a released tag |
 
 ## Reviewer Quick Links
@@ -47,6 +47,29 @@ DevHire Cloud is a production-engineering portfolio for a recruitment platform: 
 | Security evidence | [docs/security-evidence.md](docs/security-evidence.md) |
 | Cloud readiness | [docs/cloud-readiness-review.md](docs/cloud-readiness-review.md) |
 | Production scorecard | [docs/production-engineering-scorecard.md](docs/production-engineering-scorecard.md) |
+
+### Simplified system topology
+
+This reviewer map groups related services for readability; it is not a complete protocol or event-edge diagram.
+
+```mermaid
+flowchart LR
+  UI["Next.js frontend"] --> GW["Spring Cloud Gateway"]
+  GW --> ID["Auth + User"]
+  GW --> HIRE["Company + Job + Application"]
+  GW --> OPS["Notification + Audit"]
+  GW --> AI["Claude AI service"]
+  HIRE --> RUNNER["Assessment runner"]
+  HIRE <--> KAFKA[("Kafka + outbox")]
+  ID --> PG[("Service-owned PostgreSQL")]
+  HIRE --> PG
+  OPS --> PG
+  AI --> PG
+  HIRE --> SEARCH[("OpenSearch")]
+  ID --> REDIS[("Redis")]
+```
+
+[Review the detailed service boundaries and event flows](docs/architecture.md).
 
 ## Architecture and Operations Proof
 
@@ -182,4 +205,4 @@ The full visual evidence set is machine-checked in [docs/evidence-manifest.json]
 
 ## Honest Scope
 
-DevHire Cloud is a production-engineering portfolio, not a claim of live customer traffic. It does not claim external penetration testing, a production AWS account, or real customer data. Secrets are not committed; cloud apply remains a separate, credentialed operation.
+DevHire Cloud is a learning project that practices production-engineering patterns, not a claim of live customer traffic. It does not claim external penetration testing, a production AWS account, or real customer data. Secrets are not committed; cloud apply remains a separate, credentialed operation.

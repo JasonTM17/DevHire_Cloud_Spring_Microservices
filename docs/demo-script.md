@@ -100,7 +100,7 @@ Show these files:
 
 Final message for recruiter:
 
-DevHire Cloud demonstrates Java 21, Spring Boot 3.5, Spring Cloud Gateway, JWT security, service-owned databases, Flyway, Kafka/outbox, OpenSearch, Claude Haiku RAG assistant, Gmail SMTP hardening, observability, CI/CD, Docker, Kubernetes/Helm/GitOps, tests, and real frontend E2E smoke coverage.
+DevHire Cloud demonstrates Java 21, Spring Boot 4.0, Spring Cloud Gateway, JWT security, service-owned databases, Flyway, Kafka/outbox, OpenSearch, Claude Haiku RAG assistant, Gmail SMTP hardening, observability, CI/CD, Docker, Kubernetes/Helm/GitOps, tests, and real frontend E2E smoke coverage.
 
 Cleanup after a recruiter demo:
 

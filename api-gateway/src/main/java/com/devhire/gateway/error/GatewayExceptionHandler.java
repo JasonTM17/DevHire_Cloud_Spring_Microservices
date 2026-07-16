@@ -1,7 +1,7 @@
 package com.devhire.gateway.error;
 
 import com.devhire.common.error.ErrorCode;
-import org.springframework.boot.web.reactive.error.ErrorWebExceptionHandler;
+import org.springframework.boot.webflux.error.ErrorWebExceptionHandler;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;

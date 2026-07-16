@@ -1,6 +1,6 @@
 # Production Portfolio Checklist
 
-- Java 21 and Spring Boot 3.5.x multi-module build.
+- Java 21 and Spring Boot 4.0.x multi-module build.
 - Spring Cloud Gateway with JWT validation, CORS, route security, and Redis rate limit.
 - Role-based authorization for Admin, Employer, and Candidate.
 - BCrypt password hashing.

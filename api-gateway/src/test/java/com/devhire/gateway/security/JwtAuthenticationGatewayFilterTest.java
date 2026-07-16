@@ -85,7 +85,7 @@ class JwtAuthenticationGatewayFilterTest {
 
         filter.filter(exchange, chain).block();
 
-        assertThat(downstreamExchange.get().getRequest().getHeaders()).doesNotContainKey(AppHeaders.USER_ID);
+        assertThat(downstreamExchange.get().getRequest().getHeaders().containsHeader(AppHeaders.USER_ID)).isFalse();
         verifyNoInteractions(redisTemplate);
     }
 
@@ -108,8 +108,8 @@ class JwtAuthenticationGatewayFilterTest {
 
             filter.filter(exchange, chain).block();
 
-            assertThat(downstreamExchange.get().getRequest().getHeaders()).doesNotContainKey(AppHeaders.USER_ID);
-            assertThat(downstreamExchange.get().getRequest().getHeaders()).doesNotContainKey(AppHeaders.USER_ROLE);
+            assertThat(downstreamExchange.get().getRequest().getHeaders().containsHeader(AppHeaders.USER_ID)).isFalse();
+            assertThat(downstreamExchange.get().getRequest().getHeaders().containsHeader(AppHeaders.USER_ROLE)).isFalse();
         }
         verifyNoInteractions(redisTemplate);
     }

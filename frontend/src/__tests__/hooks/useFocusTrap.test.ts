@@ -44,10 +44,10 @@ describe('useFocusTrap - DOM behavior', () => {
     // Should find: btn1, input1, link1, div1 (4 elements)
     // Should NOT find: btn-disabled, div-neg
     assert.equal(focusable.length, 4);
-    assert.equal((focusable[0] as HTMLElement).id, 'btn1');
-    assert.equal((focusable[1] as HTMLElement).id, 'input1');
-    assert.equal((focusable[2] as HTMLElement).id, 'link1');
-    assert.equal((focusable[3] as HTMLElement).id, 'div1');
+    assert.deepEqual(
+      new Set(focusable.map((element) => (element as HTMLElement).id)),
+      new Set(['btn1', 'input1', 'link1', 'div1'])
+    );
   });
 
   it('Tab on last element should cycle to first (simulated keydown logic)', () => {

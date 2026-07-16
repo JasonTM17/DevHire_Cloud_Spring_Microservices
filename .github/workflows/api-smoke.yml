@@ -15,7 +15,7 @@ jobs:
     timeout-minutes: 35
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Validate compose file
         run: docker compose config --quiet
@@ -30,7 +30,7 @@ jobs:
 
       - name: Store compose logs
         if: failure()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: compose-api-smoke-log
           path: compose-api-smoke.log

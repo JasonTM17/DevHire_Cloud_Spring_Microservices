@@ -36,6 +36,10 @@ updates:
     labels:
       - portfolio-maintenance
       - needs-runtime-smoke
+    ignore:
+      - dependency-name: typescript
+        update-types:
+          - version-update:semver-major
     groups:
       frontend-platform:
         patterns:

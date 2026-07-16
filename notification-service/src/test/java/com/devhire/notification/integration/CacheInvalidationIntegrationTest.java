@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.KafkaContainer;
+import org.testcontainers.kafka.ConfluentKafkaContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
@@ -43,7 +43,7 @@ class CacheInvalidationIntegrationTest {
             .withExposedPorts(6379);
 
     @Container
-    static final KafkaContainer KAFKA = new KafkaContainer(
+    static final ConfluentKafkaContainer KAFKA = new ConfluentKafkaContainer(
             DockerImageName.parse("confluentinc/cp-kafka:7.6.0"));
 
     private LettuceConnectionFactory connectionFactory;

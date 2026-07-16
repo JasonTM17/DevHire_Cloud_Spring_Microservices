@@ -12,13 +12,13 @@ public final class AuditLogSpecifications {
     }
 
     public static Specification<AuditLog> actorId(UUID actorId) {
-        return actorId == null ? null : (root, query, criteriaBuilder) ->
+        return actorId == null ? Specification.unrestricted() : (root, query, criteriaBuilder) ->
                 criteriaBuilder.equal(root.get("actorId"), actorId);
     }
 
     public static Specification<AuditLog> action(String action) {
         if (action == null || action.isBlank()) {
-            return null;
+            return Specification.unrestricted();
         }
         String normalized = action.toLowerCase(Locale.ROOT);
         return (root, query, criteriaBuilder) ->
@@ -26,12 +26,12 @@ public final class AuditLogSpecifications {
     }
 
     public static Specification<AuditLog> occurredFrom(Instant from) {
-        return from == null ? null : (root, query, criteriaBuilder) ->
+        return from == null ? Specification.unrestricted() : (root, query, criteriaBuilder) ->
                 criteriaBuilder.greaterThanOrEqualTo(root.get("occurredAt"), from);
     }
 
     public static Specification<AuditLog> occurredTo(Instant to) {
-        return to == null ? null : (root, query, criteriaBuilder) ->
+        return to == null ? Specification.unrestricted() : (root, query, criteriaBuilder) ->
                 criteriaBuilder.lessThanOrEqualTo(root.get("occurredAt"), to);
     }
 }
