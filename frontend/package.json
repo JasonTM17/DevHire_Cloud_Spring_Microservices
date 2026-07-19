@@ -48,7 +48,7 @@
     "@types/sockjs-client": "^1.5.4",
     "fast-check": "^4.8.0",
     "jsdom": "^29.1.1",
-    "playwright-core": "1.60.0",
+    "playwright-core": "1.61.1",
     "typescript": "6.0.3"
   },
   "overrides": {
