@@ -43,7 +43,7 @@
         <spring-kafka.version>4.0.6</spring-kafka.version>
         <commons-fileupload.version>1.6.0</commons-fileupload.version>
         <postgresql.version>42.7.11</postgresql.version>
-        <bouncycastle.version>1.85</bouncycastle.version>
+        <bouncycastle.version>1.85.2</bouncycastle.version>
         <jjwt.version>0.12.6</jjwt.version>
         <springdoc.version>3.0.3</springdoc.version>
         <testcontainers.version>2.0.5</testcontainers.version>
